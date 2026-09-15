@@ -89,7 +89,7 @@ class Game(a.Game):
   compensation=0
   if q['kind']=='supplies':compensation=round(18*1.15)*q.get('food_need',5 if q.get('unique') else 3)+round(42*1.15)*q.get('med_need',3 if q.get('unique') else 2)
   if q['kind']=='trophies':compensation=3*trophy(q['target_kind'])['value']*q['goal']
-  q.update(reward=fee+compensation,economy_scaled=True,zone=zone,level=zone,xp_reward=40*zone*multiplier)
+  q.update(reward=fee+compensation,economy_scaled=True,zone=zone,level=zone,xp_reward=(40+5*(zone-1))*multiplier)
  def mayor_offers(self):
   offers=super().mayor_offers()
   if not offers:return offers
