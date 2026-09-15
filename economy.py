@@ -1,0 +1,141 @@
+"""v0.9 monster-dependent loot, trophy trade and fixed quest contracts."""
+import copy,json,math
+from pathlib import Path
+import afterdays as r
+import progression as p
+import adventure as a
+if len(r.MERCHANTS)==4:r.MERCHANTS.append('Мисливець')
+p.STACK_KINDS.add('trophy')
+HUNTER_CITIES=(0,3,5,9)
+BODY_NAMES=['Ікла гризуна','Пазурі здичавілого','Залоза плювача','Шкура гончака','Панцирні уламки','Міхур кислотного кліща','Хутро попелястого вовка','Оптика дрона','Тканина болотяника','Кістка велета','Залоза іскровика','Хітин павука']
+BASE_REWARDS={'scout':45,'hunt':70,'retrieve':85,'purge':110,'supplies':40,'trophies':60}
+WEIGHTS=[55,27,12,5,1]
+def trophy(kind,qty=1):
+ return dict(id=r.uid(),kind='trophy',name=BODY_NAMES[kind],monster_kind=kind,rarity=0,level=1,qty=qty,weight=.08,value=4+kind)
+def loot_rules(kills):
+ normal=sum(e.get('grade','normal')=='normal' for e in kills);rare=sum(e.get('grade')=='rare' for e in kills);mythic=sum(e.get('grade')=='mythic' for e in kills)
+ return min(1,.10+.05*normal+.10*rare+.25*mythic),2+rare+2*mythic,4 if mythic else 3 if rare else 1
+class Game(a.Game):
+ def __init__(self,seed=None):
+  super().__init__(seed);self.add_hunters()
+ def add_hunters(self):
+  for n in HUNTER_CITIES:
+   if 4 not in self.city_merchants[n]:self.city_merchants[n].append(4)
+ def available_merchant(self,m):
+  roaming=self.traveler and self.traveler.get('hunter') and self.traveler['pos']==[self.x,self.y]
+  if m==4:return not self.battle and (bool(roaming) or self.city in HUNTER_CITIES)
+  if m==3 and roaming:return False
+  return super().available_merchant(m)
+ def merchant_title(self,m):return 'Мисливець · трофеї' if m==4 else super().merchant_title(m)
+ def stock(self,m):
+  if m==4:return []
+  return super().stock(m)
+ def spawn_traveler(self):
+  if self.rng.random()<.30:
+   self.traveler=dict(hunter=True,pos=[self.x,self.y],items=[]);self.last_traveler_turn=self.turn;self.log('Зустріч: мандрівний мисливець скуповує трофеї за подвійну базову ціну.')
+  else:super().spawn_traveler()
+ def buys_kind(self,item,m):
+  if m==4:return item['kind']=='trophy'
+  if item['kind']=='trophy':return m in (1,2,3)
+  return super().buys_kind(item,m)
+ def price(self,item,m,buying=True):
+  if item['kind']=='trophy' and not buying:return item['value']*(2 if m==4 else 1)
+  return super().price(item,m,buying)
+ def trophy_count(self,kind):return sum(i.get('qty',1) for i in self.bag if i['kind']=='trophy' and i['monster_kind']==kind)
+ def consume_trophies(self,kind,qty):
+  for item in list(self.bag):
+   if item['kind']=='trophy' and item['monster_kind']==kind:
+    take=min(qty,item['qty']);p.extract(self.bag,item,take);qty-=take
+    if not qty:break
+ def reward_item(self,cap=4,minimum=0,level=None):
+  tier=self.rng.choices(list(range(minimum,cap+1)),WEIGHTS[minimum:cap+1])[0]
+  level=self.rng.randint(max(1,self.level-2),self.level) if level is None else max(1,int(level))
+  category=self.rng.choice(['weapon','armor','helmet','module'])
+  if category=='module':return p.module(tier,self.rng,level=level)
+  names=[n for n,v in r.GEAR.items() if v[0]==category and p.GEAR_MIN_LEVEL[n]<=level]
+  item=p.equipment(self.rng.choice(names),tier,self.rng,level)
+  if self.rng.random()<.08:
+   target='weapon' if category=='weapon' else 'protection';pool=[n for n,m in enumerate(r.MODULES) if m[1]==target]
+   for _ in range(min(item['slots'],1+(self.rng.random()<.04))):item['modules'].append(p.module(tier,self.rng,self.rng.choice(pool),level))
+  return item
+ def start_battle(self):
+  super().start_battle();self.battle['kills']=[]
+ def victory(self):
+  if not self.battle:return
+  b=self.battle;self._last_battle=copy.deepcopy(b);kills=b.get('kills',[])
+  chance,rolls,cap=loot_rules(kills)
+  self.battle=None;qid=self.quest_battle;self.quest_battle=None
+  credits=round(self.rng.randint(40,65)*(1+.35*(b.get('region_level',1)-1))*(1+.15*self.rank('scavenger')));self.money+=credits
+  drops=0
+  for _ in range(rolls):
+   if self.rng.random()<chance:p.add_to(self.loot,self.reward_item(cap));drops+=1
+  # Independent supplies. They never replace successful equipment rolls.
+  for _ in range(2):
+   if self.rng.random()<.55:p.add_to(self.loot,p.ammunition(self.rng.choice(list(p.AMMO)),self.rng.randint(3,12)))
+  for kind,prob in [('food',.20),('med',.12),('rad',.05)]:
+   if self.rng.random()<prob:p.add_to(self.loot,p.supply(kind))
+  for fn in (p.parts,p.fragments):
+   if self.rng.random()<.35:p.add_to(self.loot,fn(self.rng.randint(2,8)))
+  for e in kills:
+   if self.rng.random()<.65:p.add_to(self.loot,trophy(e['kind']))
+  if qid:
+   q=next((q for q in self.quests if q['id']==qid and q['status']=='active'),None)
+   if q:q['progress']=1;self.emit('Підземелля зачищено ✓',color='#c7a0f1')
+  self.log(f'Перемога! +{credits} кр. Здобич: {rolls} кидків по {chance:.0%}, предметів {drops}.')
+ def price_quest(self,q):
+  zone=q.get('level',q.get('zone',self.region_at(*self.cities[q['city']])))
+  multiplier=2 if q.get('unique') else 1
+  fee=round(BASE_REWARDS[q['kind']]*zone**1.3*multiplier)
+  compensation=0
+  if q['kind']=='supplies':compensation=round(18*1.15)*q.get('food_need',5 if q.get('unique') else 3)+round(42*1.15)*q.get('med_need',3 if q.get('unique') else 2)
+  if q['kind']=='trophies':compensation=3*trophy(q['target_kind'])['value']*q['goal']
+  q.update(reward=fee+compensation,economy_scaled=True,zone=zone,level=zone,xp_reward=40*zone*multiplier)
+ def mayor_offers(self):
+  offers=super().mayor_offers()
+  if not offers:return offers
+  if not any(q['kind']=='trophies' for q in offers):
+   kind=self.rng.randrange(min(12,5+self.region_level))
+   offers.append(dict(id=r.uid(),kind='trophies',city=self.city,status='offered',title='Трофеї для дослідників',progress=0,goal=3+(self.region_level-1)//2,target_kind=kind,reward=0,pos=None,zone=self.region_level,unique=self.rng.random()<.18,scaled=True,distance_scaled=True,cycle_named=True))
+  for q in offers:
+   if q['status']=='offered' and not q.get('economy_scaled'):self.price_quest(q)
+  return offers
+ def quest_ready(self,q):
+  if q['kind']=='trophies':return q['status']=='active' and self.trophy_count(q['target_kind'])>=q['goal']
+  return super().quest_ready(q)
+ def quest_text(self,q):
+  if q['kind']=='trophies':
+   text=f'{q["title"]}\nПринести: {BODY_NAMES[q["target_kind"]]} · {self.trophy_count(q["target_kind"])}/{q["goal"]}\nЗамовник: {self.city_name(q["city"])}\nНагорода: {q["reward"]} кр. + {80 if q.get("unique") else 40} XP'
+  else:text=super().quest_text(q)
+  text=text.replace(f'{80 if q.get("unique") else 40} XP',f'{q.get("xp_reward",80 if q.get("unique") else 40)} XP')
+  text=f'Рівень завдання: {q.get("level",q.get("zone",1))}\n'+text
+  if q.get('unique'):text+='\nПредмет: незвичайний або кращий гарантовано; 10% на другий.'
+  return text
+ def turn_in(self,quest_id):
+  q=next((q for q in self.quests if q['id']==quest_id),None)
+  ok=super().turn_in(quest_id)
+  if ok:
+   if q['kind']=='trophies':self.consume_trophies(q['target_kind'],q['goal'])
+   if q.get('unique'):
+    for _ in range(1+(self.rng.random()<.10)):
+     item=self.reward_item(4,1,level=q.get("level",q.get("zone",1)))
+     if not self.accept(item):p.add_to(self.stash,item);self.log('Нагороду перенесено у власне сховище: рюкзак повний.')
+     else:self.log('Нагорода: '+item['name']+' · '+r.RARITIES[item['rarity']][0])
+  return ok
+ @classmethod
+ def load(cls,path):
+  version=json.loads(Path(path).read_text(encoding='utf-8'))['version'];game=super().load(path);game.add_hunters()
+  if version<7:
+   def reprice(item):
+    if item['kind'] in ('weapon','armor','helmet'):item['value']=round((70+item['weight']*15)*item.get('level',1)**1.3*[1,1.8,3.5,7,14][item['rarity']])
+    elif item['kind']=='module':item['value']=round(30*(item['rarity']+1)**2*item.get('level',1)**1.3)
+    if 'sealed_price' in item:item['sealed_price']=round(85*game.level**1.3)
+    for m in item.get('modules',[]):reprice(m)
+   items=game.bag+game.loot+game.stash+[i for i in game.equipped.values() if i]
+   for entry in game.shops.values():items+=entry['items']
+   if game.traveler:items+=game.traveler['items']
+   for item in items:reprice(item)
+   # Existing accepted contracts retain their promised credit reward.
+   for q in game.quests:q['economy_scaled']=True
+   game.offers={};game.offer_refresh={}
+  if game.battle and 'kills' not in game.battle:game.battle['kills']=[dict(kind=e['kind'],grade=e.get('grade','normal')) for e in game.battle.get('corpses',[])]
+  return game
