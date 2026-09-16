@@ -2,6 +2,7 @@ from i18n import t as tr
 """Short floating messages, combat traces, town service cards and shared storage."""
 import copy
 import sprites
+from debug_config import TEST_MODE
 import math
 import time
 import tkinter as tk
@@ -143,7 +144,7 @@ class Services(tk.Frame):
             if hasattr(g,'destination_quest') and g.destination_quest():
                 q=g.destination_quest();items.append(('search',tr('adventure_ui.0019') if q['kind']=='delivery' else tr('adventure_ui.0020'),lambda:app.act(g.search)))
             if g.road_event:items.append(('traveler',tr('adventure_ui.0021'),app.road_dialog))
-        items.extend([('perks',tr('adventure_ui.0022', v0=g.pending_perks),app.perks),('atlas',tr('adventure_ui.0023'),app.atlas)])
+        items.extend([('perks',tr('adventure_ui.0022', v0=g.pending_perks),app.perks),('atlas',tr('debug.atlas_button') if TEST_MODE else tr('adventure_ui.0023'),app.atlas)])
         self.entries=items;self.paint()
 
     def paint(self):
@@ -246,7 +247,7 @@ def paint_world_extras(app):
     trails=set(map(tuple,g.trails))
     for y in range(app.vy,min(32,app.vy+17)):
         for x in range(app.vx,min(48,app.vx+23)):
-            if not g.revealed(x,y):continue
+            if not app.map_revealed(x,y):continue
             px,py=app.ox+(x-app.vx+.5)*app.tile,app.oy+(y-app.vy+.5)*app.tile;t=app.tile
             if (x,y) in trails:
                 for q in r.neighbors(x,y,48,32):

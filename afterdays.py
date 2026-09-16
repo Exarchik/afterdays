@@ -2,6 +2,7 @@
 from __future__ import annotations
 from i18n import t as tr
 import content
+from debug_config import TEST_MODE, MapVisibility
 import json
 import math
 import os
@@ -993,11 +994,12 @@ def launch(test_hook=None):
     BG, PANEL, TEXT, MUTED, GOLD = '#141c1a', '#202b27', '#e4e8d9', '#a4b2a4', '#d7b77a'
     save_path = Path.home() / 'Afterdays' / 'save.json'
 
-    class App:
+    class App(MapVisibility):
         def __init__(self, root):
             self.root = root
             root.app=self
             self.game = Game()
+            self.show_full_map = False
             self.perk_prompted = -1
             self.mode = 'world'
             self.selection = None
@@ -1333,21 +1335,21 @@ def launch(test_hook=None):
                 layout.update(t=t, ox=ox, oy=oy)
                 for y in range(32):
                     for x in range(48):
-                        if not self.game.revealed(x,y):
+                        if not self.map_revealed(x,y):
                             c.create_rectangle(ox+x*t,oy+y*t,ox+(x+1)*t,oy+(y+1)*t,fill='#101714',outline='')
                             continue
                         kind = self.game.world[y][x]
                         c.create_rectangle(ox+x*t,oy+y*t,ox+(x+1)*t,oy+(y+1)*t,fill=TERRAINS[kind][0],outline='')
                 for x,y in self.game.trails:
-                    if not self.game.revealed(x,y):continue
+                    if not self.map_revealed(x,y):continue
                     c.create_oval(ox+(x+.35)*t,oy+(y+.35)*t,ox+(x+.65)*t,oy+(y+.65)*t,fill='#c8b17c',outline='')
                 for key in self.game.radiation:
                     x,y=map(int,key.split(','))
-                    if not self.game.revealed(x,y):continue
+                    if not self.map_revealed(x,y):continue
                     c.create_rectangle(ox+x*t,oy+y*t,ox+(x+1)*t,oy+(y+1)*t,outline='#9fba51')
                 frontier_ui.draw_metro(c,self.game,t,ox,oy)
                 for n,(x,y) in enumerate(self.game.cities):
-                    if n not in self.game.known_cities:continue
+                    if not self.map_city_known(n):continue
                     px,py = ox+(x+.5)*t, oy+(y+.5)*t
                     c.create_rectangle(px-t*.4,py-t*.4,px+t*.4,py+t*.4,outline=GOLD)
                     c.create_text(px+8,py-9,text=self.game.city_name(n), fill=TEXT, anchor='w', font=('Segoe UI', 8))
@@ -1364,7 +1366,7 @@ def launch(test_hook=None):
             def click(event):
                 t,ox,oy = layout['t'],layout['ox'],layout['oy']
                 pos=[int((event.x-ox)//t), int((event.y-oy)//t)]
-                if pos in self.game.cities and self.game.cities.index(pos) in self.game.known_cities:
+                if pos in self.game.cities and self.map_city_known(self.game.cities.index(pos)):
                     n=self.game.cities.index(pos)
                     detail.config(text=f'{self.game.city_name(n)} ({pos[0]}, {pos[1]}) · '+', '.join(MERCHANTS[m] for m in self.game.city_merchants[n])+(tr('afterdays.0182') if n in self.game.mayors else tr('afterdays.0183'))+(tr('afterdays.0184') if n in self.game.technicians else '')+tr('afterdays.0185', v0=self.game.region_at(pos[0], pos[1])))
                 else:
@@ -1372,6 +1374,15 @@ def launch(test_hook=None):
                     detail.config(text=self.game.quest_text(q).replace('\n', ' · ') if q else tr('afterdays.0186', v0=pos[0], v1=pos[1], v2=self.game.region_at(pos[0], pos[1])))
             c.bind('<Configure>',paint)
             c.bind('<Button-1>',click)
+
+            def toggle_atlas_visibility(event):
+                self.toggle_test_map()
+                paint()
+                return 'break'
+
+            if TEST_MODE:
+                win.bind('<KeyPress-m>',toggle_atlas_visibility)
+                win.bind('<KeyPress-M>',toggle_atlas_visibility)
 
         def shop(self, merchant):
             if not self.game.available_merchant(merchant):
@@ -1422,12 +1433,12 @@ def launch(test_hook=None):
                             queue.append(q)
                 self.map_title.config(text=tr('afterdays.0187', v0=b['round'], v1=b['ap']))
             else:
-                self.map_title.config(text=tr('afterdays.0188'))
+                self.map_title.config(text=tr('debug.map_hint') if TEST_MODE else tr('afterdays.0188'))
             for sy in range(rows):
                 for sx in range(cols):
                     x, y = sx+self.vx, sy+self.vy
                     px, py = self.ox+sx*t, self.oy+sy*t
-                    if not b and not g.revealed(x,y):
+                    if not b and not self.map_revealed(x,y):
                         c.create_rectangle(px,py,px+t,py+t,fill='#101714',outline='#1b2721')
                         continue
                     kind = None if b else g.world[y][x]
@@ -1457,7 +1468,7 @@ def launch(test_hook=None):
             c.create_polygon(px, py-t*.22, px+t*.16, py+t*.17, px, py+t*.09, px-t*.16, py+t*.17, fill='#233a31')
             if not b:
                 for idx, pos in enumerate(g.cities):
-                    if idx not in g.known_cities:continue
+                    if not self.map_city_known(idx):continue
                     if self.vx <= pos[0] < self.vx+cols and self.vy <= pos[1] < self.vy+rows:
                         px, py = center(pos)
                         c.create_text(px, py-t*.67, text=g.city_name(idx), fill='#efe0b5', font=('Segoe UI', 8), anchor='s')
@@ -1545,7 +1556,10 @@ def launch(test_hook=None):
             elif key == 'j':
                 self.tabs.select(self.quest_tab)
             elif key == 'm':
-                self.atlas()
+                if TEST_MODE and not (event.state & 0x0001):
+                    self.toggle_test_map()
+                else:
+                    self.atlas()
             elif key == 'f5':
                 self.save()
             elif key == 'f9':
