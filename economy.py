@@ -1,17 +1,20 @@
+from i18n import t as tr
 """v0.9 monster-dependent loot, trophy trade and fixed quest contracts."""
 import copy,json,math
+import content
 from pathlib import Path
 import afterdays as r
 import progression as p
 import adventure as a
-if len(r.MERCHANTS)==4:r.MERCHANTS.append('Мисливець')
+if len(r.MERCHANTS)==4:r.MERCHANTS.append(tr('economy.0001'))
 p.STACK_KINDS.add('trophy')
 HUNTER_CITIES=(0,3,5,9)
-BODY_NAMES=['Ікла гризуна','Пазурі здичавілого','Залоза плювача','Шкура гончака','Панцирні уламки','Міхур кислотного кліща','Хутро попелястого вовка','Оптика дрона','Тканина болотяника','Кістка велета','Залоза іскровика','Хітин павука']
+BODY_NAMES=[content.t(k+'.trophy') for k in content.MONSTER_IDS]
 BASE_REWARDS={'scout':45,'hunt':70,'retrieve':85,'purge':110,'supplies':40,'trophies':60}
 WEIGHTS=[55,27,12,5,1]
 def trophy(kind,qty=1):
- return dict(id=r.uid(),kind='trophy',name=BODY_NAMES[kind],monster_kind=kind,rarity=0,level=1,qty=qty,weight=.08,value=4+kind)
+ kind=content.MONSTER_DATA[content.monster_id(kind)]['legacy_index']
+ return dict(id=r.uid(),type_id='trophy_'+content.monster_id(kind),monster_type_id=content.monster_id(kind),kind='trophy',name=BODY_NAMES[kind],monster_kind=kind,rarity=0,level=1,qty=qty,weight=.08,value=4+kind)
 def loot_rules(kills):
  normal=sum(e.get('grade','normal')=='normal' for e in kills);rare=sum(e.get('grade')=='rare' for e in kills);mythic=sum(e.get('grade')=='mythic' for e in kills)
  return min(1,.10+.05*normal+.10*rare+.25*mythic),2+rare+2*mythic,4 if mythic else 3 if rare else 1
@@ -26,13 +29,13 @@ class Game(a.Game):
   if m==4:return not self.battle and (bool(roaming) or self.city in HUNTER_CITIES)
   if m==3 and roaming:return False
   return super().available_merchant(m)
- def merchant_title(self,m):return 'Мисливець · трофеї' if m==4 else super().merchant_title(m)
+ def merchant_title(self,m):return tr('economy.0002') if m==4 else super().merchant_title(m)
  def stock(self,m):
   if m==4:return []
   return super().stock(m)
  def spawn_traveler(self):
   if self.rng.random()<.30:
-   self.traveler=dict(hunter=True,pos=[self.x,self.y],items=[]);self.last_traveler_turn=self.turn;self.log('Зустріч: мандрівний мисливець скуповує трофеї за подвійну базову ціну.')
+   self.traveler=dict(hunter=True,pos=[self.x,self.y],items=[]);self.last_traveler_turn=self.turn;self.log(tr('economy.0003'))
   else:super().spawn_traveler()
  def buys_kind(self,item,m):
   if m==4:return item['kind']=='trophy'
@@ -41,10 +44,10 @@ class Game(a.Game):
  def price(self,item,m,buying=True):
   if item['kind']=='trophy' and not buying:return item['value']*(2 if m==4 else 1)
   return super().price(item,m,buying)
- def trophy_count(self,kind):return sum(i.get('qty',1) for i in self.bag if i['kind']=='trophy' and i['monster_kind']==kind)
+ def trophy_count(self,kind):return sum(i.get('qty',1) for i in self.bag if i['kind']=='trophy' and content.monster_id(i.get('monster_type_id',i['monster_kind']))==content.monster_id(kind))
  def consume_trophies(self,kind,qty):
   for item in list(self.bag):
-   if item['kind']=='trophy' and item['monster_kind']==kind:
+   if item['kind']=='trophy' and content.monster_id(item.get('monster_type_id',item['monster_kind']))==content.monster_id(kind):
     take=min(qty,item['qty']);p.extract(self.bag,item,take);qty-=take
     if not qty:break
  def reward_item(self,cap=4,minimum=0,level=None):
@@ -84,8 +87,8 @@ class Game(a.Game):
    if self.rng.random()<.65:p.add_to(self.loot,trophy(e['kind']))
   if qid:
    q=next((q for q in self.quests if q['id']==qid and q['status']=='active'),None)
-   if q:q['progress']=1;self.emit('Підземелля зачищено ✓',color='#c7a0f1')
-  self.log(f'Перемога! +{credits} кр. Здобич: {rolls} кидків по {chance:.0%}, предметів {drops}.')
+   if q:q['progress']=1;self.emit(tr('economy.0004'),color='#c7a0f1')
+  self.log(tr('economy.0005', v0=credits, v1=rolls, v2=chance, v3=drops))
  def price_quest(self,q):
   zone=q.get('level',q.get('zone',self.region_at(*self.cities[q['city']])))
   multiplier=2 if q.get('unique') else 1
@@ -99,7 +102,7 @@ class Game(a.Game):
   if not offers:return offers
   if not any(q['kind']=='trophies' for q in offers):
    kind=self.rng.randrange(min(12,5+self.region_level))
-   offers.append(dict(id=r.uid(),kind='trophies',city=self.city,status='offered',title='Трофеї для дослідників',progress=0,goal=3+(self.region_level-1)//2,target_kind=kind,reward=0,pos=None,zone=self.region_level,unique=self.rng.random()<.18,scaled=True,distance_scaled=True,cycle_named=True))
+   offers.append(dict(id=r.uid(),kind='trophies',city=self.city,status='offered',title=tr('economy.0006'),progress=0,goal=3+(self.region_level-1)//2,target_kind=kind,reward=0,pos=None,zone=self.region_level,unique=self.rng.random()<.18,scaled=True,distance_scaled=True,cycle_named=True))
   for q in offers:
    if q['status']=='offered' and not q.get('economy_scaled'):self.price_quest(q)
   return offers
@@ -108,11 +111,11 @@ class Game(a.Game):
   return super().quest_ready(q)
  def quest_text(self,q):
   if q['kind']=='trophies':
-   text=f'{q["title"]}\nПринести: {BODY_NAMES[q["target_kind"]]} · {self.trophy_count(q["target_kind"])}/{q["goal"]}\nЗамовник: {self.city_name(q["city"])}\nНагорода: {q["reward"]} кр. + {80 if q.get("unique") else 40} XP'
+   text=tr('economy.0007', v0=q['title'], v1=BODY_NAMES[q['target_kind']], v2=self.trophy_count(q['target_kind']), v3=q['goal'], v4=self.city_name(q['city']), v5=q['reward'], v6=80 if q.get('unique') else 40)
   else:text=super().quest_text(q)
   text=text.replace(f'{80 if q.get("unique") else 40} XP',f'{q.get("xp_reward",80 if q.get("unique") else 40)} XP')
-  text=f'Рівень завдання: {q.get("level",q.get("zone",1))}\n'+text
-  if q.get('unique'):text+='\nПредмет: незвичайний або кращий гарантовано; 10% на другий.'
+  text=tr('economy.0008', v0=q.get('level', q.get('zone', 1)))+text
+  if q.get('unique'):text+=tr('economy.0009')
   return text
  def turn_in(self,quest_id):
   q=next((q for q in self.quests if q['id']==quest_id),None)
@@ -122,8 +125,8 @@ class Game(a.Game):
    if q.get('unique'):
     for _ in range(1+(self.rng.random()<.10)):
      item=self.reward_item(4,1,level=q.get("level",q.get("zone",1)))
-     if not self.accept(item):p.add_to(self.stash,item);self.log('Нагороду перенесено у власне сховище: рюкзак повний.')
-     else:self.log('Нагорода: '+item['name']+' · '+r.RARITIES[item['rarity']][0])
+     if not self.accept(item):p.add_to(self.stash,item);self.log(tr('economy.0010'))
+     else:self.log(tr('economy.0011')+item['name']+' · '+r.RARITIES[item['rarity']][0])
   return ok
  @classmethod
  def load(cls,path):

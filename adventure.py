@@ -1,4 +1,6 @@
+from i18n import t as tr
 """v0.4 world encounters, combat feedback, damage profiles and shared storage."""
+import content
 import road_additions
 import balance
 import copy
@@ -10,88 +12,81 @@ from collections import deque
 import afterdays as r
 import progression as p
 
-DAMAGE_TYPES={'kinetic':('Кінетична','#e8c78c'),'piercing':('Пробивна','#d7e2bf'),
-              'thermal':('Термічна','#ff9160'),'energy':('Енергетична','#88e3d9'),
-              'electric':('Електрична','#bf9dff')}
-WEAPON_DAMAGE={'Арбалет «Тиша»':'piercing','Снайперська «Горизонт»':'piercing',
-               'Гаус-карабін «Імпульс»':'electric','Іонний пістолет «Іскра»':'electric',
-               'Плазмомет «Сонце»':'thermal','Лазер «Промінь»':'energy'}
+DAMAGE_TYPES={'kinetic':(tr('adventure.0001'),'#e8c78c'),'piercing':(tr('adventure.0002'),'#d7e2bf'),
+              'thermal':(tr('adventure.0003'),'#ff9160'),'energy':(tr('adventure.0004'),'#88e3d9'),
+              'electric':(tr('adventure.0005'),'#bf9dff')}
+WEAPON_DAMAGE = content.WEAPON_DAMAGE
 # Positive values resist damage; negative values increase damage taken.
-RESISTANCES={0:{'thermal':-30},1:{'piercing':-20},2:{'thermal':-50,'energy':20},
-             3:{'electric':-25},4:{'kinetic':50,'piercing':-35,'thermal':20},
-             5:{'kinetic':25,'thermal':-40},6:{'thermal':-25,'electric':15},
-             7:{'kinetic':35,'electric':-65,'thermal':30},8:{'thermal':-60,'energy':30},
-             9:{'kinetic':30,'piercing':-30},10:{'electric':70,'kinetic':-25},
-             11:{'energy':-45,'piercing':20}}
-p.PERKS.update(tactician=('Тактик','+1 максимальна ОД за ранг; до +4 ОД.'),
-               adrenaline=('Адреналін','+1 ОД на початку раунду при HP нижче 50%; до +2 ОД.'))
-r.TERRAINS.update(water=('#254b59','Водойма'),cliff=('#62635d','Скелі'),site=('#537965','Особлива локація'))
+RESISTANCES = content.RESISTANCES
+p.PERKS.update(tactician=(tr('adventure.0006'),tr('adventure.0007')),
+               adrenaline=(tr('adventure.0008'),tr('adventure.0009')))
+r.TERRAINS.update(water=('#254b59',tr('adventure.0010')),cliff=('#62635d',tr('adventure.0011')),site=('#537965',tr('adventure.0012')))
 BLOCKED={'water','cliff'}
-SITES=[('Обсерваторія «Луна»','Астроном','quest'),('Вагон №13','Торговець Рейка','merchant'),
-       ('Стара насосна','Інженер Лев','quest'),('Бункер «Кедр»','Архіваріус','merchant'),
-       ('Самотня радіовежа','Радистка Ніка','quest'),('Скляна оранжерея','Садівник','merchant')]
+SITES=[(tr('adventure.0013'),tr('adventure.0014'),'quest'),(tr('adventure.0015'),tr('adventure.0016'),'merchant'),
+       (tr('adventure.0017'),tr('adventure.0018'),'quest'),(tr('adventure.0019'),tr('adventure.0020'),'merchant'),
+       (tr('adventure.0021'),tr('adventure.0022'),'quest'),(tr('adventure.0023'),tr('adventure.0024'),'merchant')]
 ROAD_EVENTS=[
-    ('wounded','Поранений біля дороги','Під уламком дорожнього знака сидить поранений розвідник.',
-     [('help','Дати аптечку → +40 XP, +60 кр.'),('leave','Побажати удачі й піти')]),
-    ('wreck','Перекинутий караван','У кузові чути скрегіт. Усередині могли залишитись запчастини.',
-     [('search','Обшукати: деталі або ризик травми'),('leave','Обійти караван')]),
-    ('camp','Вогонь серед пустки','Мандрівники запрошують до вогнища. Поділіться вечерею.',
-     [('rest','Витратити консерви → +25 HP, +15 XP'),('leave','Продовжити шлях')]),
-    ('mines','Старе мінне поле','Ви помітили дріт під пилом. Можна обійти або ризикнути.',
-     [('careful','Обережно обійти → +15 XP'),('rush','Ризикнути заради припасів'),('leave','Відступити від небезпечного місця')]),
-    ('signal','Сигнал невідомої станції','Радіоприймач упіймав координати забутого об’єкта.',
-     [('follow','Розшифрувати координати → відкрити локацію'),('leave','Не реагувати')]),
-    ('pilgrims','Голодні пілігрими','Двоє мандрівників пропонують оплатити вашу їжу.',
-     [('share','Віддати консерви → +70 кр.'),('talk','Поговорити → +10 XP'),('leave','Пройти повз')]),
+    ('wounded',tr('adventure.0025'),tr('adventure.0026'),
+     [('help',tr('adventure.0027')),('leave',tr('adventure.0028'))]),
+    ('wreck',tr('adventure.0029'),tr('adventure.0030'),
+     [('search',tr('adventure.0031')),('leave',tr('adventure.0032'))]),
+    ('camp',tr('adventure.0033'),tr('adventure.0034'),
+     [('rest',tr('adventure.0035')),('leave',tr('adventure.0036'))]),
+    ('mines',tr('adventure.0037'),tr('adventure.0038'),
+     [('careful',tr('adventure.0039')),('rush',tr('adventure.0040')),('leave',tr('adventure.0041'))]),
+    ('signal',tr('adventure.0042'),tr('adventure.0043'),
+     [('follow',tr('adventure.0044')),('leave',tr('adventure.0045'))]),
+    ('pilgrims',tr('adventure.0046'),tr('adventure.0047'),
+     [('share',tr('adventure.0048')),('talk',tr('adventure.0049')),('leave',tr('adventure.0050'))]),
 ]
 
 
-SITES.extend([('Підземна друкарня','Друкар','quest'),('Затоплена станція','Водолаз','merchant'),('Купол метеорологів','Метеоролог','quest'),('Старий елеватор','Комірник','merchant'),('Польовий шпиталь','Лікарка','quest'),('Забутий радар','Зв’язківець','quest'),('Тунель караванників','Провідник','merchant'),('Сонячна ферма','Енергетик','merchant'),('Архів під мостом','Картограф','quest'),('Майстерня в кар’єрі','Майстер','merchant')])
+SITES.extend([(tr('adventure.0051'),tr('adventure.0052'),'quest'),(tr('adventure.0053'),tr('adventure.0054'),'merchant'),(tr('adventure.0055'),tr('adventure.0056'),'quest'),(tr('adventure.0057'),tr('adventure.0058'),'merchant'),(tr('adventure.0059'),tr('adventure.0060'),'quest'),(tr('adventure.0061'),tr('adventure.0062'),'quest'),(tr('adventure.0063'),tr('adventure.0064'),'merchant'),(tr('adventure.0065'),tr('adventure.0066'),'merchant'),(tr('adventure.0067'),tr('adventure.0068'),'quest'),(tr('adventure.0069'),tr('adventure.0070'),'merchant')])
 
 # Location filters are applied before the event is selected.
 EXTRA_EVENTS={
- 'berries':('forest','Схованка в чагарнику','Між колючими отруйними кущами видніється ящик консервів.', [('gather','Дістати: їжа або отруєння'),('leave','Не чіпати')]),
- 'snare':('forest','Звір у пастці','Невеликий звір б’ється в старому дроті.', [('free','Звільнити → +25 XP, ризик укусу'),('leave','Пройти повз')]),
- 'hermit':('forest','Лісовий самітник','Самітник обмінює знання про місцевість на вечерю.', [('meal','Консерва → карта околиць, +30 XP'),('leave','Попрощатись')]),
- 'safe':('ruin','Забутий сейф','Під завалами зберігся старий сейф.', [('open','10 запчастин → 60–120 кредитів'),('leave','Залишити')]),
- 'pharmacy':('ruin','Рештки аптеки','У шафах можуть бути ліки, але стеля ненадійна.', [('search','Обшукати: ліки або травма'),('leave','Не ризикувати')]),
- 'terminal':('ruin','Термінал архіву','На екрані блимає карта довоєнного району.', [('read','Прочитати → карта околиць, +35 XP'),('leave','Відійти')]),
- 'courier':('road','Велосипед кур’єра','Кур’єр просить допомогти відремонтувати колесо.', [('fix','5 запчастин → +45 кр., +20 XP'),('leave','Відмовитись')]),
- 'toll':('road','Самозвані митники','Озброєні люди вимагають 20 кредитів.', [('pay','Заплатити 20 кредитів → +15 XP'),('detour','Обійти через колючки → −3 HP, +20 XP'),('leave','Відступити')]),
- 'storm':('waste','Пилова стіна','Піщана буря насувається на ваш маршрут.', [('shelter','Сховатись → +20 XP'),('rush','Рушити крізь бурю → −4 HP, +30 XP'),('leave','Зачекати осторонь')]),
- 'meteor':('waste','Уламок із неба','Серед випаленої землі лежить гарячий метал.', [('collect','Дістати 15 фрагментів → −3 HP'),('study','Оглянути здалеку → +25 XP'),('leave','Оминути')]),
+ 'berries':('forest',tr('adventure.0071'),tr('adventure.0072'), [('gather',tr('adventure.0073')),('leave',tr('adventure.0074'))]),
+ 'snare':('forest',tr('adventure.0075'),tr('adventure.0076'), [('free',tr('adventure.0077')),('leave',tr('adventure.0078'))]),
+ 'hermit':('forest',tr('adventure.0079'),tr('adventure.0080'), [('meal',tr('adventure.0081')),('leave',tr('adventure.0082'))]),
+ 'safe':('ruin',tr('adventure.0083'),tr('adventure.0084'), [('open',tr('adventure.0085')),('leave',tr('adventure.0086'))]),
+ 'pharmacy':('ruin',tr('adventure.0087'),tr('adventure.0088'), [('search',tr('adventure.0089')),('leave',tr('adventure.0090'))]),
+ 'terminal':('ruin',tr('adventure.0091'),tr('adventure.0092'), [('read',tr('adventure.0093')),('leave',tr('adventure.0094'))]),
+ 'courier':('road',tr('adventure.0095'),tr('adventure.0096'), [('fix',tr('adventure.0097')),('leave',tr('adventure.0098'))]),
+ 'toll':('road',tr('adventure.0099'),tr('adventure.0100'), [('pay',tr('adventure.0101')),('detour',tr('adventure.0102')),('leave',tr('adventure.0103'))]),
+ 'storm':('waste',tr('adventure.0104'),tr('adventure.0105'), [('shelter',tr('adventure.0106')),('rush',tr('adventure.0107')),('leave',tr('adventure.0108'))]),
+ 'meteor':('waste',tr('adventure.0109'),tr('adventure.0110'), [('collect',tr('adventure.0111')),('study',tr('adventure.0112')),('leave',tr('adventure.0113'))]),
 }
 ROAD_EVENTS.extend((key,title,body,choices) for key,(_,title,body,choices) in EXTRA_EVENTS.items())
 
 
 SIMPLE_EVENTS={
- 'donation':('Подарунок каравану','Караванники залишили вам 60 кредитів.','money',60),
- 'aidbox':('Пакунок допомоги','Ви знайшли дві запечатані аптечки.','med',2),
- 'pantry':('Запаси під каменем','У схованці лежать три консерви.','food',3),
- 'lesson':('Порада розвідника','Корисна розмова: +35 XP.','xp',35),
- 'clean_cache':('Захищений контейнер','Знайдено дві пігулки від радіації.','rad',2),
- 'toxic_air':('Отруйний пил','Вдихнули токсичний пил: −4 HP.','damage',4),
- 'torn_pocket':('Дірка в кишені','Загублено до 30 кредитів.','money',-30),
- 'sand_lock':('Пісок у механізмі','Активна зброя втратила 8 пунктів стану.','wear',8),
- 'spoiled_can':('Зіпсована консерва','Довелося викинути одну консерву, якщо вона була.','food',-1),
- 'sharp_wire':('Дріт у траві','Подряпина від іржавого дроту: −3 HP.','damage',3),
+ 'donation':(tr('adventure.0114'),tr('adventure.0115'),'money',60),
+ 'aidbox':(tr('adventure.0116'),tr('adventure.0117'),'med',2),
+ 'pantry':(tr('adventure.0118'),tr('adventure.0119'),'food',3),
+ 'lesson':(tr('adventure.0120'),tr('adventure.0121'),'xp',35),
+ 'clean_cache':(tr('adventure.0122'),tr('adventure.0123'),'rad',2),
+ 'toxic_air':(tr('adventure.0124'),tr('adventure.0125'),'damage',4),
+ 'torn_pocket':(tr('adventure.0126'),tr('adventure.0127'),'money',-30),
+ 'sand_lock':(tr('adventure.0128'),tr('adventure.0129'),'wear',8),
+ 'spoiled_can':(tr('adventure.0130'),tr('adventure.0131'),'food',-1),
+ 'sharp_wire':(tr('adventure.0132'),tr('adventure.0133'),'damage',3),
 }
-ROAD_EVENTS.extend((k,title,body,[('leave','Продовжити')]) for k,(title,body,_,_) in SIMPLE_EVENTS.items())
+ROAD_EVENTS.extend((k,title,body,[('leave',tr('adventure.0134'))]) for k,(title,body,_,_) in SIMPLE_EVENTS.items())
 
-ROAD_EVENTS.extend((key,title,story,[('act',action),('leave','Пройти повз')]) for key,terrain,title,story,action,*rest in road_additions.EVENTS)
+ROAD_EVENTS.extend((key,title,story,[('act',action),('leave',tr('adventure.0135'))]) for key,terrain,title,story,action,*rest in road_additions.EVENTS)
 
-def damage_type(item):return WEAPON_DAMAGE.get(item['name'],'kinetic')
+def damage_type(item):return WEAPON_DAMAGE.get(item.get('type_id',item['name']),'kinetic')
 
 
 def resistance_text(enemy):
     profile=enemy.get('resists',RESISTANCES.get(enemy['kind'],{}))
-    return ' · '.join(f'{DAMAGE_TYPES[k][0]}: '+(f'опір {v}%' if v>0 else f'вразливість +{-v}%') for k,v in profile.items()) or 'Природних опорів немає.'
+    return ' · '.join(f'{DAMAGE_TYPES[k][0]}: '+(tr('adventure.0136', v0=v) if v>0 else tr('adventure.0137', v0=-v)) for k,v in profile.items()) or tr('adventure.0138')
 
 
 class Game(p.Game):
     def __init__(self,seed=None):
         super().__init__(seed)
-        self.city_names=r.random.Random(repr(self.rng.getstate())).sample(json.loads((Path(__file__).resolve().parent/'assets'/'city_names.json').read_text(encoding='utf-8')),len(self.cities))
+        self.city_names=r.random.Random(repr(self.rng.getstate())).sample([content.t(key) for key in content.read('city_names.json')],len(self.cities))
         self.stash=[]
         self.offer_refresh={}
         self.road_event=None
@@ -216,40 +211,40 @@ class Game(p.Game):
         self.world[site['pos'][1]][site['pos'][0]]='site'
         self.reveal(*site['pos'],2)
         self.radiation.pop(f'{site["pos"][0]},{site["pos"][1]}',None)
-        self.log(f"Відкрито: {site['name']}. На мапі з’явилася стежка.")
-        self.emit('Нова локація!',color='#92deb7')
+        self.log(tr('adventure.0139', v0=site['name']))
+        self.emit(tr('adventure.0140'),color='#92deb7')
         return True
 
     def step(self,dx,dy):
         if self.battle:return self.battle_move((self.battle['pos'][0]+dx,self.battle['pos'][1]+dy))
         if not self.can_step(dx,dy):
-            self.log('Спочатку завершіть дорожню подію.' if self.road_event else 'Шлях перекритий водоймою, скелями або краєм мапи.')
-            self.emit('Подія чекає' if self.road_event else 'Непрохідно',color='#eea18b');return False
+            self.log(tr('adventure.0141') if self.road_event else tr('adventure.0142'))
+            self.emit(tr('adventure.0143') if self.road_event else tr('adventure.0144'),color='#eea18b');return False
         self.x+=dx;self.y+=dy;self.turn+=1;self.travel_steps+=1;self.traveler=None
         self.reveal(self.x,self.y,2)
         if self.travel_steps%8==0:
             if self.consume('food'):
                 before=self.hp;self.hp=min(self.max_hp,self.hp+10)
-                self.emit(f'Їжа −1 · +{self.hp-before} HP',color='#9edba2')
-                self.log('Дорожній привал: витрачено консерви.')
-            else:self.hurt_world(5,'Голод')
+                self.emit(tr('adventure.0145', v0=self.hp - before),color='#9edba2')
+                self.log(tr('adventure.0146'))
+            else:self.hurt_world(5,tr('adventure.0147'))
         radiation=self.radiation.get(f'{self.x},{self.y}',0)
         protected=self.rad_turns>0
         self.rad_turns=max(0,self.rad_turns-1)
-        if radiation and protected:self.emit('☢ Захищено',color='#b9e876')
-        elif radiation and not self.hurt_world(radiation,'Радіація'):return True
+        if radiation and protected:self.emit(tr('adventure.0148'),color='#b9e876')
+        elif radiation and not self.hurt_world(radiation,tr('adventure.0149')):return True
         self._visit_objectives()
         for site in list(self.special_sites):
             if not site['found'] and math.dist(site['pos'],(self.x,self.y))<=1.5:self.discover(site['id'])
-        if self.city is not None:self.log(f'Прибуття: {self.city_name(self.city)}.');return True
+        if self.city is not None:self.log(tr('adventure.0150', v0=self.city_name(self.city)));return True
         terrain=self.world[self.y][self.x]
         if self.rng.random()<{'road':.06,'waste':.12,'forest':.20,'ruin':.24}.get(terrain,.1):self.start_battle()
         elif self.turn-self.last_event_turn>=8 and self.rng.random()<.12:self.make_road_event()
         elif self.turn-self.last_traveler_turn>=7 and self.rng.random()<.09:self.spawn_traveler()
         return True
 
-    def hurt_world(self,damage,label='Шкода'):
-        if label=='Голод':damage=min(damage,max(0,self.hp-1))
+    def hurt_world(self,damage,label=tr('adventure.0151')):
+        if label==tr('adventure.0152'):damage=min(damage,max(0,self.hp-1))
         self.hp-=damage;self.emit(f'−{damage} HP',color='#ff927c')
         self.log(f'{label}: −{damage} HP.')
         if self.hp<=0:self.defeat();return False
@@ -260,9 +255,9 @@ class Game(p.Game):
             if not self.count('rad') or (self.battle and self.battle['ap']<2):return False
             self.consume('rad');self.rad_turns=10
             if self.battle:self.battle['ap']-=2
-            self.emit('☢ Захист: 10 ходів',color='#b9e876');return True
+            self.emit(tr('adventure.0153'),color='#b9e876');return True
         before=self.hp
-        if self.battle and self.battle['ap']<2:self.emit('Мало ОД',color='#ffcb79')
+        if self.battle and self.battle['ap']<2:self.emit(tr('adventure.0154'),color='#ffcb79')
         ok=super().use(kind)
         if ok:self.emit(f'+{self.hp-before} HP',color='#9cdda8')
         return ok
@@ -271,13 +266,13 @@ class Game(p.Game):
         previous={q['id']:q['progress'] for q in self.quests}
         super()._visit_objectives()
         for q in self.quests:
-            if q['progress']!=previous[q['id']]:self.emit('Розвідка ✓',color='#b3d794')
+            if q['progress']!=previous[q['id']]:self.emit(tr('adventure.0155'),color='#b3d794')
 
     def _kill_objectives(self,kind):
         previous={q['id']:q['progress'] for q in self.quests}
         super()._kill_objectives(kind)
         for q in self.quests:
-            if q['progress']!=previous[q['id']]:self.emit(f'Ціль {q["progress"]}/{q["goal"]}',color='#c7a0f1')
+            if q['progress']!=previous[q['id']]:self.emit(tr('adventure.0156', v0=q['progress'], v1=q['goal']),color='#c7a0f1')
 
     def gain_xp(self,amount):
         self.xp+=amount;self.emit(f'+{amount} XP',color='#99c9ff')
@@ -298,34 +293,34 @@ class Game(p.Game):
         if kind in SIMPLE_EVENTS:
             self.road_event=None
             _,_,effect,value=SIMPLE_EVENTS[kind]
-            if effect=='money':self.money=max(0,self.money+value);self.emit(f'{value:+} кр.')
+            if effect=='money':self.money=max(0,self.money+value);self.emit(tr('adventure.0157', v0=value))
             elif effect=='xp':self.gain_xp(value)
             elif effect=='damage':self.hurt_world(value,event['title'])
             elif effect=='wear':
                 if self.weapon:self.wear(self.weapon,value)
             elif value<0:self.consume(effect,min(self.count(effect),-value))
-            else:p.add_to(self.loot,p.supply(effect,value));self.emit('Припаси знайдено')
+            else:p.add_to(self.loot,p.supply(effect,value));self.emit(tr('adventure.0158'))
             return True
         if kind in EXTRA_EVENTS:return self.resolve_extra_event(kind,choice)
         required='med' if choice=='help' else 'food' if choice in ('rest','share') else None
-        if required and not self.count(required):self.log('Немає потрібного припасу.');return False
+        if required and not self.count(required):self.log(tr('adventure.0159'));return False
         if required:self.consume(required)
         self.road_event=None
-        if choice=='leave':self.emit('Далі в дорогу');return True
-        if kind=='wounded':self.gain_xp(40);self.money+=60;self.emit('+60 кр.')
+        if choice=='leave':self.emit(tr('adventure.0160'));return True
+        if kind=='wounded':self.gain_xp(40);self.money+=60;self.emit(tr('adventure.0161'))
         elif kind=='wreck':
-            if self.rng.random()<.7:p.add_to(self.bag,p.parts(self.rng.randint(12,35)));self.emit('Запчастини +',color='#d2cb9b')
-            else:self.hurt_world(8,'Уламки')
+            if self.rng.random()<.7:p.add_to(self.bag,p.parts(self.rng.randint(12,35)));self.emit(tr('adventure.0162'),color='#d2cb9b')
+            else:self.hurt_world(8,tr('adventure.0163'))
         elif kind=='camp':
             old=self.hp;self.hp=min(self.max_hp,self.hp+25);self.emit(f'+{self.hp-old} HP',color='#9cdda8');self.gain_xp(15)
         elif kind=='mines':
             if choice=='careful':self.gain_xp(15)
-            elif self.rng.random()<.5:self.hurt_world(self.rng.randint(6,14),'Міна')
-            else:p.add_to(self.loot,p.supply('med',2));self.emit('Аптечки +2')
+            elif self.rng.random()<.5:self.hurt_world(self.rng.randint(6,14),tr('adventure.0164'))
+            else:p.add_to(self.loot,p.supply('med',2));self.emit(tr('adventure.0165'))
         elif kind=='signal':
             if not self.discover():self.gain_xp(20)
         elif kind=='pilgrims':
-            if choice=='share':self.money+=70;self.emit('+70 кр.')
+            if choice=='share':self.money+=70;self.emit(tr('adventure.0166'))
             else:self.gain_xp(10)
         return True
 
@@ -359,10 +354,10 @@ class Game(p.Game):
         preview=copy.deepcopy(item)
         if p.stack_key(preview):preview['qty']=qty
         if direction=='withdraw' and (self.weight+p.item_weight(preview)>self.capacity+.0001 or item.get('level',1)>self.level):
-            self.log('Не вміщується в рюкзак або зависокий рівень.');return False
+            self.log(tr('adventure.0167'));return False
         moved=p.extract(source,item,qty)
         p.add_to(self.stash if direction=='deposit' else self.bag,moved)
-        self.log('Предмет перенесено до сховища.' if direction=='deposit' else 'Предмет забрано зі сховища.')
+        self.log(tr('adventure.0168') if direction=='deposit' else tr('adventure.0169'))
         return True
 
     def mayor_offers(self):
@@ -380,11 +375,11 @@ class Game(p.Game):
                 if q['kind']=='supplies':
                     q['food_need']=(5 if q.get('unique') else 3)+(self.region_level-1)//2
                     q['med_need']=(3 if q.get('unique') else 2)+(self.region_level-1)//3
-        variants={'hunt':['Зачистити околиці','Небезпека на дорозі','Захист каравану'],
-                  'retrieve':['Загублений передавач','Сигнал довоєнного приладу','Пошук навігатора'],
-                  'scout':['Дослідити сектор','Перевірка маршруту','Розвідати аномалію'],
-                  'supplies':['Поповнити запаси','Допомога лікарні','Їжа для вартових'],
-                  'purge':['Гніздо біля поселення','Лігво мутантів','Загроза з руїн']}
+        variants={'hunt':[tr('adventure.0170'),tr('adventure.0171'),tr('adventure.0172')],
+                  'retrieve':[tr('adventure.0173'),tr('adventure.0174'),tr('adventure.0175')],
+                  'scout':[tr('adventure.0176'),tr('adventure.0177'),tr('adventure.0178')],
+                  'supplies':[tr('adventure.0179'),tr('adventure.0180'),tr('adventure.0181')],
+                  'purge':[tr('adventure.0182'),tr('adventure.0183'),tr('adventure.0184')]}
         for q in offers:
             if not q.get('cycle_named'):
                 q['cycle_named']=True
@@ -402,50 +397,50 @@ class Game(p.Game):
 
     def accept_quest(self,quest_id):
         ok=super().accept_quest(quest_id)
-        if ok:self.emit('Завдання взято',color='#c7a0f1')
+        if ok:self.emit(tr('adventure.0185'),color='#c7a0f1')
         return ok
 
     def quest_text(self,q):
         k=q['kind'];unique=q.get('unique',False)
         if k=='hunt':
-            target='мутантів' if q['target_kind'] is None else r.MONSTERS[q['target_kind']][0]
-            desc=f'Знищити {target}: {q["progress"]}/{q["goal"]} після взяття завдання.'
-        elif k=='retrieve':desc='Знайти '+('чорну скриньку «Геліос».' if unique else 'довоєнний навігатор.')+' Дійдіть до позначки й натисніть E.'
-        elif k=='scout':desc='Дійти до позначеної точки та повернутися з розвідданими.'
-        elif k=='supplies':desc=f'Принести консерви {self.count("food")}/{q.get('food_need',5 if unique else 3)} та аптечки {self.count("med")}/{q.get('med_need',3 if unique else 2)}.'
-        else:desc='Дійти до гнізда, натиснути E й виграти спеціальний бій.'
-        if q.get('pos'):desc+=f'\nКоординати: {q["pos"][0]}, {q["pos"][1]}.'
-        state='ВИКОНАНО' if q['status']=='done' else 'ДОСТУПНЕ' if q['status']=='offered' else 'ГОТОВО ДО ЗДАЧІ' if self.quest_ready(q) else 'У ПРОЦЕСІ'
-        return ('★ УНІКАЛЬНЕ\n' if unique else '')+f'{q["title"]}\n{desc}\nЗамовник: {self.city_name(q["city"])}\nНагорода: {q["reward"]} кр. + {80 if unique else 40} XP\n{state}'
+            target=tr('adventure.0186') if q['target_kind'] is None else r.MONSTERS[q['target_kind']][0]
+            desc=tr('adventure.0187', v0=target, v1=q['progress'], v2=q['goal'])
+        elif k=='retrieve':desc=tr('adventure.0188')+(tr('adventure.0189') if unique else tr('adventure.0190'))+tr('adventure.0191')
+        elif k=='scout':desc=tr('adventure.0192')
+        elif k=='supplies':desc=tr('adventure.0193', v0=self.count('food'), v1=q.get('food_need', 5 if unique else 3), v2=self.count('med'), v3=q.get('med_need', 3 if unique else 2))
+        else:desc=tr('adventure.0194')
+        if q.get('pos'):desc+=tr('adventure.0195', v0=q['pos'][0], v1=q['pos'][1])
+        state=tr('adventure.0196') if q['status']=='done' else tr('adventure.0197') if q['status']=='offered' else tr('adventure.0198') if self.quest_ready(q) else tr('adventure.0199')
+        return (tr('adventure.0200') if unique else '')+tr('adventure.0201', v0=q['title'], v1=desc, v2=self.city_name(q['city']), v3=q['reward'], v4=80 if unique else 40, v5=state)
 
     def turn_in(self,quest_id):
         xp=self.xp
         ok=super().turn_in(quest_id)
         if ok:
-            self.emit('Завдання ✓',color='#c7a0f1');self.emit(f'+{self.xp-xp} XP',color='#99c9ff')
+            self.emit(tr('adventure.0202'),color='#c7a0f1');self.emit(f'+{self.xp-xp} XP',color='#99c9ff')
             city=self.city
             if city is not None and city<12 and city not in self.map_rewards and sum(q['status']=='done' and q['city']==city for q in self.quests)>=3:
                 self.map_rewards.append(city)
                 nearby=sorted((n for n in range(12) if n not in self.known_cities),key=lambda n:math.dist(self.cities[n],self.cities[city]))[:3]
                 for n in nearby:self.reveal(*self.cities[n],2)
-                self.log('Мер передав карту найближчих міст: '+', '.join(self.city_name(n) for n in nearby))
-                self.emit('Карта міст +',color='#a5dabc')
+                self.log(tr('adventure.0203')+', '.join(self.city_name(n) for n in nearby))
+                self.emit(tr('adventure.0204'),color='#a5dabc')
         return ok
 
     def search(self):
-        if self.road_event:self.log('Спочатку завершіть дорожню подію.');return False
+        if self.road_event:self.log(tr('adventure.0205'));return False
         old={q['id']:q['progress'] for q in self.quests}
         before=self.turn
         ok=super().search()
         self.rad_turns=max(0,self.rad_turns-(self.turn-before))
         for q in self.quests:
-            if q['progress']!=old[q['id']]:self.emit('Предмет знайдено ✓',color='#c7a0f1')
+            if q['progress']!=old[q['id']]:self.emit(tr('adventure.0206'),color='#c7a0f1')
         return ok
 
     def switch(self):
         other='weapon2' if self.active=='weapon1' else 'weapon1'
-        if not self.equipped[other]:self.emit('Порожній слот');return False
-        self.active=other;self.emit('Зброю змінено');return True
+        if not self.equipped[other]:self.emit(tr('adventure.0207'));return False
+        self.active=other;self.emit(tr('adventure.0208'));return True
 
     def start_battle(self):
         super().start_battle()
@@ -458,7 +453,7 @@ class Game(p.Game):
             e['hp']=e['max_hp']=round(e['max_hp']*factor)
             e['damage']=round(e['damage']*({'normal':1,'rare':1.3,'mythic':1.8}[grade]))
             balance.set_monster(e)
-            if grade!='normal':e['name']=('Рідкісний · ' if grade=='rare' else 'Міфічний · ')+e['name']
+            if grade!='normal':e['name']=(tr('adventure.0209') if grade=='rare' else tr('adventure.0210'))+e['name']
 
     def battle_move(self,target):
         if not self.battle:return False
@@ -467,7 +462,7 @@ class Game(p.Game):
             b=self.battle
             blocked=set(map(tuple,b['walls']))|{tuple(e['pos']) for e in b['enemies']}
             path=r.path_to(tuple(b['pos']),tuple(target),b['w'],b['h'],blocked)
-            self.emit('Мало ОД' if path and len(path)>b['ap'] else 'Немає шляху',color='#ffcb79')
+            self.emit(tr('adventure.0211') if path and len(path)>b['ap'] else tr('adventure.0212'),color='#ffcb79')
         return ok
 
     def shoot(self,enemy_id):
@@ -477,10 +472,10 @@ class Game(p.Game):
         if not e:return False
         reason=None
         valid,why,chance=self.shot_info(e)
-        if w.get('durability',100)<=0:reason='Зламана зброя'
-        elif not self.count('ammo',w.get('ammo_type','pistol')):reason='Немає набоїв'
-        elif b['ap']<w['ap']:reason='Мало ОД'
-        elif not valid:reason='Немає пострілу'
+        if w.get('durability',100)<=0:reason=tr('adventure.0213')
+        elif not self.count('ammo',w.get('ammo_type','pistol')):reason=tr('adventure.0214')
+        elif b['ap']<w['ap']:reason=tr('adventure.0215')
+        elif not valid:reason=tr('adventure.0216')
         if reason:self.log(reason if not why else why);self.emit(reason,color='#ffcb79');return False
         b['ap']-=w['ap'];self.consume('ammo',1,w.get('ammo_type','pistol'))
         element=damage_type(w);color=DAMAGE_TYPES[element][1]
@@ -492,14 +487,14 @@ class Game(p.Game):
             resist=e.get('resists',RESISTANCES.get(e['kind'],{})).get(element,0)
             amount=max(1,round(base*(1-resist/100)))
             e['hp']-=amount
-            self.emit(('КРИТ ' if critical else '')+f'−{amount}',pos=e['pos'],color='#ffbf82' if critical else '#ff9d84')
+            self.emit((tr('adventure.0217') if critical else '')+f'−{amount}',pos=e['pos'],color='#ffbf82' if critical else '#ff9d84')
             self.log(f'{e["name"]}: −{amount} HP ({DAMAGE_TYPES[element][0]}).')
             if e['hp']<=0:
-                b.setdefault('corpses',[]).append(dict(pos=e['pos'][:],kind=e['kind'],grade=e.get('grade','normal')))
-                b.setdefault('kills',[]).append(dict(kind=e['kind'],grade=e.get('grade','normal'),level=e.get('level',b.get('region_level',1))))
+                b.setdefault('corpses',[]).append(dict(pos=e['pos'][:],kind=e['kind'],type_id=content.monster_id(e),grade=e.get('grade','normal')))
+                b.setdefault('kills',[]).append(dict(kind=e['kind'],type_id=content.monster_id(e),grade=e.get('grade','normal'),level=e.get('level',b.get('region_level',1))))
                 b['enemies'].remove(e);self.gain_xp(self.enemy_xp(e));self._kill_objectives(e['kind'])
             if not b['enemies']:self.victory()
-        else:self.emit('Промах',color='#d7d4c0');self.log('Промах.')
+        else:self.emit(tr('adventure.0218'),color='#d7d4c0');self.log(tr('adventure.0219'))
         self.wear(w,.6)
         return True
 
@@ -508,7 +503,7 @@ class Game(p.Game):
         if not b:return
         for e in b['enemies']:
             if b.get('dungeon') and not e.get('awake'):continue
-            if e['kind']==8:e['hp']=min(e['max_hp'],e['hp']+3)
+            if content.MONSTER_DATA[content.monster_id(e)]['regen']:e['hp']=min(e['max_hp'],e['hp']+content.MONSTER_DATA[content.monster_id(e)]['regen'])
             motion=[e['pos'][:]]
             for _ in range(e['speed']):
                 if math.dist(e['pos'],b['pos'])<=e['range'] and r.visible(tuple(e['pos']),tuple(b['pos']),b['walls']):break
@@ -520,7 +515,7 @@ class Game(p.Game):
             if math.dist(e['pos'],b['pos'])<=e['range'] and r.visible(tuple(e['pos']),tuple(b['pos']),b['walls']):
                 self.emit(kind='slash' if e['range']<=1 else 'attack',pos=b['pos'],source=e['pos'],color='#ff976f')
                 if self.rng.randrange(100)<min(45,self.protection_stat('evasion')):
-                    self.emit('Ухилення',color='#b8dcb0');self.emit('Промах',pos=e['pos'],color='#d7d4c0');continue
+                    self.emit(tr('adventure.0220'),color='#b8dcb0');self.emit(tr('adventure.0221'),pos=e['pos'],color='#d7d4c0');continue
                 damage=balance.damage(e['damage']+self.rng.randint(-2,2),e.get('attack',0),self.defense)
                 self.hp-=damage;self.emit(f'−{damage}',color='#ff8f79')
                 self.wear(self.equipped['armor'],.5);self.wear(self.equipped['helmet'],.25)
@@ -530,28 +525,29 @@ class Game(p.Game):
         self.hp+=heal
         if heal:self.emit(f'+{heal} HP',color='#9cdda8')
         b['ap']=self.max_ap;b['max_ap']=self.max_ap;b['round']+=1
-        self.log(f'Раунд {b["round"]}. Ваш хід.')
+        self.log(tr('adventure.0222', v0=b['round']))
 
     def victory(self):
         if self.battle:self._last_battle=copy.deepcopy(self.battle)
         qid=self.quest_battle
         super().victory()
-        if qid:self.emit('Гніздо знищено ✓',color='#c7a0f1')
+        if qid:self.emit(tr('adventure.0223'),color='#c7a0f1')
 
     def defeat(self):
         if self.battle:self._last_battle=copy.deepcopy(self.battle)
         super().defeat();self.road_event=None
 
     def save(self,path):
+        content.migrate(self)
         data={k:v for k,v in vars(self).items() if k!='rng' and not k.startswith('_')}
-        data.update(version=11,rng_state=self.rng.getstate())
+        data.update(version=12,rng_state=self.rng.getstate())
         path=Path(path);path.parent.mkdir(parents=True,exist_ok=True)
         tmp=path.with_suffix('.tmp');tmp.write_text(json.dumps(data,ensure_ascii=False),encoding='utf-8');os.replace(tmp,path)
 
     @classmethod
     def load(cls,path):
         data=json.loads(Path(path).read_text(encoding='utf-8'));version=data.get('version')
-        if version not in (1,2,3,4,5,6,7,8,9,10,11):raise ValueError('Невідома версія збереження.')
+        if version not in (1,2,3,4,5,6,7,8,9,10,11,12):raise ValueError(tr('adventure.0224'))
         game=cls(0)
         if version<4:
             old=p.Game.load(path)
@@ -571,12 +567,12 @@ class Game(p.Game):
                     while y!=cy:
                         y+=1 if cy>y else -1
                         if not game.passable(x,y):game.world[y][x]='waste'
-            game.log('Оновлення v0.4: нові перки, рельєф і події. Старий прогрес збережено.')
+            game.log(tr('adventure.0225'))
         else:
             data.pop('version');state=data.pop('rng_state')
             expected={k for k in vars(game) if k!='rng' and not k.startswith('_')}
             if version==4:expected-= {'explored','known_cities','map_rewards','rad_turns'}
-            if set(data)!=expected:raise ValueError('Неповне збереження.')
+            if set(data)!=expected:raise ValueError(tr('adventure.0226'))
             game.__dict__.update(data)
             def tuples(v):return tuple(tuples(i) for i in v) if isinstance(v,list) else v
             game.rng.setstate(tuples(state))
@@ -589,7 +585,7 @@ class Game(p.Game):
         if version<6:
             game.build_radiation();game.add_sites()
             game.offers={};game.offer_refresh={}
-            game.log('Оновлення: небезпека за відстанню, нові локації та західні радіаційні поля.')
+            game.log(tr('adventure.0227'))
         game._events=[];game._last_battle=None
         if game.battle:
             game.battle.setdefault('corpses',[]);game.battle.setdefault('max_ap',game.max_ap)
@@ -606,10 +602,10 @@ class Game(p.Game):
         self.explored=sorted(known)
         for n,pos in enumerate(self.cities):
             if self.revealed(*pos) and n not in self.known_cities:
-                self.known_cities.append(n);self.emit('Місто відкрито',color='#d8c38e')
+                self.known_cities.append(n);self.emit(tr('adventure.0228'),color='#d8c38e')
 
     def enemy_xp(self,enemy):
-        _,hp,damage,reach,speed,armor,_=r.MONSTERS[enemy['kind']]
+        _,hp,damage,reach,speed,armor,_=r.MONSTERS[content.monster_id(enemy)]
         base=round(hp*.35+damage*1.5+armor*2+reach+speed)
         level=enemy.get('level',1)
         multiplier={'normal':1,'rare':2,'mythic':5}.get(enemy.get('grade','normal'),1)
@@ -639,37 +635,37 @@ class Game(p.Game):
         item=p.module(tier,self.rng,self.rng.choice(pool),self.level)
         if self.weight+p.item_weight(item)>self.capacity:return False
         self.consume(kind,amount);p.add_to(self.bag,item)
-        self.log('Створено: '+item['name']+' · '+r.RARITIES[tier][0]);return True
+        self.log(tr('adventure.0229')+item['name']+' · '+r.RARITIES[tier][0]);return True
 
     def resolve_extra_event(self,kind,choice):
         cost={'meal':('food',1),'open':('parts',10),'fix':('parts',5)}.get(choice)
-        if cost and self.count(cost[0])<cost[1]:self.log('Недостатньо припасів.');return False
-        if choice=='pay' and self.money<20:self.log('Недостатньо кредитів.');return False
+        if cost and self.count(cost[0])<cost[1]:self.log(tr('adventure.0230'));return False
+        if choice=='pay' and self.money<20:self.log(tr('adventure.0231'));return False
         if cost:self.consume(*cost)
         self.road_event=None
         if choice=='leave':return True
         if kind=='berries':
-            if self.rng.random()<.75:p.add_to(self.loot,p.supply('food',2));self.emit('Консерви +2')
-            else:self.hurt_world(4,'Отруйні ягоди')
+            if self.rng.random()<.75:p.add_to(self.loot,p.supply('food',2));self.emit(tr('adventure.0232'))
+            else:self.hurt_world(4,tr('adventure.0233'))
         elif kind=='snare':
             self.gain_xp(25)
-            if self.rng.random()<.25:self.hurt_world(3,'Укус')
+            if self.rng.random()<.25:self.hurt_world(3,tr('adventure.0234'))
         elif kind in ('hermit','terminal'):
-            self.reveal(self.x,self.y,6);self.gain_xp(30 if kind=='hermit' else 35);self.emit('Мапу доповнено')
+            self.reveal(self.x,self.y,6);self.gain_xp(30 if kind=='hermit' else 35);self.emit(tr('adventure.0235'))
         elif kind=='safe':
-            amount=self.rng.randint(60,120);self.money+=amount;self.emit(f'+{amount} кр.')
+            amount=self.rng.randint(60,120);self.money+=amount;self.emit(tr('adventure.0236', v0=amount))
         elif kind=='pharmacy':
-            if self.rng.random()<.8:p.add_to(self.loot,p.supply(self.rng.choice(['med','rad']),2));self.emit('Ліки знайдено')
-            else:self.hurt_world(5,'Обвал')
-        elif kind=='courier':self.money+=45;self.gain_xp(20);self.emit('+45 кр.')
+            if self.rng.random()<.8:p.add_to(self.loot,p.supply(self.rng.choice(['med','rad']),2));self.emit(tr('adventure.0237'))
+            else:self.hurt_world(5,tr('adventure.0238'))
+        elif kind=='courier':self.money+=45;self.gain_xp(20);self.emit(tr('adventure.0239'))
         elif kind=='toll':
             if choice=='pay':self.money-=20;self.gain_xp(15)
-            else:self.gain_xp(20);self.hurt_world(3,'Колючки')
+            else:self.gain_xp(20);self.hurt_world(3,tr('adventure.0240'))
         elif kind=='storm':
             self.gain_xp(20 if choice=='shelter' else 30)
-            if choice=='rush':self.hurt_world(4,'Буря')
+            if choice=='rush':self.hurt_world(4,tr('adventure.0241'))
         elif kind=='meteor':
-            if choice=='collect':p.add_to(self.bag,p.fragments(15));self.emit('Фрагменти +15');self.hurt_world(3,'Гарячий метал')
+            if choice=='collect':p.add_to(self.bag,p.fragments(15));self.emit(tr('adventure.0242'));self.hurt_world(3,tr('adventure.0243'))
             else:self.gain_xp(25)
         return True
 

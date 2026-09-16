@@ -1,4 +1,6 @@
+from i18n import t as tr
 """Afterdays v0.3: progression, stacks, economy, ammunition and maintenance."""
+import content
 import copy
 import balance
 import json
@@ -9,36 +11,18 @@ from collections import deque
 import afterdays as r
 
 _base_equipment, _base_module, _base_supply, _base_stats = r.equipment, r.module, r.supply, r.stats
-GEAR_MIN_LEVEL = {
-    'Пістолет «Попіл»':1, 'Гвинтівка «Сторож»':3, 'Автомат «Іржа»':3,
-    'Дробовик «Грім»':2, 'Лазер «Промінь»':6, 'Куртка з пластинами':1,
-    'Бронекорпус «Бастіон»':5, 'Шолом «Шукач»':1, 'Револьвер «Ворон»':2,
-    'ПП «Шершень»':2, 'Карабін «Пілігрим»':4, 'Снайперська «Горизонт»':7,
-    'Кулемет «Молот»':8, 'Плазмомет «Сонце»':9, 'Гаус-карабін «Імпульс»':10,
-    'Іонний пістолет «Іскра»':5, 'Арбалет «Тиша»':3, 'Плащ розвідника':1,
-    'Кевларова жилетка':2, 'Костюм «Сталкер»':3, 'Панцир «Черепаха»':7,
-    'Екзокаркас «Атлант»':10, 'Костюм «Фантом»':6, 'Композит «Світанок»':8,
-    'Каптур вигнанця':1, 'Каска рейнджера':2, 'Шолом «Циклоп»':5,
-    'Маска «Привид»':3, 'Важкий шолом «Форт»':7, 'Візор «Обрій»':4,
-}
-AMMO = {'pistol':('9 мм',2,.012), 'rifle':('Гвинтівкові',4,.022),
-        'shell':('Картеч',5,.035), 'energy':('Енергоосередки',7,.015),
-        'heavy':('Важкі набої',6,.04), 'bolt':('Болти',3,.03)}
-AMMO_BY_WEAPON = {
-    'Пістолет «Попіл»':'pistol', 'Револьвер «Ворон»':'pistol', 'ПП «Шершень»':'pistol',
-    'Дробовик «Грім»':'shell', 'Кулемет «Молот»':'heavy', 'Арбалет «Тиша»':'bolt',
-    'Лазер «Промінь»':'energy', 'Іонний пістолет «Іскра»':'energy',
-    'Плазмомет «Сонце»':'energy', 'Гаус-карабін «Імпульс»':'energy',
-}
+GEAR_MIN_LEVEL = content.GEAR_MIN_LEVEL
+AMMO = content.AMMO
+AMMO_BY_WEAPON = content.AMMO_BY_WEAPON
 PERKS = {
-    'marksman':('Влучне око','+4 п.п. до точності за ранг; фінальний шанс не вище 98%.'),
-    'carrier':('Караванник','+5 кг вантажності за ранг.'),
-    'hardy':('Живучий','+10 максимальних HP за ранг.'),
-    'armorer':('Бронемайстер','+1 захисту за ранг.'),
-    'medic':('Польовий медик','+10% лікування їжею за ранг. Аптечка завжди лікує 50% максимальних HP.'),
-    'engineer':('Обережний механік','На 15% менший знос за ранг; максимум 70% зменшення.'),
-    'trader':('Переговорник','−5% до цін купівлі й ремонту за ранг; максимум −30%.'),
-    'scavenger':('Шукач скарбів','+15% кредитів за перемогу за ранг.'),
+    'marksman':(tr('progression.0007'),tr('progression.0008')),
+    'carrier':(tr('progression.0009'),tr('progression.0010')),
+    'hardy':(tr('progression.0011'),tr('progression.0012')),
+    'armorer':(tr('progression.0013'),tr('progression.0014')),
+    'medic':(tr('progression.0015'),tr('progression.0016')),
+    'engineer':(tr('progression.0017'),tr('progression.0018')),
+    'trader':(tr('progression.0019'),tr('progression.0020')),
+    'scavenger':(tr('progression.0021'),tr('progression.0022')),
 }
 STACK_KINDS = {'food','med','ammo','parts','fragments','rad'}
 TECHNICIANS = [0,2,4,7,10]
@@ -51,6 +35,7 @@ def xp_for_level(level):
 def equipment(name=None, tier=0, rng=None, level=1):
     rng = rng or r.random
     level=max(1,int(level))
+    if name is not None:name=content.entity_id(name)
     eligible=[n for n in r.GEAR if GEAR_MIN_LEVEL[n] <= level]
     if name not in eligible:
         # Preserve requested equipment category when possible.
@@ -86,25 +71,18 @@ def module(tier=0,rng=None,index=None,level=1):
 
 
 def supply(kind,qty=1):
-    item=_base_supply('med' if kind=='rad' else kind)
-    if kind=='rad':item.update(name='Радіопротектор',kind='rad',value=84,weight=.1)
-    item.update(qty=int(qty),level=1)
-    return item
+    return dict(id=r.uid(),qty=int(qty),level=1,**content.consumable(kind))
 
 
 def ammunition(kind,qty=1):
     name,value,weight=AMMO[kind]
-    return dict(id=r.uid(),name=name,kind='ammo',ammo_type=kind,rarity=0,
+    return dict(id=r.uid(),name=name,type_id='ammo_'+kind,kind='ammo',ammo_type=kind,rarity=0,
                 weight=weight,value=value,qty=int(qty),level=1)
 
 
-def fragments(qty):
-    item=parts(qty);item.update(name='Фрагменти',kind='fragments');return item
+def fragments(qty):return supply('fragments',qty)
 
-
-def parts(qty):
-    return dict(id=r.uid(),name='Запчастини',kind='parts',rarity=0,weight=0,
-                value=2,qty=int(qty),level=1)
+def parts(qty):return supply('parts',qty)
 
 
 def stats(item):
@@ -168,13 +146,13 @@ class Game(r.ExpansionGame):
         self.perks={}
         self.technicians=TECHNICIANS[:]
         self.travel_steps=0
-        self.equipped={'weapon1':equipment('Пістолет «Попіл»'), 'weapon2':None,
-                        'armor':equipment('Куртка з пластинами'), 'helmet':equipment('Шолом «Шукач»')}
+        self.equipped={'weapon1':equipment('weapon_ash_pistol'), 'weapon2':None,
+                        'armor':equipment('armor_plated_jacket'), 'helmet':equipment('helmet_seeker')}
         self.bag=[module(index=0),module(index=3),supply('med',2),supply('food',3),ammunition('pistol',60)]
         self.money=160
         self.hp=self.max_hp
         self.messages=[]
-        self.log('Сховище 17. Чим далі від старту, тим небезпечніша пустка.')
+        self.log(tr('progression.0026'))
 
     @property
     def level(self):
@@ -194,7 +172,7 @@ class Game(r.ExpansionGame):
         if key not in PERKS or not self.pending_perks:
             return False
         self.perks[key]=self.rank(key)+1
-        self.log(f'Вивчено: {PERKS[key][0]} · ранг {self.rank(key)}.')
+        self.log(tr('progression.0027', v0=PERKS[key][0], v1=self.rank(key)))
         return True
 
     @property
@@ -240,7 +218,7 @@ class Game(r.ExpansionGame):
 
     def accept(self,item):
         if self.weight+item_weight(item)>self.capacity+.0001:
-            self.log('Перевищення вантажності. Звільніть місце.')
+            self.log(tr('progression.0028'))
             return False
         add_to(self.bag,item)
         return True
@@ -248,7 +226,7 @@ class Game(r.ExpansionGame):
     def equip(self,item_id,slot):
         item=self.find(item_id)
         if item and item.get('level',1)>self.level:
-            self.log('Для цього предмета потрібен вищий рівень.')
+            self.log(tr('progression.0029'))
             return False
         return super().equip(item_id,slot)
 
@@ -266,20 +244,20 @@ class Game(r.ExpansionGame):
 
     def use(self,kind):
         if kind not in ('med','food') or not self.count(kind):
-            self.log('Немає потрібного припасу.')
+            self.log(tr('progression.0030'))
             return False
         if self.hp>=self.max_hp:
-            self.log('Здоров’я повне.')
+            self.log(tr('progression.0031'))
             return False
         if self.battle and self.battle['ap']<2:
-            self.log('Потрібно 2 ОД.')
+            self.log(tr('progression.0032'))
             return False
         self.consume(kind)
         heal=min(self.max_hp-self.hp,math.ceil(self.max_hp*.5) if kind=='med' else round(14*(1+.1*self.rank('medic'))))
         self.hp+=heal
         if self.battle:
             self.battle['ap']-=2
-        self.log(f'Лікування: +{heal} HP.')
+        self.log(tr('progression.0033', v0=heal))
         return True
 
     def step(self,dx,dy):
@@ -293,13 +271,13 @@ class Game(r.ExpansionGame):
         if self.travel_steps%8==0:
             if self.consume('food'):
                 self.hp=min(self.max_hp,self.hp+10)
-                self.log('Привал: −1 консерви, +10 HP.')
+                self.log(tr('progression.0034'))
             else:
                 self.hp=max(1,self.hp-5)
-                self.log('Без їжі: −5 HP.')
+                self.log(tr('progression.0035'))
         self._visit_objectives()
         if self.city is not None:
-            self.log(f'Прибуття: {self.city_name(self.city)}.')
+            self.log(tr('progression.0036', v0=self.city_name(self.city)))
         elif self.rng.random()<{'road':.06,'waste':.12,'forest':.20,'ruin':.24}[self.world[self.y][self.x]]:
             self.start_battle()
         elif self.turn-self.last_traveler_turn>=7 and self.rng.random()<.09:
@@ -347,7 +325,7 @@ class Game(r.ExpansionGame):
         self.traveler=dict(pos=[self.x,self.y],items=[item,module(self.rng.choices(range(5),balance.TRAVELER_WEIGHTS)[0],self.rng,level=self.region_level),
                            supply('food',8),supply('med',5),ammunition('pistol',60)])
         self.last_traveler_turn=self.turn
-        self.log('Мандрівний торговець: речі рівня місцевості за пів ціни!')
+        self.log(tr('progression.0037'))
 
     def price(self,item,merchant,buying=True):
         base=item_value(item)/item.get('qty',1)
@@ -376,15 +354,15 @@ class Game(r.ExpansionGame):
         preview=copy.deepcopy(item)
         if stack_key(preview): preview['qty']=qty
         if price>self.money:
-            self.log(f'Потрібно {price} кредитів.')
+            self.log(tr('progression.0038', v0=price))
             return False
         if self.weight+item_weight(preview)>self.capacity+.0001:
-            self.log('Перевищення вантажності.')
+            self.log(tr('progression.0039'))
             return False
         bought=extract(stock,item,qty)
         self.money-=price
         add_to(self.bag,bought)
-        self.log(f"Куплено: {bought['name']} ×{qty} за {price} кр.")
+        self.log(tr('progression.0040', v0=bought['name'], v1=qty, v2=price))
         return True
 
     def sell(self,item_id,merchant,qty=1):
@@ -392,12 +370,12 @@ class Game(r.ExpansionGame):
         item=next((i for i in self.bag if i['id']==item_id),None)
         if not item or not isinstance(qty,int) or not 1<=qty<=item.get('qty',1): return False
         if not self.buys_kind(item,merchant):
-            self.log('Не купує: стан нижче 25%, квестовий предмет або невідповідний товар.')
+            self.log(tr('progression.0041'))
             return False
         price=self.price(item,merchant,False)*qty
         extract(self.bag,item,qty)
         self.money+=price
-        self.log(f"Продано: {item['name']} ×{qty} за {price} кр.")
+        self.log(tr('progression.0042', v0=item['name'], v1=qty, v2=price))
         return True
 
     def salvage_yield(self,item):
@@ -407,13 +385,13 @@ class Game(r.ExpansionGame):
         if self.battle: return False
         item=next((i for i in self.bag if i['id']==item_id),None)
         if not item or item['kind'] not in ('weapon','armor','helmet'):
-            self.log('Для розбирання зніміть спорядження в рюкзак.')
+            self.log(tr('progression.0043'))
             return False
         count=self.salvage_yield(item)
         self.bag.remove(item)
         for mod in item.get('modules',[]): add_to(self.bag,mod)
         add_to(self.bag,parts(count) if item['kind']=='weapon' else fragments(count))
-        self.log(f'Розібрано: +{count} матеріалів. Установлені модулі повернуто.')
+        self.log(tr('progression.0044', v0=count))
         return True
 
     def drop_item(self,item_id,qty=None):
@@ -434,7 +412,7 @@ class Game(r.ExpansionGame):
         if stack_key(item) and item['weight']>0:
             qty=min(qty,max(0,int((self.capacity-self.weight+.00001)/item['weight'])))
         if qty<1:
-            self.log('Немає місця для здобичі.')
+            self.log(tr('progression.0045'))
             return False
         obj=copy.deepcopy(item)
         if stack_key(obj): obj['qty']=qty
@@ -448,20 +426,20 @@ class Game(r.ExpansionGame):
 
     def repair(self,item_id,target=100):
         if self.battle or self.city not in self.technicians:
-            self.log('Потрібен технік: є не в кожному місті.')
+            self.log(tr('progression.0046'))
             return False
         item=self.find(item_id)
         if not item or 'durability' not in item: return False
         cost=self.repair_cost(item,target)
         if not cost:
-            self.log('Предмет уже відремонтований.')
+            self.log(tr('progression.0047'))
             return False
         if cost>self.money:
-            self.log(f'Ремонт коштує {cost} кредитів.')
+            self.log(tr('progression.0048', v0=cost))
             return False
         self.money-=cost
         item['durability']=float(target)
-        self.log(f"Відремонтовано: {item['name']} за {cost} кр.")
+        self.log(tr('progression.0049', v0=item['name'], v1=cost))
         return True
 
     def wear(self,item,amount):
@@ -477,11 +455,11 @@ class Game(r.ExpansionGame):
         w=self.weapon
         if not self.battle or not w: return False
         if w.get('durability',100)<=0:
-            self.log('Зброя зламана. Змініть її або відремонтуйте.')
+            self.log(tr('progression.0050'))
             return False
         ammo_type=w.get('ammo_type','pistol')
         if not self.count('ammo',ammo_type):
-            self.log(f'Немає набоїв: {AMMO[ammo_type][0]}. Їх продає коваль.')
+            self.log(tr('progression.0051', v0=AMMO[ammo_type][0]))
             return False
         ok=super().shoot(enemy_id)
         if ok:
@@ -519,7 +497,7 @@ class Game(r.ExpansionGame):
             hp=round(hp*(1+.24*(lv-1)))
             e.update(kind=kind_id,name=name,hp=hp,max_hp=hp,damage=damage+3*(lv-1),
                      range=reach,speed=speed,armor=armor+(lv-1)//2,level=lv,pos=list(candidates[n]))
-        self.log(f'Зона рівня {self.region_level} · {r.TERRAINS[b["biome"]][1]}.')
+        self.log(tr('progression.0052', v0=self.region_level, v1=r.TERRAINS[b['biome']][1]))
 
     def end_turn(self):
         b=self.battle
@@ -533,7 +511,7 @@ class Game(r.ExpansionGame):
                 if route and route[0]!=tuple(b['pos']): e['pos']=list(route[0])
             if math.dist(e['pos'],b['pos'])<=e['range'] and r.visible(tuple(e['pos']),tuple(b['pos']),b['walls']):
                 if self.rng.randrange(100)<min(45,self.protection_stat('evasion')):
-                    self.log('Ви ухилились від атаки.'); continue
+                    self.log(tr('progression.0053')); continue
                 damage=max(1,e['damage']+self.rng.randint(-2,2)-self.defense)
                 self.hp-=damage
                 self.wear(self.equipped['armor'],.5)
@@ -543,7 +521,7 @@ class Game(r.ExpansionGame):
                     self.defeat(); return
         self.hp=min(self.max_hp,self.hp+self.protection_stat('regen'))
         b['ap']=6; b['round']+=1
-        self.log(f"Раунд {b['round']}. Ваш хід.")
+        self.log(tr('progression.0054', v0=b['round']))
 
     def victory(self):
         region=self.battle.get('region_level',self.region_level) if self.battle else self.region_level
@@ -556,7 +534,7 @@ class Game(r.ExpansionGame):
         if quest_id:
             q=next((q for q in self.quests if q['id']==quest_id and q['status']=='active'),None)
             if q: q['progress']=1
-        self.log(f'Перемога! +{reward} кр. Заберіть здобич.')
+        self.log(tr('progression.0055', v0=reward))
 
     def mayor_offers(self):
         offers=super().mayor_offers()
@@ -566,9 +544,9 @@ class Game(r.ExpansionGame):
             q['unique']=(self.city==0 and q['kind']=='retrieve') or self.rng.random()<.18
             q['reward']=round(q['reward']*self.level**1.6*(3 if q['unique'] else 1))
             if q['unique']:
-                q['title']={'hunt':'Останнє полювання','retrieve':'Чорна скринька «Геліос»',
-                            'scout':'Сигнал із тиші','supplies':'Порятунок карантинного блоку',
-                            'purge':'Серце зараження'}[q['kind']]
+                q['title']={'hunt':tr('progression.0056'),'retrieve':tr('progression.0057'),
+                            'scout':tr('progression.0058'),'supplies':tr('progression.0059'),
+                            'purge':tr('progression.0060')}[q['kind']]
                 if q['kind']=='hunt': q['goal']=8
         return offers
 
@@ -582,23 +560,23 @@ class Game(r.ExpansionGame):
         text=super().quest_text(q)
         if q['kind']=='supplies':
             f,m=(5,3) if q.get('unique') else (3,2)
-            a=text.find('\n'); b=text.find('\nЗамовник:')
-            text=text[:a]+f'\nПринести консерви {self.count("food")}/{f} та аптечки {self.count("med")}/{m}.'+text[b:]
+            a=text.find('\n'); b=text.find(tr('progression.0061'))
+            text=text[:a]+tr('progression.0062', v0=self.count('food'), v1=f, v2=self.count('med'), v3=m)+text[b:]
         if q.get('unique'):
-            text='★ УНІКАЛЬНЕ ЗАВДАННЯ\n'+text.replace('+ 40 XP','+ 80 XP').replace('довоєнний навігатор','чорну скриньку «Геліос»')
+            text=tr('progression.0063')+text.replace('+ 40 XP','+ 80 XP').replace(tr('progression.0064'),tr('progression.0065'))
         return text
 
     def turn_in(self,quest_id):
         q=next((q for q in self.quests if q['id']==quest_id),None)
         if self.battle or not q or self.city!=q['city'] or not self.quest_ready(q):
-            self.log('Виконайте умови та поверніться до замовника.'); return False
+            self.log(tr('progression.0066')); return False
         if q['kind']=='supplies':
             self.consume('food',q.get('food_need',5 if q.get('unique') else 3))
             self.consume('med',q.get('med_need',3 if q.get('unique') else 2))
         elif q['kind']=='retrieve':
             self.bag[:]=[i for i in self.bag if i.get('quest_id')!=q['id']]
         q['status']='done'; self.money+=q['reward']; self.xp+=q.get('xp_reward',80 if q.get('unique') else 40)
-        self.log(f"Виконано: {q['title']}. +{q['reward']} кр.")
+        self.log(tr('progression.0067', v0=q['title'], v1=q['reward']))
         return True
 
     def search(self):
@@ -614,7 +592,7 @@ class Game(r.ExpansionGame):
         for i in self.bag:
             if i['kind']=='quest':
                 q=next((q for q in self.quests if q['id']==i.get('quest_id')),None)
-                if q and q['kind']=='retrieve' and q.get('unique'): i['name']='Чорна скринька «Геліос»'; i['rarity']=3
+                if q and q['kind']=='retrieve' and q.get('unique'): i['name']=tr('progression.0068'); i['rarity']=3
         return ok
 
     def save(self,path):
@@ -629,14 +607,14 @@ class Game(r.ExpansionGame):
     def load(cls,path):
         data=json.loads(Path(path).read_text(encoding='utf-8'))
         version=data.pop('version',None)
-        if version not in (1,2,3): raise ValueError('Невідома версія збереження.')
+        if version not in (1,2,3): raise ValueError(tr('progression.0069'))
         def tuples(v): return tuple(tuples(x) for x in v) if isinstance(v,list) else v
         state=tuples(data.pop('rng_state'))
         game=cls(0)
         allowed=set(vars(game))-{'rng'}
         if set(data)-allowed or len(data['world'])!=32 or set(data['equipped'])!=set(r.SLOTS):
-            raise ValueError('Збереження пошкоджене.')
-        if version==3 and set(data)!=allowed: raise ValueError('Неповне збереження.')
+            raise ValueError(tr('progression.0070'))
+        if version==3 and set(data)!=allowed: raise ValueError(tr('progression.0071'))
         game.__dict__.update(data)
         if version==1:
             game.cities.extend([p[:] for p in r.EXTRA_CITIES]); game._connect_cities()
@@ -660,7 +638,7 @@ class Game(r.ExpansionGame):
                 fits=min(40,max(0,int((game.capacity-game.weight+.00001)/unit)))
                 if fits: add_to(game.bag,ammunition(ammo_type,fits))
                 if fits<40: add_to(game.loot,ammunition(ammo_type,40-fits))
-            game.log('Міграція v0.3: набої додано в рюкзак; що не вмістилося — у здобич. Рівень збережено.')
+            game.log(tr('progression.0072'))
         if game.battle:
             game.battle.setdefault('biome',game.world[game.y][game.x])
             game.battle.setdefault('region_level',game.region_level)

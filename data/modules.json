@@ -1,0 +1,142 @@
+{
+  "module_amplifier": {
+    "legacy_index": 0,
+    "target": "weapon",
+    "stat": "damage",
+    "base": 3,
+    "sprite_id": "module_amplifier"
+  },
+  "module_optics": {
+    "legacy_index": 1,
+    "target": "weapon",
+    "stat": "range",
+    "base": 1,
+    "sprite_id": "module_optics"
+  },
+  "module_stabilizer": {
+    "legacy_index": 2,
+    "target": "weapon",
+    "stat": "accuracy",
+    "base": 4,
+    "sprite_id": "module_stabilizer"
+  },
+  "module_armor_plate": {
+    "legacy_index": 3,
+    "target": "protection",
+    "stat": "defense",
+    "base": 1,
+    "sprite_id": "module_armor_plate"
+  },
+  "module_burst_core": {
+    "legacy_index": 4,
+    "target": "weapon",
+    "stat": "damage",
+    "base": 4,
+    "sprite_id": "module_burst_core"
+  },
+  "module_rangefinder": {
+    "legacy_index": 5,
+    "target": "weapon",
+    "stat": "accuracy",
+    "base": 5,
+    "sprite_id": "module_rangefinder"
+  },
+  "module_accelerator": {
+    "legacy_index": 6,
+    "target": "weapon",
+    "stat": "pierce",
+    "base": 2,
+    "sprite_id": "module_accelerator"
+  },
+  "module_critical_processor": {
+    "legacy_index": 7,
+    "target": "weapon",
+    "stat": "crit",
+    "base": 5,
+    "sprite_id": "module_critical_processor"
+  },
+  "module_focusing_lens": {
+    "legacy_index": 8,
+    "target": "weapon",
+    "stat": "range",
+    "base": 1,
+    "sprite_id": "module_focusing_lens"
+  },
+  "module_magnetic_coil": {
+    "legacy_index": 9,
+    "target": "weapon",
+    "stat": "damage",
+    "base": 5,
+    "sprite_id": "module_magnetic_coil"
+  },
+  "module_ballistic_computer": {
+    "legacy_index": 10,
+    "target": "weapon",
+    "stat": "accuracy",
+    "base": 6,
+    "sprite_id": "module_ballistic_computer"
+  },
+  "module_tungsten_channel": {
+    "legacy_index": 11,
+    "target": "weapon",
+    "stat": "pierce",
+    "base": 3,
+    "sprite_id": "module_tungsten_channel"
+  },
+  "module_ceramic_inserts": {
+    "legacy_index": 12,
+    "target": "protection",
+    "stat": "defense",
+    "base": 2,
+    "sprite_id": "module_ceramic_inserts"
+  },
+  "module_medical_lining": {
+    "legacy_index": 13,
+    "target": "protection",
+    "stat": "vitality",
+    "base": 8,
+    "sprite_id": "module_medical_lining"
+  },
+  "module_servo": {
+    "legacy_index": 14,
+    "target": "protection",
+    "stat": "capacity",
+    "base": 2,
+    "sprite_id": "module_servo"
+  },
+  "module_camouflage": {
+    "legacy_index": 15,
+    "target": "protection",
+    "stat": "evasion",
+    "base": 3,
+    "sprite_id": "module_camouflage"
+  },
+  "module_regenerator": {
+    "legacy_index": 16,
+    "target": "protection",
+    "stat": "regen",
+    "base": 1,
+    "sprite_id": "module_regenerator"
+  },
+  "module_emergency_frame": {
+    "legacy_index": 17,
+    "target": "protection",
+    "stat": "vitality",
+    "base": 10,
+    "sprite_id": "module_emergency_frame"
+  },
+  "module_load_system": {
+    "legacy_index": 18,
+    "target": "protection",
+    "stat": "capacity",
+    "base": 3,
+    "sprite_id": "module_load_system"
+  },
+  "module_reactive_plates": {
+    "legacy_index": 19,
+    "target": "protection",
+    "stat": "defense",
+    "base": 3,
+    "sprite_id": "module_reactive_plates"
+  }
+}

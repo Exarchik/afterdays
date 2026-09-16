@@ -1,3 +1,4 @@
+from i18n import t as tr
 """Short floating messages, combat traces, town service cards and shared storage."""
 import copy
 import sprites
@@ -104,14 +105,14 @@ def paint_snapshot(app):
 def service_picture(c,key,x,y,npc=None):
     sprite=('npc:'+npc if npc else 'npc:'+key) if key in ('smith','food','fence','tech','mayor','traveler','hunter') else {'stash':'stash','rest':'rest','search':'loot','perks':'perk:tactician','atlas':'site'}.get(key)
     if sprites.draw(c,sprite,x,y,52):return
-    samples={'hunter':dict(name='Трофеї',kind='sealed',rarity=0),'smith':dict(name='Гвинтівка',kind='weapon',rarity=1),
-             'food':p.supply('food'),'fence':dict(name='Запечатана',kind='sealed',rarity=0),
-             'tech':p.parts(1),'mayor':dict(name='Маска',kind='helmet',rarity=3),
-             'stash':dict(name='Сховище',kind='sealed',rarity=2),
-             'rest':p.supply('med'),'traveler':dict(name='Плащ',kind='armor',rarity=3),
-             'search':dict(name='Далекомір',kind='module',rarity=0,stats={'range':1}),
-             'perks':dict(name='Критичний процесор',kind='module',rarity=3,stats={'crit':5}),
-             'atlas':dict(name='Карта',kind='quest',rarity=2)}
+    samples={'hunter':dict(name=tr('adventure_ui.0001'),kind='sealed',rarity=0),'smith':dict(name=tr('adventure_ui.0002'),kind='weapon',rarity=1),
+             'food':p.supply('food'),'fence':dict(name=tr('adventure_ui.0003'),kind='sealed',rarity=0),
+             'tech':p.parts(1),'mayor':dict(name=tr('adventure_ui.0004'),kind='helmet',rarity=3),
+             'stash':dict(name=tr('adventure_ui.0005'),kind='sealed',rarity=2),
+             'rest':p.supply('med'),'traveler':dict(name=tr('adventure_ui.0006'),kind='armor',rarity=3),
+             'search':dict(name=tr('adventure_ui.0007'),kind='module',rarity=0,stats={'range':1}),
+             'perks':dict(name=tr('adventure_ui.0008'),kind='module',rarity=3,stats={'crit':5}),
+             'atlas':dict(name=tr('adventure_ui.0009'),kind='quest',rarity=2)}
     icon(c,samples[key],x,y,52)
 
 
@@ -129,20 +130,20 @@ class Services(tk.Frame):
         if not g.battle:
             for m,key in enumerate(('smith','food','fence')):
                 if g.available_merchant(m):items.append((key,g.merchant_title(m),lambda m=m:app.shop(m)))
-            if g.city in g.metro_unlocked:items.append(('atlas','Метро · 50 кр.',app.metro))
-            if getattr(g,'cartographer',False):items.append(('atlas','Картограф',app.cartographer))
-            if g.available_merchant(4):items.append(('hunter','Мисливець · трофеї',lambda:app.shop(4)))
-            if g.available_merchant(3):items.append(('traveler','Мандрівник',lambda:app.shop(3)))
-            if g.city in g.technicians:items.append(('tech','Технік',app.technician))
-            if g.city in g.mayors:items.append(('mayor',g.current_site['npc'] if g.current_site else 'Мер · завдання',app.mayor))
+            if g.city in g.metro_unlocked:items.append(('atlas',tr('adventure_ui.0010'),app.metro))
+            if getattr(g,'cartographer',False):items.append(('atlas',tr('adventure_ui.0011'),app.cartographer))
+            if g.available_merchant(4):items.append(('hunter',tr('adventure_ui.0012'),lambda:app.shop(4)))
+            if g.available_merchant(3):items.append(('traveler',tr('adventure_ui.0013'),lambda:app.shop(3)))
+            if g.city in g.technicians:items.append(('tech',tr('adventure_ui.0014'),app.technician))
+            if g.city in g.mayors:items.append(('mayor',g.current_site['npc'] if g.current_site else tr('adventure_ui.0015'),app.mayor))
             if g.regular_city:
-                items.extend([('stash','Власне сховище',app.storage),('rest','Ночівля · 15 кр.',lambda:app.act(g.rest))])
+                items.extend([('stash',tr('adventure_ui.0016'),app.storage),('rest',tr('adventure_ui.0017'),lambda:app.act(g.rest))])
             elif g.city is None:
-                items.append(('search','Обшукати [E]',lambda:app.act(g.search)))
+                items.append(('search',tr('adventure_ui.0018'),lambda:app.act(g.search)))
             if hasattr(g,'destination_quest') and g.destination_quest():
-                q=g.destination_quest();items.append(('search','Передати посилку' if q['kind']=='delivery' else 'Налаштувати радіо',lambda:app.act(g.search)))
-            if g.road_event:items.append(('traveler','Дорожня подія',app.road_dialog))
-        items.extend([('perks',f'Перки ({g.pending_perks})',app.perks),('atlas','Атлас [M]',app.atlas)])
+                q=g.destination_quest();items.append(('search',tr('adventure_ui.0019') if q['kind']=='delivery' else tr('adventure_ui.0020'),lambda:app.act(g.search)))
+            if g.road_event:items.append(('traveler',tr('adventure_ui.0021'),app.road_dialog))
+        items.extend([('perks',tr('adventure_ui.0022', v0=g.pending_perks),app.perks),('atlas',tr('adventure_ui.0023'),app.atlas)])
         self.entries=items;self.paint()
 
     def paint(self):
@@ -165,22 +166,22 @@ class Storage(tk.Frame):
     def __init__(self,parent,app):
         super().__init__(parent,bg=PANEL);self.app=app;self.selection=None;self.direction='withdraw'
         self.label=tk.Label(self,bg=PANEL,fg=GOLD,font=('Segoe UI',13,'bold'));self.label.pack(pady=12)
-        tk.Label(self,text='Одне спільне сховище для всіх міст. Перетягніть предмет між панелями.',bg=PANEL,fg=MUTED).pack()
+        tk.Label(self,text=tr('adventure_ui.0024'),bg=PANEL,fg=MUTED).pack()
         body=tk.Frame(self,bg=PANEL);body.pack(fill='both',expand=True,padx=8,pady=10)
         left,right=tk.Frame(body,bg=PANEL),tk.Frame(body,bg=PANEL)
         left.pack(side='left',fill='both',expand=True);right.pack(side='left',fill='both',expand=True)
-        tk.Label(left,text='СХОВИЩЕ · БЕЗ ЛІМІТУ ВАГИ',bg=PANEL,fg=TEXT).pack()
-        tk.Label(right,text='ВАШ РЮКЗАК',bg=PANEL,fg=TEXT).pack()
+        tk.Label(left,text=tr('adventure_ui.0025'),bg=PANEL,fg=TEXT).pack()
+        tk.Label(right,text=tr('adventure_ui.0026'),bg=PANEL,fg=TEXT).pack()
         self.stored=ItemGrid(left,lambda i:self.select(i,'withdraw'),height=310);self.stored.pack(fill='both',expand=True,padx=4)
         self.bag=ItemGrid(right,lambda i:self.select(i,'deposit'),height=310);self.bag.pack(fill='both',expand=True,padx=4)
         from refinement_ui import Detail
         self.detail=Detail(self,height=7);self.detail.pack(fill='x',padx=12)
         bar=tk.Frame(self,bg=PANEL);bar.pack(fill='x',padx=12,pady=10)
         self.qty=tk.StringVar(value='1')
-        ttk.Label(bar,text='Кількість:').pack(side='left')
+        ttk.Label(bar,text=tr('adventure_ui.0027')).pack(side='left')
         ttk.Spinbox(bar,from_=1,to=999999,width=8,textvariable=self.qty).pack(side='left',padx=6)
-        ttk.Button(bar,text='Увесь стек',command=self.all).pack(side='left',padx=5)
-        ttk.Button(bar,text='Перенести вибране',command=self.transfer).pack(side='right')
+        ttk.Button(bar,text=tr('adventure_ui.0028'),command=self.all).pack(side='left',padx=5)
+        ttk.Button(bar,text=tr('adventure_ui.0029'),command=self.transfer).pack(side='right')
         self.drag=Drag(self,self.drop)
         for grid,direction in ((self.stored,'withdraw'),(self.bag,'deposit')):
             grid.canvas.bind('<Button-1>',lambda e,g=grid,d=direction:self.press(e,g,d))
@@ -202,7 +203,7 @@ class Storage(tk.Frame):
 
     def refresh(self):
         g=self.app.game;self.stored.set_items(g.stash);self.bag.set_items(g.bag)
-        self.label.config(text=f'СХОВИЩЕ / РЮКЗАК {g.weight:.1f}/{g.capacity:.0f} кг')
+        self.label.config(text=tr('adventure_ui.0030', v0=g.weight, v1=g.capacity))
         self.app.refresh()
 
     def transfer(self):
@@ -212,7 +213,7 @@ class Storage(tk.Frame):
         except ValueError:qty=1
         ok=self.app.game.stash_transfer(item['id'],self.direction,qty)
         self.refresh()
-        self.detail.config(text=self.app.game.messages[-1] if ok else 'Перенесення неможливе: вага, рівень або квестовий предмет.')
+        self.detail.config(text=self.app.game.messages[-1] if ok else tr('adventure_ui.0031'))
 
     def press(self,e,grid,direction):
         grid.select_event(e);item=self.item()

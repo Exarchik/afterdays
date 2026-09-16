@@ -1,3 +1,4 @@
+from i18n import t as tr
 """Location markets, cartographers and room-based dungeon expeditions."""
 import exploration
 import balance
@@ -11,9 +12,9 @@ import adventure as a
 import economy
 
 METRO_CITIES=(0,2,3,7)
-METRO_PARTS={2:'Силовий контролер',3:'Ротор генератора',7:'Блок живлення дрезини'}
+METRO_PARTS={2:tr('frontier.0001'),3:tr('frontier.0002'),7:tr('frontier.0003')}
 
-DUNGEONS=('Печери відлуння','Підземний індустріальний комплекс','Закинуте бомбосховище')
+DUNGEONS=(tr('frontier.0004'),tr('frontier.0005'),tr('frontier.0006'))
 
 class Game(economy.Game):
     @property
@@ -37,25 +38,25 @@ class Game(economy.Game):
         x,y=self.rng.choice(boxes)
         self.traveler=dict(cartographer=True,pos=[self.x,self.y],items=[],box=[x,y,size],price=10+3*size,purchased=False)
         self.last_traveler_turn=self.turn
-        self.log(f'Картограф пропонує фрагмент мапи {size}×{size} за {10+3*size} кр.')
+        self.log(tr('frontier.0007', v0=size, v1=size, v2=10 + 3 * size))
         return True
 
     def buy_map(self):
         if not self.cartographer or self.traveler['purchased']:return False
         t=self.traveler;x,y,size=t['box']
         cells={f'{xx},{yy}' for yy in range(y,y+size) for xx in range(x,x+size)}
-        if not cells-set(self.explored):self.log('Ця ділянка вже відома.');return False
-        if self.money<t['price']:self.log('Недостатньо кредитів.');return False
+        if not cells-set(self.explored):self.log(tr('frontier.0008'));return False
+        if self.money<t['price']:self.log(tr('frontier.0009'));return False
         self.money-=t['price'];t['purchased']=True
         self.explored=sorted(set(self.explored)|cells)
         for n,pos in enumerate(self.cities):
             if self.revealed(*pos) and n not in self.known_cities:self.known_cities.append(n)
-        self.log(f'Відкрито фрагмент мапи {size}×{size}.');return True
+        self.log(tr('frontier.0010', v0=size, v1=size));return True
 
     def name_dungeon(self,q):
         if q['kind']=='purge':
             if 'dungeon_kind' not in q:q['dungeon_kind']=self.rng.choice(DUNGEONS)
-            q['title']=('Унікальна зачистка: ' if q.get('unique') else 'Зачистка: ')+q['dungeon_kind']
+            q['title']=(tr('frontier.0011') if q.get('unique') else tr('frontier.0012'))+q['dungeon_kind']
 
     def mayor_offers(self):
         offers=super().mayor_offers()
@@ -65,7 +66,7 @@ class Game(economy.Game):
         city=self.city
         if not self.battle and city in METRO_CITIES[1:] and not any(q.get('metro_city')==city for q in self.quests):
             if not any(q.get('metro_city')==city for q in offers):
-                q=dict(id=r.uid(),kind='retrieve',city=city,status='offered',title='Метро: ремонт станції',
+                q=dict(id=r.uid(),kind='retrieve',city=city,status='offered',title=tr('frontier.0013'),
                        progress=0,goal=1,target_kind=None,reward=0,pos=None,unique=True,metro_city=city,
                        part_name=METRO_PARTS[city],zone=self.region_level,scaled=True,distance_scaled=True,cycle_named=True)
                 self.price_quest(q);offers.append(q)
@@ -80,7 +81,7 @@ class Game(economy.Game):
             for n,item in enumerate(items):
                 if item['kind']=='sealed':continue
                 price=item.get('sealed_price',round(85*self.region_level**1.3))
-                items[n]=dict(id=r.uid(),kind='sealed',name='Запечатана скриня',rarity=0,level=item.get('level',1),
+                items[n]=dict(id=r.uid(),type_id='item_sealed',kind='sealed',name=tr('frontier.0014'),rarity=0,level=item.get('level',1),
                               weight=p.item_weight(item),value=price,sealed_price=price,contents=item)
         return items
 
@@ -95,11 +96,11 @@ class Game(economy.Game):
         item=chest['contents']
         if self.weight-p.item_weight(chest)+p.item_weight(item)>self.capacity+.0001:return None
         self.bag.remove(chest);p.add_to(self.bag,item)
-        self.log('Скриню відкрито: '+item['name']);return item
+        self.log(tr('frontier.0015')+item['name']);return item
 
     def ordinary_search(self):
         pos=[self.x,self.y]
-        if pos in self.searched:self.log('Цю ділянку вже обшукано.');return False
+        if pos in self.searched:self.log(tr('frontier.0016'));return False
         self.searched.append(pos);self.turn+=1;self.rad_turns=max(0,self.rad_turns-1)
         if self.rng.random()<.04:
             if self.rng.random()<.10:
@@ -107,8 +108,8 @@ class Game(economy.Game):
             else:
                 kind=self.rng.choice(['food','med','rad','ammo','parts','fragments'])
                 item=p.ammunition(self.rng.choice(list(p.AMMO)),self.rng.randint(3,10)) if kind=='ammo' else p.parts(self.rng.randint(2,6)) if kind=='parts' else p.fragments(self.rng.randint(2,6)) if kind=='fragments' else p.supply(kind)
-            p.add_to(self.loot,item);self.log('Знайдено: '+item['name']+'. Відкрийте «Здобич».')
-        else:self.log('Нічого корисного не знайдено.')
+            p.add_to(self.loot,item);self.log(tr('frontier.0017')+item['name']+tr('frontier.0018'))
+        else:self.log(tr('frontier.0019'))
         if self.rng.random()<.35:self.start_battle()
         return True
 
@@ -125,45 +126,45 @@ class Game(economy.Game):
     def metro_travel(self,destination):
         if self.road_event:return False
         cost=self.metro_cost(destination)
-        if cost is None:self.log('Маршрут метро недоступний.');return False
+        if cost is None:self.log(tr('frontier.0020'));return False
         fare,turns,_=cost
-        if self.money<fare:self.log('Для поїздки потрібно 50 кредитів.');return False
+        if self.money<fare:self.log(tr('frontier.0021'));return False
         self.money-=fare;self.turn+=turns;self.rad_turns=max(0,self.rad_turns-turns)
         self.x,self.y=self.cities[destination];self.traveler=None
         self.reveal(self.x,self.y,2);self._visit_objectives()
-        self.log(f'Метро → {self.city_name(destination)} · −50 кр. · {turns} ходів.');return True
+        self.log(tr('frontier.0022', v0=self.city_name(destination), v1=turns));return True
 
     def turn_in(self,quest_id):
         q=next((q for q in self.quests if q['id']==quest_id),None)
         ok=super().turn_in(quest_id)
         if ok and q.get('metro_city') in METRO_CITIES:
-            self.log('Станцію відремонтовано! У місті доступне «Метро».')
+            self.log(tr('frontier.0023'))
         return ok
 
     def quest_text(self,q):
         text=super().quest_text(q)
         if 'metro_city' in q:
-            text=text.replace('Знайти чорну скриньку «Геліос».',f'Знайти деталь «{q["part_name"]}» для генератора метро.')
-            text+='\nДеталь не продається: знайдіть її на позначці (E) і поверніть меру.\nДодаткова нагорода: відкриття цієї станції метро.'
+            text=text.replace(tr('frontier.0024'),tr('frontier.0025', v0=q['part_name']))
+            text+=tr('frontier.0026')
         if q['kind']=='purge':
-            text=text.replace('Дійти до гнізда, натиснути E й виграти спеціальний бій.',
-                'На позначці натисніть E. Зачистіть кімнати, обшукайте скриню та поверніться до виходу (E).')
+            text=text.replace(tr('frontier.0027'),
+                tr('frontier.0028'))
         return text
 
     def search(self):
         b=self.battle
         if b and b.get('dungeon'):
-            if not b['cleared']:self.log('Спочатку зачистіть усі кімнати.');return False
+            if not b['cleared']:self.log(tr('frontier.0029'));return False
             if math.dist(b['pos'],b['chest'])<=1.5:
-                if b['chest_open']:self.log('Скриня вже порожня.');return False
+                if b['chest_open']:self.log(tr('frontier.0030'));return False
                 b['chest_open']=True
                 cap=economy.loot_rules(b['kills'])[2]
                 for _ in range(2):p.add_to(self.loot,self.reward_item(cap,level=self.monster_loot_level(b.get('kills',[]),b.get('region_level',1))))
                 for _ in range(2):p.add_to(self.loot,p.ammunition(self.rng.choice(list(p.AMMO)),self.rng.randint(8,20)))
                 p.add_to(self.loot,p.supply('med',2));p.add_to(self.loot,p.supply('food',2))
-                self.log('Скриню відкрито! Заберіть речі у вкладці «Здобич» і знайдіть вихід.');return True
+                self.log(tr('frontier.0031'));return True
             if b['pos']==b['exit']:super().victory();return True
-            self.log('Підійдіть до скрині або станьте на зелену позначку виходу.');return False
+            self.log(tr('frontier.0032'));return False
         if not b and not self.road_event:
             q=next((q for q in self.quests if q['kind']=='purge' and q['status']=='active' and not q.get('progress') and q.get('pos')==[self.x,self.y]),None)
             if q:self.start_dungeon(q);return True
@@ -198,7 +199,7 @@ class Game(economy.Game):
                  dungeon_kind=q['dungeon_kind'],biome='ruin',enemies=enemies,region_level=zone,kills=[],corpses=[])
         for enemy in b['enemies']:balance.set_monster(enemy)
         self.quest_battle=q['id'];self.wake_enemies()
-        self.log('Підземелля: вороги реагують на наближення до 5 клітин у межах видимості. E — скриня / вихід.')
+        self.log(tr('frontier.0033'))
 
     def wake_enemies(self,pos=None):
         b=self.battle
@@ -213,7 +214,7 @@ class Game(economy.Game):
         route=r.path_to(tuple(b['pos']),tuple(target),b['w'],b['h'],blocked) or []
         before=b['pos'][:]
         if b.get('dungeon') and b.get('cleared'):
-            if not route:self.log('Немає шляху.');return False
+            if not route:self.log(tr('frontier.0034'));return False
             b['pos']=list(target);ok=True
         else:ok=super().battle_move(target)
         if ok:
@@ -234,16 +235,16 @@ class Game(economy.Game):
         if self.battle and self.battle.get('dungeon'):
             if self.battle['enemies']:return
             self.battle['cleared']=True
-            self.log('Підземелля зачищено! Золота скриня — здобич; зелений вихід — завершення (E).')
+            self.log(tr('frontier.0035'))
             return
         super().victory()
 
     def flee(self):
         b=self.battle
         if b and b.get('dungeon'):
-            if b['pos']!=b['exit']:self.log('Для виходу поверніться до зеленої позначки.');return False
+            if b['pos']!=b['exit']:self.log(tr('frontier.0036'));return False
             if b['cleared']:super().victory()
-            else:self.battle=None;self.quest_battle=None;self.log('Ви залишили підземелля. Зачистку доведеться почати знову.')
+            else:self.battle=None;self.quest_battle=None;self.log(tr('frontier.0037'))
             return True
         return super().flee()
 
@@ -257,7 +258,7 @@ class Game(economy.Game):
         if version<10:
             if version>=3:game.xp=balance.migrate_xp(json.loads(Path(path).read_text(encoding='utf-8'))['xp'])
             def upgrade(item):
-                if item['kind']=='weapon':item['stats']['attack']=balance.attack_for(item['name'],item.get('level',1))
+                if item['kind']=='weapon':item['stats']['attack']=balance.attack_for(item.get('type_id',item['name']),item.get('level',1))
                 elif item['kind'] in ('armor','helmet'):
                     level=item.get('level',1);item['stats']['defense']+=level-1-(level-1)//2
                 elif item['kind']=='module' and 'pierce' in item.get('stats',{}):

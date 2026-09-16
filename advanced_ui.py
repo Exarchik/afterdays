@@ -1,3 +1,4 @@
+from i18n import t as tr
 import sprites
 """Isometric arena, grid-based trading, technicians and perk selection."""
 import math
@@ -78,7 +79,7 @@ def draw_battle(app):
             is_exit=list(pos)==b['exit']
             color='#80e3b4' if is_exit else '#94876b' if b['chest_open'] else '#f4c86b'
             c.create_oval(px-u*.7,py-u*.35,px+u*.7,py+u*.35,outline=color,width=3)
-            c.create_text(px,py-u*.65,text='ВИХІД' if is_exit else 'СКРИНЯ',fill=color,font=('Segoe UI',8,'bold'))
+            c.create_text(px,py-u*.65,text=tr('advanced_ui.0001') if is_exit else tr('advanced_ui.0002'),fill=color,font=('Segoe UI',8,'bold'))
         if list(pos)==b['pos']:
             if hasattr(getattr(app,'fx',None),'position'):px,py=center(app.fx.position('player',b['pos']))
             c.create_oval(px-u*.45,py-u*.1,px+u*.45,py+u*.3,fill='#253d33',outline='#c8efce',width=2)
@@ -98,15 +99,15 @@ def draw_battle(app):
             c.create_rectangle(px-u*.5,top,px+u*.5,top+3,fill='#23392d',outline='')
             c.create_rectangle(px-u*.5,top,px-u*.5+u*e['hp']/e['max_hp'],top+3,fill='#d88667',outline='')
             c.create_text(px,top-7,text=f'L{e.get("level",1)}'+(' · z' if b.get('dungeon') and not e.get('awake') else ''),fill='#e6c18d',font=('Segoe UI',7))
-    app.map_title.config(text=f'{r.TERRAINS[kind][1].upper()} / ЗОНА L{b.get("region_level",1)} / ОД {b["ap"]}/{b.get("max_ap",6)}')
+    app.map_title.config(text=tr('advanced_ui.0003', v0=r.TERRAINS[kind][1].upper(), v1=b.get('region_level', 1), v2=b['ap'], v3=b.get('max_ap', 6)))
     weapon=g.weapon
     ammo=p.AMMO[weapon.get('ammo_type','pistol')][0] if weapon else '—'
     count=g.count('ammo',weapon.get('ammo_type','pistol')) if weapon else 0
-    app.hint.config(text=f'Клік на мутанта — постріл · земля — рух · Space — хід ворогів\nНабої: {ammo} ×{count}. Зелений край — втеча. Стрілки рухають уздовж осей сітки.')
+    app.hint.config(text=tr('advanced_ui.0004', v0=ammo, v1=count))
 
     if b.get('dungeon'):
-        app.map_title.config(text=f'{b["dungeon_kind"]} · ворогів: {len(b["enemies"])} · ОД {b["ap"]}/{g.max_ap}')
-        app.hint.config(text=('Зачищено: рух без витрати ОД. ' if b.get('cleared') else '')+'Клік — рух / постріл · Space — наступний хід · z — неактивний ворог\nПісля зачистки: E біля золотої скрині; E на зеленому виході завершує похід.')
+        app.map_title.config(text=tr('advanced_ui.0005', v0=b['dungeon_kind'], v1=len(b['enemies']), v2=b['ap'], v3=g.max_ap))
+        app.hint.config(text=(tr('advanced_ui.0006') if b.get('cleared') else '')+tr('advanced_ui.0007'))
 
 
 def iso_cell(app,event):
@@ -125,30 +126,30 @@ class TradingPanel(tk.Frame):
         self.selection=None;self.source=None
         self.title=tk.Label(self,bg=PANEL,fg=GOLD,font=('Segoe UI',12,'bold'))
         self.title.pack(pady=10)
-        rules='Перетягніть товар між панелями. Кількість задається нижче. Стан <25% — не приймають.'
-        if merchant==4:rules='Мисливець лише скуповує трофеї за подвійною базовою ціною. Перетягніть їх ліворуч.'
-        if merchant==2:rules+=' Запечатані речі часто сильно зношені!'
-        if merchant==3:rules+=' Ціни мандрівника: 50% базової вартості.'
+        rules=tr('advanced_ui.0008')
+        if merchant==4:rules=tr('advanced_ui.0009')
+        if merchant==2:rules+=tr('advanced_ui.0010')
+        if merchant==3:rules+=tr('advanced_ui.0011')
         tk.Label(self,text=rules,bg=PANEL,fg=MUTED,wraplength=880).pack(padx=12,pady=6)
         row=tk.Frame(self,bg=PANEL);row.pack(fill='both',expand=True,padx=8)
         a,b=tk.Frame(row,bg=PANEL),tk.Frame(row,bg=PANEL)
         a.pack(side='left',fill='both',expand=True);b.pack(side='left',fill='both',expand=True)
-        tk.Label(a,text='ТОВАРИ ПРОДАВЦЯ',bg=PANEL,fg=GOLD).pack(pady=4)
-        tk.Label(b,text='ВАШ РЮКЗАК',bg=PANEL,fg=GOLD).pack(pady=4)
+        tk.Label(a,text=tr('advanced_ui.0012'),bg=PANEL,fg=GOLD).pack(pady=4)
+        tk.Label(b,text=tr('advanced_ui.0013'),bg=PANEL,fg=GOLD).pack(pady=4)
         self.stock_grid=ItemGrid(a,lambda i:self.select(i,'stock'),height=310,columns=5)
         self.stock_grid.pack(fill='both',expand=True,padx=4)
         self.bag_grid=ItemGrid(b,lambda i:self.select(i,'bag'),height=310,columns=5)
         self.bag_grid.pack(fill='both',expand=True,padx=4)
         controls=tk.Frame(self,bg=PANEL);controls.pack(fill='x',padx=15,pady=8)
-        tk.Label(controls,text='Кількість:',bg=PANEL,fg=TEXT).pack(side='left')
+        tk.Label(controls,text=tr('advanced_ui.0014'),bg=PANEL,fg=TEXT).pack(side='left')
         self.qty=tk.StringVar(value='1')
         self.spin=ttk.Spinbox(controls,from_=1,to=999999,width=8,textvariable=self.qty,command=self.describe)
         self.spin.pack(side='left',padx=5)
         self.qty.trace_add('write',lambda *a:self.describe())
-        for label,n in [('1',1),('10',10),('Усе',None)]:
+        for label,n in [('1',1),('10',10),(tr('advanced_ui.0015'),None)]:
             ttk.Button(controls,text=label,command=lambda n=n:self.set_qty(n)).pack(side='left',padx=2)
-        ttk.Button(controls,text='Купити →',command=lambda:self.trade('stock')).pack(side='right',padx=3)
-        ttk.Button(controls,text='← Продати',command=lambda:self.trade('bag')).pack(side='right',padx=3)
+        ttk.Button(controls,text=tr('advanced_ui.0016'),command=lambda:self.trade('stock')).pack(side='right',padx=3)
+        ttk.Button(controls,text=tr('advanced_ui.0017'),command=lambda:self.trade('bag')).pack(side='right',padx=3)
         bottom=tk.Frame(self,bg=PANEL);bottom.pack(fill='x',padx=12,pady=5)
         self.preview=tk.Canvas(bottom,width=82,height=90,bg=PANEL,highlightthickness=0)
         self.preview.pack(side='left')
@@ -185,34 +186,34 @@ class TradingPanel(tk.Frame):
         if not hasattr(self,'preview'):return
         item=self.item()
         self.preview.delete('all')
-        if not item:self.detail.config(text='Виберіть предмет.');return
+        if not item:self.detail.config(text=tr('advanced_ui.0018'));return
         qty=self.amount(item)
         price=self.app.game.price(item,self.merchant,self.source=='stock')
         hidden=self.merchant==2 and self.source=='stock'
-        shown=dict(item,kind='sealed',name='Запечатана знахідка',rarity=0) if hidden else item
+        shown=dict(item,kind='sealed',name=tr('advanced_ui.0019'),rarity=0) if hidden else item
         icon(self.preview,shown,2,5,76)
         if item['kind']=='weapon' and not hidden:
             from adventure import damage_type
             sprites.draw(self.preview,'damage:'+damage_type(item),52,60,24)
-        desc='Вміст і стан невідомі. Великий ризик сильного зносу.' if hidden else self.app.description(item)
+        desc=tr('advanced_ui.0020') if hidden else self.app.description(item)
         allowed=self.source=='stock' or self.app.game.buys_kind(item,self.merchant)
-        self.detail.config(text=desc+f'\n{price} кр./шт. ×{qty} = {price*qty} кр.'+('' if allowed else '\nПРОДАВЕЦЬ НЕ ПРИЙМАЄ ЦЕЙ ПРЕДМЕТ.'))
+        self.detail.config(text=desc+tr('advanced_ui.0021', v0=price, v1=qty, v2=price * qty)+('' if allowed else tr('advanced_ui.0022')))
 
     def refresh(self):
         g=self.app.game
         items=g.stock(self.merchant)
         if self.merchant==2:
-            items=[dict(id=i['id'],kind='sealed',name='Запечатана',rarity=0,weight=0) for i in items]
+            items=[dict(id=i['id'],kind='sealed',name=tr('advanced_ui.0023'),rarity=0,weight=0) for i in items]
         self.stock_grid.set_items(items)
         self.bag_grid.set_items(g.bag)
-        self.title.config(text=f'{g.merchant_title(self.merchant)} / {g.money} кр. / {g.weight:.1f}/{g.capacity:.0f} кг')
+        self.title.config(text=tr('advanced_ui.0024', v0=g.merchant_title(self.merchant), v1=g.money, v2=g.weight, v3=g.capacity))
         self.app.refresh()
 
     def press(self,event,grid,source):
         grid.select_event(event)
         item=self.item()
         if item:
-            shown=dict(item,kind='sealed',name='Запечатана',rarity=0) if self.merchant==2 and source=='stock' else item
+            shown=dict(item,kind='sealed',name=tr('advanced_ui.0025'),rarity=0) if self.merchant==2 and source=='stock' else item
             self.drag.begin(event,dict(item=shown,source=source))
 
     def trade(self,source,item_id=None):
@@ -220,7 +221,7 @@ class TradingPanel(tk.Frame):
         if self.source!=source:return
         item=self.item()
         if not item:return
-        if source=='bag' and item.get('modules') and not messagebox.askyesno('Продаж із модулями','Продати корпус разом з усіма встановленими модулями?',parent=self):return
+        if source=='bag' and item.get('modules') and not messagebox.askyesno(tr('advanced_ui.0026'),tr('advanced_ui.0027'),parent=self):return
         qty=self.amount(item)
         g=self.app.game
         ok=g.buy(item['id'],self.merchant,qty) if source=='stock' else g.sell(item['id'],self.merchant,qty)
@@ -244,18 +245,18 @@ class TechnicianPanel(tk.Frame):
         self.label=tk.Label(self,bg=PANEL,fg=GOLD,font=('Segoe UI',13,'bold'));self.label.pack(pady=12)
         self.grid=ItemGrid(self,self.describe,height=290,columns=7);self.grid.pack(fill='both',expand=True,padx=10)
         self.detail=tk.Label(self,bg=PANEL,fg=TEXT,wraplength=700,justify='left',height=5);self.detail.pack(padx=12,pady=8)
-        ttk.Button(self,text='Відремонтувати вибране до 100%',command=self.repair).pack(fill='x',padx=20,pady=12)
+        ttk.Button(self,text=tr('advanced_ui.0028'),command=self.repair).pack(fill='x',padx=20,pady=12)
         self.refresh()
 
     def refresh(self):
         g=self.app.game
-        self.label.config(text=f'МАЙСТЕРНЯ / {g.money} кредитів')
+        self.label.config(text=tr('advanced_ui.0029', v0=g.money))
         self.grid.set_items([i for i in list(g.equipped.values())+g.bag if i and 'durability' in i])
         self.app.refresh()
 
     def describe(self,item_id):
         item=self.app.game.find(item_id)
-        if item:self.detail.config(text=self.app.description(item)+f'\nРемонт: {self.app.game.repair_cost(item)} кр.')
+        if item:self.detail.config(text=self.app.description(item)+tr('advanced_ui.0030', v0=self.app.game.repair_cost(item)))
 
     def repair(self):
         if self.grid.selection:
@@ -265,12 +266,12 @@ class TechnicianPanel(tk.Frame):
 
 
 def perk_window(app):
-    win=app.popup('Перки · кожен другий рівень','760x750')
-    tk.Label(win,text=f'РОЗВИТОК / доступно виборів: {app.game.pending_perks}',bg=PANEL,fg=GOLD,font=('Segoe UI',14,'bold')).pack(pady=15)
+    win=app.popup(tr('advanced_ui.0031'),'760x750')
+    tk.Label(win,text=tr('advanced_ui.0032', v0=app.game.pending_perks),bg=PANEL,fg=GOLD,font=('Segoe UI',14,'bold')).pack(pady=15)
     def choose(key):
         if app.game.choose_perk(key):
             app.dialog=None;win.destroy();app.perk_prompted=-1;app.refresh()
     for key,(name,desc) in p.PERKS.items():
-        text=f'{name} · ранг {app.game.rank(key)}\n{desc}'
+        text=tr('advanced_ui.0033', v0=name, v1=app.game.rank(key), v2=desc)
         ttk.Button(win,text=text,command=lambda key=key:choose(key),state='normal' if app.game.pending_perks else 'disabled').pack(fill='x',padx=16,pady=4)
-    tk.Label(win,text='Ранги можна брати повторно. Невитрачені вибори зберігаються.\nЗакрийте вікно, щоб вибрати пізніше через кнопку «Перки».',bg=PANEL,fg=MUTED).pack(pady=10)
+    tk.Label(win,text=tr('advanced_ui.0034'),bg=PANEL,fg=MUTED).pack(pady=10)

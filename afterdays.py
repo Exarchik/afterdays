@@ -1,5 +1,7 @@
 """Afterdays — standalone turn-based RPG. Python 3.10+, Tkinter, no pip packages."""
 from __future__ import annotations
+from i18n import t as tr
+import content
 import json
 import math
 import os
@@ -10,29 +12,17 @@ from collections import deque
 from pathlib import Path
 sys.modules.setdefault('afterdays', sys.modules[__name__])
 
-RARITIES = [('Звичайний', '#a8acaa'), ('Незвичний', '#53a9ff'),
-            ('Рідкісний', '#f4cd55'), ('Унікальний', '#c58bfa'), ('Релікт', '#ff6570')]
-STAT_NAMES = {'damage': 'Шкода', 'range': 'Дальність', 'defense': 'Захист', 'accuracy': 'Точність'}
-SLOTS = {'weapon1': 'Зброя I', 'weapon2': 'Зброя II', 'armor': 'Броня', 'helmet': 'Шолом'}
-GEAR = {
-    'Пістолет «Попіл»': ('weapon', 11, 5, 0, 84, 1.6, 2),
-    'Гвинтівка «Сторож»': ('weapon', 18, 9, 0, 88, 4.5, 3),
-    'Автомат «Іржа»': ('weapon', 14, 6, 0, 82, 3.5, 2),
-    'Дробовик «Грім»': ('weapon', 26, 3, 0, 94, 4.0, 3),
-    'Лазер «Промінь»': ('weapon', 20, 8, 0, 95, 3.0, 3),
-    'Куртка з пластинами': ('armor', 0, 0, 3, 0, 5.0, 0),
-    'Бронекорпус «Бастіон»': ('armor', 0, 0, 6, 0, 8.0, 0),
-    'Шолом «Шукач»': ('helmet', 0, 0, 2, 0, 1.5, 0),
-}
-MODULES = [
-    ('Підсилювач', 'weapon', 'damage', 3), ('Оптика', 'weapon', 'range', 1),
-    ('Стабілізатор', 'weapon', 'accuracy', 4), ('Бронепластина', 'protection', 'defense', 1),
-]
-CITY_NAMES = ['Сховище 17', 'Сухий Колодязь', 'Іржавий Порт', 'Нова Зоря', 'Рубіж']
-MERCHANTS = ['Коваль', 'Торговець', 'Барига']
-TERRAINS = {'waste': ('#333b34', 'Пустка'), 'forest': ('#253c34', 'Мертвий ліс'),
-            'ruin': ('#484139', 'Руїни'), 'road': ('#625747', 'Стара дорога'),
-            'city': ('#827346', 'Місто')}
+RARITIES = [(tr('afterdays.0001'), '#a8acaa'), (tr('afterdays.0002'), '#53a9ff'),
+            (tr('afterdays.0003'), '#f4cd55'), (tr('afterdays.0004'), '#c58bfa'), (tr('afterdays.0005'), '#ff6570')]
+STAT_NAMES = {'damage': tr('afterdays.0006'), 'range': tr('afterdays.0007'), 'defense': tr('afterdays.0008'), 'accuracy': tr('afterdays.0009')}
+SLOTS = {'weapon1': tr('afterdays.0010'), 'weapon2': tr('afterdays.0011'), 'armor': tr('afterdays.0012'), 'helmet': tr('afterdays.0013')}
+GEAR = content.GEAR
+MODULES = content.MODULES
+CITY_NAMES = [tr('afterdays.0014'), tr('afterdays.0015'), tr('afterdays.0016'), tr('afterdays.0017'), tr('afterdays.0018')]
+MERCHANTS = [tr('afterdays.0019'), tr('afterdays.0020'), tr('afterdays.0021')]
+TERRAINS = {'waste': ('#333b34', tr('afterdays.0022')), 'forest': ('#253c34', tr('afterdays.0023')),
+            'ruin': ('#484139', tr('afterdays.0024')), 'road': ('#625747', tr('afterdays.0025')),
+            'city': ('#827346', tr('afterdays.0026'))}
 
 
 def uid():
@@ -41,9 +31,9 @@ def uid():
 
 def equipment(name=None, tier=0, rng=None):
     rng = rng or random
-    name = name or rng.choice(list(GEAR))
+    name = content.entity_id(name) if name else rng.choice(list(GEAR))
     kind, damage, reach, defense, accuracy, weight, cost = GEAR[name]
-    return dict(id=uid(), name=name, kind=kind, rarity=tier, weight=weight,
+    return dict(id=uid(), type_id=name, name=content.name(name), kind=kind, rarity=tier, weight=weight,
                 value=int((70 + weight * 15) * (1 + tier * .85)), slots=min(5, tier + 1),
                 stats=dict(damage=damage + (tier * 2 if kind == 'weapon' else 0),
                            range=reach, defense=defense + (tier if kind != 'weapon' else 0),
@@ -52,14 +42,15 @@ def equipment(name=None, tier=0, rng=None):
 
 def module(tier=0, rng=None, index=None):
     rng = rng or random
-    name, target, stat, base = MODULES[rng.randrange(len(MODULES)) if index is None else index]
-    return dict(id=uid(), name=name, kind='module', rarity=tier, weight=.3,
+    ident=content.module_id(rng.randrange(len(MODULES)) if index is None else index)
+    data=content.MODULE_DATA[ident]
+    name,target,stat,base=content.name(ident),data['target'],data['stat'],data['base']
+    return dict(id=uid(), type_id=ident, name=name, kind='module', rarity=tier, weight=.3,
                 value=30 * (tier + 1) ** 2, target=target, stats={stat: base * (tier + 1)})
 
 
 def supply(kind):
-    return dict(id=uid(), name='Аптечка' if kind == 'med' else 'Консерви', kind=kind,
-                rarity=0, weight=.4 if kind == 'med' else .6, value=42 if kind == 'med' else 18)
+    return dict(id=uid(),**content.consumable(kind))
 
 
 def stats(item):
@@ -144,10 +135,10 @@ class LegacyGame:
         self.money = 180
         self.xp = 0
         self.active = 'weapon1'
-        self.equipped = {'weapon1': equipment('Пістолет «Попіл»', 1),
-                         'weapon2': equipment('Гвинтівка «Сторож»'),
-                         'armor': equipment('Куртка з пластинами'),
-                         'helmet': equipment('Шолом «Шукач»')}
+        self.equipped = {'weapon1': equipment('weapon_ash_pistol', 1),
+                         'weapon2': equipment('weapon_watch_rifle'),
+                         'armor': equipment('armor_plated_jacket'),
+                         'helmet': equipment('helmet_seeker')}
         self.bag = [module(index=0), module(index=3), supply('med'), supply('med'),
                     supply('food'), supply('food'), supply('food')]
         self.loot = []
@@ -164,7 +155,7 @@ class LegacyGame:
             self.world[y][x] = 'city'
         self.shops = {}
         self.searched = []
-        self.log('Ви прокинулись у Сховищі 17. Спорядження готове. Пустка чекає.')
+        self.log(tr('afterdays.0029'))
 
     @property
     def level(self):
@@ -205,14 +196,14 @@ class LegacyGame:
 
     def accept(self, item):
         if self.weight + item_weight(item) > self.capacity + .0001:
-            self.log('Замало місця за вагою. Звільніть рюкзак.')
+            self.log(tr('afterdays.0030'))
             return False
         self.bag.append(item)
         return True
 
     def equip(self, item_id, slot):
         if self.battle:
-            self.log('Екіпіровку можна змінювати лише поза боєм.')
+            self.log(tr('afterdays.0031'))
             return False
         item = self.find(item_id)
         if not item or item not in self.bag or slot not in SLOTS:
@@ -225,7 +216,7 @@ class LegacyGame:
         if old:
             self.bag.append(old)
         self.equipped[slot] = item
-        self.log(f"Екіпіровано: {item['name']}.")
+        self.log(tr('afterdays.0032', v0=item['name']))
         return True
 
     def unequip(self, slot):
@@ -242,7 +233,7 @@ class LegacyGame:
         if not item or not mod or mod not in self.bag or not compatible(item, mod):
             return False
         if len(item['modules']) >= item['slots']:
-            self.log('Усі слоти зайняті. Спочатку зніміть один модуль.')
+            self.log(tr('afterdays.0033'))
             return False
         self.bag.remove(mod)
         item['modules'].append(mod)
@@ -265,20 +256,20 @@ class LegacyGame:
     def use(self, kind):
         item = next((i for i in self.bag if i['kind'] == kind), None)
         if not item:
-            self.log('Немає аптечки.' if kind == 'med' else 'Немає консервів.')
+            self.log(tr('afterdays.0034') if kind == 'med' else tr('afterdays.0035'))
             return False
         if self.hp >= self.max_hp:
-            self.log('Здоров’я вже повне.')
+            self.log(tr('afterdays.0036'))
             return False
         if self.battle and self.battle['ap'] < 2:
-            self.log('Потрібно 2 ОД.')
+            self.log(tr('afterdays.0037'))
             return False
         self.bag.remove(item)
         healing = min(self.max_hp - self.hp, 40 if kind == 'med' else 14)
         self.hp += healing
         if self.battle:
             self.battle['ap'] -= 2
-        self.log(f"{item['name']}: +{healing} здоров’я.")
+        self.log(tr('afterdays.0038', v0=item['name'], v1=healing))
         return True
 
     def step(self, dx, dy):
@@ -294,13 +285,13 @@ class LegacyGame:
             if food:
                 self.bag.remove(food)
                 self.hp = min(self.max_hp, self.hp + 10)
-                self.log('Дорожній привал: витрачено консерви, +10 здоров’я.')
+                self.log(tr('afterdays.0039'))
             else:
                 self.hp = max(1, self.hp - 5)
-                self.log('Немає харчів: виснаження забрало 5 здоров’я.')
+                self.log(tr('afterdays.0040'))
         terrain = self.world[self.y][self.x]
         if self.city is not None:
-            self.log(f'Ви прибули: {CITY_NAMES[self.city]}. Тут безпечно.')
+            self.log(tr('afterdays.0041', v0=CITY_NAMES[self.city]))
         elif self.rng.random() < {'road': .06, 'waste': .12, 'forest': .20, 'ruin': .24}[terrain]:
             self.start_battle()
         return True
@@ -310,12 +301,12 @@ class LegacyGame:
             return False
         key = [self.x, self.y]
         if key in self.searched:
-            self.log('Цю ділянку вже обшукано.')
+            self.log(tr('afterdays.0042'))
             return False
         self.searched.append(key)
         self.turn += 1
         self.loot.extend([self.roll_item(), supply(self.rng.choice(['food', 'med']))])
-        self.log('Знайдено припаси. Відкрийте «Здобич».')
+        self.log(tr('afterdays.0043'))
         if self.rng.random() < .35:
             self.start_battle()
         return True
@@ -346,14 +337,14 @@ class LegacyGame:
         for n in range(self.rng.randint(2, 3)):
             kind = self.rng.randrange(3)
             name, hp, damage, reach, speed = [
-                ('Гризун', 23, 8, 1, 3), ('Здичавілий', 36, 11, 1, 2),
-                ('Плювач', 26, 9, 5, 2)][kind]
+                (tr('afterdays.0044'), 23, 8, 1, 3), (tr('afterdays.0045'), 36, 11, 1, 2),
+                (tr('afterdays.0046'), 26, 9, 5, 2)][kind]
             hp += int(danger * 5)
             enemies.append(dict(id=n, name=name, hp=hp, max_hp=hp, damage=damage+int(danger),
                                 range=reach, speed=speed, pos=list(candidates[n]), kind=kind))
         self.battle = dict(w=w, h=h, walls=[list(p) for p in sorted(walls)], pos=list(pos),
                            enemies=enemies, ap=6, round=1)
-        self.log('Засідка! Натисніть на ворога, щоб стріляти; на землю — щоб рухатись.')
+        self.log(tr('afterdays.0047'))
 
     def battle_move(self, target):
         b = self.battle
@@ -362,7 +353,7 @@ class LegacyGame:
         occupied = set(map(tuple, b['walls'])) | {tuple(e['pos']) for e in b['enemies']}
         route = path_to(tuple(b['pos']), tuple(target), b['w'], b['h'], occupied)
         if not route or len(route) > b['ap']:
-            self.log('Немає шляху або замало очок дій.')
+            self.log(tr('afterdays.0048'))
             return False
         b['pos'] = list(target)
         b['ap'] -= len(route)
@@ -371,13 +362,13 @@ class LegacyGame:
     def shot_info(self, enemy):
         b, weapon = self.battle, self.weapon
         if not b or not weapon:
-            return False, 'В активному слоті немає зброї.', 0
+            return False, tr('afterdays.0049'), 0
         s = stats(weapon)
         distance = math.dist(b['pos'], enemy['pos'])
         if distance > s['range']:
-            return False, 'Ціль поза дальністю.', 0
+            return False, tr('afterdays.0050'), 0
         if not visible(tuple(b['pos']), tuple(enemy['pos']), b['walls']):
-            return False, 'Перепона перекриває лінію вогню.', 0
+            return False, tr('afterdays.0051'), 0
         chance = max(45, min(98, s['accuracy'] - int(max(0, distance-3)*3)))
         return True, '', chance
 
@@ -393,31 +384,31 @@ class LegacyGame:
             self.log(reason)
             return False
         if b['ap'] < self.weapon['ap']:
-            self.log(f"Для пострілу потрібно {self.weapon['ap']} ОД.")
+            self.log(tr('afterdays.0052', v0=self.weapon['ap']))
             return False
         b['ap'] -= self.weapon['ap']
         if self.rng.randrange(100) < chance:
             damage = max(1, stats(self.weapon)['damage'] + (self.level-1)*2 + self.rng.randint(-2, 2))
             e['hp'] -= damage
-            self.log(f"{e['name']}: −{damage} HP ({chance}% влучання).")
+            self.log(tr('afterdays.0053', v0=e['name'], v1=damage, v2=chance))
             if e['hp'] <= 0:
                 b['enemies'].remove(e)
                 self.xp += 20
-                self.log(f"{e['name']} знищено. +20 досвіду.")
+                self.log(tr('afterdays.0054', v0=e['name']))
             if not b['enemies']:
                 self.victory()
         else:
-            self.log(f'Промах ({chance}% влучання).')
+            self.log(tr('afterdays.0055', v0=chance))
         return True
 
     def switch(self):
         other = 'weapon2' if self.active == 'weapon1' else 'weapon1'
         if not self.equipped[other]:
-            self.log('Другий слот порожній.')
+            self.log(tr('afterdays.0056'))
             return False
         if self.battle:
             if self.battle['ap'] < 1:
-                self.log('Для зміни зброї потрібно 1 ОД.')
+                self.log(tr('afterdays.0057'))
                 return False
             self.battle['ap'] -= 1
         self.active = other
@@ -438,29 +429,29 @@ class LegacyGame:
             if math.dist(e['pos'], b['pos']) <= e['range'] and visible(tuple(e['pos']), tuple(b['pos']), b['walls']):
                 damage = max(1, e['damage'] + self.rng.randint(-2, 2) - self.defense)
                 self.hp -= damage
-                self.log(f"{e['name']} атакує: −{damage} HP.")
+                self.log(tr('afterdays.0058', v0=e['name'], v1=damage))
                 if self.hp <= 0:
                     self.defeat()
                     return
         b['ap'] = 6
         b['round'] += 1
-        self.log(f"Раунд {b['round']}. Ваш хід.")
+        self.log(tr('afterdays.0059', v0=b['round']))
 
     def victory(self):
         self.battle = None
         reward = self.rng.randint(45, 85)
         self.money += reward
         self.loot.extend([self.roll_item(), self.roll_item(), supply('med')])
-        self.log(f'Перемога! +{reward} кредитів. Здобич чекає у відповідній вкладці.')
+        self.log(tr('afterdays.0060', v0=reward))
 
     def flee(self):
         if not self.battle:
             return False
         if self.battle['pos'][0] != 0 or self.battle['ap'] < 2:
-            self.log('Для втечі дістаньтесь лівого краю арени й залиште 2 ОД.')
+            self.log(tr('afterdays.0061'))
             return False
         self.battle = None
-        self.log('Ви відірвались від переслідувачів.')
+        self.log(tr('afterdays.0062'))
         return True
 
     def defeat(self):
@@ -470,21 +461,21 @@ class LegacyGame:
         self.hp = self.max_hp
         self.battle = None
         self.loot.clear()
-        self.log(f'Вас витягнув караван. Сховище 17. Втрачено {loss} кредитів і незабрану здобич.')
+        self.log(tr('afterdays.0063', v0=loss))
 
     def rest(self):
         if self.city is None or self.battle:
             return False
         if self.hp == self.max_hp:
-            self.log('Ви вже відпочили.')
+            self.log(tr('afterdays.0064'))
             return False
         if self.money < 15:
-            self.log('Ночівля коштує 15 кредитів.')
+            self.log(tr('afterdays.0065'))
             return False
         self.money -= 15
         self.hp = self.max_hp
         self.turn += 4
-        self.log('Ночівля: здоров’я повністю відновлено.')
+        self.log(tr('afterdays.0066'))
         return True
 
     def stock(self, merchant):
@@ -518,13 +509,13 @@ class LegacyGame:
             return False
         price = self.price(item, merchant)
         if self.money < price:
-            self.log('Недостатньо кредитів.')
+            self.log(tr('afterdays.0067'))
             return False
         if not self.accept(item):
             return False
         self.money -= price
         items.remove(item)
-        self.log(f"Куплено: {item['name']} · {RARITIES[item['rarity']][0]}.")
+        self.log(tr('afterdays.0068', v0=item['name'], v1=RARITIES[item['rarity']][0]))
         return True
 
     def sell(self, item_id, merchant):
@@ -532,12 +523,12 @@ class LegacyGame:
             return False
         item = next((i for i in self.bag if i['id'] == item_id), None)
         if not item or not self.buys_kind(item, merchant):
-            self.log('Цей торговець не купує такий товар.')
+            self.log(tr('afterdays.0069'))
             return False
         price = self.price(item, merchant, False)
         self.bag.remove(item)
         self.money += price
-        self.log(f"Продано {item['name']} за {price} кр.")
+        self.log(tr('afterdays.0070', v0=item['name'], v1=price))
         return True
 
     def collect(self, item_id):
@@ -563,14 +554,14 @@ class LegacyGame:
     def load(cls, path):
         data = json.loads(Path(path).read_text(encoding='utf-8'))
         if data.pop('version', None) != 1:
-            raise ValueError('Невідома версія збереження.')
+            raise ValueError(tr('afterdays.0071'))
         def tuples(value):
             return tuple(tuples(i) for i in value) if isinstance(value, list) else value
         state = tuples(data.pop('rng_state'))
         game = cls(0)
         required = set(vars(game)) - {'rng'}
         if set(data) != required or len(data['world']) != 32 or set(data['equipped']) != set(SLOTS):
-            raise ValueError('Збереження пошкоджене або несумісне.')
+            raise ValueError(tr('afterdays.0072'))
         game.__dict__.update(data)
         game.rng.setstate(state)
         return game
@@ -578,72 +569,17 @@ class LegacyGame:
 
 
 # Expanded content. All sprites are drawn locally with Canvas in visuals.py.
-GEAR.update({
-    'Револьвер «Ворон»': ('weapon', 22, 5, 0, 87, 2.2, 3),
-    'ПП «Шершень»': ('weapon', 12, 4, 0, 90, 2.4, 2),
-    'Карабін «Пілігрим»': ('weapon', 17, 7, 0, 90, 3.7, 2),
-    'Снайперська «Горизонт»': ('weapon', 30, 12, 0, 94, 5.8, 4),
-    'Кулемет «Молот»': ('weapon', 32, 7, 0, 76, 7.2, 4),
-    'Плазмомет «Сонце»': ('weapon', 29, 5, 0, 90, 5.1, 3),
-    'Гаус-карабін «Імпульс»': ('weapon', 25, 10, 0, 96, 4.6, 3),
-    'Іонний пістолет «Іскра»': ('weapon', 15, 5, 0, 94, 1.9, 2),
-    'Арбалет «Тиша»': ('weapon', 24, 7, 0, 92, 3.2, 3),
-    'Плащ розвідника': ('armor', 0, 0, 2, 0, 2.6, 0),
-    'Кевларова жилетка': ('armor', 0, 0, 4, 0, 4.0, 0),
-    'Костюм «Сталкер»': ('armor', 0, 0, 5, 0, 5.5, 0),
-    'Панцир «Черепаха»': ('armor', 0, 0, 9, 0, 10.5, 0),
-    'Екзокаркас «Атлант»': ('armor', 0, 0, 11, 0, 12.0, 0),
-    'Костюм «Фантом»': ('armor', 0, 0, 5, 0, 3.6, 0),
-    'Композит «Світанок»': ('armor', 0, 0, 7, 0, 6.4, 0),
-    'Каптур вигнанця': ('helmet', 0, 0, 1, 0, .7, 0),
-    'Каска рейнджера': ('helmet', 0, 0, 3, 0, 2.0, 0),
-    'Шолом «Циклоп»': ('helmet', 0, 0, 4, 0, 2.5, 0),
-    'Маска «Привид»': ('helmet', 0, 0, 2, 0, 1.1, 0),
-    'Важкий шолом «Форт»': ('helmet', 0, 0, 5, 0, 3.2, 0),
-    'Візор «Обрій»': ('helmet', 0, 0, 3, 0, 1.7, 0),
-})
-MODULES.extend([
-    ('Розривний осердок', 'weapon', 'damage', 4),
-    ('Далекомір', 'weapon', 'accuracy', 5),
-    ('Прискорювач', 'weapon', 'pierce', 2),
-    ('Критичний процесор', 'weapon', 'crit', 5),
-    ('Фокусувальна лінза', 'weapon', 'range', 1),
-    ('Магнітна котушка', 'weapon', 'damage', 5),
-    ('Балістичний комп’ютер', 'weapon', 'accuracy', 6),
-    ('Вольфрамовий канал', 'weapon', 'pierce', 3),
-    ('Керамічні вставки', 'protection', 'defense', 2),
-    ('Медична підкладка', 'protection', 'vitality', 8),
-    ('Сервопривід', 'protection', 'capacity', 2),
-    ('Камуфляжний екран', 'protection', 'evasion', 3),
-    ('Регенератор', 'protection', 'regen', 1),
-    ('Аварійний каркас', 'protection', 'vitality', 10),
-    ('Розвантажувальна система', 'protection', 'capacity', 3),
-    ('Реактивні пластини', 'protection', 'defense', 3),
-])
-STAT_NAMES.update(attack='Атака', pierce='Атака', crit='Крит. шанс', vitality='Макс. HP',
-                  capacity='Вантажність', evasion='Ухилення', regen='Регенерація')
-CITY_NAMES.extend(['Тиха Балка', 'Мідні Ворота', 'Станція Омега', 'Глиняний Брід',
-                   'Чорний Маяк', 'Останній Сад', 'Бурштин'])
-MERCHANTS.append('Мандрівний торговець')
-MONSTERS = [
-    ('Гризун', 23, 8, 1, 3, 0, '#b68a63'),
-    ('Здичавілий', 36, 11, 1, 2, 1, '#b97667'),
-    ('Плювач', 26, 9, 5, 2, 0, '#b7bd66'),
-    ('Сліпий гончак', 30, 10, 1, 4, 0, '#bca28b'),
-    ('Панцирник', 45, 13, 1, 1, 6, '#94a19a'),
-    ('Кислотний кліщ', 25, 12, 4, 2, 2, '#9bc560'),
-    ('Попелястий вовк', 40, 14, 1, 3, 1, '#c4c3b7'),
-    ('Сторожовий дрон', 33, 13, 6, 2, 4, '#93bbc5'),
-    ('Болотяник', 48, 12, 2, 2, 2, '#669b77'),
-    ('Кістяний велет', 76, 19, 1, 1, 5, '#d9c9aa'),
-    ('Іскровик', 38, 15, 7, 2, 2, '#ad94de'),
-    ('Химерний павук', 44, 15, 3, 3, 3, '#ce917b'),
-]
+STAT_NAMES.update(attack=tr('afterdays.0073'), pierce=tr('afterdays.0074'), crit=tr('afterdays.0075'), vitality=tr('afterdays.0076'),
+                  capacity=tr('afterdays.0077'), evasion=tr('afterdays.0078'), regen=tr('afterdays.0079'))
+CITY_NAMES.extend([tr('afterdays.0080'), tr('afterdays.0081'), tr('afterdays.0082'), tr('afterdays.0083'),
+                   tr('afterdays.0084'), tr('afterdays.0085'), tr('afterdays.0086')])
+MERCHANTS.append(tr('afterdays.0087'))
+MONSTERS = content.MONSTERS
 EXTRA_CITIES = [[5, 15], [27, 4], [28, 16], [4, 28], [44, 15], [24, 28], [17, 17]]
 MAYORS = [0, 2, 3, 5, 7, 9, 11]
 QUEST_KINDS = ['hunt', 'retrieve', 'scout', 'supplies', 'purge']
-QUEST_LABELS = {'hunt': 'Захист поселення', 'retrieve': 'Загублена реліквія',
-                'scout': 'Розвідка території', 'supplies': 'Запаси для лікарні', 'purge': 'Зачистка підземелля'}
+QUEST_LABELS = {'hunt': tr('afterdays.0088'), 'retrieve': tr('afterdays.0089'),
+                'scout': tr('afterdays.0090'), 'supplies': tr('afterdays.0091'), 'purge': tr('afterdays.0092')}
 
 
 class ExpansionGame(LegacyGame):
@@ -689,7 +625,7 @@ class ExpansionGame(LegacyGame):
         ok = fn()
         if ok and self.weight > self.capacity + .0001:
             self.bag, self.equipped = before
-            self.log('Спершу зменште вагу: цей предмет підтримує вантажність.')
+            self.log(tr('afterdays.0093'))
             return False
         self.hp = min(self.hp, self.max_hp)
         return ok
@@ -717,7 +653,7 @@ class ExpansionGame(LegacyGame):
             self.bag.remove(mod)
             self.bag.append(old)
             item['modules'][slot_index] = mod
-            self.log(f"Замінено: {old['name']} → {mod['name']}.")
+            self.log(tr('afterdays.0094', v0=old['name'], v1=mod['name']))
             return True
         return self._change_gear(replace)
 
@@ -765,7 +701,7 @@ class ExpansionGame(LegacyGame):
             return False
         self.money += self.price(item, merchant, False)
         self.bag.remove(item)
-        self.log(f"Продано: {item['name']}.")
+        self.log(tr('afterdays.0095', v0=item['name']))
         return True
 
     def spawn_traveler(self):
@@ -773,7 +709,7 @@ class ExpansionGame(LegacyGame):
         self.traveler = dict(pos=[self.x, self.y], items=[rare, module(4, self.rng)] +
                              [supply('food') for _ in range(5)] + [supply('med') for _ in range(3)])
         self.last_traveler_turn = self.turn
-        self.log('На дорозі мандрівний торговець! Рідкісні речі та припаси за 50% базової вартості.')
+        self.log(tr('afterdays.0096'))
 
     def step(self, dx, dy):
         in_battle = bool(self.battle)
@@ -790,7 +726,7 @@ class ExpansionGame(LegacyGame):
         for q in self.quests:
             if q['status'] == 'active' and q['kind'] == 'scout' and q['pos'] == [self.x, self.y]:
                 q['progress'] = 1
-                self.log('Розвідку завершено. Поверніться до мера.')
+                self.log(tr('afterdays.0097'))
 
     def start_battle(self):
         super().start_battle()
@@ -814,7 +750,7 @@ class ExpansionGame(LegacyGame):
             self.log(reason)
             return False
         if b['ap'] < self.weapon['ap']:
-            self.log(f"Для пострілу потрібно {self.weapon['ap']} ОД.")
+            self.log(tr('afterdays.0098', v0=self.weapon['ap']))
             return False
         b['ap'] -= self.weapon['ap']
         if self.rng.randrange(100) < chance:
@@ -823,16 +759,16 @@ class ExpansionGame(LegacyGame):
             raw = s['damage'] + (self.level-1)*2 + self.rng.randint(-2, 2)
             damage = max(1, int(raw*(1.6 if critical else 1))-max(0, e.get('armor', 0)-s.get('pierce', 0)))
             e['hp'] -= damage
-            self.log(f"{'КРИТ! ' if critical else ''}{e['name']}: −{damage} HP.")
+            self.log(f"{tr('afterdays.0099') if critical else ''}{e['name']}: −{damage} HP.")
             if e['hp'] <= 0:
                 b['enemies'].remove(e)
                 self.xp += 20
                 self._kill_objectives(e['kind'])
-                self.log(f"{e['name']} знищено. +20 XP.")
+                self.log(tr('afterdays.0100', v0=e['name']))
             if not b['enemies']:
                 self.victory()
         else:
-            self.log(f'Промах ({chance}% влучання).')
+            self.log(tr('afterdays.0101', v0=chance))
         return True
 
     def end_turn(self):
@@ -851,21 +787,21 @@ class ExpansionGame(LegacyGame):
                     e['pos'] = list(route[0])
             if math.dist(e['pos'], b['pos']) <= e['range'] and visible(tuple(e['pos']), tuple(b['pos']), b['walls']):
                 if self.rng.randrange(100) < min(45, self.protection_stat('evasion')):
-                    self.log(f"Ухилення від атаки: {e['name']}.")
+                    self.log(tr('afterdays.0102', v0=e['name']))
                     continue
                 damage = max(1, e['damage'] + self.rng.randint(-2, 2) - self.defense)
                 self.hp -= damage
-                self.log(f"{e['name']} атакує: −{damage} HP.")
+                self.log(tr('afterdays.0103', v0=e['name'], v1=damage))
                 if self.hp <= 0:
                     self.defeat()
                     return
         healing = min(self.max_hp-self.hp, self.protection_stat('regen'))
         if healing:
             self.hp += healing
-            self.log(f'Регенерація: +{healing} HP.')
+            self.log(tr('afterdays.0104', v0=healing))
         b['ap'] = 6
         b['round'] += 1
-        self.log(f"Раунд {b['round']}. Ваш хід.")
+        self.log(tr('afterdays.0105', v0=b['round']))
 
     def victory(self):
         quest_id = self.quest_battle
@@ -874,7 +810,7 @@ class ExpansionGame(LegacyGame):
             q = next((q for q in self.quests if q['id'] == quest_id and q['status'] == 'active'), None)
             if q:
                 q['progress'] = 1
-                self.log('Гніздо знищено. Поверніться до мера по нагороду.')
+                self.log(tr('afterdays.0106'))
         self.quest_battle = None
 
     def flee(self):
@@ -910,7 +846,7 @@ class ExpansionGame(LegacyGame):
         if not offer:
             return False
         if sum(q['status'] == 'active' for q in self.quests) >= 8:
-            self.log('Спочатку завершіть частину завдань (ліміт 8 активних).')
+            self.log(tr('afterdays.0107'))
             return False
         q = dict(offer)
         q['status'] = 'active'
@@ -920,17 +856,17 @@ class ExpansionGame(LegacyGame):
                           if 4 <= abs(x-self.x)+abs(y-self.y) <= 12 and [x, y] not in self.cities and (x, y) not in occupied]
             if hasattr(self, 'quest_locations'):candidates=self.quest_locations(q)
             if not candidates:
-                self.log('Немає вільної локації для завдання.')
+                self.log(tr('afterdays.0108'))
                 return False
             q['pos'] = list(self.rng.choice(candidates))
         offer['status'] = 'accepted'
         self.quests.append(q)
-        self.log(f"Взято завдання: {q['title']}. Відкрийте «Завдання».")
+        self.log(tr('afterdays.0109', v0=q['title']))
         return True
 
     def _kill_objectives(self, kind):
         for q in self.quests:
-            if q['status'] == 'active' and q['kind'] == 'hunt' and (q['target_kind'] is None or q['target_kind'] == kind):
+            if q['status'] == 'active' and q['kind'] == 'hunt' and (q['target_kind'] is None or content.monster_id(q.get('target_type_id') or q['target_kind']) == content.monster_id(kind)):
                 q['progress'] = min(q['goal'], q['progress']+1)
 
     def quest_ready(self, q):
@@ -945,27 +881,27 @@ class ExpansionGame(LegacyGame):
     def quest_text(self, q):
         kind = q['kind']
         if kind == 'hunt':
-            target = 'будь-яких мутантів' if q['target_kind'] is None else MONSTERS[q['target_kind']][0]
-            desc = f"Знищити {target}: {q['progress']}/{q['goal']}. Рахуються лише вбивства після взяття."
+            target = tr('afterdays.0110') if q['target_kind'] is None else MONSTERS[q['target_kind']][0]
+            desc = tr('afterdays.0111', v0=target, v1=q['progress'], v2=q['goal'])
         elif kind == 'retrieve':
-            desc = 'Знайти довоєнний навігатор. Він з’явиться лише після взяття завдання; купити його неможливо.'
+            desc = tr('afterdays.0112')
         elif kind == 'scout':
-            desc = 'Дістатися позначеної точки та повернутися з розвідданими.'
+            desc = tr('afterdays.0113')
         elif kind == 'supplies':
             food = sum(i['kind'] == 'food' for i in self.bag)
             med = sum(i['kind'] == 'med' for i in self.bag)
-            desc = f'Принести 3 консерви ({food}/3) та 2 аптечки ({med}/2). Їх буде передано лікарні.'
+            desc = tr('afterdays.0114', v0=food, v1=med)
         else:
-            desc = 'Дістатися гнізда, обшукати ділянку [E] і виграти спеціальний бій. Втеча не завершує завдання.'
+            desc = tr('afterdays.0115')
         if q.get('pos'):
-            desc += f"\nПозначка на мапі: {q['pos'][0]}, {q['pos'][1]}."
-        state = 'ДОСТУПНЕ' if q['status'] == 'offered' else ('ВИКОНАНО' if q['status'] == 'done' else ('ГОТОВО ДО ЗДАЧІ' if self.quest_ready(q) else 'У ПРОЦЕСІ'))
-        return f"{q['title']}\n{desc}\nЗамовник: мер · {CITY_NAMES[q['city']]}\nНагорода: {q['reward']} кр. + 40 XP\n{state}"
+            desc += tr('afterdays.0116', v0=q['pos'][0], v1=q['pos'][1])
+        state = tr('afterdays.0117') if q['status'] == 'offered' else (tr('afterdays.0118') if q['status'] == 'done' else (tr('afterdays.0119') if self.quest_ready(q) else tr('afterdays.0120')))
+        return tr('afterdays.0121', v0=q['title'], v1=desc, v2=CITY_NAMES[q['city']], v3=q['reward'], v4=state)
 
     def turn_in(self, quest_id):
         q = next((q for q in self.quests if q['id'] == quest_id), None)
         if self.battle or not q or self.city != q['city'] or not self.quest_ready(q):
-            self.log('Виконайте умови та поверніться до мера міста-замовника.')
+            self.log(tr('afterdays.0122'))
             return False
         if q['kind'] == 'retrieve':
             self.bag[:] = [i for i in self.bag if i.get('quest_id') != q['id']]
@@ -976,7 +912,7 @@ class ExpansionGame(LegacyGame):
         q['status'] = 'done'
         self.money += q['reward']
         self.xp += 40
-        self.log(f"Завдання виконано: {q['title']}. +{q['reward']} кр., +40 XP.")
+        self.log(tr('afterdays.0123', v0=q['title'], v1=q['reward']))
         return True
 
     def search(self):
@@ -986,12 +922,12 @@ class ExpansionGame(LegacyGame):
             if q['status'] != 'active' or q.get('pos') != [self.x, self.y] or self.quest_ready(q):
                 continue
             if q['kind'] == 'retrieve':
-                item = dict(id=uid(), name='Довоєнний навігатор', kind='quest', rarity=2,
+                item = dict(id=uid(), name=tr('afterdays.0124'), kind='quest', type_id='quest_item', rarity=2,
                             weight=0, value=0, quest_id=q['id'])
                 self.bag.append(item)
                 q['progress'] = 1
                 self.turn += 1
-                self.log('Знайдено квестовий навігатор! Він захищений від продажу та втрати.')
+                self.log(tr('afterdays.0125'))
                 return True
             if q['kind'] == 'purge':
                 self.start_battle()
@@ -999,7 +935,7 @@ class ExpansionGame(LegacyGame):
                 for e in self.battle['enemies']:
                     e['max_hp'] += 12
                     e['hp'] += 12
-                self.log('Гніздо пробудилося! Для завдання потрібно перемогти.')
+                self.log(tr('afterdays.0126'))
                 return True
         return super().search()
 
@@ -1018,22 +954,22 @@ class ExpansionGame(LegacyGame):
         data = json.loads(Path(path).read_text(encoding='utf-8'))
         version = data.pop('version', None)
         if version not in (1, 2):
-            raise ValueError('Невідома версія збереження.')
+            raise ValueError(tr('afterdays.0127'))
         def tuples(v):
             return tuple(tuples(x) for x in v) if isinstance(v, list) else v
         state = tuples(data.pop('rng_state'))
         game = cls(0)
         allowed = set(vars(game))-{'rng'}
         if set(data)-allowed or len(data['world']) != 32 or set(data['equipped']) != set(SLOTS):
-            raise ValueError('Збереження пошкоджене.')
+            raise ValueError(tr('afterdays.0128'))
         if version == 2 and set(data) != allowed:
-            raise ValueError('Неповне збереження.')
+            raise ValueError(tr('afterdays.0129'))
         game.__dict__.update(data)
         if version == 1:
             game.cities.extend([p[:] for p in EXTRA_CITIES])
             game._connect_cities()
             game.shops = {}
-            game.log('Збереження v1 оновлено: нові міста, торговці й квести доступні.')
+            game.log(tr('afterdays.0130'))
         game.rng.setstate(state)
         return game
 
@@ -1071,7 +1007,7 @@ def launch(test_hook=None):
             self.dialog = None
             self.hover = None
             root.after_idle(lambda:sprites.decorate(root))
-            root.title('AFTERDAYS v0.15.1 — Після останнього світанку')
+            root.title(tr('afterdays.0131'))
             sw,sh=root.winfo_screenwidth(),root.winfo_screenheight()
             root.geometry(f'1260x880+{max(0,(sw-1260)//2)}+{max(0,(sh-880)//2)}')
             root.minsize(1080, 760)
@@ -1088,8 +1024,8 @@ def launch(test_hook=None):
             header = tk.Frame(root, bg=BG)
             header.pack(fill='x', padx=18, pady=(12, 6))
             tk.Label(header, text='A F T E R D A Y S', bg=BG, fg=GOLD, font=('Segoe UI', 23, 'bold')).pack(side='left')
-            tk.Label(header, text='  /  ПІСЛЯ ОСТАННЬОГО СВІТАНКУ', bg=BG, fg=MUTED, font=('Segoe UI', 10)).pack(side='left')
-            for title, fn in [('Арти',lambda:sprites.gallery(self)),('?', self.help), ('Нова гра', self.new), ('Завантажити', self.load), ('Зберегти', self.save)]:
+            tk.Label(header, text=tr('afterdays.0132'), bg=BG, fg=MUTED, font=('Segoe UI', 10)).pack(side='left')
+            for title, fn in [(tr('afterdays.0133'),lambda:sprites.gallery(self)),('?', self.help), (tr('afterdays.0134'), self.new), (tr('afterdays.0135'), self.load), (tr('afterdays.0136'), self.save)]:
                 ttk.Button(header, text=title, command=fn).pack(side='right', padx=3)
             self.status = tk.Label(root, bg=PANEL, fg=TEXT, anchor='w', padx=16, pady=10, font=('Segoe UI', 11))
             self.status.pack(fill='x', padx=18)
@@ -1114,13 +1050,13 @@ def launch(test_hook=None):
             self.hint.pack(fill='x', pady=5)
             controls = tk.Frame(left, bg=BG)
             controls.pack(fill='x')
-            self.end_button = ttk.Button(controls, text='Завершити хід [Space]', command=lambda: self.act(self.game.end_turn))
+            self.end_button = ttk.Button(controls, text=tr('afterdays.0137'), command=lambda: self.act(self.game.end_turn))
             self.end_button.pack(side='left', padx=2)
-            ttk.Button(controls, text='Зброя [Tab]', command=lambda: self.act(self.game.switch)).pack(side='left', padx=2)
-            ttk.Button(controls, text='Аптечка [H]', command=lambda: self.act(lambda: self.game.use('med'))).pack(side='left', padx=2)
-            self.flee_button = ttk.Button(controls, text='Втеча', command=lambda: self.act(self.game.flee))
+            ttk.Button(controls, text=tr('afterdays.0138'), command=lambda: self.act(self.game.switch)).pack(side='left', padx=2)
+            ttk.Button(controls, text=tr('afterdays.0139'), command=lambda: self.act(lambda: self.game.use('med'))).pack(side='left', padx=2)
+            self.flee_button = ttk.Button(controls, text=tr('afterdays.0140'), command=lambda: self.act(self.game.flee))
             self.flee_button.pack(side='left', padx=2)
-            ttk.Button(controls,text='Дія [E]',command=lambda:self.act(self.game.search)).pack(side='left',padx=2)
+            ttk.Button(controls,text=tr('afterdays.0141'),command=lambda:self.act(self.game.search)).pack(side='left',padx=2)
             side = tk.Frame(body, bg=PANEL, width=380)
             side.grid(row=0,column=1,sticky='nsew',padx=(6,0))
             side.pack_propagate(False)
@@ -1139,13 +1075,13 @@ def launch(test_hook=None):
             self.tabs = ttk.Notebook(side)
             self.tabs.pack(fill='both', expand=True)
             self.world_tab, self.inv_tab, self.loot_tab, self.quest_tab = [ttk.Frame(self.tabs) for _ in range(4)]
-            for tab, title in [(self.world_tab, 'Місцевість'), (self.inv_tab, 'Екіпіровка'), (self.loot_tab, 'Здобич'), (self.quest_tab, 'Завдання')]:
+            for tab, title in [(self.world_tab, tr('afterdays.0142')), (self.inv_tab, tr('afterdays.0143')), (self.loot_tab, tr('afterdays.0144')), (self.quest_tab, tr('afterdays.0145'))]:
                 key={self.world_tab:'site',self.inv_tab:'backpack',self.loot_tab:'loot',self.quest_tab:'journal'}[tab]
                 art=sprites.photo(root,key,16)
                 self.tabs.add(tab,text=title,**({'image':art,'compound':'left'} if art else {}))
             import frontier_ui
             self.player_tab = ttk.Frame(self.tabs)
-            self.tabs.add(self.player_tab,text='Гравець')
+            self.tabs.add(self.player_tab,text=tr('afterdays.0146'))
             self.player_panel=frontier_ui.PlayerPanel(self.player_tab,self)
             self.player_panel.pack(fill='both',expand=True)
             self.cartographer=lambda:frontier_ui.cartographer(self)
@@ -1166,7 +1102,7 @@ def launch(test_hook=None):
             self.city_info.pack(fill='x', padx=12, pady=8)
             self.services = adventure_ui.Services(self.world_tab,self)
             self.services.pack(fill='x',padx=6,pady=4)
-            tk.Label(self.world_tab, text='НАЙБЛИЖЧІ МІСТА', bg=PANEL, fg=GOLD).pack(anchor='w', padx=12, pady=(20, 8))
+            tk.Label(self.world_tab, text=tr('afterdays.0147'), bg=PANEL, fg=GOLD).pack(anchor='w', padx=12, pady=(20, 8))
             self.cities_label = tk.Label(self.world_tab, bg=PANEL, fg=MUTED, justify='left')
             self.cities_label.pack(anchor='w', padx=12)
             self.inv_panel = visuals.EquipmentPanel(self.inv_tab, self)
@@ -1177,9 +1113,9 @@ def launch(test_hook=None):
             self.loot_list.pack(fill='both',expand=True,padx=6,pady=6)
             self.loot_detail=refinement_ui.Detail(self.loot_tab,height=8)
             self.loot_detail.pack(fill='x',padx=8)
-            ttk.Button(self.loot_tab, text='Забрати вибране', command=self.collect_selected).pack(fill='x', padx=10, pady=5)
-            ttk.Button(self.loot_tab, text='Забрати все, що вміститься', command=self.collect_all).pack(fill='x', padx=10, pady=5)
-            tk.Label(self.loot_tab, text='Здобич доступна після бою. Незабране\nвтрачається при наступному переході.\nМожна звільнити вагу в інвентарі.', bg=PANEL, fg=MUTED, justify='left').pack(padx=10, pady=12)
+            ttk.Button(self.loot_tab, text=tr('afterdays.0148'), command=self.collect_selected).pack(fill='x', padx=10, pady=5)
+            ttk.Button(self.loot_tab, text=tr('afterdays.0149'), command=self.collect_all).pack(fill='x', padx=10, pady=5)
+            tk.Label(self.loot_tab, text=tr('afterdays.0150'), bg=PANEL, fg=MUTED, justify='left').pack(padx=10, pady=12)
             logframe = tk.Frame(root, bg=PANEL)
             logframe.pack(fill='x', padx=18, pady=(0, 12))
             self.logbox = tk.Text(logframe, height=3, bg=PANEL, fg=MUTED, relief='flat', font=('Segoe UI', 10), padx=10, pady=6, state='disabled')
@@ -1225,26 +1161,26 @@ def launch(test_hook=None):
             g = self.game
             weapon = g.weapon
             ws = stats(weapon) if weapon else {}
-            self.status.config(text=f'HP {g.hp}/{g.max_hp}    |    Захист {g.defense}    |    Вага {g.weight:.1f}/{g.capacity:.0f} кг    |    {g.money} кр.    |    Рівень {g.level} · XP {g.xp}/{progression.xp_for_level(g.level+1)}    |    Хід {g.turn}')
+            self.status.config(text=tr('afterdays.0151', v0=g.hp, v1=g.max_hp, v2=g.defense, v3=g.weight, v4=g.capacity, v5=g.money, v6=g.level, v7=g.xp, v8=progression.xp_for_level(g.level + 1), v9=g.turn))
             combat = g.battle is not None
             self.end_button.config(state='normal' if combat else 'disabled')
             self.flee_button.config(state='normal' if combat else 'disabled')
-            self.tabs.tab(self.loot_tab, text=f'Здобич {len(g.loot)}')
+            self.tabs.tab(self.loot_tab, text=tr('afterdays.0152', v0=len(g.loot)))
             self.services.refresh()
             self.location.config(text=g.city_name(g.city) if g.city is not None else TERRAINS[g.world[g.y][g.x]][1])
-            self.city_info.config(text=(f'Особлива локація. Тут вас чекає {g.current_site["npc"]}.' if g.current_site else 'Безпечна зона. Торгівля, сховище та відпочинок.\nНові доручення — кожні 100 ходів.' if g.city is not None else
-                                      'Обшук може дати спорядження та припаси,\nале шум приваблює мутантів.\nКожні 8 переходів витрачаються консерви.') +
-                                      f'\n\nКоординати: {g.x}, {g.y} · зона L{g.region_level}\nАктивна: {weapon["name"] if weapon else "немає зброї"}\nШкода {ws.get("damage", 0)} · дальність {ws.get("range", 0)}\nПостріл: {weapon["ap"] if weapon else "—"} ОД')
+            self.city_info.config(text=(tr('afterdays.0153', v0=g.current_site['npc']) if g.current_site else tr('afterdays.0154') if g.city is not None else
+                                      tr('afterdays.0155')) +
+                                      tr('afterdays.0157', v0=g.x, v1=g.y, v2=g.region_level, v3=weapon['name'] if weapon else tr('afterdays.0156'), v4=ws.get('damage', 0), v5=ws.get('range', 0), v6=weapon['ap'] if weapon else '—'))
             if weapon:
                 ammo_type=weapon.get('ammo_type','pistol')
-                self.city_info.config(text=self.city_info.cget('text')+f'\n{progression.AMMO[ammo_type][0]}: {g.count("ammo",ammo_type)} · стан {weapon.get("durability",100):.0f}%')
-            self.city_info.config(text=self.city_info.cget('text')+f'\n☢ Захист: {g.rad_turns} ходів')
+                self.city_info.config(text=self.city_info.cget('text')+tr('afterdays.0158', v0=progression.AMMO[ammo_type][0], v1=g.count('ammo', ammo_type), v2=weapon.get('durability', 100)))
+            self.city_info.config(text=self.city_info.cget('text')+tr('afterdays.0159', v0=g.rad_turns))
             near = sorted(((n,pos) for n,pos in enumerate(g.cities) if n in g.known_cities), key=lambda entry: math.dist(entry[1], (g.x, g.y)))[:3]
             self.cities_label.config(text='\n'.join(f'◆ {self.game.city_name(n)} ({p[0]}, {p[1]})' for n,p in near))
             self.player_panel.refresh()
             self.inv_panel.refresh()
             self.quest_panel.refresh()
-            self.tabs.tab(self.quest_tab, text='Завдання')
+            self.tabs.tab(self.quest_tab, text=tr('afterdays.0160'))
             self.loot_list.set_items(g.loot)
             self.logbox.config(state='normal')
             self.logbox.delete('1.0', 'end')
@@ -1269,7 +1205,7 @@ def launch(test_hook=None):
 
         def storage(self):
             if self.game.regular_city and not self.game.battle:
-                win=self.popup('Власне сховище','940x680')
+                win=self.popup(tr('afterdays.0161'),'940x680')
                 adventure_ui.Storage(win,self).pack(fill='both',expand=True)
 
         def perks(self):
@@ -1278,7 +1214,7 @@ def launch(test_hook=None):
 
         def technician(self):
             if not self.game.battle and self.game.city in self.game.technicians:
-                win=self.popup('Технік · майстерня','790x690')
+                win=self.popup(tr('afterdays.0162'),'790x690')
                 refinement_ui.Technician(win,self).pack(fill='both',expand=True)
 
         def description(self,item):
@@ -1292,7 +1228,7 @@ def launch(test_hook=None):
 
         def equip_selected(self):
             if self.game.battle:
-                self.act(lambda: self.game.log('Зміна екіпіровки недоступна під час бою.'))
+                self.act(lambda: self.game.log(tr('afterdays.0163')))
                 return
             item_id = self.selected_id()
             item = self.game.find(item_id)
@@ -1302,7 +1238,7 @@ def launch(test_hook=None):
             if slot:
                 self.act(lambda: self.game.unequip(slot))
             elif item['kind'] == 'weapon':
-                answer = messagebox.askyesnocancel('Слот зброї', 'Встановити у слот I?\n«Ні» — у слот II.', parent=self.root)
+                answer = messagebox.askyesnocancel(tr('afterdays.0164'), tr('afterdays.0165'), parent=self.root)
                 if answer is not None:
                     self.act(lambda: self.game.equip(item_id, 'weapon1' if answer else 'weapon2'))
             elif item['kind'] in ('armor', 'helmet'):
@@ -1317,7 +1253,7 @@ def launch(test_hook=None):
                     self.refresh()
                     import inspection_ui
                     inspection_ui.result(self,found,animate=True)
-                else:self.game.log('Скриню можна відкрити поза боєм.');self.refresh()
+                else:self.game.log(tr('afterdays.0166'));self.refresh()
                 return
             if item and item['kind'] in ('med', 'food', 'rad'):
                 self.act(lambda: self.game.use(item['kind']))
@@ -1325,10 +1261,10 @@ def launch(test_hook=None):
         def drop_selected(self):
             item = self.game.find(self.selected_id())
             if item and item['kind'] == 'quest':
-                self.act(lambda: self.game.log('Квестові предмети захищені від втрати.'))
+                self.act(lambda: self.game.log(tr('afterdays.0167')))
             elif self.game.battle:
-                self.act(lambda: self.game.log('Викидати спорядження можна поза боєм.'))
-            elif item and item in self.game.bag and messagebox.askyesno('Викинути', f'Викинути {item["name"]} разом із модулями?', parent=self.root):
+                self.act(lambda: self.game.log(tr('afterdays.0168')))
+            elif item and item in self.game.bag and messagebox.askyesno(tr('afterdays.0169'), tr('afterdays.0170', v0=item['name']), parent=self.root):
                 self.game.drop_item(item['id'])
                 self.refresh()
 
@@ -1337,10 +1273,10 @@ def launch(test_hook=None):
             if self.game.battle or not item or item['kind'] not in ('weapon','armor','helmet'):
                 return
             if item not in self.game.bag:
-                self.act(lambda:self.game.log('Спочатку зніміть предмет у рюкзак.'))
+                self.act(lambda:self.game.log(tr('afterdays.0171')))
                 return
             count=self.game.salvage_yield(item)
-            if messagebox.askyesno('Розібрати спорядження',f'Розібрати {item["name"]} на {count} одиниць матеріалу ({"запчастини" if item["kind"]=="weapon" else "фрагменти"})? Корпус зникне, модулі повернуться.',parent=self.root):
+            if messagebox.askyesno(tr('afterdays.0172'),tr('afterdays.0175', v0=item['name'], v1=count, v2=tr('afterdays.0173') if item['kind'] == 'weapon' else tr('afterdays.0174')),parent=self.root):
                 self.act(lambda:self.game.dismantle(item['id']))
 
         def popup(self, title, geometry):
@@ -1368,25 +1304,25 @@ def launch(test_hook=None):
             if not item or 'slots' not in item:
                 return
             if self.game.battle:
-                self.act(lambda: self.game.log('Модифікації доступні лише поза боєм.'))
+                self.act(lambda: self.game.log(tr('afterdays.0176')))
                 return
-            win = self.popup('Модифікації · ' + item['name'], '770x730')
+            win = self.popup(tr('afterdays.0177') + item['name'], '770x730')
             panel = visuals.ModificationPanel(win, self, item['id'])
             panel.pack(fill='both', expand=True)
 
         def mayor(self):
             if self.game.city not in self.game.mayors or self.game.battle:return
-            win=self.popup('Доручення · '+self.game.city_name(self.game.city),'750x670')
+            win=self.popup(tr('afterdays.0178')+self.game.city_name(self.game.city),'750x670')
             refinement_ui.QuestCards(win,self,mayor=True).pack(fill='both',expand=True)
 
         def atlas(self):
             import frontier_ui
-            win = self.popup('Атлас Пустки · міста й відкриті локації', '1000x730')
-            tk.Label(win, text='АТЛАС / ДАЛІ ВІД СТАРТОВОГО МІСТА → НЕБЕЗПЕЧНІШЕ / ! ЗАВДАННЯ / ★ УНІКАЛЬНЕ', bg=PANEL, fg=GOLD,
+            win = self.popup(tr('afterdays.0179'), '1000x730')
+            tk.Label(win, text=tr('afterdays.0180'), bg=PANEL, fg=GOLD,
                      font=('Segoe UI', 12, 'bold')).pack(pady=10)
             c = tk.Canvas(win, bg=BG, highlightthickness=0)
             c.pack(fill='both', expand=True, padx=12)
-            detail = tk.Label(win, text='Бірюзові лінії — відкрита мережа метро. Клік на місто — торговці й мер. Клік на позначку — завдання. Переміщення тут немає.',
+            detail = tk.Label(win, text=tr('afterdays.0181'),
                               bg=PANEL, fg=TEXT, wraplength=950, height=3)
             detail.pack(fill='x', padx=12, pady=8)
             layout = {}
@@ -1430,10 +1366,10 @@ def launch(test_hook=None):
                 pos=[int((event.x-ox)//t), int((event.y-oy)//t)]
                 if pos in self.game.cities and self.game.cities.index(pos) in self.game.known_cities:
                     n=self.game.cities.index(pos)
-                    detail.config(text=f'{self.game.city_name(n)} ({pos[0]}, {pos[1]}) · '+', '.join(MERCHANTS[m] for m in self.game.city_merchants[n])+(' · Мер: є' if n in self.game.mayors else ' · Мера немає')+(' · Технік: є' if n in self.game.technicians else '')+f' · Зона L{self.game.region_at(pos[0],pos[1])}')
+                    detail.config(text=f'{self.game.city_name(n)} ({pos[0]}, {pos[1]}) · '+', '.join(MERCHANTS[m] for m in self.game.city_merchants[n])+(tr('afterdays.0182') if n in self.game.mayors else tr('afterdays.0183'))+(tr('afterdays.0184') if n in self.game.technicians else '')+tr('afterdays.0185', v0=self.game.region_at(pos[0], pos[1])))
                 else:
                     q=next((q for q in self.game.quests if q.get('pos') == pos and q['status'] == 'active'), None)
-                    detail.config(text=self.game.quest_text(q).replace('\n', ' · ') if q else f'Координати: {pos[0]}, {pos[1]} · Зона L{self.game.region_at(pos[0],pos[1])}')
+                    detail.config(text=self.game.quest_text(q).replace('\n', ' · ') if q else tr('afterdays.0186', v0=pos[0], v1=pos[1], v2=self.game.region_at(pos[0], pos[1])))
             c.bind('<Configure>',paint)
             c.bind('<Button-1>',click)
 
@@ -1484,9 +1420,9 @@ def launch(test_hook=None):
                         if q not in occupied and q not in reachable:
                             reachable[q] = reachable[p]+1
                             queue.append(q)
-                self.map_title.config(text=f'БОЙОВА ЗОНА  /  РАУНД {b["round"]}   /   ОД {b["ap"]}/6')
+                self.map_title.config(text=tr('afterdays.0187', v0=b['round'], v1=b['ap']))
             else:
-                self.map_title.config(text='ПУСТКА / ☢ РАДІАЦІЯ / M — АТЛАС')
+                self.map_title.config(text=tr('afterdays.0188'))
             for sy in range(rows):
                 for sx in range(cols):
                     x, y = sx+self.vx, sy+self.vy
@@ -1540,8 +1476,8 @@ def launch(test_hook=None):
                 if g.traveler and g.traveler['pos'] == [g.x,g.y]:
                     px,py=center((g.x,g.y))
                     c.create_text(px+t*.4,py-t*.5,text='¤',fill='#f1d383',font=('Segoe UI',16,'bold'))
-            self.hint.config(text=('Клік на землю — рух · клік на ворога — постріл · підсвічені клітинки доступні за ОД\nЛівий край — евакуація. Наведіть на ворога, щоб побачити шанс влучання.' if b else
-                                   'WASD / стрілки — крок · клік на мапу — один крок у вибраному напрямку\nE — обшук · I — інвентар · ◆ — міста. Дороги безпечніші за руїни.'))
+            self.hint.config(text=(tr('afterdays.0189') if b else
+                                   tr('afterdays.0190')))
 
         def cell(self, event):
             if self.game.battle:
@@ -1554,8 +1490,8 @@ def launch(test_hook=None):
                 e = next((e for e in self.game.battle['enemies'] if tuple(e['pos']) == pos), None)
                 if e:
                     valid, reason, chance = self.game.shot_info(e)
-                    self.hint.config(text=f'{e["name"]} · L{e.get("level",1)} · HP {e["hp"]}/{e["max_hp"]} · шкода {e["damage"]} · Атака {e.get("attack",0)} · Захист {e.get("defense",0)} · дальність {e["range"]}\n' +
-                                     (f'Шанс: {chance}%. Постріл: {self.game.weapon["ap"]} ОД. ' if valid else reason+' ') + adventure.resistance_text(e)+f' · Нагорода: {self.game.enemy_xp(e)} XP')
+                    self.hint.config(text=tr('afterdays.0191', v0=e['name'], v1=e.get('level', 1), v2=e['hp'], v3=e['max_hp'], v4=e['damage'], v5=e.get('attack', 0), v6=e.get('defense', 0), v7=e['range']) +
+                                     (tr('afterdays.0192', v0=chance, v1=self.game.weapon['ap']) if valid else reason+' ') + adventure.resistance_text(e)+tr('afterdays.0193', v0=self.game.enemy_xp(e)))
 
         def world_step(self, dx, dy):
             g = self.game
@@ -1563,7 +1499,7 @@ def launch(test_hook=None):
                 g.step(dx,dy)
                 return
             if g.loot:
-                if not messagebox.askyesno('Залишити здобич?', 'Незабрана здобич залишиться тут і буде втрачена. Продовжити?', parent=self.root):
+                if not messagebox.askyesno(tr('afterdays.0194'), tr('afterdays.0195'), parent=self.root):
                     return
                 g.loot.clear()
             g.step(dx, dy)
@@ -1621,70 +1557,47 @@ def launch(test_hook=None):
         def save(self):
             try:
                 self.game.save(save_path)
-                self.game.log('Гру збережено. F9 — завантажити.')
+                self.game.log(tr('afterdays.0196'))
             except OSError as exc:
-                messagebox.showerror('Не вдалося зберегти', str(exc), parent=self.root)
+                messagebox.showerror(tr('afterdays.0197'), str(exc), parent=self.root)
             self.refresh()
 
         def load(self):
             if not save_path.exists():
-                messagebox.showinfo('Збереження', 'Збереженої гри ще немає.', parent=self.root)
+                messagebox.showinfo(tr('afterdays.0198'), tr('afterdays.0199'), parent=self.root)
                 return
-            if not messagebox.askyesno('Завантажити', 'Замінити поточну гру збереженою?', parent=self.root):
+            if not messagebox.askyesno(tr('afterdays.0200'), tr('afterdays.0201'), parent=self.root):
                 return
             try:
                 loaded = Game.load(save_path)
                 self.game = loaded
                 self.perk_prompted = -1
-                self.game.log('Збереження завантажено.')
+                self.game.log(tr('afterdays.0202'))
                 self.refresh()
             except (OSError, ValueError, KeyError, TypeError) as exc:
-                messagebox.showerror('Не вдалося завантажити', str(exc), parent=self.root)
+                messagebox.showerror(tr('afterdays.0203'), str(exc), parent=self.root)
 
         def new(self):
-            if messagebox.askyesno('Нова гра', 'Почати нову гру? Незбережений прогрес буде втрачено.', parent=self.root):
+            if messagebox.askyesno(tr('afterdays.0204'), tr('afterdays.0205'), parent=self.root):
                 self.game = Game()
                 self.perk_prompted = -1
                 self.refresh()
 
         def close(self):
-            answer = messagebox.askyesnocancel('Afterdays', 'Зберегти гру перед виходом?', parent=self.root)
+            answer = messagebox.askyesnocancel('Afterdays', tr('afterdays.0206'), parent=self.root)
             if answer is None:
                 return
             if answer:
                 try:
                     self.game.save(save_path)
                 except OSError as exc:
-                    messagebox.showerror('Не вдалося зберегти', str(exc), parent=self.root)
+                    messagebox.showerror(tr('afterdays.0207'), str(exc), parent=self.root)
                     return
             self.root.destroy()
 
         def help(self):
-            messagebox.showinfo('Afterdays · Керування',
-                'НОВЕ У v0.5\n25 HP на старті; +5 за рівень. Аптечка: 50% максимуму.\n'
-                'Технік: модулі з матеріалів, ремонт до 25/50/100%.\n'
-                'Радіопротектор: 10 ходів захисту. Мапу приховує туман.\n'
-                'Перки кожні 2 рівні. Tab у бою без витрати ОД.\n'
-                'Міста: сховище й ілюстровані розділи. Квести оновлюються кожні 100 ходів.\n'
-                'Водойми й скелі непрохідні. Радіація завдає шкоди.\n\n'
-                'СПОРЯДЖЕННЯ\nНабої продає коваль; стеки й торгівля підтримують кількість.\n'
-                'Техніки ремонтують; корпуси можна розбирати. Перки: кожен 2-й рівень.\n'
-                'Далі від старту небезпечніше, спорядження обмежене вашим рівнем.\n\n'
-                'ЕКІПІРОВКА\nI — екіпіровка з перетягуванням; J — завдання; M — атлас.\n'
-                'Модулі перетягуються у слоти та назад у нижню панель.\n'
-                'Мери дають завдання, мандрівні торговці — знижку 50%.\n\n'
-                'ПОДОРОЖ\nWASD / стрілки або клік — один крок. E — обшук, I — інвентар.\n'
-                'Кожні 8 переходів: консерви дають +10 HP; без їжі −5 HP.\n'
-                'У містах є коваль, торговець, барига та ночівля.\n\n'
-                'БІЙ\nБаза 6 ОД + перки. Рух: 1 ОД/клітинка; постріл: 2–4 ОД.\n'
-                'Клік на ворога — стріляти. Перепони блокують постріли.\n'
-                'Tab — інша зброя (безкоштовно). H — аптечка (2 ОД).\n'
-                'Space — хід ворогів. Втеча: лівий край + 2 ОД.\n\n'
-                'СПОРЯДЖЕННЯ\nВиберіть предмет в інвентарі → Модифікації.\n'
-                'Бонуси модулів складаються. Вага екіпіровки входить у ліміт 35 кг.\n'
-                'Після перемоги заберіть здобич перед переходом.\n\n'
-                'F5 — зберегти; F9 — завантажити.\n'
-                'Це sandbox-прототип: набої витрачаються, сюжетного фіналу немає.', parent=self.root)
+            messagebox.showinfo(tr('afterdays.0208'),
+                tr('afterdays.0209'), parent=self.root)
 
     root = tk.Tk()
     app = App(root)
@@ -1697,5 +1610,5 @@ if __name__ == '__main__':
     try:
         launch()
     except ImportError:
-        print('Потрібен Tkinter. Windows: перевстановіть Python з компонентом Tcl/Tk. Linux: установіть python3-tk.')
+        print(tr('afterdays.0210'))
         sys.exit(1)

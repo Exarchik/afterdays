@@ -1,6 +1,8 @@
+from i18n import t as tr
 """Canvas art and drag-and-drop inventory. No external image files or packages."""
 import math
 import sprites
+import content
 import terrain_tiles
 import tkinter as tk
 from tkinter import ttk, messagebox
@@ -35,9 +37,9 @@ def icon(c, item, x, y, size=48):
     def oval(*p, **kw):
         c.create_oval(*coords(p), **kw)
     if k == 'weapon':
-        laser = any(s in name for s in ('Лазер', 'Плазм', 'Іонний', 'Гаус'))
-        pistol = any(s in name for s in ('Пістолет', 'пістолет', 'Револьвер'))
-        if 'Арбалет' in name:
+        laser = any(s in name for s in (tr('visuals.0001'), tr('visuals.0002'), tr('visuals.0003'), tr('visuals.0004')))
+        pistol = any(s in name for s in (tr('visuals.0005'), tr('visuals.0006'), tr('visuals.0007')))
+        if tr('visuals.0008') in name:
             line(8, 12, 23, 32, 8, 52, fill=color, width=max(2, size/16))
             line(8, 12, 8, 52, fill=metal)
             rect(8, 28, 60, 35, fill=metal, outline=color)
@@ -50,14 +52,14 @@ def icon(c, item, x, y, size=48):
                 poly(4, 26, 19, 25, 19, 35, 4, 42, fill='#736a52', outline=color)
                 rect(39, 35, 46, 45, fill=metal, outline='')
                 line(31, 19, 45, 19, fill=metal, width=3)
-            if 'Дробовик' in name:
+            if tr('visuals.0009') in name:
                 line(41, 33, 61, 33, fill=metal, width=3)
-            if 'Кулемет' in name:
+            if tr('visuals.0010') in name:
                 oval(27, 32, 47, 52, fill='#555f52', outline=color)
-            if 'Револьвер' in name:
+            if tr('visuals.0011') in name:
                 oval(25, 23, 38, 36, fill=metal, outline=color)
             if laser:
-                glow = '#72e3db' if 'Плазм' not in name else '#eec670'
+                glow = '#72e3db' if tr('visuals.0012') not in name else '#eec670'
                 rect(24, 26, 44, 31, fill=glow, outline='')
                 oval(51, 21, 60, 34, fill=dark, outline=glow, width=2)
         for n, mod in enumerate(item.get('modules', [])):
@@ -65,8 +67,8 @@ def icon(c, item, x, y, size=48):
             c.create_rectangle(mx, y+size*.90, mx+size*.12, y+size*.96,
                                fill=rules.RARITIES[mod['rarity']][1], outline='')
     elif k == 'armor':
-        heavy = any(s in name for s in ('Бастіон', 'Атлант', 'Черепаха', 'Композит'))
-        if 'Плащ' in name or 'Костюм' in name:
+        heavy = any(s in name for s in (tr('visuals.0013'), tr('visuals.0014'), tr('visuals.0015'), tr('visuals.0016')))
+        if tr('visuals.0017') in name or tr('visuals.0018') in name:
             poly(18, 7, 46, 7, 59, 57, 5, 57, fill='#485548', outline=color, width=2)
         poly(19, 10, 27, 15, 37, 15, 45, 10, 57, 21, 47, 29, 46, 55, 18, 55, 17, 29, 7, 21,
              fill='#667260' if heavy else '#736d55', outline=color, width=2)
@@ -77,12 +79,12 @@ def icon(c, item, x, y, size=48):
             rect(46, 15, 59, 31, fill=metal, outline=color)
         line(21, 49, 43, 49, fill='#bdab76', width=2)
     elif k == 'helmet':
-        hood = 'Каптур' in name
+        hood = tr('visuals.0019') in name
         poly(12, 30, 16, 14, 26, 7, 40, 7, 51, 17, 54, 42, 45, 55, 19, 55, 10, 43,
              fill='#696957' if hood else '#718178', outline=color, width=2)
         rect(16, 25, 48, 36, fill='#172824', outline=color)
         line(19, 29, 43, 29, fill='#90ccc4', width=2)
-        if 'Маска' in name or 'Циклоп' in name:
+        if tr('visuals.0020') in name or tr('visuals.0021') in name:
             oval(24, 35, 41, 51, fill=dark, outline=metal)
             line(28, 38, 28, 47, 32, 47, 32, 38, 36, 38, 36, 47, fill=metal)
     elif k == 'ammo':
@@ -158,7 +160,7 @@ def icon(c, item, x, y, size=48):
 
 
 def monster(c, enemy, x, y, size):
-    if sprites.draw(c,'monster:'+str(enemy.get('kind',0)),x,y,size):
+    if sprites.draw(c,content.monster_id(enemy),x,y,size):
         if enemy.get('grade','normal')!='normal':
             c.create_oval(x,y,x+size,y+size,outline='#dc8ef5' if enemy['grade']=='mythic' else '#eac863',width=2)
         return
@@ -318,7 +320,7 @@ class ItemGrid(tk.Frame):
             icon(c,item,x+(cell-40)/2,y+14,40)
             if item['kind'] in ('weapon','armor','helmet','module'):
                 c.create_text(x+6,y+9,text=f'L{item.get("level",1)}',fill=TEXT,font=('Segoe UI',8,'bold'),anchor='w')
-            if item['kind']=='weapon':c.create_text(x+cell-6,y+9,text=f'{item.get("ap",2)} ОД',fill=TEXT,font=('Segoe UI',8,'bold'),anchor='e')
+            if item['kind']=='weapon':c.create_text(x+cell-6,y+9,text=tr('visuals.0022', v0=item.get('ap', 2)),fill=TEXT,font=('Segoe UI',8,'bold'),anchor='e')
             elif item.get('qty',1)>1:c.create_text(x+cell-6,y+9,text=f'×{item["qty"]}',fill=TEXT,font=('Segoe UI',8,'bold'),anchor='e')
             if item['id']==self.selection:c.create_rectangle(x+5,y+16,x+9,y+20,fill='#ffffff',outline='')
             short = item['name'][:10] + ('…' if len(item['name']) > 10 else '')
@@ -375,7 +377,7 @@ class EquipmentPanel(tk.Frame):
         self.paper = tk.Canvas(self, height=218, bg='#17221d', highlightthickness=0)
         self.paper.pack(fill='x', padx=6, pady=(5, 0))
         self.paper.bind('<Configure>', lambda e: self.draw())
-        tk.Label(self, text='Перетягніть предмет на силует / назад у рюкзак', bg=PANEL, fg=MUTED, font=('Segoe UI', 8)).pack(pady=2)
+        tk.Label(self, text=tr('visuals.0023'), bg=PANEL, fg=MUTED, font=('Segoe UI', 8)).pack(pady=2)
         self.grid = ItemGrid(self, self.select, height=104)
         self.grid.pack(fill='both', expand=True, padx=6)
         from refinement_ui import Detail
@@ -383,9 +385,9 @@ class EquipmentPanel(tk.Frame):
         self.details.pack(fill='x', padx=8, pady=3)
         bar = tk.Frame(self, bg=PANEL)
         bar.pack(fill='x', padx=4, pady=4)
-        for n, (label, fn) in enumerate([('Вдягти / зняти', app.equip_selected), ('Модифікації', app.modify),
-                                       ('Використати', app.use_selected), ('Викинути', app.drop_selected),
-                                       ('Розібрати', app.dismantle_selected), ('Перки', app.perks)]):
+        for n, (label, fn) in enumerate([(tr('visuals.0024'), app.equip_selected), (tr('visuals.0025'), app.modify),
+                                       (tr('visuals.0026'), app.use_selected), (tr('visuals.0027'), app.drop_selected),
+                                       (tr('visuals.0028'), app.dismantle_selected), (tr('visuals.0029'), app.perks)]):
             ttk.Button(bar, text=label, command=fn).grid(row=n//2, column=n%2, sticky='ew', padx=2, pady=2)
         bar.columnconfigure((0, 1), weight=1)
         self.drag = Drag(self, self.drop)
@@ -439,7 +441,7 @@ class EquipmentPanel(tk.Frame):
                 c.create_text((x+d)/2, (y+e)/2, text='+', fill='#708573', font=('Segoe UI', 20))
             if slot.startswith('weapon'):
                 c.create_text((x+d)/2, e+12, text=('▶ ' if g.active == slot else '')+rules.SLOTS[slot], fill=color, font=('Segoe UI', 9))
-        c.create_text(mid, 215, text=f'ЗАХИСТ {g.defense}  ·  {g.weight:.1f}/{g.capacity:.0f} КГ', fill=MUTED, font=('Segoe UI', 8))
+        c.create_text(mid, 215, text=tr('visuals.0030', v0=g.defense, v1=g.weight, v2=g.capacity), fill=MUTED, font=('Segoe UI', 8))
 
     def inspect_paper(self,event):
         slot=next((s for s,(a,b,d,e) in self.slots.items() if a<=event.x<=d and b<=event.y<=e),None)
@@ -462,7 +464,7 @@ class EquipmentPanel(tk.Frame):
     def drop(self, payload, xr, yr):
         g = self.app.game
         if g.battle:
-            self.app.act(lambda: g.log('Перетягування екіпіровки доступне поза боєм.'))
+            self.app.act(lambda: g.log(tr('visuals.0031')))
             return
         if inside(self.paper, xr, yr):
             x, y = xr-self.paper.winfo_rootx(), yr-self.paper.winfo_rooty()
@@ -490,15 +492,15 @@ class ModificationPanel(tk.Frame):
         from refinement_ui import Detail
         self.summary = Detail(self,height=4)
         self.summary.pack(fill='x', padx=12, pady=5)
-        tk.Label(self, text='СУМІСНІ МОДУЛІ • перетягніть у слот; зайнятий слот замінить модуль', bg=PANEL, fg=GOLD).pack(pady=6)
+        tk.Label(self, text=tr('visuals.0032'), bg=PANEL, fg=GOLD).pack(pady=6)
         self.grid = ItemGrid(self, self.select, height=175, columns=8)
         self.grid.pack(fill='both', expand=True, padx=10)
         self.preview = tk.Label(self, bg=PANEL, fg=TEXT, height=2, wraplength=710, justify='left')
         self.preview.pack(fill='x', padx=12, pady=5)
         bar = tk.Frame(self, bg=PANEL)
         bar.pack(fill='x', padx=10, pady=8)
-        ttk.Button(bar, text='Установити вибраний', command=self.install_selected).pack(side='left', padx=4)
-        ttk.Button(bar, text='Зняти вибраний', command=self.remove_selected).pack(side='left', padx=4)
+        ttk.Button(bar, text=tr('visuals.0033'), command=self.install_selected).pack(side='left', padx=4)
+        ttk.Button(bar, text=tr('visuals.0034'), command=self.remove_selected).pack(side='left', padx=4)
         self.drag = Drag(self, self.drop)
         self.grid.canvas.bind('<Button-1>', self.press_bag)
         self.grid.canvas.bind('<B1-Motion>', self.drag.move)
@@ -539,7 +541,7 @@ class ModificationPanel(tk.Frame):
                 c.create_text(x+49, y+62, text=mod['name'][:12], fill=color, font=('Segoe UI', 8))
             else:
                 c.create_text(x+49, y+31, text='+', fill=color, font=('Segoe UI', 23))
-                c.create_text(x+49, y+65, text=f'СЛОТ {n+1}', fill=MUTED, font=('Segoe UI', 8))
+                c.create_text(x+49, y+65, text=tr('visuals.0035', v0=n + 1), fill=MUTED, font=('Segoe UI', 8))
 
     def select(self, item_id, sign=1):
         self.selected_mod = item_id
@@ -605,8 +607,8 @@ class QuestPanel(tk.Frame):
         self.tree.bind('<Button-1>',self.click)
         self.detail=tk.Label(self,bg=PANEL,fg=TEXT,wraplength=345,justify='left',anchor='nw',height=12)
         self.detail.pack(fill='x',padx=10,pady=8)
-        ttk.Button(self,text='Здати завдання замовнику',command=self.turn_in).pack(fill='x',padx=8,pady=5)
-        ttk.Button(self,text='Атлас і позначки [M]',command=app.atlas).pack(fill='x',padx=8,pady=5)
+        ttk.Button(self,text=tr('visuals.0036'),command=self.turn_in).pack(fill='x',padx=8,pady=5)
+        ttk.Button(self,text=tr('visuals.0037'),command=app.atlas).pack(fill='x',padx=8,pady=5)
 
     def selected(self):
         selection=self.tree.selection()
@@ -628,7 +630,7 @@ class QuestPanel(tk.Frame):
             tag='unique' if q.get('unique') else 'ready' if g.quest_ready(q) else ''
             self.tree.insert('','end',iid=q['id'],text=f'{"★ " if q.get("unique") else ""}{mark} {q["title"]}',tags=(tag,))
         done=[q for q in g.quests if q['status']=='done']
-        self.tree.insert('','end',iid='completed',text=f'Завершені завдання ({len(done)})',open=opened,tags=('done',))
+        self.tree.insert('','end',iid='completed',text=tr('visuals.0038', v0=len(done)),open=opened,tags=('done',))
         for q in done:self.tree.insert('completed','end',iid=q['id'],text='✓ '+q['title'],tags=('done',))
         if old and self.tree.exists(old['id']):self.tree.selection_set(old['id'])
         elif any(q['status']!='done' for q in g.quests):self.tree.selection_set(next(q['id'] for q in g.quests if q['status']!='done'))
@@ -636,7 +638,7 @@ class QuestPanel(tk.Frame):
 
     def describe(self):
         q=self.selected()
-        self.detail.config(text=self.app.game.quest_text(q) if q else 'Відвідайте мера або квестодавця. Нові доручення з’являються кожні 100 ходів.')
+        self.detail.config(text=self.app.game.quest_text(q) if q else tr('visuals.0039'))
 
     def turn_in(self):
         q=self.selected()

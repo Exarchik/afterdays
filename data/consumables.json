@@ -1,0 +1,63 @@
+{
+  "item_med": {
+    "kind": "med",
+    "value": 42,
+    "weight": 0.4
+  },
+  "item_food": {
+    "kind": "food",
+    "value": 18,
+    "weight": 0.6
+  },
+  "item_rad": {
+    "kind": "rad",
+    "value": 84,
+    "weight": 0.1
+  },
+  "item_parts": {
+    "kind": "parts",
+    "value": 2,
+    "weight": 0
+  },
+  "item_fragments": {
+    "kind": "fragments",
+    "value": 2,
+    "weight": 0
+  },
+  "ammo_pistol": {
+    "kind": "ammo",
+    "ammo_type": "pistol",
+    "value": 2,
+    "weight": 0.012
+  },
+  "ammo_rifle": {
+    "kind": "ammo",
+    "ammo_type": "rifle",
+    "value": 4,
+    "weight": 0.022
+  },
+  "ammo_shell": {
+    "kind": "ammo",
+    "ammo_type": "shell",
+    "value": 5,
+    "weight": 0.035
+  },
+  "ammo_energy": {
+    "kind": "ammo",
+    "ammo_type": "energy",
+    "value": 7,
+    "weight": 0.015
+  },
+  "ammo_heavy": {
+    "kind": "ammo",
+    "ammo_type": "heavy",
+    "value": 6,
+    "weight": 0.04
+  },
+  "ammo_bolt": {
+    "kind": "ammo",
+    "ammo_type": "bolt",
+    "value": 3,
+    "weight": 0.03
+  }
+}

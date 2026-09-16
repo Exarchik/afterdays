@@ -35,7 +35,7 @@ class AdventureTests(unittest.TestCase):
         self.assertIn('Промах',[n['text'] for n in g.pop_events()])
         g,e=self.combat();e['hp']=1;g.rng.seed(1)
         self.assertTrue(g.shoot(0));self.assertIsNone(g.battle)
-        self.assertEqual(g._last_battle['corpses'],[dict(pos=[3,5],kind=0,grade='normal')])
+        self.assertEqual(g._last_battle['corpses'],[dict(pos=[3,5],kind=0,type_id='monster_rodent',grade='normal')])
         self.assertTrue(any(n['text'].endswith(' XP') for n in g.pop_events()))
 
     def test_enemy_attack_emits_trace_and_player_damage(self):

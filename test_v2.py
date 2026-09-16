@@ -193,7 +193,7 @@ class ExpansionTests(unittest.TestCase):
             self.assertEqual(len(new.cities),12)
             self.assertEqual(len(new.city_merchants),12)
             new.save(p)
-            self.assertEqual(json.loads(p.read_text())['version'],11)
+            self.assertEqual(json.loads(p.read_text())['version'],12)
 
     def test_equipment_mouse_drop_routes(self):
         from visuals import EquipmentPanel

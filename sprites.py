@@ -1,9 +1,13 @@
+from i18n import t as tr
 """PNG atlas access for Tkinter. No Pillow or image processing at runtime."""
 from pathlib import Path
 import json
+import content
 import tkinter as tk
 ROOT=Path(__file__).resolve().parent/'assets'
 MANIFEST=json.loads((ROOT/'manifest.json').read_text(encoding='utf-8')) if (ROOT/'manifest.json').exists() else {}
+MANIFEST.update(content.read('sprites.json'))
+NPC_TEXT_BINDINGS=content.read('sprite_text_bindings.json')
 SIZES=(16,24,32,48,64,96,144,192)
 
 def item_key(item):
@@ -12,11 +16,16 @@ def item_key(item):
     if kind=='sealed':return 'sealed'
     if kind=='ammo':return 'ammo:'+item.get('ammo_type','pistol')
     if kind=='quest':return 'quest_item'
+    ident=item.get('type_id')
+    data=content.EQUIPMENT.get(ident) or content.MODULE_DATA.get(ident)
+    if data:return data['sprite_id']
     return item['name'] if item.get('name') in MANIFEST else kind
 
-NPC_ALIASES={'hunter':'traveler','Друкар':'Архіваріус','Водолаз':'Інженер Лев','Метеоролог':'Астроном','Комірник':'Торговець Рейка','Лікарка':'food','Зв’язківець':'Радистка Ніка','Провідник':'traveler','Енергетик':'tech','Картограф':'Астроном','Майстер':'smith'}
+NPC_ALIASES={'hunter':'traveler',tr('sprites.0001'):tr('sprites.0011'),tr('sprites.0002'):tr('sprites.0012'),tr('sprites.0003'):tr('sprites.0013'),tr('sprites.0004'):tr('sprites.0014'),tr('sprites.0005'):'food',tr('sprites.0006'):tr('sprites.0015'),tr('sprites.0007'):'traveler',tr('sprites.0008'):'tech',tr('sprites.0009'):tr('sprites.0016'),tr('sprites.0010'):'smith'}
 def photo(widget,key,size=48):
     if key and key.startswith('npc:'):key='npc:'+NPC_ALIASES.get(key[4:],key[4:])
+    if key and key.startswith('npc:'):
+        key=next((asset for token,asset in NPC_TEXT_BINDINGS.items() if 'npc:'+tr(token)==key),key)
     if key not in MANIFEST or not hasattr(widget,'tk'):return None
     root=widget._root()
     if not hasattr(root,'_sprite_cache'):root._sprite_cache={};root._sprite_sheets={}
@@ -39,7 +48,7 @@ def draw(canvas,key,x,y,size=48):
     canvas.create_image(x+size/2,y+size/2,image=image,anchor='center')
     return True
 
-BUTTONS=[('Модифікац','modify'),('Розібрати','dismantle'),('Створити модуль','craft'),('Ремонт','repair'),('Забрати','loot'),('Сховище','stash'),('Атлас','site'),('Перки','perk:tactician'),('Аптечка','med'),('Зброя','damage:kinetic'),('Взяти','journal'),('Здати','quest:supplies')]
+BUTTONS=[(tr('sprites.0017'),'modify'),(tr('sprites.0018'),'dismantle'),(tr('sprites.0019'),'craft'),(tr('sprites.0020'),'repair'),(tr('sprites.0021'),'loot'),(tr('sprites.0022'),'stash'),(tr('sprites.0023'),'site'),(tr('sprites.0024'),'perk:tactician'),(tr('sprites.0025'),'med'),(tr('sprites.0026'),'damage:kinetic'),(tr('sprites.0027'),'journal'),(tr('sprites.0028'),'quest:supplies')]
 def decorate(widget):
     for child in widget.winfo_children():
         if child.winfo_class() in ('TButton','Button'):
@@ -50,7 +59,7 @@ def decorate(widget):
 
 def gallery(app):
     from tkinter import ttk
-    win=app.popup('Арти Afterdays · 128 іконок','960x700')
+    win=app.popup(tr('sprites.0029'),'960x700')
     canvas=tk.Canvas(win,bg='#202b27',highlightthickness=0);scroll=ttk.Scrollbar(win,command=canvas.yview)
     scroll.pack(side='right',fill='y');canvas.pack(fill='both',expand=True);canvas.configure(yscrollcommand=scroll.set)
     canvas.bind('<MouseWheel>',lambda e:canvas.yview_scroll(-1 if e.delta>0 else 1,'units'))

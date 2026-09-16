@@ -1,14 +1,14 @@
 """Shared combat and progression balance; no runtime UI dependencies."""
+import content
 import math
-WEAPON_ATTACK={'Пістолет «Попіл»':10,'Револьвер «Ворон»':12,'ПП «Шершень»':8,'Дробовик «Грім»':6,
- 'Гвинтівка «Сторож»':13,'Автомат «Іржа»':10,'Арбалет «Тиша»':11,'Карабін «Пілігрим»':12,
- 'Іонний пістолет «Іскра»':13,'Лазер «Промінь»':14,'Снайперська «Горизонт»':16,
- 'Кулемет «Молот»':9,'Плазмомет «Сонце»':12,'Гаус-карабін «Імпульс»':18}
-MONSTER_STATS=[(6,2),(9,5),(11,3),(12,4),(8,15),(13,8),(14,6),(15,12),(10,10),(12,16),(17,5),(13,9)]
+WEAPON_ATTACK = content.WEAPON_ATTACK
+MONSTER_STATS = content.MONSTER_STATS
 TRAVELER_WEIGHTS=[30,40,22,7,1]
 def attack_for(name,level):return WEAPON_ATTACK[name]+2*(level-1)
 def set_monster(enemy):
- attack,defense=MONSTER_STATS[enemy['kind']]
+ content.identify_monster(enemy)
+ data=content.MONSTER_DATA[enemy['type_id']]
+ attack,defense=data['attack'],data['defense']
  bonus=2*(enemy.get('level',1)-1)+{'normal':0,'rare':2,'mythic':4}[enemy.get('grade','normal')]
  enemy.update(attack=attack+bonus,defense=defense+bonus,armor=defense+bonus)
 def multiplier(attack,defense):

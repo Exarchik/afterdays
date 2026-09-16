@@ -1,3 +1,4 @@
+from i18n import t as tr
 """Live character sheet and cartographer service."""
 import tkinter as tk
 from tkinter import ttk
@@ -7,28 +8,28 @@ from visuals import PANEL, TEXT, GOLD
 
 def player_text(g):
     w=g.weapon;s=p.stats(w) if w else {};base=s.get('damage',0)+2*(g.level-1) if w else 0
-    lines=[f'РІВЕНЬ {g.level} · {g.money} кр.',f'Здоров’я: {g.hp}/{g.max_hp}',
-           f'ОД: {g.battle["ap"] if g.battle else g.max_ap}/{g.max_ap}',
-           f'Захист: {g.defense} · ухилення: {min(45,g.protection_stat("evasion"))}%',
-           f'Регенерація: {g.protection_stat("regen")} HP/раунд',
-           f'Вага: {g.weight:.1f}/{g.capacity:.0f} кг',f'Радіозахист: {g.rad_turns} ходів',
-           '', 'АКТИВНА ЗБРОЯ',w['name'] if w else 'Не екіпірована']
+    lines=[tr('frontier_ui.0001', v0=g.level, v1=g.money),tr('frontier_ui.0002', v0=g.hp, v1=g.max_hp),
+           tr('frontier_ui.0003', v0=g.battle['ap'] if g.battle else g.max_ap, v1=g.max_ap),
+           tr('frontier_ui.0004', v0=g.defense, v1=min(45, g.protection_stat('evasion'))),
+           tr('frontier_ui.0005', v0=g.protection_stat('regen')),
+           tr('frontier_ui.0006', v0=g.weight, v1=g.capacity),tr('frontier_ui.0007', v0=g.rad_turns),
+           '', tr('frontier_ui.0008'),w['name'] if w else tr('frontier_ui.0009')]
     if w:
-        lines += [f'Шкода до захисту цілі: {max(1,base-2)}–{base+2}',
-                  f'Тип: {a.DAMAGE_TYPES[a.damage_type(w)][0]}',
-                  f'Критичний шанс: {min(65,5+s.get("crit",0))}% · множник ×1.6',
-                  f'Точність зброї: {s.get("accuracy",0)}% · перки +{4*g.rank("marksman")} п.п.',
-                  'Фінальна точність залежить від відстані.',
-                  f'Дальність: {s.get("range",0)} · Атака: {s.get("attack",0)}',
-                  f'Постріл: {w["ap"]} ОД · стан: {w.get("durability",100):.0f}%',
+        lines += [tr('frontier_ui.0010', v0=max(1, base - 2), v1=base + 2),
+                  tr('frontier_ui.0011', v0=a.DAMAGE_TYPES[a.damage_type(w)][0]),
+                  tr('frontier_ui.0012', v0=min(65, 5 + s.get('crit', 0))),
+                  tr('frontier_ui.0013', v0=s.get('accuracy', 0), v1=4 * g.rank('marksman')),
+                  tr('frontier_ui.0014'),
+                  tr('frontier_ui.0015', v0=s.get('range', 0), v1=s.get('attack', 0)),
+                  tr('frontier_ui.0016', v0=w['ap'], v1=w.get('durability', 100)),
                   f'{p.AMMO[w.get("ammo_type","pistol")][0]}: {g.count("ammo",w.get("ammo_type","pistol"))}']
-    lines+=['','ПЕРКИ',f'Доступно для вибору: {g.pending_perks}']
+    lines+=['',tr('frontier_ui.0017'),tr('frontier_ui.0018', v0=g.pending_perks)]
     for key,rank in g.perks.items():
-        name,desc=p.PERKS[key];lines += [f'{name} · ранг {rank}',desc]
-    if not g.perks:lines+=['Поки що немає. Новий вибір кожні 2 рівні.']
-    labels={'damage':'шкода','range':'дальність','accuracy':'точність','crit':'крит. шанс','attack':'Атака',
-            'defense':'захист','evasion':'ухилення','vitality':'макс. HP','capacity':'вантажність','regen':'регенерація'}
-    lines+=['','МОДУЛІ ЕКІПІРОВАНИХ РЕЧЕЙ']
+        name,desc=p.PERKS[key];lines += [tr('frontier_ui.0019', v0=name, v1=rank),desc]
+    if not g.perks:lines+=[tr('frontier_ui.0020')]
+    labels={'damage':tr('frontier_ui.0021'),'range':tr('frontier_ui.0022'),'accuracy':tr('frontier_ui.0023'),'crit':tr('frontier_ui.0024'),'attack':tr('frontier_ui.0025'),
+            'defense':tr('frontier_ui.0026'),'evasion':tr('frontier_ui.0027'),'vitality':tr('frontier_ui.0028'),'capacity':tr('frontier_ui.0029'),'regen':tr('frontier_ui.0030')}
+    lines+=['',tr('frontier_ui.0031')]
     for item in g.equipped.values():
         if not item:continue
         for module in item.get('modules',[]):
@@ -46,7 +47,7 @@ class PlayerPanel(tk.Frame):
         self.text.pack(fill='both',expand=True);scroll.config(command=self.text.yview)
     def refresh(self):
         g=self.app.game;low=p.xp_for_level(g.level);high=p.xp_for_level(g.level+1)
-        self.xp.config(text=f'Досвід: {g.xp-low}/{high-low} · до рівня: {high-g.xp}')
+        self.xp.config(text=tr('frontier_ui.0032', v0=g.xp - low, v1=high - low, v2=high - g.xp))
         self.bar.config(maximum=high-low,value=g.xp-low)
         pos=self.text.yview()[0];self.text.config(state='normal');self.text.delete('1.0','end')
         self.text.insert('end',player_text(g));self.text.config(state='disabled');self.text.yview_moveto(pos)
@@ -54,14 +55,14 @@ class PlayerPanel(tk.Frame):
 def cartographer(app):
     g=app.game
     if not g.cartographer:return
-    window=app.popup('Картограф','420x240');t=g.traveler;size=t['box'][2]
-    tk.Label(window,text=f'Фрагмент мапи {size}×{size}\nПоруч із вами · {t["price"]} кр.',bg=PANEL,fg=TEXT,font=('Segoe UI',13),pady=24).pack()
-    status=tk.Label(window,text='Цей фрагмент уже придбано.' if t['purchased'] else 'Відкриває туман на мапі та в атласі.',bg=PANEL,fg=GOLD);status.pack()
+    window=app.popup(tr('frontier_ui.0033'),'420x240');t=g.traveler;size=t['box'][2]
+    tk.Label(window,text=tr('frontier_ui.0034', v0=size, v1=size, v2=t['price']),bg=PANEL,fg=TEXT,font=('Segoe UI',13),pady=24).pack()
+    status=tk.Label(window,text=tr('frontier_ui.0035') if t['purchased'] else tr('frontier_ui.0036'),bg=PANEL,fg=GOLD);status.pack()
     def buy():
-        if g.buy_map():status.config(text='Мапу відкрито!');button.config(state='disabled')
+        if g.buy_map():status.config(text=tr('frontier_ui.0037'));button.config(state='disabled')
         else:status.config(text=g.messages[-1])
         app.refresh()
-    button=ttk.Button(window,text='Придбати мапу',command=buy,state='disabled' if t['purchased'] else 'normal');button.pack(pady=16)
+    button=ttk.Button(window,text=tr('frontier_ui.0038'),command=buy,state='disabled' if t['purchased'] else 'normal');button.pack(pady=16)
 
 
 def draw_metro(canvas,g,t,ox,oy):
@@ -73,17 +74,17 @@ def draw_metro(canvas,g,t,ox,oy):
     for city in stations:
         x,y=point(city)
         canvas.create_oval(x-7,y-7,x+7,y+7,fill='#173b3a',outline='#58d9d1',width=2)
-        canvas.create_text(x,y,text='М',fill='#9afbf2',font=('Segoe UI',8,'bold'))
+        canvas.create_text(x,y,text=tr('frontier_ui.0039'),fill='#9afbf2',font=('Segoe UI',8,'bold'))
 
 
 def metro(app):
     g=app.game
     if g.battle or g.city not in g.metro_unlocked:return
-    window=app.popup('Метро · підземна дрезина','540x380')
-    tk.Label(window,text='МЕТРО / '+g.city_name(g.city),bg=PANEL,fg=GOLD,font=('Segoe UI',14,'bold')).pack(pady=18)
-    tk.Label(window,text='50 кредитів за поїздку · без боїв і радіації\nЧас: наземний маршрут ÷ 5, округлено вгору.',bg=PANEL,fg=TEXT).pack(pady=8)
+    window=app.popup(tr('frontier_ui.0040'),'540x380')
+    tk.Label(window,text=tr('frontier_ui.0041')+g.city_name(g.city),bg=PANEL,fg=GOLD,font=('Segoe UI',14,'bold')).pack(pady=18)
+    tk.Label(window,text=tr('frontier_ui.0042'),bg=PANEL,fg=TEXT).pack(pady=8)
     destinations=[n for n in g.metro_unlocked if n!=g.city]
-    status=tk.Label(window,text='' if destinations else 'Інші станції ще не відремонтовані.\nЗнайдіть їхні міста та зверніться до мерів.',bg=PANEL,fg=GOLD,wraplength=490)
+    status=tk.Label(window,text='' if destinations else tr('frontier_ui.0043'),bg=PANEL,fg=GOLD,wraplength=490)
     status.pack(pady=8)
     def travel(destination):
         if g.metro_travel(destination):
@@ -92,4 +93,4 @@ def metro(app):
     for city in destinations:
         cost=g.metro_cost(city)
         if cost:
-            ttk.Button(window,text=f'{g.city_name(city)} · {cost[1]} ходів · 50 кр.',command=lambda city=city:travel(city)).pack(fill='x',padx=24,pady=6)
+            ttk.Button(window,text=tr('frontier_ui.0044', v0=g.city_name(city), v1=cost[1]),command=lambda city=city:travel(city)).pack(fill='x',padx=24,pady=6)
