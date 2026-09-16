@@ -36,7 +36,7 @@ class Detail(tk.Frame):
 def description(game,item):
     if not item:return 'Виберіть предмет.'
     if item['kind']=='sealed':return f'Запечатана скриня\nВміст і його стан невідомі.\nВага\t{p.item_weight(item):g} кг\nВиберіть у рюкзаку й натисніть «Використати» поза боєм.'
-    kind=item['kind'];lines=[item['name'],f'L{item.get("level",1)} · {r.RARITIES[item["rarity"]][0]}']
+    kind=item['kind'];lines=[item['name'],(f'L{item.get("level",1)} · ' if kind in ('weapon','armor','helmet','module') else '')+r.RARITIES[item['rarity']][0]]
     current=game.weapon if kind=='weapon' else game.equipped.get(kind)
     compare=current is not None and current['id']!=item['id']
     if compare:lines.append('Порівняння: '+current['name'])
@@ -75,7 +75,7 @@ def description(game,item):
     elif kind in ('parts','fragments'):lines.append('Матеріал для модулів '+('зброї' if kind=='parts' else 'броні')+' у техніка. Не важить.')
     return '\n'.join(lines)
 
-QUEST_ICONS={'trophies':'♜','hunt':'◎','retrieve':'▣','scout':'◈','supplies':'✚','purge':'⚑'}
+QUEST_ICONS={'delivery':'✉','radio':'◉','trophies':'♜','hunt':'◎','retrieve':'▣','scout':'◈','supplies':'✚','purge':'⚑'}
 class QuestCards(tk.Frame):
     def __init__(self,parent,app,mayor=False):
         super().__init__(parent,bg=PANEL);self.app=app;self.mayor=mayor;self.selection=None;self.open_done=False;self.entries=[];self.rects=[]

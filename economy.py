@@ -58,6 +58,10 @@ class Game(a.Game):
    target='weapon' if category=='weapon' else 'protection';pool=[n for n,m in enumerate(r.MODULES) if m[1]==target]
    for _ in range(min(item['slots'],1+(self.rng.random()<.04))):item['modules'].append(p.module(tier,self.rng,self.rng.choice(pool),level))
   return item
+ def monster_loot_level(self,kills,fallback=1):
+  source=self.rng.choice(kills) if kills else {}
+  level=max(1,int(source.get('level',fallback)))
+  return self.rng.randint(max(1,level-2),level)
  def start_battle(self):
   super().start_battle();self.battle['kills']=[]
  def victory(self):
@@ -68,7 +72,7 @@ class Game(a.Game):
   credits=round(self.rng.randint(40,65)*(1+.35*(b.get('region_level',1)-1))*(1+.15*self.rank('scavenger')));self.money+=credits
   drops=0
   for _ in range(rolls):
-   if self.rng.random()<chance:p.add_to(self.loot,self.reward_item(cap));drops+=1
+   if self.rng.random()<chance:p.add_to(self.loot,self.reward_item(cap,level=self.monster_loot_level(kills,b.get('region_level',1))));drops+=1
   # Independent supplies. They never replace successful equipment rolls.
   for _ in range(2):
    if self.rng.random()<.55:p.add_to(self.loot,p.ammunition(self.rng.choice(list(p.AMMO)),self.rng.randint(3,12)))

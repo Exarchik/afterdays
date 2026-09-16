@@ -1039,7 +1039,7 @@ class ExpansionGame(LegacyGame):
 
 
 from progression import equipment, module, supply, stats, item_weight, item_value
-from frontier import Game
+from contracts import Game
 
 # GUI imports are delayed so the model and tests work without a display.
 def launch(test_hook=None):
@@ -1071,7 +1071,7 @@ def launch(test_hook=None):
             self.dialog = None
             self.hover = None
             root.after_idle(lambda:sprites.decorate(root))
-            root.title('AFTERDAYS v0.14 — Після останнього світанку')
+            root.title('AFTERDAYS v0.15.1 — Після останнього світанку')
             sw,sh=root.winfo_screenwidth(),root.winfo_screenheight()
             root.geometry(f'1260x880+{max(0,(sw-1260)//2)}+{max(0,(sh-880)//2)}')
             root.minsize(1080, 760)
@@ -1212,6 +1212,11 @@ def launch(test_hook=None):
             before_battle = self.game.battle is not None
             fn()
             self.refresh()
+            request=getattr(self.game,'_radio_request',None)
+            if request:
+                self.game._radio_request=None
+                import radio_ui
+                radio_ui.show(self,request)
             if before_battle and not self.game.battle and self.game.loot:
                 self.tabs.select(self.loot_tab)
 
@@ -1377,7 +1382,7 @@ def launch(test_hook=None):
         def atlas(self):
             import frontier_ui
             win = self.popup('Атлас Пустки · міста й відкриті локації', '1000x730')
-            tk.Label(win, text='АТЛАС / ДАЛІ ВІД СХОВИЩА 17 → НЕБЕЗПЕЧНІШЕ / ! ЗАВДАННЯ / ★ УНІКАЛЬНЕ', bg=PANEL, fg=GOLD,
+            tk.Label(win, text='АТЛАС / ДАЛІ ВІД СТАРТОВОГО МІСТА → НЕБЕЗПЕЧНІШЕ / ! ЗАВДАННЯ / ★ УНІКАЛЬНЕ', bg=PANEL, fg=GOLD,
                      font=('Segoe UI', 12, 'bold')).pack(pady=10)
             c = tk.Canvas(win, bg=BG, highlightthickness=0)
             c.pack(fill='both', expand=True, padx=12)

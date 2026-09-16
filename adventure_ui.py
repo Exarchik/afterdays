@@ -139,16 +139,18 @@ class Services(tk.Frame):
                 items.extend([('stash','Власне сховище',app.storage),('rest','Ночівля · 15 кр.',lambda:app.act(g.rest))])
             elif g.city is None:
                 items.append(('search','Обшукати [E]',lambda:app.act(g.search)))
+            if hasattr(g,'destination_quest') and g.destination_quest():
+                q=g.destination_quest();items.append(('search','Передати посилку' if q['kind']=='delivery' else 'Налаштувати радіо',lambda:app.act(g.search)))
             if g.road_event:items.append(('traveler','Дорожня подія',app.road_dialog))
         items.extend([('perks',f'Перки ({g.pending_perks})',app.perks),('atlas','Атлас [M]',app.atlas)])
         self.entries=items;self.paint()
 
     def paint(self):
         c=self.canvas;c.delete('all');self.rects=[]
-        width=max(320,c.winfo_width());cell=width/2;h=93
-        c.config(height=math.ceil(len(self.entries)/2)*h)
+        width=max(320,c.winfo_width());cell=width/3;h=102
+        c.config(height=math.ceil(len(self.entries)/3)*h)
         for n,(key,label,fn) in enumerate(self.entries):
-            x,y=n%2*cell,n//2*h
+            x,y=n%3*cell,n//3*h
             rect=(x+4,y+4,x+cell-4,y+h-4);self.rects.append((rect,fn))
             c.create_rectangle(*rect,fill='#2b3b30',outline='#63745a',width=1)
             service_picture(c,key,x+cell/2-26,y+7,self.app.game.current_site['npc'] if self.app.game.current_site and key in ('smith','mayor') else None)

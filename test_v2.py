@@ -31,7 +31,9 @@ class ExpansionTests(unittest.TestCase):
     def test_traveler_discount_identity_and_expiry(self):
         g = Game(1)
         g.x,g.y=6,5
-        g.spawn_traveler()
+        # Test the regular merchant explicitly, not a seed-dependent hunter/cartographer.
+        from progression import Game as ProgressionGame
+        ProgressionGame.spawn_traveler(g)
         stock = g.stock(3)
         self.assertEqual(len([i for i in stock if i['kind'] in ('weapon','armor','helmet','module')]),2)
         self.assertTrue({'food','med'}.issubset({i['kind'] for i in stock}))

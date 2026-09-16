@@ -299,7 +299,7 @@ class Game(r.ExpansionGame):
                 self.log('Без їжі: −5 HP.')
         self._visit_objectives()
         if self.city is not None:
-            self.log(f'Прибуття: {r.CITY_NAMES[self.city]}.')
+            self.log(f'Прибуття: {self.city_name(self.city)}.')
         elif self.rng.random()<{'road':.06,'waste':.12,'forest':.20,'ruin':.24}[self.world[self.y][self.x]]:
             self.start_battle()
         elif self.turn-self.last_traveler_turn>=7 and self.rng.random()<.09:
@@ -614,7 +614,7 @@ class Game(r.ExpansionGame):
         for i in self.bag:
             if i['kind']=='quest':
                 q=next((q for q in self.quests if q['id']==i.get('quest_id')),None)
-                if q and q.get('unique'): i['name']='Чорна скринька «Геліос»'; i['rarity']=3
+                if q and q['kind']=='retrieve' and q.get('unique'): i['name']='Чорна скринька «Геліос»'; i['rarity']=3
         return ok
 
     def save(self,path):

@@ -158,7 +158,7 @@ class Game(economy.Game):
                 if b['chest_open']:self.log('Скриня вже порожня.');return False
                 b['chest_open']=True
                 cap=economy.loot_rules(b['kills'])[2]
-                for _ in range(2):p.add_to(self.loot,self.reward_item(cap))
+                for _ in range(2):p.add_to(self.loot,self.reward_item(cap,level=self.monster_loot_level(b.get('kills',[]),b.get('region_level',1))))
                 for _ in range(2):p.add_to(self.loot,p.ammunition(self.rng.choice(list(p.AMMO)),self.rng.randint(8,20)))
                 p.add_to(self.loot,p.supply('med',2));p.add_to(self.loot,p.supply('food',2))
                 self.log('Скриню відкрито! Заберіть речі у вкладці «Здобич» і знайдіть вихід.');return True
@@ -283,7 +283,7 @@ class Game(economy.Game):
                     q['progress']=min(q.get('progress',0),q['goal']);game.price_quest(q)
         # Repair unfinished destination quests in older saves, keeping rewards and progress.
         for q in game.quests:
-            if q['status']=='active' and q.get('pos') and not game.quest_ready(q):
+            if q['kind'] in ('retrieve','scout','purge','radio') and q['status']=='active' and q.get('pos') and not game.quest_ready(q):
                 ceiling=q.get('level',q.get('zone',1))+1
                 in_dungeon=game.battle and game.battle.get('dungeon') and game.quest_battle==q['id']
                 if not in_dungeon and game.region_at(*q['pos'])>ceiling:

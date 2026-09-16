@@ -91,7 +91,7 @@ def resistance_text(enemy):
 class Game(p.Game):
     def __init__(self,seed=None):
         super().__init__(seed)
-        self.city_names=list(r.CITY_NAMES)
+        self.city_names=r.random.Random(repr(self.rng.getstate())).sample(json.loads((Path(__file__).resolve().parent/'assets'/'city_names.json').read_text(encoding='utf-8')),len(self.cities))
         self.stash=[]
         self.offer_refresh={}
         self.road_event=None
@@ -101,6 +101,8 @@ class Game(p.Game):
         self.trails=[]
         self._events=[]
         self._last_battle=None
+        from world_layout import build
+        self.cities,self.world=build(self.rng.getstate())
         self._build_world()
         self.explored=[]
         self.known_cities=[0]
@@ -494,7 +496,7 @@ class Game(p.Game):
             self.log(f'{e["name"]}: −{amount} HP ({DAMAGE_TYPES[element][0]}).')
             if e['hp']<=0:
                 b.setdefault('corpses',[]).append(dict(pos=e['pos'][:],kind=e['kind'],grade=e.get('grade','normal')))
-                b.setdefault('kills',[]).append(dict(kind=e['kind'],grade=e.get('grade','normal')))
+                b.setdefault('kills',[]).append(dict(kind=e['kind'],grade=e.get('grade','normal'),level=e.get('level',b.get('region_level',1))))
                 b['enemies'].remove(e);self.gain_xp(self.enemy_xp(e));self._kill_objectives(e['kind'])
             if not b['enemies']:self.victory()
         else:self.emit('Промах',color='#d7d4c0');self.log('Промах.')

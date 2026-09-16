@@ -316,14 +316,14 @@ class ItemGrid(tk.Frame):
             color = rules.RARITIES[item.get('rarity', 0)][1]
             c.create_rectangle(*r, fill=TYPE_COLORS.get(item['kind'],'#233229'),outline=color,width=3 if item['id']==self.selection else 1)
             icon(c,item,x+(cell-40)/2,y+14,40)
-            if item['kind']!='sealed':
+            if item['kind'] in ('weapon','armor','helmet','module'):
                 c.create_text(x+6,y+9,text=f'L{item.get("level",1)}',fill=TEXT,font=('Segoe UI',8,'bold'),anchor='w')
-                if item.get('qty',1)>1:c.create_text(x+cell-6,y+9,text=f'×{item["qty"]}',fill=TEXT,font=('Segoe UI',8,'bold'),anchor='e')
+            if item['kind']=='weapon':c.create_text(x+cell-6,y+9,text=f'{item.get("ap",2)} ОД',fill=TEXT,font=('Segoe UI',8,'bold'),anchor='e')
+            elif item.get('qty',1)>1:c.create_text(x+cell-6,y+9,text=f'×{item["qty"]}',fill=TEXT,font=('Segoe UI',8,'bold'),anchor='e')
             if item['id']==self.selection:c.create_rectangle(x+5,y+16,x+9,y+20,fill='#ffffff',outline='')
             short = item['name'][:10] + ('…' if len(item['name']) > 10 else '')
             c.create_text(x+cell/2, y+59, text=short, fill=color, font=('Segoe UI', 8))
             footer='?' if item['kind']=='sealed' else (f'{item.get("durability",100):.0f}%' if 'durability' in item else '')
-            if item['kind']=='weapon':footer+=f' · {item.get("ap",2)} ОД'
             c.create_text(x+cell/2,y+71,text=footer,fill='#ed8c78' if item.get('durability',100)<25 else MUTED,font=('Segoe UI',7))
         c.configure(scrollregion=(0, 0, width, max(h, math.ceil(len(self.items)/self.columns)*h)))
 
