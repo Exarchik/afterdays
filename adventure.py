@@ -389,16 +389,18 @@ class Game(p.Game):
                 if not q.get('unique'):q['title']=self.rng.choice(variants[q['kind']])
         return offers
 
+    def quest_locations(self,q):
+        origin=tuple(self.cities[q['city']])
+        ceiling=q.get('level',q.get('zone',self.region_at(*origin)))+1
+        occupied={tuple(t['pos']) for t in self.quests if t.get('pos') and t['status']=='active' and t['id']!=q['id']}
+        pool=[pos for pos in sorted(self.reachable_world(origin))
+              if pos not in occupied and list(pos) not in self.cities and self.region_at(*pos)<=ceiling]
+        nearby=[pos for pos in pool if 4<=abs(pos[0]-origin[0])+abs(pos[1]-origin[1])<=12]
+        return nearby or pool
+
     def accept_quest(self,quest_id):
         ok=super().accept_quest(quest_id)
-        if ok:
-            q=self.quests[-1]
-            if q.get('pos'):
-                reachable=self.reachable_world((self.x,self.y))
-                others={tuple(t['pos']) for t in self.quests[:-1] if t.get('pos') and t['status']=='active'}
-                pool=[p for p in sorted(reachable) if p not in others and list(p) not in self.cities and 4<=abs(p[0]-self.x)+abs(p[1]-self.y)<=12]
-                if tuple(q['pos']) not in pool and pool:q['pos']=list(self.rng.choice(pool))
-            self.emit('Завдання взято',color='#c7a0f1')
+        if ok:self.emit('Завдання взято',color='#c7a0f1')
         return ok
 
     def quest_text(self,q):

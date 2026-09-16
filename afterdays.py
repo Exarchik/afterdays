@@ -918,6 +918,7 @@ class ExpansionGame(LegacyGame):
             occupied = {tuple(t['pos']) for t in self.quests if t.get('pos') and t['status'] == 'active'}
             candidates = [(x, y) for y in range(32) for x in range(48)
                           if 4 <= abs(x-self.x)+abs(y-self.y) <= 12 and [x, y] not in self.cities and (x, y) not in occupied]
+            if hasattr(self, 'quest_locations'):candidates=self.quest_locations(q)
             if not candidates:
                 self.log('Немає вільної локації для завдання.')
                 return False
@@ -1070,7 +1071,7 @@ def launch(test_hook=None):
             self.dialog = None
             self.hover = None
             root.after_idle(lambda:sprites.decorate(root))
-            root.title('AFTERDAYS v0.13 — Після останнього світанку')
+            root.title('AFTERDAYS v0.14 — Після останнього світанку')
             sw,sh=root.winfo_screenwidth(),root.winfo_screenheight()
             root.geometry(f'1260x880+{max(0,(sw-1260)//2)}+{max(0,(sh-880)//2)}')
             root.minsize(1080, 760)

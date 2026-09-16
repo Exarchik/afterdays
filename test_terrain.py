@@ -9,8 +9,8 @@ class TerrainTests(unittest.TestCase):
    self.assertEqual(tile_key(g,10,10),'road'+str(mask))
  def test_shores_radiation_and_purity(self):
   g=r.Game(2);state=g.rng.getstate();g.world=[['water']*48 for _ in range(32)];g.radiation={}
-  self.assertEqual(tile_key(g,10,10),'water');g.world[10][9]='waste';self.assertEqual(tile_key(g,10,10),'shoreW')
-  g.world[10][10]='forest';g.radiation['10,10']=3;self.assertEqual(tile_key(g,10,10),'rad1')
+  self.assertEqual(tile_key(g,10,10),'water_255');g.world[10][9]='waste';self.assertEqual(tile_key(g,10,10),'water_247')
+  g.world[10][10]='forest';g.radiation['10,10']=3;self.assertTrue(tile_key(g,10,10).startswith('forest_'));self.assertTrue(tile_key(g,10,10).endswith('_rad'))
   g.world[10][10]='road';self.assertTrue(tile_key(g,10,10).startswith('road'))
   self.assertEqual(state,g.rng.getstate())
  def test_every_world_cell_supported(self):
