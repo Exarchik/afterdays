@@ -1,3 +1,4 @@
+from tests_fixtures.quest_offer import offer_for
 import json,tempfile,unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -5,7 +6,7 @@ import afterdays as r
 import progression as p
 from refinement_ui import description
 class NewContractTests(unittest.TestCase):
- def offer(self,g,kind):return next(q for q in g.mayor_offers() if q['kind']==kind and q['status']=='offered')
+ def offer(self,g,kind):return offer_for(g,kind)
  def test_delivery_flow_and_protection(self):
   g=r.Game(4);q=self.offer(g,'delivery');self.assertLessEqual(g.region_at(*q['pos']),q['level']+1)
   self.assertTrue(g.accept_quest(q['id']));q=g.quests[-1]

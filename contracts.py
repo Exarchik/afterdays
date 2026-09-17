@@ -4,28 +4,32 @@ import afterdays as r
 import frontier
 import economy
 import content
+from reputation import Reputation
+from border import Border
 
 economy.BASE_REWARDS.update(delivery=90,radio=100)
 
-class Game(frontier.Game):
+class Game(Border, Reputation, frontier.Game):
     def __init__(self,seed=None):
         super().__init__(seed)
         content.migrate(self)
+        self.init_reputation()
 
     @classmethod
     def load(cls,path):
         game=super().load(path)
         content.migrate(game)
+        game.migrate_reputation_keys()
         return game
 
     def delivery_sites(self,q):
-        origin=tuple(self.cities[q['city']]);reachable=self.reachable_world(origin)
+        origin=tuple(self.cities[q['city']]);reachable=self.player_reachable_world(origin)
         occupied={tuple(t['pos']) for t in self.quests if t['status']=='active' and t.get('pos')}
         return [s for s in self.special_sites if tuple(s['pos']) in reachable and tuple(s['pos'])!=origin
                 and tuple(s['pos']) not in occupied and self.region_at(*s['pos'])<=q['level']+1]
 
-    def mayor_offers(self):
-        offers=super().mayor_offers()
+    def _raw_mayor_offers(self):
+        offers=frontier.Game.mayor_offers(self)
         if self.city not in self.mayors or self.battle:return offers
         for kind,title in [('delivery',tr('contracts.0001')),('radio',tr('contracts.0002'))]:
             if any(q['kind']==kind for q in offers):continue

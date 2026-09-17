@@ -1,3 +1,4 @@
+from tests_fixtures.quest_offer import offer_for
 import copy,math,tempfile,unittest
 from pathlib import Path
 from types import SimpleNamespace
@@ -50,7 +51,7 @@ class MetroTests(unittest.TestCase):
   g=r.Game(8);c=Canvas();draw_metro(c,g,10,0,0);self.assertEqual(len(c.stations),1);self.assertFalse(c.lines)
   self.repair(g,2);c=Canvas();draw_metro(c,g,10,0,0);self.assertEqual(len(c.stations),2);self.assertEqual(len(c.lines),1)
  def test_free_movement_only_after_clear(self):
-  g=r.Game(71);q=next(q for q in g.mayor_offers() if q['kind']=='purge');g.accept_quest(q['id']);q=g.quests[-1];g.x,g.y=q['pos'];g.search();b=g.battle
+  g=r.Game(71);q=offer_for(g,'purge');g.accept_quest(q['id']);q=g.quests[-1];g.x,g.y=q['pos'];g.search();b=g.battle
   b['ap']=0;self.assertFalse(g.battle_move((2,4)))
   b['enemies']=[];g.victory();round=b['round'];self.assertTrue(g.battle_move(b['chest']));self.assertEqual(b['ap'],0)
   self.assertTrue(g.search());self.assertTrue(g.battle_move(b['exit']));self.assertEqual(b['round'],round)

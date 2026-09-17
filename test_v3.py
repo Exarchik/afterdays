@@ -1,3 +1,4 @@
+from tests_fixtures.quest_offer import offer_for
 """Behavioral regressions for v0.3, including transactional stack trading."""
 import copy
 import json
@@ -166,8 +167,8 @@ class ProgressionTests(unittest.TestCase):
                     total+=1;damaged+=i['durability']<=30
         self.assertGreater(damaged/total,.6)
         g=r.Game(10);offers=g.mayor_offers()
-        unique=next(q for q in offers if q['unique'] and q['kind']=='retrieve')
-        normal=next(q for q in offers if not q['unique'] and q['kind'] in ('hunt','scout','purge'))
+        unique=offer_for(g,'retrieve',unique=True)
+        normal=offer_for(g,'hunt')
         self.assertGreater(unique['reward'],normal['reward'])
         self.assertTrue(g.accept_quest(unique['id']))
         q=g.quests[-1];g.x,g.y=q['pos'];g.search();g.x,g.y=g.cities[0]

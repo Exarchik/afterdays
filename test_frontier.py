@@ -1,3 +1,4 @@
+from tests_fixtures.quest_offer import offer_for
 import copy,json,tempfile,unittest
 from pathlib import Path
 import afterdays as r
@@ -6,7 +7,7 @@ from frontier_ui import player_text
 
 class FrontierTests(unittest.TestCase):
  def dungeon(self,seed=71):
-  g=r.Game(seed);q=next(q for q in g.mayor_offers() if q['kind']=='purge');g.accept_quest(q['id']);q=g.quests[-1];g.x,g.y=q['pos'];g.search();return g,q
+  g=r.Game(seed);q=offer_for(g,'purge');g.accept_quest(q['id']);q=g.quests[-1];g.x,g.y=q['pos'];g.search();return g,q
  def test_dungeon_connected_and_dormant(self):
   for seed in range(5):
    g,q=self.dungeon(seed);b=g.battle;self.assertTrue(b['dungeon']);self.assertTrue(6<=len(b['enemies'])<=10)

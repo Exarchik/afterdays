@@ -1,3 +1,4 @@
+from tests_fixtures.quest_offer import offer_for
 """Regression tests for expansion, quest lifecycle and drag/drop transactions."""
 import json
 import tempfile
@@ -9,7 +10,7 @@ from afterdays import Game, LegacyGame, GEAR, MODULES, MONSTERS, equipment, modu
 
 class ExpansionTests(unittest.TestCase):
     def accept(self, g, kind):
-        q = next(q for q in g.mayor_offers() if q['kind'] == kind)
+        q = offer_for(g,kind)
         self.assertTrue(g.accept_quest(q['id']))
         return g.quests[-1]
 
@@ -193,7 +194,7 @@ class ExpansionTests(unittest.TestCase):
             self.assertEqual(len(new.cities),12)
             self.assertEqual(len(new.city_merchants),12)
             new.save(p)
-            self.assertEqual(json.loads(p.read_text())['version'],12)
+            self.assertEqual(json.loads(p.read_text())['version'],14)
 
     def test_equipment_mouse_drop_routes(self):
         from visuals import EquipmentPanel

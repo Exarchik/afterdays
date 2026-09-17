@@ -1,3 +1,4 @@
+from tests_fixtures.quest_offer import offer_for
 import json,math,tempfile,unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -31,7 +32,7 @@ class BalanceTests(unittest.TestCase):
    self.assertTrue(g.shoot(e['id']));self.assertEqual(e['hp'],1000-expected)
    hp=g.hp;expected=balance.damage(10,15,g.defense);g.end_turn();self.assertEqual(g.hp,hp-expected)
  def test_quest_reward_fixed_after_level_up(self):
-  g=r.Game(4);q=next(q for q in g.mayor_offers() if q['kind']=='retrieve' and q.get('unique'))
+  g=r.Game(4);q=offer_for(g,'retrieve',unique=True)
   g.accept_quest(q['id']);q=g.quests[-1];self.assertEqual(q['level'],1)
   reward=q['reward'];g.xp=p.xp_for_level(7);g.x,g.y=q['pos'];g.search();g.x,g.y=g.cities[0]
   before={i['id'] for i in g.bag+g.stash};xp=g.xp;self.assertTrue(g.turn_in(q['id']))

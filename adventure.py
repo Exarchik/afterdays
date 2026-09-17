@@ -420,11 +420,13 @@ class Game(p.Game):
             self.emit(tr('adventure.0202'),color='#c7a0f1');self.emit(f'+{self.xp-xp} XP',color='#99c9ff')
             city=self.city
             if city is not None and city<12 and city not in self.map_rewards and sum(q['status']=='done' and q['city']==city for q in self.quests)>=3:
-                self.map_rewards.append(city)
-                nearby=sorted((n for n in range(12) if n not in self.known_cities),key=lambda n:math.dist(self.cities[n],self.cities[city]))[:3]
-                for n in nearby:self.reveal(*self.cities[n],2)
-                self.log(tr('adventure.0203')+', '.join(self.city_name(n) for n in nearby))
-                self.emit(tr('adventure.0204'),color='#a5dabc')
+                nearby=sorted((n for n in range(12) if n not in self.known_cities),key=lambda n:math.dist(self.cities[n],self.cities[city]))[:1]
+                if nearby:
+                    self.map_rewards.append(city)
+                    self.reveal(*self.cities[nearby[0]],0)
+                    self._mayor_notice=tr('border.city_reveal',city=self.city_name(city),destination=self.city_name(nearby[0]))
+                    self.log(self._mayor_notice)
+                    self.emit(tr('adventure.0204'),color='#a5dabc')
         return ok
 
     def search(self):
@@ -540,14 +542,14 @@ class Game(p.Game):
     def save(self,path):
         content.migrate(self)
         data={k:v for k,v in vars(self).items() if k!='rng' and not k.startswith('_')}
-        data.update(version=12,rng_state=self.rng.getstate())
+        data.update(version=14,rng_state=self.rng.getstate())
         path=Path(path);path.parent.mkdir(parents=True,exist_ok=True)
         tmp=path.with_suffix('.tmp');tmp.write_text(json.dumps(data,ensure_ascii=False),encoding='utf-8');os.replace(tmp,path)
 
     @classmethod
     def load(cls,path):
         data=json.loads(Path(path).read_text(encoding='utf-8'));version=data.get('version')
-        if version not in (1,2,3,4,5,6,7,8,9,10,11,12):raise ValueError(tr('adventure.0224'))
+        if version not in (1,2,3,4,5,6,7,8,9,10,11,12,13,14):raise ValueError(tr('adventure.0224'))
         game=cls(0)
         if version<4:
             old=p.Game.load(path)
@@ -571,6 +573,7 @@ class Game(p.Game):
         else:
             data.pop('version');state=data.pop('rng_state')
             expected={k for k in vars(game) if k!='rng' and not k.startswith('_')}
+            if version<13 and 'reputation_state' not in data:expected.discard('reputation_state')
             if version==4:expected-= {'explored','known_cities','map_rewards','rad_turns'}
             if set(data)!=expected:raise ValueError(tr('adventure.0226'))
             game.__dict__.update(data)

@@ -81,16 +81,17 @@ def description(game,item):
     elif kind in ('parts','fragments'):lines.append(tr('refinement_ui.0025')+(tr('refinement_ui.0026') if kind=='parts' else tr('refinement_ui.0027'))+tr('refinement_ui.0028'))
     return '\n'.join(lines)
 
-QUEST_ICONS={'delivery':'✉','radio':'◉','trophies':'♜','hunt':'◎','retrieve':'▣','scout':'◈','supplies':'✚','purge':'⚑'}
+QUEST_ICONS={'permit':'⚿','thanks':'★','delivery':'✉','radio':'◉','trophies':'♜','hunt':'◎','retrieve':'▣','scout':'◈','supplies':'✚','purge':'⚑'}
 class QuestCards(tk.Frame):
     def __init__(self,parent,app,mayor=False):
         super().__init__(parent,bg=PANEL);self.app=app;self.mayor=mayor;self.selection=None;self.open_done=False;self.entries=[];self.rects=[]
-        self.canvas=tk.Canvas(self,bg='#17231e',height=235,highlightthickness=0)
+        self.rep_label=tk.Label(self,bg=PANEL,fg=GOLD);self.rep_label.pack(fill='x')
+        self.canvas=tk.Canvas(self,bg='#17231e',height=424,highlightthickness=0)
         scroll=ttk.Scrollbar(self,command=self.canvas.yview);scroll.pack(side='right',fill='y')
         self.canvas.pack(fill='both',expand=True,padx=6,pady=6);self.canvas.config(yscrollcommand=scroll.set)
         self.canvas.bind('<Configure>',lambda e:self.paint());self.canvas.bind('<Button-1>',self.click)
         self.canvas.bind('<MouseWheel>',lambda e:self.canvas.yview_scroll(-1 if e.delta>0 else 1,'units'))
-        self.detail=Detail(self,height=9);self.detail.pack(fill='x',padx=8)
+        self.detail=Detail(self,height=5);self.detail.pack(fill='x',padx=8)
         if mayor:ttk.Button(self,text=tr('refinement_ui.0029'),command=self.accept).pack(fill='x',padx=8,pady=3)
         ttk.Button(self,text=tr('refinement_ui.0030'),command=self.turn_in).pack(fill='x',padx=8,pady=3)
         if not mayor:ttk.Button(self,text=tr('refinement_ui.0031'),command=app.atlas).pack(fill='x',padx=8,pady=3)
@@ -98,26 +99,31 @@ class QuestCards(tk.Frame):
     def selected(self):return next((q for q in self.entries if q['id']==self.selection),None)
     def refresh(self):
         g=self.app.game
+        self.rep_label.config(text=tr('reputation.short',value=g.reputation()) if self.mayor else '')
         self.entries=([q for q in g.mayor_offers() if q['status']=='offered']+[q for q in g.quests if q['city']==g.city]) if self.mayor else list(g.quests)
         if not self.selected():self.selection=next((q['id'] for q in self.entries if q['status']!='done'),None)
         self.paint();self.describe()
     def paint(self):
         c=self.canvas;c.delete('all');self.rects=[];w=max(280,c.winfo_width());y=4
+        # Eight compact cards in a normal-height panel; scrolling remains available.
+        h=max(40,min(52,(max(328,c.winfo_height())-8)//8))
         active=[q for q in self.entries if q['status']!='done'];done=[q for q in self.entries if q['status']=='done']
         for q in active+[None]+(done if self.open_done else []):
             if q is None:
-                c.create_rectangle(5,y,w-5,y+34,fill='#2a3c32',outline='#566955')
-                c.create_text(15,y+17,text=('▾' if self.open_done else '▸')+tr('refinement_ui.0032', v0=len(done)),fill=MUTED,anchor='w')
-                self.rects.append((y,y+34,'done'));y+=40;continue
+                c.create_rectangle(5,y,w-5,y+30,fill='#2a3c32',outline='#566955')
+                c.create_text(15,y+15,text=('▾' if self.open_done else '▸')+tr('refinement_ui.0032', v0=len(done)),fill=MUTED,anchor='w')
+                self.rects.append((y,y+30,'done'));y+=34;continue
             color='#d0a0f5' if q.get('unique') else '#8aa78e' if q['status']=='done' else GOLD
-            c.create_rectangle(5,y,w-5,y+89,fill='#334a3d' if q['id']==self.selection else '#22332b',outline=color)
-            c.create_oval(13,y+13,53,y+53,fill='#17241e',outline=color,width=2)
-            if not sprites.draw(c,'quest:'+q['kind'],12,y+12,42):c.create_text(33,y+33,text=QUEST_ICONS[q['kind']],fill=color,font=('Segoe UI',21))
-            c.create_text(64,y+9,text=('★ ' if q.get('unique') else '')+f'L{q.get("level",q.get("zone",1))} · '+q['title'],width=w-80,anchor='nw',fill=color,font=('Segoe UI',10,'bold'))
+            c.create_rectangle(5,y,w-5,y+h-3,fill='#334a3d' if q['id']==self.selection else '#22332b',outline=color)
+            if not sprites.draw(c,'quest:'+q['kind'],10,y+5,30):c.create_text(25,y+20,text=QUEST_ICONS.get(q['kind'],'!'),fill=color,font=('Segoe UI',17))
+            title=('★ ' if q.get('unique') else '')+f'L{q.get("level",q.get("zone",1))} · '+q['title']
+            limit=max(20,int((w-65)/7))
+            if len(title)>limit:title=title[:limit-1]+'…'
+            c.create_text(48,y+5,text=title,anchor='nw',fill=color,font=('Segoe UI',9,'bold'))
             state=tr('refinement_ui.0033') if q['status']=='offered' else tr('refinement_ui.0034') if q['status']=='done' else tr('refinement_ui.0035') if self.app.game.quest_ready(q) else tr('refinement_ui.0036', v0=q['progress'], v1=q['goal'])
-            c.create_text(64,y+49,text=state,anchor='nw',fill=TEXT,font=('Segoe UI',9))
-            c.create_text(16,y+75,text=tr('refinement_ui.0037', v0=q.get('money', q.get('reward', 0)), v1=q.get('xp_reward', 80 if q.get('unique') else 40)),anchor='w',fill=MUTED,font=('Segoe UI',9))
-            self.rects.append((y,y+89,q['id']));y+=96
+            reward=tr('refinement_ui.0037',v0=q.get('reward',0),v1=q.get('xp_reward',0))
+            c.create_text(48,y+23,text=state+' · '+reward,anchor='nw',fill=MUTED,font=('Segoe UI',8))
+            self.rects.append((y,y+h-3,q['id']));y+=h
         c.config(scrollregion=(0,0,w,y))
     def click(self,e):
         y=self.canvas.canvasy(e.y);key=next((key for a,b,key in self.rects if a<=y<=b),None)
@@ -178,6 +184,7 @@ class Technician(tk.Frame):
     def refresh(self):
         g=self.app.game;self.grid.set_items([i for i in list(g.equipped.values())+g.bag if i and 'durability' in i])
         self.resources.config(text=tr('refinement_ui.0053', v0=g.money, v1=g.count('parts'), v2=g.count('fragments')))
+        if g.reputation()>=50 and g.city is not None:self.resources.config(text=self.resources.cget('text')+' · '+tr('reputation.repair_discount'))
         self.chances();self.describe(self.grid.selection)
     def describe(self,i):
         item=self.app.game.find(i)

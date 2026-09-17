@@ -977,6 +977,7 @@ class ExpansionGame(LegacyGame):
 
 from progression import equipment, module, supply, stats, item_weight, item_value
 from contracts import Game
+from reputation import buy_factor, sell_factor
 
 # GUI imports are delayed so the model and tests work without a display.
 def launch(test_hook=None):
@@ -1161,6 +1162,15 @@ def launch(test_hook=None):
         def refresh(self):
             self.fx.ingest()
             g = self.game
+            g.check_thanks()
+            if not self.dialog and not g.battle and not getattr(self,'_notice_open',False):
+                notice_key=next((key for key in ('_border_notice','_mayor_notice','_reputation_notice') if getattr(g,key,None)),None)
+                if notice_key:
+                    notice=getattr(g,notice_key);setattr(g,notice_key,None);self._notice_open=True
+                    def show_notice(text=notice):
+                        try:messagebox.showinfo('Afterdays',text,parent=root)
+                        finally:self._notice_open=False;self.refresh()
+                    root.after_idle(show_notice)
             weapon = g.weapon
             ws = stats(weapon) if weapon else {}
             self.status.config(text=tr('afterdays.0151', v0=g.hp, v1=g.max_hp, v2=g.defense, v3=g.weight, v4=g.capacity, v5=g.money, v6=g.level, v7=g.xp, v8=progression.xp_for_level(g.level + 1), v9=g.turn))
@@ -1173,6 +1183,8 @@ def launch(test_hook=None):
             self.city_info.config(text=(tr('afterdays.0153', v0=g.current_site['npc']) if g.current_site else tr('afterdays.0154') if g.city is not None else
                                       tr('afterdays.0155')) +
                                       tr('afterdays.0157', v0=g.x, v1=g.y, v2=g.region_level, v3=weapon['name'] if weapon else tr('afterdays.0156'), v4=ws.get('damage', 0), v5=ws.get('range', 0), v6=weapon['ap'] if weapon else '—'))
+            if g.city is not None:
+                self.city_info.config(text=self.city_info.cget('text')+'\n'+tr('reputation.status', value=g.reputation(), buy=round((buy_factor(g.reputation())-1)*100), sell=round((sell_factor(g.reputation())-1)*100)))
             if weapon:
                 ammo_type=weapon.get('ammo_type','pistol')
                 self.city_info.config(text=self.city_info.cget('text')+tr('afterdays.0158', v0=progression.AMMO[ammo_type][0], v1=g.count('ammo', ammo_type), v2=weapon.get('durability', 100)))
@@ -1347,6 +1359,8 @@ def launch(test_hook=None):
                     x,y=map(int,key.split(','))
                     if not self.map_revealed(x,y):continue
                     c.create_rectangle(ox+x*t,oy+y*t,ox+(x+1)*t,oy+(y+1)*t,outline='#9fba51')
+                from border_ui import draw_border
+                draw_border(c,self.game,t,ox,oy,self.map_revealed)
                 frontier_ui.draw_metro(c,self.game,t,ox,oy)
                 for n,(x,y) in enumerate(self.game.cities):
                     if not self.map_city_known(n):continue
@@ -1452,6 +1466,8 @@ def launch(test_hook=None):
                     if b and x == 0:
                         c.create_line(px+2, py+2, px+2, py+t-2, fill='#72ad91', width=3)
             adventure_ui.paint_world_extras(self)
+            from border_ui import draw_border
+            draw_border(c,g,t,self.ox-self.vx*t,self.oy-self.vy*t,self.map_revealed,(self.vx,self.vy,cols,rows))
             def center(pos):
                 return self.ox+(pos[0]-self.vx+.5)*t, self.oy+(pos[1]-self.vy+.5)*t
             if b:
@@ -1503,6 +1519,14 @@ def launch(test_hook=None):
                     valid, reason, chance = self.game.shot_info(e)
                     self.hint.config(text=tr('afterdays.0191', v0=e['name'], v1=e.get('level', 1), v2=e['hp'], v3=e['max_hp'], v4=e['damage'], v5=e.get('attack', 0), v6=e.get('defense', 0), v7=e['range']) +
                                      (tr('afterdays.0192', v0=chance, v1=self.game.weapon['ap']) if valid else reason+' ') + adventure.resistance_text(e)+tr('afterdays.0193', v0=self.game.enemy_xp(e)))
+
+            else:
+                pos=self.cell(event)
+                if 0<=pos[0]<48 and 0<=pos[1]<32:
+                    edges=[(pos,q) for q in neighbors(*pos,48,32) if self.game.border_edge(pos,q)]
+                    if edges and self.map_revealed(*pos):
+                        gate=any(self.game.checkpoint(a,b) for a,b in edges)
+                        self.hint.config(text=tr('border.open_hint') if gate and self.game.border_open else tr('border.locked') if gate else tr('border.fence'))
 
         def world_step(self, dx, dy):
             g = self.game

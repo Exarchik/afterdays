@@ -207,6 +207,8 @@ class TradingPanel(tk.Frame):
         self.stock_grid.set_items(items)
         self.bag_grid.set_items(g.bag)
         self.title.config(text=tr('advanced_ui.0024', v0=g.merchant_title(self.merchant), v1=g.money, v2=g.weight, v3=g.capacity))
+        if g.city is not None:self.title.config(text=self.title.cget('text')+' · '+tr('reputation.short', value=g.reputation()))
+        self.describe()
         self.app.refresh()
 
     def press(self,event,grid,source):

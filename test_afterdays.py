@@ -65,6 +65,7 @@ class AfterdaysTests(unittest.TestCase):
 
     def test_merchants_and_installed_module_value(self):
         g = Game(5)
+        g.local_record()['value']=50
         armor = g.equipped['armor']
         mod = next(i for i in g.bag if i['kind'] == 'module' and i['target'] == 'protection')
         self.assertTrue(g.install(armor['id'], mod['id']))

@@ -1,3 +1,4 @@
+from tests_fixtures.quest_offer import offer_for
 """v0.4 regression coverage: world topology, feedback, storage and event lifecycle."""
 import copy
 import tempfile
@@ -69,7 +70,7 @@ class AdventureTests(unittest.TestCase):
         g=r.Game(4);g.hp=20;g.use('food')
         self.assertTrue(any(n['scene']=='world' and 'HP' in n['text'] for n in g.pop_events()))
         g.gain_xp(20);self.assertIn('+20 XP',[n['text'] for n in g.pop_events()])
-        offer=next(q for q in g.mayor_offers() if q['kind']=='scout');g.accept_quest(offer['id'])
+        offer=offer_for(g,'scout');g.accept_quest(offer['id'])
         q=g.quests[-1];g.x,g.y=q['pos'];g._visit_objectives()
         self.assertIn('Розвідка ✓',[n['text'] for n in g.pop_events()])
 

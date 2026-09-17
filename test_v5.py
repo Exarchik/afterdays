@@ -77,8 +77,8 @@ class RefinementTests(unittest.TestCase):
             q=dict(id=f'q{n}',kind='hunt',city=0,status='active',title='Test',progress=1,goal=1,target_kind=None,reward=10,pos=None)
             g.quests.append(q);self.assertTrue(g.turn_in(q['id']))
             if n<2:self.assertEqual(g.known_cities,[0])
-        self.assertEqual(len(g.known_cities),4);self.assertEqual(g.map_rewards,[0])
-        self.assertFalse(g.turn_in('q2'));self.assertEqual(len(g.known_cities),4)
+        self.assertEqual(len(g.known_cities),2);self.assertEqual(g.map_rewards,[0])
+        self.assertFalse(g.turn_in('q2'));self.assertEqual(len(g.known_cities),2)
 
     def test_rad_protection_exact_duration_and_price(self):
         g=r.Game(8);p.add_to(g.bag,p.supply('rad',2));self.assertTrue(g.use('rad'));self.assertEqual(g.rad_turns,10)
