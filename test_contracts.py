@@ -2,6 +2,7 @@ from tests_fixtures.quest_offer import offer_for
 import json,tempfile,unittest
 from pathlib import Path
 from unittest.mock import patch
+import content
 import afterdays as r
 import progression as p
 from refinement_ui import description
@@ -46,7 +47,8 @@ class NewContractTests(unittest.TestCase):
   with patch.object(g.rng,'randrange',return_value=0):self.assertTrue(g.shoot(e['id']))
   self.assertEqual(b['kills'][-1]['level'],7)
  def test_city_names_and_saved_world(self):
-  bank=json.loads((Path(__file__).parent/'assets/city_names.json').read_text());self.assertEqual(len(set(bank)),1000)
+  keys=content.read('city_names.json');self.assertEqual(len(set(keys)),1000)
+  bank=[content.t(key) for key in keys]
   g=r.Game();h=r.Game();self.assertNotEqual(g.world,h.world);self.assertNotEqual(g.city_names,h.city_names)
   self.assertEqual(len(set(g.city_names)),12);self.assertTrue(set(g.city_names)<=set(bank))
   with tempfile.TemporaryDirectory() as td:
