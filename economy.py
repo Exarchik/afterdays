@@ -123,10 +123,11 @@ class Game(a.Game):
   if ok:
    if q['kind']=='trophies':self.consume_trophies(q['target_kind'],q['goal'])
    if q.get('unique'):
-    for _ in range(1+(self.rng.random()<.10)):
-     item=self.reward_item(4,1,level=q.get("level",q.get("zone",1)))
-     if not self.accept(item):p.add_to(self.stash,item);self.log(tr('economy.0010'))
-     else:self.log(tr('economy.0011')+item['name']+' · '+r.RARITIES[item['rarity']][0])
+    if hasattr(self,'give_quest_items'):self.give_quest_items(q)
+    else:
+     for _ in range(1+(self.rng.random()<.10)):
+      item=self.reward_item(4,1,level=q.get('level',q.get('zone',1)))
+      if not self.accept(item):p.add_to(self.stash,item)
   return ok
  @classmethod
  def load(cls,path):

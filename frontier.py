@@ -287,7 +287,7 @@ class Game(economy.Game):
             if q['kind'] in ('retrieve','scout','purge','radio') and q['status']=='active' and q.get('pos') and not game.quest_ready(q):
                 ceiling=q.get('level',q.get('zone',1))+1
                 in_dungeon=game.battle and game.battle.get('dungeon') and game.quest_battle==q['id']
-                if not in_dungeon and game.region_at(*q['pos'])>ceiling:
+                if not in_dungeon and (game.region_at(*q['pos'])>ceiling or (ceiling>=4 and game.region_at(*q['pos'])<3)):
                     pool=game.quest_locations(q)
                     if pool:q['pos']=list(game.rng.choice(pool))
         for q in game.quests:game.name_dungeon(q)

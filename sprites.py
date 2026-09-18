@@ -12,10 +12,10 @@ SIZES=(16,24,32,48,64,96,144,192)
 
 def item_key(item):
     kind=item.get('kind')
-    if kind=='trophy':return 'corpse'
+    if kind=='trophy':return 'trophy_'+content.monster_id(item.get('monster_type_id',item.get('monster_kind',0)))
     if kind=='sealed':return 'sealed'
     if kind=='ammo':return 'ammo:'+item.get('ammo_type','pistol')
-    if kind=='quest':return 'quest_item'
+    if kind=='quest' and not item.get('quest_repair'):return 'quest_item'
     ident=item.get('type_id')
     data=content.EQUIPMENT.get(ident) or content.MODULE_DATA.get(ident)
     if data:return data['sprite_id']
@@ -34,10 +34,11 @@ def photo(widget,key,size=48):
     cache=(key,size)
     if cache not in root._sprite_cache:
         try:
-            if size not in root._sprite_sheets:root._sprite_sheets[size]=tk.PhotoImage(master=root,file=str(ROOT/f'atlas_{size}.png'))
+            entry=MANIFEST[key];sheet=entry.get('sheet','atlas');sheet_key=(sheet,size);columns=entry.get('columns',16)
+            if sheet_key not in root._sprite_sheets:root._sprite_sheets[sheet_key]=tk.PhotoImage(master=root,file=str(ROOT/f'{sheet}_{size}.png'))
             image=tk.PhotoImage(master=root,width=size,height=size)
-            index=MANIFEST[key]['index'];x=index%16*size;y=index//16*size
-            image.tk.call(str(image),'copy',str(root._sprite_sheets[size]),'-from',x,y,x+size,y+size,'-to',0,0)
+            index=entry['index'];x=index%columns*size;y=index//columns*size
+            image.tk.call(str(image),'copy',str(root._sprite_sheets[sheet_key]),'-from',x,y,x+size,y+size,'-to',0,0)
             root._sprite_cache[cache]=image
         except (OSError,tk.TclError):return None
     return root._sprite_cache[cache]

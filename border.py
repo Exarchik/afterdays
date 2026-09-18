@@ -52,17 +52,19 @@ class Border:
 
     def quest_locations(self,q):
         reachable=self.player_reachable_world(self.cities[q['city']])
-        return [pos for pos in super().quest_locations(q) if pos in reachable]
+        return [pos for pos in super().quest_locations(q) if pos in reachable and (q.get('level',self.region_at(*self.cities[q['city']]))<3 or self.region_at(*pos)>=3)]
 
     def metro_cost(self,destination):
         if not self.border_open and destination in range(len(self.cities)) and self.inside_border((self.x,self.y)) and not self.inside_border(self.cities[destination]):return None
         return super().metro_cost(destination)
 
     def check_border_quest(self):
+        if self.turn<self.reputation_state.get('permit_retry',0):return
         if self.border_open or any(q['kind']=='permit' for q in self.quests):return
         eligible=[i for i in range(12) if self.reputation(i)>=75]
         if not eligible:return
         city=self.city if self.city in eligible else min(eligible,key=lambda i:(i not in self.known_cities,abs(self.cities[i][0]-self.x)+abs(self.cities[i][1]-self.y)))
+        if len(self.active_for(city))>=self.quest_capacity(city):return
         if city not in self.mayors:self.mayors.append(city)
         self.quests.append(dict(id=r.uid(),kind='permit',city=city,status='active',title=tr('border.title'),
             progress=1,goal=1,target_kind=None,pos=self.cities[city][:],unique=False,level=self.region_at(*self.cities[city]),reward=0,xp_reward=0))

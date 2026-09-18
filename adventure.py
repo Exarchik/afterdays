@@ -542,14 +542,14 @@ class Game(p.Game):
     def save(self,path):
         content.migrate(self)
         data={k:v for k,v in vars(self).items() if k!='rng' and not k.startswith('_')}
-        data.update(version=14,rng_state=self.rng.getstate())
+        data.update(version=15,rng_state=self.rng.getstate())
         path=Path(path);path.parent.mkdir(parents=True,exist_ok=True)
         tmp=path.with_suffix('.tmp');tmp.write_text(json.dumps(data,ensure_ascii=False),encoding='utf-8');os.replace(tmp,path)
 
     @classmethod
     def load(cls,path):
         data=json.loads(Path(path).read_text(encoding='utf-8'));version=data.get('version')
-        if version not in (1,2,3,4,5,6,7,8,9,10,11,12,13,14):raise ValueError(tr('adventure.0224'))
+        if version not in (1,2,3,4,5,6,7,8,9,10,11,12,13,14,15):raise ValueError(tr('adventure.0224'))
         game=cls(0)
         if version<4:
             old=p.Game.load(path)

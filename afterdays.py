@@ -1325,7 +1325,7 @@ def launch(test_hook=None):
             panel.pack(fill='both', expand=True)
 
         def mayor(self):
-            if self.game.city not in self.game.mayors or self.game.battle:return
+            if (self.game.city not in self.game.mayors and not self.game.regular_city) or self.game.battle:return
             win=self.popup(tr('afterdays.0178')+self.game.city_name(self.game.city),'750x670')
             refinement_ui.QuestCards(win,self,mayor=True).pack(fill='both',expand=True)
 
@@ -1370,7 +1370,7 @@ def launch(test_hook=None):
                 for q in self.game.quests:
                     if q['status'] != 'active':
                         continue
-                    pos = self.game.cities[q['city']] if self.game.quest_ready(q) else q.get('pos')
+                    pos = self.game.quest_return_pos(q) if self.game.quest_ready(q) else q.get('pos')
                     if pos:
                         px,py = ox+(pos[0]+.5)*t, oy+(pos[1]+.5)*t
                         c.create_oval(px-8,py-8,px+8,py+8,fill='#a674cd' if q.get('unique') else '#b48b40',outline='#ffe6a3')
@@ -1492,7 +1492,7 @@ def launch(test_hook=None):
                 for q in g.quests:
                     if q['status'] != 'active':
                         continue
-                    pos = g.cities[q['city']] if g.quest_ready(q) else q.get('pos')
+                    pos = g.quest_return_pos(q) if g.quest_ready(q) else q.get('pos')
                     if pos and self.vx <= pos[0] < self.vx+cols and self.vy <= pos[1] < self.vy+rows:
                         px,py = center(pos)
                         if pos == [g.x, g.y]:

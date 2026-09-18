@@ -17,15 +17,23 @@ def region_color(color,x):
     return '#'+''.join(f'{round(v*(1-ratio)+t*ratio):02x}' for v,t in zip(rgb,tint))
 
 
+def battle_camera(b,width,height,fx=None):
+    w,h=b['w'],b['h']
+    if b.get('dungeon'):
+        u=max(24,min(46,width/18,height/13))
+        pos=fx.position('player',b['pos']) if hasattr(fx,'position') else b['pos']
+        return u,width/2-(pos[0]-pos[1])*u,height*.55-(pos[0]+pos[1])*u/2
+    u=min((width-30)/(w+h+1),(height-45)/((w+h)/2+2))
+    return u,(width-(w-h)*u)/2,max(40,(height-(w+h)*u/2)/2)
+
+
 def draw_battle(app):
     c,g=app.canvas,app.game
     b=g.battle
     c.delete('all')
     width,height=max(c.winfo_width(),200),max(c.winfo_height(),200)
     w,h=b['w'],b['h']
-    u=min((width-30)/(w+h+1),(height-45)/((w+h)/2+2))
-    ox=(width-(w-h)*u)/2
-    oy=max(40,(height-(w+h)*u/2)/2)
+    u,ox,oy=battle_camera(b,width,height,getattr(app,'fx',None))
     app.iso=dict(u=u,ox=ox,oy=oy,sprites=[])
     def center(pos): return ox+(pos[0]-pos[1])*u,oy+(pos[0]+pos[1])*u/2
     kind=b.get('biome','waste')
@@ -45,6 +53,7 @@ def draw_battle(app):
     cells=sorted(((x,y) for y in range(h) for x in range(w)),key=lambda a:sum(a))
     for x,y in cells:
         px,py=center((x,y))
+        if px < -2*u or px > width+2*u or py < -2*u or py > height+2*u:continue
         color=colors[(x+y)%2]
         if kind=='road' and 4<=y<=6:color='#918060'
         reachable=(x,y) in costs
@@ -57,6 +66,7 @@ def draw_battle(app):
     enemies={tuple(e['pos']):e for e in b['enemies']}
     for pos in cells:
         px,py=center(pos)
+        if list(pos)!=b['pos'] and pos not in enemies and (px < -2*u or px > width+2*u or py < -2*u or py > height+2*u):continue
         for corpse in b.get('corpses',[]):
             if tuple(corpse['pos'])==pos:
                 sprites.draw(c,'corpse',px-u*.6,py-u*.5,u*1.2)
@@ -207,7 +217,8 @@ class TradingPanel(tk.Frame):
         self.stock_grid.set_items(items)
         self.bag_grid.set_items(g.bag)
         self.title.config(text=tr('advanced_ui.0024', v0=g.merchant_title(self.merchant), v1=g.money, v2=g.weight, v3=g.capacity))
-        if g.city is not None:self.title.config(text=self.title.cget('text')+' · '+tr('reputation.short', value=g.reputation()))
+        city=g.trading_city(self.merchant)
+        if city is not None:self.title.config(text=self.title.cget('text')+' · '+g.city_name(city)+' · '+tr('reputation.short', value=g.reputation(city)))
         self.describe()
         self.app.refresh()
 

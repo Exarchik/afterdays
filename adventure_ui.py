@@ -104,7 +104,7 @@ def paint_snapshot(app):
 
 
 def service_picture(c,key,x,y,npc=None):
-    sprite=('npc:'+npc if npc else 'npc:'+key) if key in ('smith','food','fence','tech','mayor','traveler','hunter') else {'stash':'stash','rest':'rest','search':'loot','perks':'perk:tactician','atlas':'site'}.get(key)
+    sprite=('npc:'+npc if npc else 'npc:'+key) if key in ('smith','food','fence','tech','mayor','traveler','hunter') else {'stash':'stash','rest':'rest','search':'loot','perks':'perk:tactician','atlas':'site','board':'journal'}.get(key)
     if sprites.draw(c,sprite,x,y,52):return
     samples={'hunter':dict(name=tr('adventure_ui.0001'),kind='sealed',rarity=0),'smith':dict(name=tr('adventure_ui.0002'),kind='weapon',rarity=1),
              'food':p.supply('food'),'fence':dict(name=tr('adventure_ui.0003'),kind='sealed',rarity=0),
@@ -114,7 +114,7 @@ def service_picture(c,key,x,y,npc=None):
              'search':dict(name=tr('adventure_ui.0007'),kind='module',rarity=0,stats={'range':1}),
              'perks':dict(name=tr('adventure_ui.0008'),kind='module',rarity=3,stats={'crit':5}),
              'atlas':dict(name=tr('adventure_ui.0009'),kind='quest',rarity=2)}
-    icon(c,samples[key],x,y,52)
+    icon(c,samples.get(key,dict(kind='quest',name=tr('quests.board'),rarity=0)),x,y,52)
 
 
 class Services(tk.Frame):
@@ -137,6 +137,8 @@ class Services(tk.Frame):
             if g.available_merchant(3):items.append(('traveler',tr('adventure_ui.0013'),lambda:app.shop(3)))
             if g.city in g.technicians:items.append(('tech',tr('adventure_ui.0014'),app.technician))
             if g.city in g.mayors:items.append(('mayor',g.current_site['npc'] if g.current_site else tr('adventure_ui.0015'),app.mayor))
+            if g.regular_city and g.city not in g.mayors:items.append(('board',tr('quests.board'),app.mayor))
+            if any(q['kind']=='repair_delivery' and q['status']=='active' and g.quest_return_city(q)==g.city for q in g.quests):items.append(('board',tr('quests.recipient'),lambda:app.tabs.select(app.quest_tab)))
             if g.regular_city:
                 items.extend([('stash',tr('adventure_ui.0016'),app.storage),('rest',tr('adventure_ui.0017'),lambda:app.act(g.rest))])
             elif g.city is None:

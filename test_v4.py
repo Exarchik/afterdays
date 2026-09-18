@@ -95,7 +95,7 @@ class AdventureTests(unittest.TestCase):
     def test_mayor_refresh_does_not_replace_active_quests(self):
         g=r.Game(7);offers=g.mayor_offers();ids={q['id'] for q in offers}
         g.accept_quest(offers[0]['id']);active=copy.deepcopy(g.quests[0])
-        g.turn=99;self.assertEqual(ids,{q['id'] for q in g.mayor_offers()})
+        g.turn=99;self.assertEqual(ids-{active['id']},{q['id'] for q in g.mayor_offers()})
         g.turn=100;self.assertTrue(ids.isdisjoint({q['id'] for q in g.mayor_offers()}))
         self.assertEqual(g.quests[0],active)
 

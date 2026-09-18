@@ -990,5 +990,65 @@
       221,
       222
     ]
+  },
+  "trophy_monster_rodent": {
+    "index": 0,
+    "sheet": "trophies",
+    "columns": 4
+  },
+  "trophy_monster_feral": {
+    "index": 1,
+    "sheet": "trophies",
+    "columns": 4
+  },
+  "trophy_monster_spitter": {
+    "index": 2,
+    "sheet": "trophies",
+    "columns": 4
+  },
+  "trophy_monster_blind_hound": {
+    "index": 3,
+    "sheet": "trophies",
+    "columns": 4
+  },
+  "trophy_monster_shellback": {
+    "index": 4,
+    "sheet": "trophies",
+    "columns": 4
+  },
+  "trophy_monster_acid_tick": {
+    "index": 5,
+    "sheet": "trophies",
+    "columns": 4
+  },
+  "trophy_monster_ash_wolf": {
+    "index": 6,
+    "sheet": "trophies",
+    "columns": 4
+  },
+  "trophy_monster_sentry_drone": {
+    "index": 7,
+    "sheet": "trophies",
+    "columns": 4
+  },
+  "trophy_monster_swamp_mutant": {
+    "index": 8,
+    "sheet": "trophies",
+    "columns": 4
+  },
+  "trophy_monster_bone_giant": {
+    "index": 9,
+    "sheet": "trophies",
+    "columns": 4
+  },
+  "trophy_monster_spark": {
+    "index": 10,
+    "sheet": "trophies",
+    "columns": 4
+  },
+  "trophy_monster_chimera_spider": {
+    "index": 11,
+    "sheet": "trophies",
+    "columns": 4
   }
 }

@@ -36,14 +36,14 @@ class ExpansionTests(unittest.TestCase):
         from progression import Game as ProgressionGame
         ProgressionGame.spawn_traveler(g)
         stock = g.stock(3)
-        self.assertEqual(len([i for i in stock if i['kind'] in ('weapon','armor','helmet','module')]),2)
+        self.assertEqual(len([i for i in stock if i['kind'] in ('weapon','armor','helmet','module')]),1)
         self.assertTrue({'food','med'}.issubset({i['kind'] for i in stock}))
-        item = stock[0]
-        self.assertEqual(g.price(item,3), round(item_value(item)*.5))
+        item = next(i for i in stock if i['kind'] in ('weapon','armor','helmet','module'))
+        self.assertEqual(g.price(item,3), round(round(item_value(item)*.5)*1.3))
         g.money=10000
         credits=g.money
         self.assertTrue(g.buy(item['id'],3))
-        self.assertEqual(credits-g.money, round(item_value(item)*.5))
+        self.assertEqual(credits-g.money, round(round(item_value(item)*.5)*1.3))
         self.assertNotIn(item,g.stock(3))
         g.step(1,0)
         self.assertFalse(g.available_merchant(3))
@@ -194,7 +194,7 @@ class ExpansionTests(unittest.TestCase):
             self.assertEqual(len(new.cities),12)
             self.assertEqual(len(new.city_merchants),12)
             new.save(p)
-            self.assertEqual(json.loads(p.read_text())['version'],14)
+            self.assertEqual(json.loads(p.read_text())['version'],15)
 
     def test_equipment_mouse_drop_routes(self):
         from visuals import EquipmentPanel

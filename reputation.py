@@ -64,7 +64,8 @@ class Reputation:
         self.check_border_quest()
 
     def price(self, item, merchant, buying=True):
-        rep = self.reputation()
+        city=self.trading_city(merchant)
+        rep = self.reputation(city) if city is not None else 50
         # Hunters pay twice face value; their own retail price has a matching spread.
         def purchase(at_rep):
             if item['kind']=='rad':return 2*self.price(p.supply('med'),merchant,True)
@@ -79,13 +80,13 @@ class Reputation:
     def buy(self, item_id, merchant, qty=1):
         money = self.money
         ok = super().buy(item_id, merchant, qty)
-        if ok:self.add_reputation(turnover=money-self.money)
+        if ok:self.add_reputation(turnover=money-self.money,city=self.trading_city(merchant))
         return ok
 
     def sell(self, item_id, merchant, qty=1):
         money = self.money
         ok = super().sell(item_id, merchant, qty)
-        if ok:self.add_reputation(turnover=self.money-money)
+        if ok:self.add_reputation(turnover=self.money-money,city=self.trading_city(merchant))
         return ok
 
     def repair_cost(self, item, target=100):
@@ -104,8 +105,11 @@ class Reputation:
                 self.shops[key] = entry
             return entry['items']
         items = super().stock(merchant)
-        if self.city is None:return items
-        entry = next((v for v in self.shops.values() if v['items'] is items), None)
+        if merchant==3 and self.traveler and self.traveler['pos']==[self.x,self.y]:
+            entry=self.traveler;rep=self.reputation(self.trading_city(merchant))
+        else:
+            if self.city is None:return items
+            entry = next((v for v in self.shops.values() if v['items'] is items), None)
         if entry is None:return items
         if 'rep_reserve' not in entry:
             gear = [i for i in items if i['kind'] in GEAR or i['kind']=='sealed']
@@ -173,17 +177,7 @@ class Reputation:
         if q and q['kind']=='thanks':
             if self.battle or self.city!=q['city'] or not self.quest_ready(q):return False
             q['status']='done';self.money+=q['reward'];self.gain_xp(q['xp_reward'])
-            gifts=[]
-            if self.rng.random()<.50:
-                kind=self.rng.choice(['ammo','med','food','rad'])
-                if kind=='ammo':
-                    item=p.ammunition((self.weapon or {}).get('ammo_type','pistol'),self.rng.randint(15,35))
-                else:item=p.supply(kind,self.rng.randint(1,3))
-                gifts.append(item)
-            if self.rng.random()<.20:gifts.append(self.reward_item(4,1,level=self.level))
-            for item in gifts:
-                if not self.accept(item):p.add_to(self.stash,item)
-                self.log(tr('reputation.gift', name=item['name']))
+            self.give_quest_items(q)
             self.log(tr('reputation.received', city=self.city_name(q['city']), money=q['reward'], xp=q['xp_reward']))
             self.add_reputation(4,city=q['city'])
             return True
@@ -207,7 +201,7 @@ class Reputation:
         eligible = self.schedule_thanks()
         due = self.reputation_state['thanks_due']
         if not eligible or due is None or self.turn<due or self.battle:return
-        eligible = [i for i in eligible if not any(q['kind']=='thanks' and q['city']==i and q['status']=='active' for q in self.quests)]
+        eligible = [i for i in eligible if len(self.active_for(i))<self.quest_capacity(i) and not any(q['kind']=='thanks' and q['city']==i and q['status']=='active' for q in self.quests)]
         self.reputation_state['thanks_due'] = self.turn+self.rng.randint(60,100)
         if not eligible:return
         city=self.rng.choice(eligible);level=self.region_at(*self.cities[city])

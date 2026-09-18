@@ -45,6 +45,7 @@ def window(app,title):
     def close():
         win.destroy();app.dialog=previous if previous and previous.winfo_exists() else None
         if app.dialog:app.dialog.grab_set()
+    win.close_dialog=close
     win.protocol('WM_DELETE_WINDOW',close);win.bind('<Escape>',lambda e:close())
     ttk.Button(win,text=tr('inspection_ui.0028'),command=close).pack(side='bottom',fill='x',padx=12,pady=10)
     return win

@@ -74,7 +74,10 @@ def migrate(game):
     """Preserve rolled stats, IDs, durability, RNG and progress; only add identity/name data."""
     items=game.bag+game.loot+game.stash+[i for i in game.equipped.values() if i]
     for shop in game.shops.values():items+=shop['items']+shop.get('rep_reserve',[])
-    if game.traveler:items+=game.traveler.get('items',[])
+    if game.traveler:items+=game.traveler.get('items',[])+game.traveler.get('rep_reserve',[])
+    for q in game.quests+[q for offers in game.offers.values() for q in offers]:
+        items+=q.get('reward_items',[])
+        if q.get('repair_item'):items.append(q['repair_item'])
     for item in items:identify_item(item)
     for q in game.quests+[q for offers in game.offers.values() for q in offers]:
         if q.get('target_kind') is not None:q['target_type_id']=monster_id(q['target_kind'])

@@ -4,12 +4,15 @@ import afterdays as r
 import frontier
 import economy
 import content
+import copy
+import progression as p
+from quest_system import QuestSystem
 from reputation import Reputation
 from border import Border
 
-economy.BASE_REWARDS.update(delivery=90,radio=100)
+economy.BASE_REWARDS.update(delivery=90,radio=100,repair_delivery=130)
 
-class Game(Border, Reputation, frontier.Game):
+class Game(QuestSystem, Border, Reputation, frontier.Game):
     def __init__(self,seed=None):
         super().__init__(seed)
         content.migrate(self)
@@ -26,35 +29,41 @@ class Game(Border, Reputation, frontier.Game):
         origin=tuple(self.cities[q['city']]);reachable=self.player_reachable_world(origin)
         occupied={tuple(t['pos']) for t in self.quests if t['status']=='active' and t.get('pos')}
         return [s for s in self.special_sites if tuple(s['pos']) in reachable and tuple(s['pos'])!=origin
-                and tuple(s['pos']) not in occupied and self.region_at(*s['pos'])<=q['level']+1]
+                and tuple(s['pos']) not in occupied and (3 if q['level']>=3 else 1)<=self.region_at(*s['pos'])<=q['level']+1]
 
     def _raw_mayor_offers(self):
         offers=frontier.Game.mayor_offers(self)
         if self.city not in self.mayors or self.battle:return offers
-        for kind,title in [('delivery',tr('contracts.0001')),('radio',tr('contracts.0002'))]:
+        for kind,title in [('delivery',tr('contracts.0001')),('radio',tr('contracts.0002')),('repair_delivery',tr('quests.repair_title'))]:
             if any(q['kind']==kind for q in offers):continue
             q=dict(id=r.uid(),kind=kind,city=self.city,status='offered',title=title,progress=0,goal=1,
                    target_kind=None,pos=None,unique=self.rng.random()<.18,scaled=True,distance_scaled=True,cycle_named=True,zone=self.region_level)
             self.price_quest(q)
-            if kind=='delivery':
+            if kind in ('delivery','repair_delivery'):
                 pool=self.delivery_sites(q)
                 if not pool:continue
                 site=self.rng.choice(pool);q.update(destination=site['id'],destination_name=site['name'],pos=site['pos'][:])
+            if kind=='repair_delivery':
+                names=[k for k,v in r.GEAR.items() if v[0] in ('weapon','armor') and p.GEAR_MIN_LEVEL[k]<=q['level']]
+                item=p.equipment(self.rng.choice(names),rng=self.rng,level=q['level'])
+                item.update(kind='quest',quest_id=q['id'],quest_repair=True,durability=0.0,weight=0)
+                item.pop('slots',None);item.pop('modules',None)
+                q['repair_item']=item
             offers.append(q)
         content.migrate(self)
         return offers
 
     def accept_quest(self,quest_id):
         offer=next((q for q in self.mayor_offers() if q['id']==quest_id and q['status']=='offered'),None)
-        if not offer or offer['kind'] not in ('delivery','radio'):return super().accept_quest(quest_id)
+        if not offer or offer['kind'] not in ('delivery','radio','repair_delivery'):return super().accept_quest(quest_id)
         if sum(q['status']=='active' for q in self.quests)>=8:
             self.log(tr('contracts.0003'));return False
         q=dict(offer)
-        if q['kind']=='delivery':
+        if q['kind'] in ('delivery','repair_delivery'):
             site=next((s for s in self.delivery_sites(q) if s['id']==q['destination']),None)
             if not site:self.log(tr('contracts.0004'));return False
             parcel=dict(id=r.uid(),type_id='quest_parcel',delivery=True,kind='quest',name=tr('contracts.0005')+q['destination_name'],rarity=0,weight=0,value=0,quest_id=q['id'])
-            self.bag.append(parcel)
+            self.bag.append(copy.deepcopy(q['repair_item']) if q['kind']=='repair_delivery' else parcel)
             # Reveal the recipient so its NPC and service are accessible on arrival.
             if not site['found']:self.discover(site['id'])
         else:
@@ -94,6 +103,9 @@ class Game(Border, Reputation, frontier.Game):
         self.log(tr('contracts.0014'));return False
 
     def quest_text(self,q):
+        if q['kind']=='repair_delivery':
+            item=next((i for i in self.bag if i.get('quest_id')==q['id']),q['repair_item'])
+            return tr('quests.repair_text',title=q['title'],item=item['name'],condition=round(item['durability']),destination=q['destination_name'],level=q['level'],money=q['reward'],xp=q['xp_reward'])
         if q['kind'] not in ('delivery','radio'):return super().quest_text(q)
         desc=(tr('contracts.0015')+q['destination_name']+tr('contracts.0016')) if q['kind']=='delivery' else tr('contracts.0017')
         state=tr('contracts.0018') if q['status']=='done' else tr('contracts.0019') if self.quest_ready(q) else tr('contracts.0020') if q['status']=='offered' else tr('contracts.0021')

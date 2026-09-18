@@ -7,7 +7,7 @@ class QuestLocationTests(unittest.TestCase):
   for seed in range(10):
    g=r.Game(seed)
    for city in (0,2,3,7):
-    g.x,g.y=g.cities[city];g.quests=[]
+    g.x,g.y=g.cities[city];g.quests=[];g.local_record()['value']=75
     for kind in ('retrieve','scout','purge'):
      q=dict(id=r.uid(),kind=kind,city=city,status='offered',title='Test',progress=0,goal=1,target_kind=None,pos=None,unique=False)
      g.price_quest(q);q['rep_elite_roll']=1;g.offers[str(city)]=[q]

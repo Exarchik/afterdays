@@ -79,9 +79,10 @@ def description(game,item):
     elif kind=='food':lines.append(tr('refinement_ui.0023'))
     elif kind=='trophy':lines.append(tr('refinement_ui.0024'))
     elif kind in ('parts','fragments'):lines.append(tr('refinement_ui.0025')+(tr('refinement_ui.0026') if kind=='parts' else tr('refinement_ui.0027'))+tr('refinement_ui.0028'))
+    if item.get('quest_repair'):lines.append(tr('quests.repair_item_info',condition=round(item.get('durability',0))))
     return '\n'.join(lines)
 
-QUEST_ICONS={'permit':'⚿','thanks':'★','delivery':'✉','radio':'◉','trophies':'♜','hunt':'◎','retrieve':'▣','scout':'◈','supplies':'✚','purge':'⚑'}
+QUEST_ICONS={'repair_delivery':'⚒','permit':'⚿','thanks':'★','delivery':'✉','radio':'◉','trophies':'♜','hunt':'◎','retrieve':'▣','scout':'◈','supplies':'✚','purge':'⚑'}
 class QuestCards(tk.Frame):
     def __init__(self,parent,app,mayor=False):
         super().__init__(parent,bg=PANEL);self.app=app;self.mayor=mayor;self.selection=None;self.open_done=False;self.entries=[];self.rects=[]
@@ -92,8 +93,10 @@ class QuestCards(tk.Frame):
         self.canvas.bind('<Configure>',lambda e:self.paint());self.canvas.bind('<Button-1>',self.click)
         self.canvas.bind('<MouseWheel>',lambda e:self.canvas.yview_scroll(-1 if e.delta>0 else 1,'units'))
         self.detail=Detail(self,height=5);self.detail.pack(fill='x',padx=8)
-        if mayor:ttk.Button(self,text=tr('refinement_ui.0029'),command=self.accept).pack(fill='x',padx=8,pady=3)
-        ttk.Button(self,text=tr('refinement_ui.0030'),command=self.turn_in).pack(fill='x',padx=8,pady=3)
+        controls=tk.Frame(self,bg=PANEL);controls.pack(fill='x',padx=8,pady=3)
+        if mayor:ttk.Button(controls,text=tr('refinement_ui.0029'),command=self.accept).pack(side='left',expand=True,fill='x')
+        ttk.Button(controls,text=tr('refinement_ui.0030'),command=self.turn_in).pack(side='left',expand=True,fill='x')
+        ttk.Button(controls,text=tr('quests.abandon'),command=self.abandon).pack(side='left',expand=True,fill='x')
         if not mayor:ttk.Button(self,text=tr('refinement_ui.0031'),command=app.atlas).pack(fill='x',padx=8,pady=3)
         self.refresh()
     def selected(self):return next((q for q in self.entries if q['id']==self.selection),None)
@@ -101,10 +104,11 @@ class QuestCards(tk.Frame):
         g=self.app.game
         self.rep_label.config(text=tr('reputation.short',value=g.reputation()) if self.mayor else '')
         self.entries=([q for q in g.mayor_offers() if q['status']=='offered']+[q for q in g.quests if q['city']==g.city]) if self.mayor else list(g.quests)
+        self.entries.sort(key=lambda q:(q['status']=='done',not g.can_turn_in(q),not g.quest_ready(q)))
         if not self.selected():self.selection=next((q['id'] for q in self.entries if q['status']!='done'),None)
         self.paint();self.describe()
     def paint(self):
-        c=self.canvas;c.delete('all');self.rects=[];w=max(280,c.winfo_width());y=4
+        c=self.canvas;c.delete('all');self.rects=[];self.turnin_rects=[];w=max(280,c.winfo_width());y=4
         # Eight compact cards in a normal-height panel; scrolling remains available.
         h=max(40,min(52,(max(328,c.winfo_height())-8)//8))
         active=[q for q in self.entries if q['status']!='done'];done=[q for q in self.entries if q['status']=='done']
@@ -114,30 +118,46 @@ class QuestCards(tk.Frame):
                 c.create_text(15,y+15,text=('▾' if self.open_done else '▸')+tr('refinement_ui.0032', v0=len(done)),fill=MUTED,anchor='w')
                 self.rects.append((y,y+30,'done'));y+=34;continue
             color='#d0a0f5' if q.get('unique') else '#8aa78e' if q['status']=='done' else GOLD
-            c.create_rectangle(5,y,w-5,y+h-3,fill='#334a3d' if q['id']==self.selection else '#22332b',outline=color)
+            c.create_rectangle(5,y,w-5,y+h-3,fill=('#173b60' if q['id']==self.selection else '#102c4a') if self.app.game.quest_ready(q) else '#334a3d' if q['id']==self.selection else '#22332b',outline=color)
             if not sprites.draw(c,'quest:'+q['kind'],10,y+5,30):c.create_text(25,y+20,text=QUEST_ICONS.get(q['kind'],'!'),fill=color,font=('Segoe UI',17))
             title=('★ ' if q.get('unique') else '')+f'L{q.get("level",q.get("zone",1))} · '+q['title']
-            limit=max(20,int((w-65)/7))
+            immediate=self.app.game.can_turn_in(q)
+            limit=max(9,int((w-65-(126 if immediate else 0))/7))
             if len(title)>limit:title=title[:limit-1]+'…'
             c.create_text(48,y+5,text=title,anchor='nw',fill=color,font=('Segoe UI',9,'bold'))
             state=tr('refinement_ui.0033') if q['status']=='offered' else tr('refinement_ui.0034') if q['status']=='done' else tr('refinement_ui.0035') if self.app.game.quest_ready(q) else tr('refinement_ui.0036', v0=q['progress'], v1=q['goal'])
             reward=tr('refinement_ui.0037',v0=q.get('reward',0),v1=q.get('xp_reward',0))
             c.create_text(48,y+23,text=state+' · '+reward,anchor='nw',fill=MUTED,font=('Segoe UI',8))
+            if immediate:
+                rect=(w-130,y+5,w-10,y+h-8)
+                c.create_rectangle(*rect,fill='#25517a',outline='#7caccb')
+                c.create_text(w-70,y+h/2-2,text=tr('refinement_ui.0030'),fill='#eef6ff',font=('Segoe UI',8,'bold'))
+                self.turnin_rects.append((rect,q['id']))
             self.rects.append((y,y+h-3,q['id']));y+=h
         c.config(scrollregion=(0,0,w,y))
     def click(self,e):
-        y=self.canvas.canvasy(e.y);key=next((key for a,b,key in self.rects if a<=y<=b),None)
+        y=self.canvas.canvasy(e.y)
+        for (x1,y1,x2,y2),ident in self.turnin_rects:
+            if x1<=e.x<=x2 and y1<=y<=y2:
+                self.selection=ident;self.turn_in();return
+        key=next((key for a,b,key in self.rects if a<=y<=b),None)
         if key=='done':self.open_done=not self.open_done
         else:self.selection=key
         self.paint();self.describe()
     def describe(self):
         q=self.selected();self.detail.config(text=self.app.game.quest_text(q) if q else tr('refinement_ui.0038'))
     def accept(self):
+        from quest_dialog import confirm
         q=self.selected()
-        if q:self.app.game.accept_quest(q['id']);self.refresh();self.app.refresh()
+        if q:confirm(self,q,'accept')
     def turn_in(self):
+        from quest_dialog import confirm
         q=self.selected()
-        if q:self.app.game.turn_in(q['id']);self.refresh();self.app.refresh()
+        if q:confirm(self,q,'turn_in')
+    def abandon(self):
+        from quest_dialog import confirm
+        q=self.selected()
+        if q:confirm(self,q,'abandon')
 
 class Technician(tk.Frame):
     def __init__(self,parent,app):
