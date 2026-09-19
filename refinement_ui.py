@@ -83,7 +83,7 @@ def description(game,item):
     if item.get('quest_repair'):lines.append(tr('quests.repair_item_info',condition=round(item.get('durability',0))))
     return '\n'.join(lines)
 
-QUEST_ICONS={'field_test':'⚒','generator':'ϟ','cache':'▣','elite_hunt':'◎','repair_delivery':'⚒','permit':'⚿','thanks':'★','delivery':'✉','radio':'◉','trophies':'♜','hunt':'◎','retrieve':'▣','scout':'◈','supplies':'✚','purge':'⚑'}
+QUEST_ICONS={'junkyard':'▦','field_test':'⚒','generator':'ϟ','cache':'▣','elite_hunt':'◎','repair_delivery':'⚒','permit':'⚿','thanks':'★','delivery':'✉','radio':'◉','trophies':'♜','hunt':'◎','retrieve':'▣','scout':'◈','supplies':'✚','purge':'⚑'}
 class QuestCards(tk.Frame):
     def __init__(self,parent,app,mayor=False):
         super().__init__(parent,bg=PANEL);self.app=app;self.mayor=mayor;self.selection=None;self.open_done=False;self.entries=[];self.rects=[]
@@ -185,8 +185,8 @@ class Technician(tk.Frame):
             ttk.Radiobutton(row,text=title,variable=self.material,value=kind,command=self.chances).pack(anchor='w',pady=6)
         tk.Label(craft,text=tr('refinement_ui.0045'),bg=PANEL,fg=GOLD,font=('Segoe UI',12,'bold')).pack(anchor='w',padx=12,pady=(15,6))
         row=tk.Frame(craft,bg=PANEL);row.pack(fill='x',padx=12)
-        ttk.Spinbox(row,from_=10,to=150,textvariable=self.amount,width=8).pack(side='left',padx=(0,10))
-        for n in (10,30,75,150):ttk.Button(row,text=str(n),command=lambda n=n:self.amount.set(str(n))).pack(side='left',padx=4)
+        ttk.Spinbox(row,from_=10,to=1000,textvariable=self.amount,width=8).pack(side='left',padx=(0,10))
+        for n in (10,75,150,500,1000):ttk.Button(row,text=str(n),command=lambda n=n:self.amount.set(str(n))).pack(side='left',padx=4)
         self.odds_frame=tk.Frame(craft,bg=PANEL);self.odds_frame.pack(fill='x',padx=12,pady=12)
         self.chance_labels=[]
         for n,(name,color) in enumerate(r.RARITIES):
@@ -205,13 +205,14 @@ class Technician(tk.Frame):
         g=self.app.game;kind=self.material.get()
         try:amount=int(self.amount.get())
         except ValueError:amount=0
-        odds=g.craft_odds(amount) if amount>=10 else [0]*5
+        failure=g.craft_failure(amount) if amount>=10 else 1
+        odds=[round(n*(1-failure),1) for n in g.craft_odds(amount)] if amount>=10 else [0]*5
         for n,label in enumerate(self.chance_labels):label.config(text=f'{r.RARITIES[n][0]}\n{odds[n]}%')
         available=g.count(kind);space=g.capacity-g.weight
-        valid=10<=amount<=150 and amount<=available and space>=.3
+        valid=10<=amount<=1000 and amount<=available and space>=.3
         self.craft_button.config(state='normal' if valid else 'disabled')
-        reason=tr('refinement_ui.0048') if valid else tr('refinement_ui.0049') if not 10<=amount<=150 else tr('refinement_ui.0050') if amount>available else tr('refinement_ui.0051')
-        self.preview.config(text=tr('refinement_ui.0052', v0=available, v1=amount, v2=max(0, available - amount), v3=g.level, v4=reason))
+        reason=tr('refinement_ui.0048') if valid else tr('refinement_ui.0049') if not 10<=amount<=1000 else tr('refinement_ui.0050') if amount>available else tr('refinement_ui.0051')
+        self.preview.config(text=tr('refinement_ui.0052', v0=available, v1=amount, v2=max(0, available - amount), v3=g.level, v4=reason)+tr('scav.craft_risk',chance=round(failure*100,1)))
     def refresh(self):
         g=self.app.game;self.grid.set_items([i for i in list(g.equipped.values())+g.bag if i and 'durability' in i])
         self.resources.config(text=tr('refinement_ui.0053', v0=g.money, v1=g.count('parts'), v2=g.count('fragments')))
@@ -227,11 +228,11 @@ class Technician(tk.Frame):
         g=self.app.game
         try:amount=int(self.amount.get())
         except ValueError:return
-        if not 10<=amount<=150:return
+        if not 10<=amount<=1000:return
         before={i['id'] for i in g.bag}
         ok=g.craft_module(self.material.get(),amount)
         item=next((i for i in g.bag if i['id'] not in before),None)
-        self.result.config(text=(tr('refinement_ui.0057')+description(g,item)) if ok else tr('refinement_ui.0058'))
+        self.result.config(text=(tr('refinement_ui.0057')+description(g,item)) if ok else g.messages[-1] if getattr(g,'_craft_failed',False) else tr('refinement_ui.0058'))
         self.refresh();self.app.refresh()
         if ok:
             import inspection_ui

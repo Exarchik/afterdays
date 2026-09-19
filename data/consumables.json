@@ -59,5 +59,10 @@
     "ammo_type": "bolt",
     "value": 3,
     "weight": 0.03
+  },
+  "item_repairkit": {
+    "kind": "repairkit",
+    "value": 50,
+    "weight": 0
   }
 }

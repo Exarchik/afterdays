@@ -8,7 +8,7 @@ from visuals import PANEL, TEXT, GOLD
 
 def player_text(g):
     w=g.weapon;s=p.stats(w) if w else {};base=s.get('damage',0)+2*(g.level-1) if w else 0
-    lines=[tr('frontier_ui.0001', v0=g.level, v1=g.money),tr('frontier_ui.0002', v0=g.hp, v1=g.max_hp),
+    lines=[tr('frontier_ui.0001', v0=g.level, v1=g.money)+tr('scav.xp_remaining',level=g.level+1,xp=p.xp_for_level(g.level+1)-g.xp),tr('frontier_ui.0002', v0=g.hp, v1=g.max_hp),
            tr('frontier_ui.0003', v0=g.battle['ap'] if g.battle else g.max_ap, v1=g.max_ap),
            tr('frontier_ui.0004', v0=g.defense, v1=min(45, g.protection_stat('evasion'))),
            tr('frontier_ui.0005', v0=g.protection_stat('regen')),

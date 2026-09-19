@@ -60,15 +60,8 @@ class ExpeditionTests(unittest.TestCase):
   self.assertTrue(g.quest_ready(q));g.battle=None;self.assertTrue(g.abandon_quest(q['id']));self.assertIsNone(g.quest_equipment(q))
  def test_generator_solvable_consumes_materials_once(self):
   g,q=self.contract('generator');g.x,g.y=q['pos'];self.assertTrue(g.search());self.assertEqual(g._generator_request,q['id'])
-  start=list(q['generator_board']);solution=None
-  for mask in range(512):
-   board=start[:]
-   for n in range(9):
-    if mask>>n&1:board=toggle_cells(board,n)
-   if all(board):solution=mask;break
-  self.assertIsNotNone(solution);self.assertFalse(g.repair_generator(q['id']))
-  for n in range(9):
-   if solution>>n&1:self.assertTrue(g.generator_toggle(q['id'],n))
+  self.assertFalse(g.repair_generator(q['id']))
+  for n in q['generator_order']:self.assertTrue(g.generator_toggle(q['id'],n))
   g.bag[:]=[i for i in g.bag if i['kind']!=q['material']];self.assertFalse(g.repair_generator(q['id']))
   p.add_to(g.bag,p.parts(q['material_qty']) if q['material']=='parts' else p.fragments(q['material_qty']))
   self.assertTrue(g.repair_generator(q['id']));self.assertEqual(g.count(q['material']),0);self.assertFalse(g.repair_generator(q['id']));self.return_to_giver(g,q)
@@ -97,7 +90,7 @@ class ExpeditionTests(unittest.TestCase):
    self.assertEqual(q,next(x for x in h.quests if x['id']==q['id']))
  def test_trophy_values_and_drop_rules(self):
   for n in range(12):self.assertEqual(economy.trophy(n)['value'],2*(4+n))
-  self.assertAlmostEqual(economy.loot_rules([dict(grade='normal')])[0],.075)
+  self.assertAlmostEqual(economy.loot_rules([dict(grade='normal')])[0],.0375)
  def test_radio_waveform_has_visual_parameters(self):
   from radio_ui import waveform
   ref=waveform([10,10,10])

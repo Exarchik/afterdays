@@ -24,7 +24,7 @@ PERKS = {
     'trader':(tr('progression.0019'),tr('progression.0020')),
     'scavenger':(tr('progression.0021'),tr('progression.0022')),
 }
-STACK_KINDS = {'food','med','ammo','parts','fragments','rad'}
+STACK_KINDS = {'food','med','ammo','parts','fragments','rad','repairkit'}
 TECHNICIANS = [0,2,4,7,10]
 
 
@@ -330,7 +330,7 @@ class Game(r.ExpansionGame):
     def price(self,item,merchant,buying=True):
         base=item_value(item)/item.get('qty',1)
         if buying:
-            amount=item.get('sealed_price',round(85*self.level**1.3)) if merchant==2 else base*(.5 if merchant==3 else 1.15)
+            amount=item.get('sealed_price',round(85*self.level**1.3)) if merchant==2 and item['kind']!='repairkit' else base*(.5 if merchant==3 else 1.15)
             return max(1,round(amount*(1-min(.30,.05*self.rank('trader')))))
         condition=.25+.75*item.get('durability',100)/100
         return max(1,int(base*condition*(.22 if merchant==2 else .30 if merchant==3 else .50)))

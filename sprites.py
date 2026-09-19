@@ -13,6 +13,7 @@ SIZES=(16,24,32,48,64,96,144,192)
 def item_key(item):
     kind=item.get('kind')
     if kind=='trophy':return 'trophy_'+content.monster_id(item.get('monster_type_id',item.get('monster_kind',0)))
+    if kind=='repairkit':return 'repair'
     if kind=='sealed':return 'sealed'
     if kind=='ammo':return 'ammo:'+item.get('ammo_type','pistol')
     if kind=='quest' and not item.get('quest_repair'):return 'quest_item'

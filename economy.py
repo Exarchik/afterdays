@@ -17,7 +17,7 @@ def trophy(kind,qty=1):
  return dict(id=r.uid(),type_id='trophy_'+content.monster_id(kind),monster_type_id=content.monster_id(kind),kind='trophy',name=BODY_NAMES[kind],monster_kind=kind,rarity=0,level=1,qty=qty,weight=.08,value=2*(4+kind))
 def loot_rules(kills):
  normal=sum(e.get('grade','normal')=='normal' for e in kills);rare=sum(e.get('grade')=='rare' for e in kills);mythic=sum(e.get('grade')=='mythic' for e in kills)
- return min(1,.10+.05*normal+.10*rare+.25*mythic)*.5,2+rare+2*mythic,4 if mythic else 3 if rare else 1
+ return min(1,.10+.05*normal+.10*rare+.25*mythic)*.25,2+rare+2*mythic,4 if mythic else 3 if rare else 1
 class Game(a.Game):
  def __init__(self,seed=None):
   super().__init__(seed);self.add_hunters()
@@ -81,7 +81,7 @@ class Game(a.Game):
     p.add_to(self.loot,item);drops+=1
   # Independent supplies. They never replace successful equipment rolls.
   for _ in range(2):
-   if self.rng.random()<.55:p.add_to(self.loot,p.ammunition(self.rng.choice(list(p.AMMO)),max(1,self.rng.randint(3,12)//2)))
+   if self.rng.random()<.20:p.add_to(self.loot,p.ammunition(self.rng.choice(list(p.AMMO)),max(1,self.rng.randint(3,12)//2)))
   for kind,prob in [('food',.20),('med',.12),('rad',.05)]:
    if self.rng.random()<prob:p.add_to(self.loot,p.supply(kind))
   for fn in (p.parts,p.fragments):

@@ -725,7 +725,7 @@ class ExpansionGame(LegacyGame):
 
     def _visit_objectives(self):
         for q in self.quests:
-            if q['status'] == 'active' and q['kind'] == 'scout' and q['pos'] == [self.x, self.y]:
+            if q['status'] == 'active' and q['kind'] == 'scout' and not q.get('area') and q['pos'] == [self.x, self.y]:
                 q['progress'] = 1
                 self.log(tr('afterdays.0097'))
 
@@ -976,7 +976,7 @@ class ExpansionGame(LegacyGame):
 
 
 from progression import equipment, module, supply, stats, item_weight, item_value
-from expeditions import Game
+from scavenging import Game
 from reputation import buy_factor, sell_factor
 
 # GUI imports are delayed so the model and tests work without a display.
@@ -1167,6 +1167,11 @@ def launch(test_hook=None):
                 self.game._generator_request=None
                 import generator_ui
                 generator_ui.show(self,generator)
+            junk=getattr(self.game,'_junkyard_request',None)
+            if junk:
+                self.game._junkyard_request=None
+                import junkyard_ui
+                junkyard_ui.show(self,junk)
             if before_battle and not self.game.battle and self.game.loot:
                 self.tabs.select(self.loot_tab)
 
@@ -1186,7 +1191,7 @@ def launch(test_hook=None):
                     root.after_idle(show_notice)
             weapon = g.weapon
             ws = stats(weapon) if weapon else {}
-            self.status.config(text=tr('afterdays.0151', v0=g.hp, v1=g.max_hp, v2=g.defense, v3=g.weight, v4=g.capacity, v5=g.money, v6=g.level, v7=g.xp, v8=progression.xp_for_level(g.level + 1), v9=g.turn))
+            self.status.config(text=tr('afterdays.0151', v0=g.hp, v1=g.max_hp, v2=g.defense, v3=g.weight, v4=g.capacity, v5=g.money, v6=g.level, v7=g.xp, v8=progression.xp_for_level(g.level + 1), v9=g.turn,v10=progression.xp_for_level(g.level+1)-g.xp))
             combat = g.battle is not None
             self.end_button.config(state='normal' if combat else 'disabled')
             self.flee_button.config(state='normal' if combat else 'disabled')
@@ -1273,6 +1278,9 @@ def launch(test_hook=None):
 
         def use_selected(self):
             item = self.game.find(self.selected_id())
+            if item and item['kind']=='repairkit':
+                import maintenance_ui
+                maintenance_ui.show(self);return
             if item and item['kind']=='sealed':
                 if self.fx.blocked:return
                 found=self.game.open_chest(item['id'])

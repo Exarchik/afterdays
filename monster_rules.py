@@ -10,7 +10,11 @@ def eligible(zone,weak=True):
 
 def choose(rng,zone):
     pool=eligible(zone)
-    return rng.choices(pool,[.3 if base_level(k)>zone else 1 for k in pool])[0]
+    return rng.choices(pool,[spawn_weight(k,zone) for k in pool])[0]
+
+def spawn_weight(kind,zone):
+    base=base_level(kind)
+    return (0.3 if base>zone else 1.0)/(1+abs(zone-base))**2
 
 def make(rng,kind,zone,pos,grade=None,weak=None,boost=1):
     ident=content.monster_id(kind);d=content.MONSTER_DATA[ident];base=d['base_level']

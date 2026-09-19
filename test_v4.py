@@ -72,7 +72,7 @@ class AdventureTests(unittest.TestCase):
         g.gain_xp(20);self.assertIn('+20 XP',[n['text'] for n in g.pop_events()])
         offer=offer_for(g,'scout');g.accept_quest(offer['id'])
         q=g.quests[-1];g.x,g.y=q['pos'];g._visit_objectives()
-        self.assertIn('Розвідка ✓',[n['text'] for n in g.pop_events()])
+        self.assertIn('Розвідка: 1/9',[n['text'] for n in g.pop_events()])
 
     def test_road_event_required_items_atomic_and_persistent(self):
         g=r.Game(5);g.x=6;g.make_road_event('wounded');g.consume('med',g.count('med'))

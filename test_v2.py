@@ -55,7 +55,7 @@ class ExpansionTests(unittest.TestCase):
         q=self.accept(g,'retrieve')
         self.assertNotIn(q['pos'],g.cities)
         self.assertEqual(q['status'],'active')
-        g.x,g.y=q['pos']
+        g.x,g.y=q['relic_pos']
         g.searched.append(q['pos'])
         self.assertTrue(g.search())  # Prior exploration cannot block a spawned objective.
         item=next(i for i in g.bag if i.get('quest_id')==q['id'])
@@ -90,6 +90,10 @@ class ExpansionTests(unittest.TestCase):
         self.assertNotEqual(a['pos'],b['pos'])
         g.x,g.y=b['pos']
         g._visit_objectives()
+        self.assertFalse(g.quest_ready(b))
+        x,y,xx,yy=b['area']
+        for cy in range(y,yy+1):
+            for cx in range(x,xx+1):g.x,g.y=cx,cy;g._visit_objectives()
         self.assertTrue(g.quest_ready(b))
         self.assertFalse(g.turn_in(b['id']))  # Must return to originating city.
 
@@ -165,7 +169,7 @@ class ExpansionTests(unittest.TestCase):
     def test_quest_item_survives_defeat_and_save_roundtrip(self):
         g=Game(9)
         q=self.accept(g,'retrieve')
-        g.x,g.y=q['pos']
+        g.x,g.y=q['relic_pos']
         g.search()
         g.defeat()
         self.assertTrue(g.quest_ready(q))
@@ -194,7 +198,7 @@ class ExpansionTests(unittest.TestCase):
             self.assertEqual(len(new.cities),12)
             self.assertEqual(len(new.city_merchants),12)
             new.save(p)
-            self.assertEqual(json.loads(p.read_text())['version'],17)
+            self.assertEqual(json.loads(p.read_text())['version'],18)
 
     def test_equipment_mouse_drop_routes(self):
         from visuals import EquipmentPanel

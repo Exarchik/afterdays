@@ -1,0 +1,28 @@
+"""Repair kits: select carried or equipped gear and preview the exact result."""
+import tkinter as tk
+from tkinter import ttk
+from inspection_ui import window
+from refinement_ui import Detail,description
+from visuals import ItemGrid,PANEL,TEXT,GOLD
+from i18n import t as tr
+
+def show(app):
+    g=app.game
+    if g.battle:return
+    app.route.pause();win=window(app,tr('scav.repair_menu'))
+    info=tk.Label(win,bg=PANEL,fg=GOLD,wraplength=560);info.pack(pady=12,padx=10)
+    def select(ident):
+        item=g.find(ident);detail.config(text=description(g,item))
+        usable=bool(item and item.get('durability',100)<100 and g.count('repairkit'))
+        button.config(state='normal' if usable else 'disabled')
+        preview.config(text=tr('scav.repair_preview',before=round(item['durability']),after=round(min(100,item['durability']+35))) if item else '')
+    grid=ItemGrid(win,select,height=220,columns=6);grid.pack(fill='both',expand=True,padx=12)
+    detail=Detail(win,height=8);detail.pack(fill='both',expand=True,padx=12)
+    preview=tk.Label(win,bg=PANEL,fg=TEXT);preview.pack(pady=8)
+    def refresh():
+        info.config(text=tr('scav.kits_available',qty=g.count('repairkit')))
+        grid.set_items([i for i in g.bag+list(g.equipped.values()) if i and i['kind'] in ('weapon','armor','helmet')]);select(grid.selection)
+    def repair():
+        if g.repair_with_kit(grid.selection):app.refresh()
+        refresh()
+    button=ttk.Button(win,text=tr('scav.use_kit'),command=repair);button.pack(fill='x',padx=12,pady=8);refresh()

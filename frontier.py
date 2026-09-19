@@ -79,7 +79,7 @@ class Game(economy.Game):
         items=super().stock(merchant)
         if merchant==2:
             for n,item in enumerate(items):
-                if item['kind']=='sealed':continue
+                if item['kind'] in ('sealed','repairkit'):continue
                 price=item.get('sealed_price',round(85*self.region_level**1.3))
                 items[n]=dict(id=r.uid(),type_id='item_sealed',kind='sealed',name=tr('frontier.0014'),rarity=0,level=item.get('level',1),
                               weight=p.item_weight(item),value=price,sealed_price=price,contents=item)

@@ -199,7 +199,7 @@ class TradingPanel(tk.Frame):
         if not item:self.detail.config(text=tr('advanced_ui.0018'));return
         qty=self.amount(item)
         price=self.app.game.price(item,self.merchant,self.source=='stock')
-        hidden=self.merchant==2 and self.source=='stock'
+        hidden=self.merchant==2 and self.source=='stock' and item['kind']=='sealed'
         shown=dict(item,kind='sealed',name=tr('advanced_ui.0019'),rarity=0) if hidden else item
         icon(self.preview,shown,2,5,76)
         if item['kind']=='weapon' and not hidden:
@@ -213,7 +213,7 @@ class TradingPanel(tk.Frame):
         g=self.app.game
         items=g.stock(self.merchant)
         if self.merchant==2:
-            items=[dict(id=i['id'],kind='sealed',name=tr('advanced_ui.0023'),rarity=0,weight=0) for i in items]
+            items=[dict(id=i['id'],kind='sealed',name=tr('advanced_ui.0023'),rarity=0,weight=0) if i['kind']=='sealed' else i for i in items]
         self.stock_grid.set_items(items)
         self.bag_grid.set_items(g.bag)
         self.title.config(text=tr('advanced_ui.0024', v0=g.merchant_title(self.merchant), v1=g.money, v2=g.weight, v3=g.capacity))
@@ -226,7 +226,7 @@ class TradingPanel(tk.Frame):
         grid.select_event(event)
         item=self.item()
         if item:
-            shown=dict(item,kind='sealed',name=tr('advanced_ui.0025'),rarity=0) if self.merchant==2 and source=='stock' else item
+            shown=dict(item,kind='sealed',name=tr('advanced_ui.0025'),rarity=0) if self.merchant==2 and source=='stock' and item['kind']=='sealed' else item
             self.drag.begin(event,dict(item=shown,source=source))
 
     def trade(self,source,item_id=None):

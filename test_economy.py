@@ -7,7 +7,7 @@ class EconomyTests(unittest.TestCase):
  def test_roll_rules(self):
   make=lambda n,rare,myth:[dict(kind=0,grade=k) for k,count in [('normal',n),('rare',rare),('mythic',myth)] for _ in range(count)]
   for counts,chance,rolls,cap in [((3,0,0),.25,2,1),((2,1,0),.30,3,3),((2,1,1),.55,5,4),((0,0,5),1,12,4)]:
-   actual=loot_rules(make(*counts));self.assertAlmostEqual(actual[0],chance*.5);self.assertEqual(actual[1:],(rolls,cap))
+   actual=loot_rules(make(*counts));self.assertAlmostEqual(actual[0],chance*.25);self.assertEqual(actual[1:],(rolls,cap))
  def test_caps_and_player_level(self):
   g=Game(6)
   for cap in (1,3,4):

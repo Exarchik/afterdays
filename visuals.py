@@ -257,6 +257,8 @@ def terrain(c, kind, x, y, t, gx, gy, game, battle=False):
 TYPE_ORDER=['weapon','armor','helmet','module','ammo','med','food','rad','parts','fragments','quest','sealed']
 TYPE_COLORS=dict(zip(TYPE_ORDER,['#323f53','#344c3b','#3f4c42','#453957','#504831','#50333b','#475032','#345249','#49433c','#424750','#514c35','#423c46']))
 TYPE_ORDER.insert(TYPE_ORDER.index('quest'),'trophy')
+TYPE_ORDER.insert(TYPE_ORDER.index('parts'),'repairkit')
+TYPE_COLORS['repairkit']='#4d4935'
 TYPE_COLORS['trophy']='#503e32'
 def item_sort_key(item):
     kind=item['kind'];return (TYPE_ORDER.index(kind) if kind in TYPE_ORDER else 99,-item.get('rarity',0),-item.get('level',1),item['name'],item['id'])
@@ -394,7 +396,8 @@ class EquipmentPanel(tk.Frame):
         bar.pack(fill='x', padx=4, pady=4)
         for n, (label, fn) in enumerate([(tr('visuals.0024'), app.equip_selected), (tr('visuals.0025'), app.modify),
                                        (tr('visuals.0026'), app.use_selected), (tr('visuals.0027'), app.drop_selected),
-                                       (tr('visuals.0028'), app.dismantle_selected), (tr('visuals.0029'), app.perks)]):
+                                       (tr('visuals.0028'), app.dismantle_selected), (tr('visuals.0029'), app.perks),
+                                       (tr('scav.repair_menu'), lambda: __import__('maintenance_ui').show(app))]):
             ttk.Button(bar, text=label, command=fn).grid(row=n//2, column=n%2, sticky='ew', padx=2, pady=2)
         bar.columnconfigure((0, 1), weight=1)
         self.drag = Drag(self, self.drop)

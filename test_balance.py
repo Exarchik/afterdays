@@ -34,7 +34,7 @@ class BalanceTests(unittest.TestCase):
  def test_quest_reward_fixed_after_level_up(self):
   g=r.Game(4);q=offer_for(g,'retrieve',unique=True)
   g.accept_quest(q['id']);q=g.quests[-1];self.assertEqual(q['level'],1)
-  reward=q['reward'];g.xp=p.xp_for_level(7);g.x,g.y=q['pos'];g.search();g.x,g.y=g.cities[0]
+  reward=q['reward'];g.xp=p.xp_for_level(7);g.x,g.y=q['relic_pos'];g.search();g.x,g.y=g.cities[0]
   before={i['id'] for i in g.bag+g.stash};xp=g.xp;self.assertTrue(g.turn_in(q['id']))
   awarded=[i for i in g.bag+g.stash if i['id'] not in before];self.assertTrue(awarded)
   self.assertTrue(all(i['level']==1 for i in awarded));self.assertEqual(g.xp-xp,80);self.assertEqual(q['reward'],reward)

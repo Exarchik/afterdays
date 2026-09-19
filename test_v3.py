@@ -163,6 +163,7 @@ class ProgressionTests(unittest.TestCase):
         for seed in range(15):
             g=r.Game(seed)
             for chest in g.stock(2):
+                if chest['kind']!='sealed':continue
                 i=chest['contents']
                 if 'durability' in i:
                     total+=1;damaged+=i['durability']<=30
@@ -172,7 +173,7 @@ class ProgressionTests(unittest.TestCase):
         normal=offer_for(g,'hunt')
         self.assertGreater(unique['reward'],normal['reward'])
         self.assertTrue(g.accept_quest(unique['id']))
-        q=g.quests[-1];g.x,g.y=q['pos'];g.search();g.x,g.y=g.cities[0]
+        q=g.quests[-1];g.x,g.y=q['relic_pos'];g.search();g.x,g.y=g.cities[0]
         xp=g.xp;self.assertTrue(g.turn_in(q['id']));self.assertEqual(g.xp,xp+80)
 
     def test_progressive_prices_and_biome_arenas(self):
