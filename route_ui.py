@@ -1,0 +1,89 @@
+"""UI-only continuous travel; segment duration follows geometric distance."""
+import time
+import math
+from journey import world_route
+from i18n import t as tr
+
+class RouteController:
+    seconds_per_cell=2/3
+
+    def __init__(self,app):
+        self.app=app;self.game=app.game;self.path=[];self.running=False
+        self.started=None;self.origin=(self.game.x,self.game.y)
+        app.root.after(33,self.tick)
+
+    def update_button(self):
+        button=getattr(self.app,'route_button',None)
+        if button:button.config(text=tr('journey.pause') if self.running else tr('journey.resume'),state='normal' if self.path and not self.app.game.battle else 'disabled')
+
+    def clear(self):
+        self.path=[];self.running=False;self.started=None;self.game=self.app.game
+        self.origin=(self.game.x,self.game.y);self.update_button()
+
+    def pause(self):
+        self.running=False;self.started=None;self.update_button()
+        # Snap to the last completed cell. Unfinished distance costs no turn.
+        self.position_player()
+
+    def blocked(self):
+        a=self.app;g=a.game
+        return bool(a.dialog or getattr(a,'_notice_open',False) or g.battle or g.road_event or a.fx.blocked)
+
+    def set_target(self,target):
+        if self.blocked():return False
+        self.clear();self.path=world_route(self.game,target)
+        if not self.path:
+            if tuple(target)!=self.origin:self.game.log(tr('journey.no_route'))
+            self.app.refresh();return False
+        self.running=True;self.started=time.monotonic();self.update_button();self.app.draw();return True
+
+    def toggle(self):
+        if self.running:self.pause()
+        elif self.path and not self.blocked():
+            if self.game is not self.app.game or self.origin!=(self.app.game.x,self.app.game.y):self.clear();return
+            self.running=True;self.started=time.monotonic();self.update_button()
+
+    def segment_duration(self):
+        return self.seconds_per_cell*math.dist((self.app.game.x,self.app.game.y),self.path[0]) if self.path else self.seconds_per_cell
+
+    def position(self):
+        pos=(self.app.game.x,self.app.game.y)
+        if not self.running or not self.path or self.started is None:return pos
+        fraction=min(1,max(0,(time.monotonic()-self.started)/self.segment_duration()))
+        return tuple(pos[i]+(self.path[0][i]-pos[i])*fraction for i in (0,1))
+
+    def position_player(self):
+        a=self.app
+        if not hasattr(a,'tile') or a.game.battle:return
+        x,y=self.position();t=a.tile
+        px=a.ox+(x-a.vx+.5)*t;py=a.oy+(y-a.vy+.5)*t
+        a.canvas.coords('world_player_ring',px-t*.31,py-t*.31,px+t*.31,py+t*.31)
+        a.canvas.coords('world_player_arrow',px,py-t*.22,px+t*.16,py+t*.17,px,py+t*.09,px-t*.16,py+t*.17)
+
+    def paint(self):
+        a=self.app;c=a.canvas;t=a.tile
+        def point(p):return a.ox+(p[0]-a.vx+.5)*t,a.oy+(p[1]-a.vy+.5)*t
+        positions=[(a.game.x,a.game.y)]+self.path
+        for p,q in zip(positions,positions[1:]):
+            if all(a.vx<=v[0]<a.vx+23 and a.vy<=v[1]<a.vy+17 for v in (p,q)):
+                c.create_line(*point(p),*point(q),fill='#e6cc8a',width=2,dash=(4,4),tags='route')
+        if self.path:
+            end=self.path[-1]
+            if a.vx<=end[0]<a.vx+23 and a.vy<=end[1]<a.vy+17:
+                x,y=point(end);c.create_rectangle(x-t*.4,y-t*.4,x+t*.4,y+t*.4,outline='#e6cc8a',width=2,dash=(4,3),tags='route')
+
+    def advance(self):
+        if self.game is not self.app.game or self.origin!=(self.app.game.x,self.app.game.y):self.clear();return
+        if not self.running:return
+        if self.blocked():self.pause();return
+        if time.monotonic()-self.started<self.segment_duration():self.position_player();return
+        g=self.game;next_pos=self.path[0]
+        ok=self.app.world_step(next_pos[0]-g.x,next_pos[1]-g.y)
+        if not ok or (g.x,g.y)!=next_pos:self.clear()
+        else:
+            self.path.pop(0);self.origin=(g.x,g.y);self.started=time.monotonic()
+            if not self.path or g.battle or g.road_event or g.traveler or g.city is not None:self.pause()
+        self.app.refresh()
+
+    def tick(self):
+        self.advance();self.app.root.after(33,self.tick)

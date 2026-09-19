@@ -52,7 +52,7 @@ class RefinementTests(unittest.TestCase):
         self.assertGreater(g.enemy_xp(dict(weak,grade='rare')),g.enemy_xp(weak))
         self.assertGreater(g.enemy_xp(dict(weak,grade='mythic')),g.enemy_xp(dict(weak,grade='rare')))
         xp=g.enemy_xp(weak);g.xp=p.xp_for_level(5);self.assertLess(g.enemy_xp(weak),xp)
-        g.xp=p.xp_for_level(30);self.assertEqual(g.enemy_xp(weak),2)
+        g.xp=p.xp_for_level(30);self.assertEqual(g.enemy_xp(weak),1)
 
     def test_monster_grades_have_stats(self):
         g=r.Game(2);seen={}

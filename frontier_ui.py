@@ -69,8 +69,8 @@ def draw_metro(canvas,g,t,ox,oy):
     stations=g.metro_unlocked
     def point(n):
         x,y=g.cities[n];return ox+(x+.5)*t,oy+(y+.5)*t
-    for city in stations[1:]:
-        canvas.create_line(*point(0),*point(city),fill='#58d9d1',width=3,dash=(7,4))
+    for first,second in zip(stations,stations[1:]):
+        canvas.create_line(*point(first),*point(second),fill='#58d9d1',width=3,dash=(7,4))
     for city in stations:
         x,y=point(city)
         canvas.create_oval(x-7,y-7,x+7,y+7,fill='#173b3a',outline='#58d9d1',width=2)
@@ -94,3 +94,18 @@ def metro(app):
         cost=g.metro_cost(city)
         if cost:
             ttk.Button(window,text=tr('frontier_ui.0044', v0=g.city_name(city), v1=cost[1]),command=lambda city=city:travel(city)).pack(fill='x',padx=24,pady=6)
+
+
+def guide(app):
+    g=app.game
+    if not g.guide:return
+    window=app.popup(tr('journey.guide'),'590x390')
+    tk.Label(window,text=tr('journey.guide'),bg=PANEL,fg=GOLD,font=('Segoe UI',16,'bold')).pack(pady=14)
+    tk.Label(window,text=tr('journey.guide_info'),bg=PANEL,fg=TEXT,wraplength=530,justify='left').pack(padx=20,pady=8)
+    choices=g.guide_destinations()
+    status=tk.Label(window,text='' if choices else tr('journey.none'),bg=PANEL,fg=GOLD);status.pack()
+    def travel(city):
+        if not g.guide_travel(city):status.config(text=g.messages[-1]);app.refresh();return
+        app.route.clear();app.dialog=None;window.destroy();app.refresh()
+    for choice in choices:
+        ttk.Button(window,text=tr('journey.destination',city=g.city_name(choice['city']),steps=choice['steps'],price=choice['price']),command=lambda city=choice['city']:travel(city)).pack(fill='x',padx=24,pady=6)

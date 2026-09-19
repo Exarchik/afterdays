@@ -13,7 +13,8 @@
       "thermal": -30
     },
     "regen": 0,
-    "sprite_id": "monster_rodent"
+    "sprite_id": "monster_rodent",
+    "base_level": 1
   },
   "monster_feral": {
     "legacy_index": 1,
@@ -29,7 +30,8 @@
       "piercing": -20
     },
     "regen": 0,
-    "sprite_id": "monster_feral"
+    "sprite_id": "monster_feral",
+    "base_level": 2
   },
   "monster_spitter": {
     "legacy_index": 2,
@@ -46,7 +48,8 @@
       "energy": 20
     },
     "regen": 0,
-    "sprite_id": "monster_spitter"
+    "sprite_id": "monster_spitter",
+    "base_level": 4
   },
   "monster_blind_hound": {
     "legacy_index": 3,
@@ -62,7 +65,8 @@
       "electric": -25
     },
     "regen": 0,
-    "sprite_id": "monster_blind_hound"
+    "sprite_id": "monster_blind_hound",
+    "base_level": 3
   },
   "monster_shellback": {
     "legacy_index": 4,
@@ -80,7 +84,8 @@
       "thermal": 20
     },
     "regen": 0,
-    "sprite_id": "monster_shellback"
+    "sprite_id": "monster_shellback",
+    "base_level": 7
   },
   "monster_acid_tick": {
     "legacy_index": 5,
@@ -97,7 +102,8 @@
       "thermal": -40
     },
     "regen": 0,
-    "sprite_id": "monster_acid_tick"
+    "sprite_id": "monster_acid_tick",
+    "base_level": 6
   },
   "monster_ash_wolf": {
     "legacy_index": 6,
@@ -114,7 +120,8 @@
       "electric": 15
     },
     "regen": 0,
-    "sprite_id": "monster_ash_wolf"
+    "sprite_id": "monster_ash_wolf",
+    "base_level": 5
   },
   "monster_sentry_drone": {
     "legacy_index": 7,
@@ -132,7 +139,8 @@
       "thermal": 30
     },
     "regen": 0,
-    "sprite_id": "monster_sentry_drone"
+    "sprite_id": "monster_sentry_drone",
+    "base_level": 9
   },
   "monster_swamp_mutant": {
     "legacy_index": 8,
@@ -149,7 +157,8 @@
       "energy": 30
     },
     "regen": 3,
-    "sprite_id": "monster_swamp_mutant"
+    "sprite_id": "monster_swamp_mutant",
+    "base_level": 8
   },
   "monster_bone_giant": {
     "legacy_index": 9,
@@ -166,7 +175,8 @@
       "piercing": -30
     },
     "regen": 0,
-    "sprite_id": "monster_bone_giant"
+    "sprite_id": "monster_bone_giant",
+    "base_level": 12
   },
   "monster_spark": {
     "legacy_index": 10,
@@ -183,7 +193,8 @@
       "kinetic": -25
     },
     "regen": 0,
-    "sprite_id": "monster_spark"
+    "sprite_id": "monster_spark",
+    "base_level": 11
   },
   "monster_chimera_spider": {
     "legacy_index": 11,
@@ -200,6 +211,7 @@
       "piercing": 20
     },
     "regen": 0,
-    "sprite_id": "monster_chimera_spider"
+    "sprite_id": "monster_chimera_spider",
+    "base_level": 10
   }
 }

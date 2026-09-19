@@ -39,6 +39,7 @@ def description(game,item):
     if not item:return tr('refinement_ui.0002')
     if item['kind']=='sealed':return tr('refinement_ui.0003', v0=p.item_weight(item))
     kind=item['kind'];lines=[item['name'],(f'L{item.get("level",1)} · ' if kind in ('weapon','armor','helmet','module') else '')+r.RARITIES[item['rarity']][0]]
+    if item.get('field_test'):lines.append(tr('exp.quest_equipment'))
     ident=item.get('type_id')
     if ident:
         desc=content.t(ident+'.description')
@@ -82,7 +83,7 @@ def description(game,item):
     if item.get('quest_repair'):lines.append(tr('quests.repair_item_info',condition=round(item.get('durability',0))))
     return '\n'.join(lines)
 
-QUEST_ICONS={'repair_delivery':'⚒','permit':'⚿','thanks':'★','delivery':'✉','radio':'◉','trophies':'♜','hunt':'◎','retrieve':'▣','scout':'◈','supplies':'✚','purge':'⚑'}
+QUEST_ICONS={'field_test':'⚒','generator':'ϟ','cache':'▣','elite_hunt':'◎','repair_delivery':'⚒','permit':'⚿','thanks':'★','delivery':'✉','radio':'◉','trophies':'♜','hunt':'◎','retrieve':'▣','scout':'◈','supplies':'✚','purge':'⚑'}
 class QuestCards(tk.Frame):
     def __init__(self,parent,app,mayor=False):
         super().__init__(parent,bg=PANEL);self.app=app;self.mayor=mayor;self.selection=None;self.open_done=False;self.entries=[];self.rects=[]
@@ -122,9 +123,15 @@ class QuestCards(tk.Frame):
             if not sprites.draw(c,'quest:'+q['kind'],10,y+5,30):c.create_text(25,y+20,text=QUEST_ICONS.get(q['kind'],'!'),fill=color,font=('Segoe UI',17))
             title=('★ ' if q.get('unique') else '')+f'L{q.get("level",q.get("zone",1))} · '+q['title']
             immediate=self.app.game.can_turn_in(q)
-            limit=max(9,int((w-65-(126 if immediate else 0))/7))
+            unread=q['status']=='offered' and not q.get('seen',False)
+            title_x=105 if unread else 48
+            title_color='#8fdda0' if q['status']=='offered' else color
+            if unread:
+                c.create_rectangle(47,y+4,101,y+21,fill='#194d31',outline='#6bc78d')
+                c.create_text(74,y+12,text=tr('exp.new'),fill='#a9efba',font=('Segoe UI',8,'bold'))
+            limit=max(9,int((w-title_x-17-(126 if immediate else 0))/7))
             if len(title)>limit:title=title[:limit-1]+'…'
-            c.create_text(48,y+5,text=title,anchor='nw',fill=color,font=('Segoe UI',9,'bold'))
+            c.create_text(title_x,y+5,text=title,anchor='nw',fill=title_color,font=('Segoe UI',9,'bold'))
             state=tr('refinement_ui.0033') if q['status']=='offered' else tr('refinement_ui.0034') if q['status']=='done' else tr('refinement_ui.0035') if self.app.game.quest_ready(q) else tr('refinement_ui.0036', v0=q['progress'], v1=q['goal'])
             reward=tr('refinement_ui.0037',v0=q.get('reward',0),v1=q.get('xp_reward',0))
             c.create_text(48,y+23,text=state+' · '+reward,anchor='nw',fill=MUTED,font=('Segoe UI',8))
@@ -142,10 +149,14 @@ class QuestCards(tk.Frame):
                 self.selection=ident;self.turn_in();return
         key=next((key for a,b,key in self.rects if a<=y<=b),None)
         if key=='done':self.open_done=not self.open_done
-        else:self.selection=key
+        else:
+            self.selection=key
+            q=self.selected()
+            if q and q['status']=='offered':q['seen']=True
         self.paint();self.describe()
     def describe(self):
         q=self.selected();self.detail.config(text=self.app.game.quest_text(q) if q else tr('refinement_ui.0038'))
+        if q and q['status']=='offered':q['seen']=True
     def accept(self):
         from quest_dialog import confirm
         q=self.selected()

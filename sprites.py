@@ -72,3 +72,23 @@ def gallery(app):
             canvas.create_text(x+cell/2,y+88,text=key,fill='#d7b77a',width=cell-6,font=('Segoe UI',8))
         canvas.configure(scrollregion=(0,0,w,((len(MANIFEST)+cols-1)//cols)*112))
     canvas.bind('<Configure>',render);render()
+
+
+def inventory_photo(widget,item,width):
+    """Fitted artwork with a pre-rendered alpha gradient; stdlib Tk runtime."""
+    key=item_key(item)
+    if key not in MANIFEST or width<48:return None
+    entry=MANIFEST[key];index=entry['index']+(128 if entry.get('sheet')=='trophies' else 0)
+    width=max(w for w in (48,56,64,80,96,128) if w<=width)
+    root=widget._root()
+    if not hasattr(root,'_inventory_images'):root._inventory_images={};root._inventory_sheets={}
+    cache=(index,width)
+    if cache not in root._inventory_images:
+        try:
+            if width not in root._inventory_sheets:root._inventory_sheets[width]=tk.PhotoImage(master=root,file=str(ROOT/f'inventory_{width}.png'))
+            image=tk.PhotoImage(master=root,width=width,height=72)
+            x,y=index%16*width,index//16*72
+            image.tk.call(str(image),'copy',str(root._inventory_sheets[width]),'-from',x,y,x+width,y+72,'-to',0,0)
+            root._inventory_images[cache]=image
+        except (OSError,tk.TclError):return None
+    return root._inventory_images[cache]

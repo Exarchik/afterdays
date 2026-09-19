@@ -120,8 +120,13 @@ class Game(economy.Game):
     def metro_cost(self,destination):
         if self.battle or self.city not in self.metro_unlocked or destination not in self.metro_unlocked or destination==self.city:return None
         blocked={(x,y) for y in range(32) for x in range(48) if not self.passable(x,y)}
-        route=r.path_to((self.x,self.y),tuple(self.cities[destination]),48,32,blocked)
-        return (50,max(1,math.ceil(len(route)/5)),len(route)) if route else None
+        first,last=sorted((METRO_CITIES.index(self.city),METRO_CITIES.index(destination)))
+        stations=METRO_CITIES[first:last+1];distance=0
+        for a,b in zip(stations,stations[1:]):
+            route=r.path_to(tuple(self.cities[a]),tuple(self.cities[b]),48,32,blocked)
+            if not route:return None
+            distance+=len(route)
+        return (50,max(1,math.ceil(distance/5)),distance)
 
     def metro_travel(self,destination):
         if self.road_event:return False
@@ -185,19 +190,14 @@ class Game(economy.Game):
         positions=[pos for pos in sorted(floor) if math.dist(pos,entrance)>7 and list(pos)!=chest]
         zone=q.get('zone',self.region_level)
         enemies=[]
-        for kind,pos in zip(self.rng.sample(range(len(r.MONSTERS)),self.rng.randint(6,10)),self.rng.sample(positions,10)):
-            name,hp,damage,reach,speed,armor,color=r.MONSTERS[kind]
-            grade=self.rng.choices(['normal','rare','mythic'],[91,8,1])[0]
-            boost=(1.35 if q.get('unique') else 1)
-            health=round(hp*(1+.24*(zone-1))*{'normal':1,'rare':1.5,'mythic':2.5}[grade]*boost)
-            enemies.append(dict(id=r.uid(),kind=kind,name=name,pos=list(pos),hp=health,max_hp=health,
-                damage=round((damage+3*(zone-1))*{'normal':1,'rare':1.3,'mythic':1.8}[grade]*boost),
-                range=reach,speed=speed,armor=armor+(zone-1)//2,color=color,level=zone,grade=grade,
-                resists=copy.deepcopy(a.RESISTANCES[kind]),awake=False))
+        import monster_rules
+        for pos in self.rng.sample(positions,self.rng.randint(6,10)):
+            kind=monster_rules.choose(self.rng,self.region_level)
+            enemy=monster_rules.make(self.rng,kind,self.region_level,pos,boost=1.35 if q.get('unique') else 1)
+            enemy['awake']=False;enemies.append(enemy)
         b.update(w=w,h=h,rooms=rooms,walls=[list((x,y)) for y in range(h) for x in range(w) if (x,y) not in floor],
                  pos=entrance[:],exit=entrance,chest=chest,chest_open=False,cleared=False,dungeon=True,
                  dungeon_kind=q['dungeon_kind'],biome='ruin',enemies=enemies,region_level=zone,kills=[],corpses=[])
-        for enemy in b['enemies']:balance.set_monster(enemy)
         self.quest_battle=q['id'];self.wake_enemies()
         self.log(tr('frontier.0033'))
 

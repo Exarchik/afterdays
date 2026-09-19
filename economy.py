@@ -14,10 +14,10 @@ BASE_REWARDS={'scout':45,'hunt':70,'retrieve':85,'purge':110,'supplies':40,'trop
 WEIGHTS=[55,27,12,5,1]
 def trophy(kind,qty=1):
  kind=content.MONSTER_DATA[content.monster_id(kind)]['legacy_index']
- return dict(id=r.uid(),type_id='trophy_'+content.monster_id(kind),monster_type_id=content.monster_id(kind),kind='trophy',name=BODY_NAMES[kind],monster_kind=kind,rarity=0,level=1,qty=qty,weight=.08,value=4+kind)
+ return dict(id=r.uid(),type_id='trophy_'+content.monster_id(kind),monster_type_id=content.monster_id(kind),kind='trophy',name=BODY_NAMES[kind],monster_kind=kind,rarity=0,level=1,qty=qty,weight=.08,value=2*(4+kind))
 def loot_rules(kills):
  normal=sum(e.get('grade','normal')=='normal' for e in kills);rare=sum(e.get('grade')=='rare' for e in kills);mythic=sum(e.get('grade')=='mythic' for e in kills)
- return min(1,.10+.05*normal+.10*rare+.25*mythic),2+rare+2*mythic,4 if mythic else 3 if rare else 1
+ return min(1,.10+.05*normal+.10*rare+.25*mythic)*.5,2+rare+2*mythic,4 if mythic else 3 if rare else 1
 class Game(a.Game):
  def __init__(self,seed=None):
   super().__init__(seed);self.add_hunters()
@@ -75,10 +75,13 @@ class Game(a.Game):
   credits=round(self.rng.randint(40,65)*(1+.35*(b.get('region_level',1)-1))*(1+.15*self.rank('scavenger')));self.money+=credits
   drops=0
   for _ in range(rolls):
-   if self.rng.random()<chance:p.add_to(self.loot,self.reward_item(cap,level=self.monster_loot_level(kills,b.get('region_level',1))));drops+=1
+   if self.rng.random()<chance:
+    item=self.reward_item(cap,level=self.monster_loot_level(kills,b.get('region_level',1)))
+    if 'durability' in item and self.rng.random()<.95:item['durability']=self.rng.randint(10,95)
+    p.add_to(self.loot,item);drops+=1
   # Independent supplies. They never replace successful equipment rolls.
   for _ in range(2):
-   if self.rng.random()<.55:p.add_to(self.loot,p.ammunition(self.rng.choice(list(p.AMMO)),self.rng.randint(3,12)))
+   if self.rng.random()<.55:p.add_to(self.loot,p.ammunition(self.rng.choice(list(p.AMMO)),max(1,self.rng.randint(3,12)//2)))
   for kind,prob in [('food',.20),('med',.12),('rad',.05)]:
    if self.rng.random()<prob:p.add_to(self.loot,p.supply(kind))
   for fn in (p.parts,p.fragments):

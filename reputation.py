@@ -52,7 +52,8 @@ class Reputation:
         city=self.city if city is None else city
         if city is None:return
         origin=self.cities[city];record=self.local_record(city)
-        points,record['turnover']=divmod(record['turnover']+max(0,turnover),50)
+        threshold=50*max(1,self.region_at(*origin))
+        points,record['turnover']=divmod(record['turnover']+max(0,turnover),threshold)
         gain=max(0,amount)+points
         # Direct neighbours only. Hidden sites have stable coordinate-based records.
         positions=set(map(tuple,self.cities))|{tuple(s['pos']) for s in self.special_sites}
@@ -87,6 +88,12 @@ class Reputation:
         money = self.money
         ok = super().sell(item_id, merchant, qty)
         if ok:self.add_reputation(turnover=self.money-money,city=self.trading_city(merchant))
+        return ok
+
+    def repair(self, item_id, target=100):
+        money=self.money
+        ok=super().repair(item_id,target)
+        if ok:self.add_reputation(turnover=money-self.money)
         return ok
 
     def repair_cost(self, item, target=100):

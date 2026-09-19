@@ -41,9 +41,10 @@ class ProgressionTests(unittest.TestCase):
         g.start_battle()
         for e in g.battle['enemies']:
             base=r.MONSTERS[e['kind']]
-            self.assertEqual(e['level'],g.region_level)
-            self.assertGreater(e['hp'],base[1])
-            self.assertGreater(e['damage'],base[2])
+            self.assertLessEqual(e['level'],g.region_level)
+            self.assertEqual(e['level'],e['base_level']-int(e.get('weak',False)))
+            self.assertGreaterEqual(e['hp'],base[1])
+            self.assertGreaterEqual(e['damage'],base[2])
 
     def test_perk_choices_every_two_levels_are_persistent(self):
         g=r.Game(2)

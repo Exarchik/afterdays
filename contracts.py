@@ -9,10 +9,11 @@ import progression as p
 from quest_system import QuestSystem
 from reputation import Reputation
 from border import Border
+from journey import Guides
 
 economy.BASE_REWARDS.update(delivery=90,radio=100,repair_delivery=130)
 
-class Game(QuestSystem, Border, Reputation, frontier.Game):
+class Game(Guides, QuestSystem, Border, Reputation, frontier.Game):
     def __init__(self,seed=None):
         super().__init__(seed)
         content.migrate(self)

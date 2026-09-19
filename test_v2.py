@@ -75,7 +75,7 @@ class ExpansionTests(unittest.TestCase):
         g._kill_objectives(0)
         q=self.accept(g,'hunt')
         self.assertEqual(q['progress'],0)
-        q['target_kind']=2
+        q['target_kind']=2;q['level']=4
         g._kill_objectives(0)
         self.assertEqual(q['progress'],0)
         for _ in range(q['goal']+2):
@@ -194,7 +194,7 @@ class ExpansionTests(unittest.TestCase):
             self.assertEqual(len(new.cities),12)
             self.assertEqual(len(new.city_merchants),12)
             new.save(p)
-            self.assertEqual(json.loads(p.read_text())['version'],15)
+            self.assertEqual(json.loads(p.read_text())['version'],17)
 
     def test_equipment_mouse_drop_routes(self):
         from visuals import EquipmentPanel

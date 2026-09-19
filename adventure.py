@@ -87,6 +87,7 @@ class Game(p.Game):
     def __init__(self,seed=None):
         super().__init__(seed)
         self.city_names=r.random.Random(repr(self.rng.getstate())).sample([content.t(key) for key in content.read('city_names.json')],len(self.cities))
+        self.world_distance_remainder=0.0
         self.stash=[]
         self.offer_refresh={}
         self.road_event=None
@@ -194,7 +195,8 @@ class Game(p.Game):
         return seen
 
     def can_step(self,dx,dy):
-        return not self.road_event and abs(dx)+abs(dy)==1 and self.passable(self.x+dx,self.y+dy)
+        from journey import world_edge
+        return not self.road_event and world_edge(self,(self.x,self.y),(self.x+dx,self.y+dy))
 
     def discover(self,site_id=None):
         hidden=[s for s in self.special_sites if not s['found']]
@@ -220,27 +222,39 @@ class Game(p.Game):
         if not self.can_step(dx,dy):
             self.log(tr('adventure.0141') if self.road_event else tr('adventure.0142'))
             self.emit(tr('adventure.0143') if self.road_event else tr('adventure.0144'),color='#eea18b');return False
-        self.x+=dx;self.y+=dy;self.turn+=1;self.travel_steps+=1;self.traveler=None
+        self.x+=dx;self.y+=dy;self.traveler=None
+        distance=self.world_distance_remainder+math.hypot(dx,dy)
+        ticks=math.floor(distance+1e-9)
+        self.world_distance_remainder=max(0.0,distance-ticks)
         self.reveal(self.x,self.y,2)
+        for _ in range(ticks):
+            if not self._world_time_tick():return True
+        self._visit_objectives()
+        for site in list(self.special_sites):
+            if not site['found'] and math.dist(site['pos'],(self.x,self.y))<=1.5:self.discover(site['id'])
+        if self.city is not None:self.log(tr('adventure.0150', v0=self.city_name(self.city)));return True
+        if getattr(self,'_guided_trip',False):return True
+        terrain=self.world[self.y][self.x]
+        for _ in range(ticks):
+            if self.rng.random()<{'road':.06,'waste':.12,'forest':.20,'ruin':.24}.get(terrain,.1):self.start_battle()
+            elif self.turn-self.last_event_turn>=8 and self.rng.random()<.12:self.make_road_event()
+            elif self.turn-self.last_traveler_turn>=7 and self.rng.random()<.09:self.spawn_traveler()
+            if self.battle or self.road_event or self.traveler:break
+        return True
+
+    def _world_time_tick(self):
+        self.turn+=1;self.travel_steps+=1
         if self.travel_steps%8==0:
             if self.consume('food'):
                 before=self.hp;self.hp=min(self.max_hp,self.hp+10)
                 self.emit(tr('adventure.0145', v0=self.hp - before),color='#9edba2')
                 self.log(tr('adventure.0146'))
-            else:self.hurt_world(5,tr('adventure.0147'))
+            elif not self.hurt_world(5,tr('adventure.0147')):return False
         radiation=self.radiation.get(f'{self.x},{self.y}',0)
         protected=self.rad_turns>0
         self.rad_turns=max(0,self.rad_turns-1)
         if radiation and protected:self.emit(tr('adventure.0148'),color='#b9e876')
-        elif radiation and not self.hurt_world(radiation,tr('adventure.0149')):return True
-        self._visit_objectives()
-        for site in list(self.special_sites):
-            if not site['found'] and math.dist(site['pos'],(self.x,self.y))<=1.5:self.discover(site['id'])
-        if self.city is not None:self.log(tr('adventure.0150', v0=self.city_name(self.city)));return True
-        terrain=self.world[self.y][self.x]
-        if self.rng.random()<{'road':.06,'waste':.12,'forest':.20,'ruin':.24}.get(terrain,.1):self.start_battle()
-        elif self.turn-self.last_event_turn>=8 and self.rng.random()<.12:self.make_road_event()
-        elif self.turn-self.last_traveler_turn>=7 and self.rng.random()<.09:self.spawn_traveler()
+        elif radiation and not self.hurt_world(radiation,tr('adventure.0149')):return False
         return True
 
     def hurt_world(self,damage,label=tr('adventure.0151')):
@@ -494,7 +508,10 @@ class Game(p.Game):
             if e['hp']<=0:
                 b.setdefault('corpses',[]).append(dict(pos=e['pos'][:],kind=e['kind'],type_id=content.monster_id(e),grade=e.get('grade','normal')))
                 b.setdefault('kills',[]).append(dict(kind=e['kind'],type_id=content.monster_id(e),grade=e.get('grade','normal'),level=e.get('level',b.get('region_level',1))))
-                b['enemies'].remove(e);self.gain_xp(self.enemy_xp(e));self._kill_objectives(e['kind'])
+                b['enemies'].remove(e)
+                earned=self.enemy_xp(e);self.gain_xp(earned)
+                if hasattr(self,'monster_killed'):self.monster_killed(e,earned,w)
+                self._kill_objectives(e['kind'])
             if not b['enemies']:self.victory()
         else:self.emit(tr('adventure.0218'),color='#d7d4c0');self.log(tr('adventure.0219'))
         self.wear(w,.6)
@@ -520,6 +537,7 @@ class Game(p.Game):
                     self.emit(tr('adventure.0220'),color='#b8dcb0');self.emit(tr('adventure.0221'),pos=e['pos'],color='#d7d4c0');continue
                 damage=balance.damage(e['damage']+self.rng.randint(-2,2),e.get('attack',0),self.defense)
                 self.hp-=damage;self.emit(f'−{damage}',color='#ff8f79')
+                if hasattr(self,'test_armor_hit'):self.test_armor_hit(damage)
                 self.wear(self.equipped['armor'],.5);self.wear(self.equipped['helmet'],.25)
                 self.log(f'{e["name"]}: −{damage} HP.')
                 if self.hp<=0:self.defeat();return
@@ -542,14 +560,14 @@ class Game(p.Game):
     def save(self,path):
         content.migrate(self)
         data={k:v for k,v in vars(self).items() if k!='rng' and not k.startswith('_')}
-        data.update(version=15,rng_state=self.rng.getstate())
+        data.update(version=17,rng_state=self.rng.getstate())
         path=Path(path);path.parent.mkdir(parents=True,exist_ok=True)
         tmp=path.with_suffix('.tmp');tmp.write_text(json.dumps(data,ensure_ascii=False),encoding='utf-8');os.replace(tmp,path)
 
     @classmethod
     def load(cls,path):
         data=json.loads(Path(path).read_text(encoding='utf-8'));version=data.get('version')
-        if version not in (1,2,3,4,5,6,7,8,9,10,11,12,13,14,15):raise ValueError(tr('adventure.0224'))
+        if version not in (1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17):raise ValueError(tr('adventure.0224'))
         game=cls(0)
         if version<4:
             old=p.Game.load(path)
@@ -573,6 +591,7 @@ class Game(p.Game):
         else:
             data.pop('version');state=data.pop('rng_state')
             expected={k for k in vars(game) if k!='rng' and not k.startswith('_')}
+            if version<16 and 'world_distance_remainder' not in data:expected.discard('world_distance_remainder')
             if version<13 and 'reputation_state' not in data:expected.discard('reputation_state')
             if version==4:expected-= {'explored','known_cities','map_rewards','rad_turns'}
             if set(data)!=expected:raise ValueError(tr('adventure.0226'))
@@ -589,6 +608,8 @@ class Game(p.Game):
             game.build_radiation();game.add_sites()
             game.offers={};game.offer_refresh={}
             game.log(tr('adventure.0227'))
+        remainder=game.world_distance_remainder
+        if not isinstance(remainder,(int,float)) or not 0<=remainder<1:raise ValueError(tr('adventure.0226'))
         game._events=[];game._last_battle=None
         if game.battle:
             game.battle.setdefault('corpses',[]);game.battle.setdefault('max_ap',game.max_ap)
@@ -613,7 +634,7 @@ class Game(p.Game):
         level=enemy.get('level',1)
         multiplier={'normal':1,'rare':2,'mythic':5}.get(enemy.get('grade','normal'),1)
         gap=max(0,self.level-level-1)
-        return max(2,round(base*(1+.25*(level-1))*multiplier*(.6**gap)))
+        return max(1,max(2,round(base*(1+.25*(level-1))*multiplier*(.6**gap)))//2)
 
     def roll_item(self):
         if self.rng.random()<.06:return p.supply('rad')

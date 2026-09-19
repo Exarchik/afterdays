@@ -7,7 +7,7 @@ class EconomyTests(unittest.TestCase):
  def test_roll_rules(self):
   make=lambda n,rare,myth:[dict(kind=0,grade=k) for k,count in [('normal',n),('rare',rare),('mythic',myth)] for _ in range(count)]
   for counts,chance,rolls,cap in [((3,0,0),.25,2,1),((2,1,0),.30,3,3),((2,1,1),.55,5,4),((0,0,5),1,12,4)]:
-   actual=loot_rules(make(*counts));self.assertAlmostEqual(actual[0],chance);self.assertEqual(actual[1:],(rolls,cap))
+   actual=loot_rules(make(*counts));self.assertAlmostEqual(actual[0],chance*.5);self.assertEqual(actual[1:],(rolls,cap))
  def test_caps_and_player_level(self):
   g=Game(6)
   for cap in (1,3,4):
@@ -26,7 +26,7 @@ class EconomyTests(unittest.TestCase):
   g=Game(4);a=trophy(0,2);b=trophy(1,3);p.add_to(g.bag,a);p.add_to(g.bag,b);p.add_to(g.bag,trophy(0,2))
   self.assertEqual(g.trophy_count(0),4);self.assertEqual(g.trophy_count(1),3)
   self.assertEqual(g.price(a,4,False),2*g.price(a,1,False))
-  money=g.money;self.assertTrue(g.sell(a['id'],4,2));self.assertEqual(g.money,money+16);self.assertEqual(g.trophy_count(0),2)
+  money=g.money;self.assertTrue(g.sell(a['id'],4,2));self.assertEqual(g.money,money+32);self.assertEqual(g.trophy_count(0),2)
   self.assertFalse(g.buys_kind(g.weapon,4))
  def test_trophy_contract_and_unique_reward(self):
   g=Game(3);offer=next(q for q in g.mayor_offers() if q['kind']=='trophies');offer['unique']=True;g.price_quest(offer)

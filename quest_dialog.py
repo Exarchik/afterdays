@@ -11,6 +11,7 @@ def confirm(panel,q,action):
     if action=='accept' and q['status']!='offered':return
     if action=='abandon' and q['status']!='active':return
     if action=='turn_in' and not g.can_turn_in(q):return
+    if q['status']=='offered':q['seen']=True
     title=tr('quests.confirm_'+action)
     win=window(app,title)
     tk.Label(win,text=q['title'],bg=PANEL,fg=GOLD,font=('Segoe UI',13,'bold'),wraplength=580).pack(padx=12,pady=8)

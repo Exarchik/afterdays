@@ -33,7 +33,7 @@ class Border:
         return self._border_edges
 
     def can_step(self,dx,dy):
-        return super().can_step(dx,dy) and self.can_cross((self.x,self.y),(self.x+dx,self.y+dy))
+        return super().can_step(dx,dy)
 
     def step(self,dx,dy):
         a=(self.x,self.y);b=(self.x+dx,self.y+dy)

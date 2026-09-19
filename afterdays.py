@@ -976,7 +976,7 @@ class ExpansionGame(LegacyGame):
 
 
 from progression import equipment, module, supply, stats, item_weight, item_value
-from contracts import Game
+from expeditions import Game
 from reputation import buy_factor, sell_factor
 
 # GUI imports are delayed so the model and tests work without a display.
@@ -1059,6 +1059,10 @@ def launch(test_hook=None):
             ttk.Button(controls, text=tr('afterdays.0139'), command=lambda: self.act(lambda: self.game.use('med'))).pack(side='left', padx=2)
             self.flee_button = ttk.Button(controls, text=tr('afterdays.0140'), command=lambda: self.act(self.game.flee))
             self.flee_button.pack(side='left', padx=2)
+            from route_ui import RouteController
+            self.route=RouteController(self)
+            self.route_button=ttk.Button(controls,text=tr('journey.resume'),command=self.route.toggle,state='disabled')
+            self.route_button.pack(side='left',padx=2)
             ttk.Button(controls,text=tr('afterdays.0141'),command=lambda:self.act(self.game.search)).pack(side='left',padx=2)
             side = tk.Frame(body, bg=PANEL, width=380)
             side.grid(row=0,column=1,sticky='nsew',padx=(6,0))
@@ -1088,6 +1092,7 @@ def launch(test_hook=None):
             self.player_panel=frontier_ui.PlayerPanel(self.player_tab,self)
             self.player_panel.pack(fill='both',expand=True)
             self.cartographer=lambda:frontier_ui.cartographer(self)
+            self.guide=lambda:frontier_ui.guide(self)
             self.metro=lambda:frontier_ui.metro(self)
             world_page = self.world_tab
             world_canvas = tk.Canvas(world_page, bg=PANEL, highlightthickness=0)
@@ -1146,6 +1151,7 @@ def launch(test_hook=None):
             return box
 
         def act(self, fn):
+            self.route.pause()
             if self.fx.blocked:
                 return
             before_battle = self.game.battle is not None
@@ -1156,10 +1162,17 @@ def launch(test_hook=None):
                 self.game._radio_request=None
                 import radio_ui
                 radio_ui.show(self,request)
+            generator=getattr(self.game,'_generator_request',None)
+            if generator:
+                self.game._generator_request=None
+                import generator_ui
+                generator_ui.show(self,generator)
             if before_battle and not self.game.battle and self.game.loot:
                 self.tabs.select(self.loot_tab)
 
         def refresh(self):
+            if self.route.game is not self.game:self.route.clear()
+            self.route.update_button()
             self.fx.ingest()
             g = self.game
             g.check_thanks()
@@ -1294,6 +1307,7 @@ def launch(test_hook=None):
                 self.act(lambda:self.game.dismantle(item['id']))
 
         def popup(self, title, geometry):
+            self.route.pause()
             self.root.after_idle(lambda:sprites.decorate(self.root))
             win = tk.Toplevel(self.root)
             win.title(title)
@@ -1362,6 +1376,8 @@ def launch(test_hook=None):
                 from border_ui import draw_border
                 draw_border(c,self.game,t,ox,oy,self.map_revealed)
                 frontier_ui.draw_metro(c,self.game,t,ox,oy)
+                from expedition_ui import draw_search_areas
+                draw_search_areas(c,self.game,t,ox,oy)
                 for n,(x,y) in enumerate(self.game.cities):
                     if not self.map_city_known(n):continue
                     px,py = ox+(x+.5)*t, oy+(y+.5)*t
@@ -1466,6 +1482,8 @@ def launch(test_hook=None):
                     if b and x == 0:
                         c.create_line(px+2, py+2, px+2, py+t-2, fill='#72ad91', width=3)
             adventure_ui.paint_world_extras(self)
+            from expedition_ui import draw_search_areas
+            draw_search_areas(c,g,t,self.ox-self.vx*t,self.oy-self.vy*t,(self.vx,self.vy,cols,rows))
             from border_ui import draw_border
             draw_border(c,g,t,self.ox-self.vx*t,self.oy-self.vy*t,self.map_revealed,(self.vx,self.vy,cols,rows))
             def center(pos):
@@ -1479,9 +1497,10 @@ def launch(test_hook=None):
                     visuals.monster(c, e, px-t*.39, py-t*.42, t*.78)
                     c.create_rectangle(px-t*.36, py+t*.36, px+t*.36, py+t*.43, fill='#191c17', outline='')
                     c.create_rectangle(px-t*.36, py+t*.36, px-t*.36+t*.72*e['hp']/e['max_hp'], py+t*.43, fill='#d8876c', outline='')
-            px, py = center(b['pos'] if b else (g.x, g.y))
-            c.create_oval(px-t*.31, py-t*.31, px+t*.31, py+t*.31, fill='#cce4d0', outline='#ffffff', width=2)
-            c.create_polygon(px, py-t*.22, px+t*.16, py+t*.17, px, py+t*.09, px-t*.16, py+t*.17, fill='#233a31')
+            if not b:self.route.paint()
+            px, py = center(b['pos'] if b else self.route.position())
+            c.create_oval(px-t*.31, py-t*.31, px+t*.31, py+t*.31, fill='#cce4d0', outline='#ffffff', width=2,tags='world_player_ring')
+            c.create_polygon(px, py-t*.22, px+t*.16, py+t*.17, px, py+t*.09, px-t*.16, py+t*.17, fill='#233a31',tags='world_player_arrow')
             if not b:
                 for idx, pos in enumerate(g.cities):
                     if not self.map_city_known(idx):continue
@@ -1504,7 +1523,7 @@ def launch(test_hook=None):
                     px,py=center((g.x,g.y))
                     c.create_text(px+t*.4,py-t*.5,text='¤',fill='#f1d383',font=('Segoe UI',16,'bold'))
             self.hint.config(text=(tr('afterdays.0189') if b else
-                                   tr('afterdays.0190')))
+                                   tr('journey.hint')))
 
         def cell(self, event):
             if self.game.battle:
@@ -1532,12 +1551,12 @@ def launch(test_hook=None):
             g = self.game
             if not g.can_step(dx,dy):
                 g.step(dx,dy)
-                return
+                return False
             if g.loot:
                 if not messagebox.askyesno(tr('afterdays.0194'), tr('afterdays.0195'), parent=self.root):
-                    return
+                    return False
                 g.loot.clear()
-            g.step(dx, dy)
+            return g.step(dx, dy)
 
         def map_click(self, event):
             if self.dialog:
@@ -1551,10 +1570,7 @@ def launch(test_hook=None):
                 enemy = next((e for e in b['enemies'] if e['pos'] == [x, y]), None)
                 self.act(lambda: self.game.shoot(enemy['id']) if enemy else self.game.battle_move((x, y)))
             elif 0 <= x < 48 and 0 <= y < 32:
-                dx, dy = x-self.game.x, y-self.game.y
-                if dx or dy:
-                    self.act(lambda: self.world_step((1 if dx > 0 else -1) if abs(dx) >= abs(dy) else 0,
-                                                     (1 if dy > 0 else -1) if abs(dy) > abs(dx) else 0))
+                self.route.set_target((x,y))
 
         def key(self, event):
             if self.dialog:
@@ -1566,9 +1582,11 @@ def launch(test_hook=None):
                 if isinstance(event.widget, tk.Listbox) and key in ('up', 'down'):
                     return
                 dx, dy = directions[key]
+                if not self.game.battle:self.route.clear()
                 self.act(lambda: self.game.step(dx, dy) if self.game.battle else self.world_step(dx, dy))
             elif key == 'space':
-                self.act(self.game.end_turn)
+                if self.game.battle:self.act(self.game.end_turn)
+                else:self.route.toggle()
             elif key == 'tab':
                 self.act(self.game.switch)
             elif key == 'h':
@@ -1593,6 +1611,7 @@ def launch(test_hook=None):
             return 'break'
 
         def save(self):
+            self.route.pause()
             try:
                 self.game.save(save_path)
                 self.game.log(tr('afterdays.0196'))
@@ -1601,6 +1620,7 @@ def launch(test_hook=None):
             self.refresh()
 
         def load(self):
+            self.route.pause()
             if not save_path.exists():
                 messagebox.showinfo(tr('afterdays.0198'), tr('afterdays.0199'), parent=self.root)
                 return
@@ -1616,12 +1636,14 @@ def launch(test_hook=None):
                 messagebox.showerror(tr('afterdays.0203'), str(exc), parent=self.root)
 
         def new(self):
+            self.route.pause()
             if messagebox.askyesno(tr('afterdays.0204'), tr('afterdays.0205'), parent=self.root):
                 self.game = Game()
                 self.perk_prompted = -1
                 self.refresh()
 
         def close(self):
+            self.route.pause()
             answer = messagebox.askyesnocancel('Afterdays', tr('afterdays.0206'), parent=self.root)
             if answer is None:
                 return

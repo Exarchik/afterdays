@@ -317,9 +317,16 @@ class ItemGrid(tk.Frame):
             self.rects[item['id']] = r
             color = rules.RARITIES[item.get('rarity', 0)][1]
             c.create_rectangle(*r, fill=TYPE_COLORS.get(item['kind'],'#233229'),outline=color,width=3 if item['id']==self.selection else 1)
-            icon(c,item,x+(cell-40)/2,y+14,40)
+            art=sprites.inventory_photo(c,item,int(cell-6))
+            if art:c.create_image(x+cell/2,y+3,image=art,anchor='n')
+            else:icon(c,item,x+(cell-min(cell-8,72))/2,y+3,min(cell-8,72))
+            for slot,mod in enumerate(item.get('modules',[])):
+                c.create_rectangle(x+7+slot*9,y+46,x+13+slot*9,y+49,fill=rules.RARITIES[mod['rarity']][1],outline='#14201b')
             if item['kind'] in ('weapon','armor','helmet','module'):
+                c.create_rectangle(x+4,y+3,x+28,y+17,fill='#17201c',outline='')
                 c.create_text(x+6,y+9,text=f'L{item.get("level",1)}',fill=TEXT,font=('Segoe UI',8,'bold'),anchor='w')
+            if item['kind']=='weapon' or item.get('qty',1)>1:
+                c.create_rectangle(x+cell-36,y+3,x+cell-4,y+17,fill='#17201c',outline='')
             if item['kind']=='weapon':c.create_text(x+cell-6,y+9,text=tr('visuals.0022', v0=item.get('ap', 2)),fill=TEXT,font=('Segoe UI',8,'bold'),anchor='e')
             elif item.get('qty',1)>1:c.create_text(x+cell-6,y+9,text=f'×{item["qty"]}',fill=TEXT,font=('Segoe UI',8,'bold'),anchor='e')
             if item['id']==self.selection:c.create_rectangle(x+5,y+16,x+9,y+20,fill='#ffffff',outline='')

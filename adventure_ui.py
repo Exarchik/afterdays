@@ -57,7 +57,7 @@ class Effects:
             if entity=='player':pos=self.position('player',b['pos'])
             iso=getattr(app,'iso',None)
             if iso:return iso['ox']+(pos[0]-pos[1])*iso['u'],iso['oy']+(pos[0]+pos[1])*iso['u']/2-iso['u']*.85
-        if entity=='player':pos=[app.game.x,app.game.y]
+        if entity=='player':pos=app.route.position() if hasattr(app,'route') else [app.game.x,app.game.y]
         return app.ox+(pos[0]-app.vx+.5)*app.tile,app.oy+(pos[1]-app.vy+.25)*app.tile
 
     def render(self):
@@ -132,6 +132,7 @@ class Services(tk.Frame):
             for m,key in enumerate(('smith','food','fence')):
                 if g.available_merchant(m):items.append((key,g.merchant_title(m),lambda m=m:app.shop(m)))
             if g.city in g.metro_unlocked:items.append(('atlas',tr('adventure_ui.0010'),app.metro))
+            if getattr(g,'guide',False):items.append(('traveler',tr('journey.guide'),app.guide))
             if getattr(g,'cartographer',False):items.append(('atlas',tr('adventure_ui.0011'),app.cartographer))
             if g.available_merchant(4):items.append(('hunter',tr('adventure_ui.0012'),lambda:app.shop(4)))
             if g.available_merchant(3):items.append(('traveler',tr('adventure_ui.0013'),lambda:app.shop(3)))
@@ -145,6 +146,7 @@ class Services(tk.Frame):
                 items.append(('search',tr('adventure_ui.0018'),lambda:app.act(g.search)))
             if hasattr(g,'destination_quest') and g.destination_quest():
                 q=g.destination_quest();items.append(('search',tr('adventure_ui.0019') if q['kind']=='delivery' else tr('adventure_ui.0020'),lambda:app.act(g.search)))
+            if getattr(g,'local_expedition',lambda:None)() and g.city is not None:items.append(('search',tr('adventure_ui.0018'),lambda:app.act(g.search)))
             if g.road_event:items.append(('traveler',tr('adventure_ui.0021'),app.road_dialog))
         items.extend([('perks',tr('adventure_ui.0022', v0=g.pending_perks),app.perks),('atlas',tr('debug.atlas_button') if TEST_MODE else tr('adventure_ui.0023'),app.atlas)])
         self.entries=items;self.paint()

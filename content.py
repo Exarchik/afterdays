@@ -78,12 +78,13 @@ def migrate(game):
     for q in game.quests+[q for offers in game.offers.values() for q in offers]:
         items+=q.get('reward_items',[])
         if q.get('repair_item'):items.append(q['repair_item'])
+        if q.get('test_item'):items.append(q['test_item'])
     for item in items:identify_item(item)
     for q in game.quests+[q for offers in game.offers.values() for q in offers]:
         if q.get('target_kind') is not None:q['target_type_id']=monster_id(q['target_kind'])
     if game.battle:
         for enemy in game.battle.get('enemies',[]):
-            identify_monster(enemy);enemy['name']=(t('monster.grade.'+enemy['grade']) if enemy.get('grade','normal')!='normal' else '')+name(enemy['type_id'])
+            identify_monster(enemy);enemy['name']=(t('monster.grade.'+enemy['grade']) if enemy.get('grade','normal')!='normal' else '')+name(enemy['type_id'])+(t('exp.weak') if enemy.get('weak') else '')
         for group in ('kills','corpses'):
             for enemy in game.battle.get(group,[]):identify_monster(enemy)
 
