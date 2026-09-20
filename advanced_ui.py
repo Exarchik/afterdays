@@ -96,7 +96,7 @@ def draw_battle(app):
                 c.create_line(px-u*.32,py-u*.08,px+u*.30,py+u*.18,fill='#b4a080',width=2)
                 c.create_line(px-u*.26,py+u*.18,px+u*.26,py-u*.09,fill='#b4a080',width=2)
         if pos in walls:
-            if sprites.draw(c,'terrain:forest' if kind=='forest' else 'terrain:ruin' if kind in ('ruin','city') else 'terrain:cliff',px-2*u,py+0.35*u-4*u,4*u):pass
+            if sprites.draw(c,'terrain:forest' if kind=='forest' else 'terrain:ruin' if kind in ('ruin','city') else 'terrain:cliff',px-2*u,py+1.2*u-4*u,4*u):pass
             elif kind=='forest':
                 c.create_line(px,py,px,py-u*1.5,fill='#8a7f5d',width=max(2,int(u*.18)))
                 c.create_line(px-u*.5,py-u*1.3,px,py-u*.8,px+u*.42,py-u*1.65,fill='#91a17a',width=2)
