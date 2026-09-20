@@ -1,3 +1,4 @@
+import hexgrid
 from i18n import t as tr
 """v0.4 world encounters, combat feedback, damage profiles and shared storage."""
 import content
@@ -42,6 +43,8 @@ ROAD_EVENTS=[
 
 
 SITES.extend([(tr('adventure.0051'),tr('adventure.0052'),'quest'),(tr('adventure.0053'),tr('adventure.0054'),'merchant'),(tr('adventure.0055'),tr('adventure.0056'),'quest'),(tr('adventure.0057'),tr('adventure.0058'),'merchant'),(tr('adventure.0059'),tr('adventure.0060'),'quest'),(tr('adventure.0061'),tr('adventure.0062'),'quest'),(tr('adventure.0063'),tr('adventure.0064'),'merchant'),(tr('adventure.0065'),tr('adventure.0066'),'merchant'),(tr('adventure.0067'),tr('adventure.0068'),'quest'),(tr('adventure.0069'),tr('adventure.0070'),'merchant')])
+
+SITES.extend((tr('update024.site_'+str(n)),tr('update024.npc_'+str(n)), 'quest' if n%2==0 else 'merchant') for n in range(8))
 
 # Location filters are applied before the event is selected.
 EXTRA_EVENTS={
@@ -176,13 +179,17 @@ class Game(p.Game):
                         self.radiation[f'{x},{y}']=self.rng.randint(2,4)
 
     def add_sites(self):
-        reachable=self.reachable_world((5,5));used=set(map(tuple,self.cities))|{tuple(s['pos']) for s in self.special_sites}
-        existing={s['name'] for s in self.special_sites}
-        for n,(name,npc,role) in enumerate(SITES):
-            if name in existing:continue
-            pool=[pos for pos in sorted(reachable) if pos not in used and self.world[pos[1]][pos[0]] not in ('road','city','site') and all(math.dist(pos,c)>2 for c in self.cities) and (3<=math.dist(pos,(5,5))<=6 if n==0 else True)]
-            if not pool:continue
-            pos=self.rng.choice(pool);used.add(pos)
+        if self.special_sites:
+            reachable=self.reachable_world((5,5));existing={s['name'] for s in self.special_sites}
+            for name,npc,role in SITES[:16]:
+                if name in existing:continue
+                pool=[p for p in sorted(reachable) if self.world[p[1]][p[0]] not in ('city','road','site') and all(math.dist(p,c)>2 for c in self.cities) and all(math.dist(p,s['pos'])>=7 for s in self.special_sites)]
+                if not pool:break
+                pos=self.rng.choice(pool)
+                self.special_sites.append(dict(id=r.uid(),name=name,npc=npc,role=role,pos=list(pos),found=False,city_id=None))
+            return
+        from site_layout import place
+        for (name,npc,role),pos in zip(SITES,place(self,len(SITES))):
             self.special_sites.append(dict(id=r.uid(),name=name,npc=npc,role=role,pos=list(pos),found=False,city_id=None))
 
     def passable(self,x,y):return 0<=x<48 and 0<=y<32 and self.world[y][x] not in BLOCKED
@@ -206,9 +213,8 @@ class Game(p.Game):
         self.cities.append(site['pos'][:]);self.city_names.append(site['name'])
         self.city_merchants.append([0] if site['role']=='merchant' else [])
         if site['role']=='quest':self.mayors.append(site['city_id'])
-        blocked={(x,y) for y in range(32) for x in range(48) if not self.passable(x,y)}
-        paths=[r.path_to(tuple(site['pos']),tuple(city),48,32,blocked) for city in self.cities[:12]]
-        route=min((path for path in paths if path),key=len,default=[])
+        from site_layout import road_path
+        route=road_path(self,site['pos'])
         self.trails=[list(p) for p in sorted(set(map(tuple,self.trails))|set(route)|{tuple(site['pos'])})]
         self.world[site['pos'][1]][site['pos'][0]]='site'
         self.reveal(*site['pos'],2)
@@ -477,7 +483,7 @@ class Game(p.Game):
         if not ok:
             b=self.battle
             blocked=set(map(tuple,b['walls']))|{tuple(e['pos']) for e in b['enemies']}
-            path=r.path_to(tuple(b['pos']),tuple(target),b['w'],b['h'],blocked)
+            path=hexgrid.path_to(tuple(b['pos']),tuple(target),b['w'],b['h'],blocked)
             self.emit(tr('adventure.0211') if path and len(path)>b['ap'] else tr('adventure.0212'),color='#ffcb79')
         return ok
 
@@ -525,13 +531,13 @@ class Game(p.Game):
             if content.MONSTER_DATA[content.monster_id(e)]['regen']:e['hp']=min(e['max_hp'],e['hp']+content.MONSTER_DATA[content.monster_id(e)]['regen'])
             motion=[e['pos'][:]]
             for _ in range(e['speed']):
-                if math.dist(e['pos'],b['pos'])<=e['range'] and r.visible(tuple(e['pos']),tuple(b['pos']),b['walls']):break
+                if hexgrid.distance(e['pos'],b['pos'])<=e['range'] and hexgrid.visible(tuple(e['pos']),tuple(b['pos']),b['walls']):break
                 blocked=set(map(tuple,b['walls']))|{tuple(o['pos']) for o in b['enemies'] if o is not e}
-                route=r.path_to(tuple(e['pos']),tuple(b['pos']),b['w'],b['h'],blocked)
+                route=hexgrid.path_to(tuple(e['pos']),tuple(b['pos']),b['w'],b['h'],blocked)
                 if route and route[0]!=tuple(b['pos']):
                     e['pos']=list(route[0]);motion.append(e['pos'][:])
             self.emit_move(motion,e['id'])
-            if math.dist(e['pos'],b['pos'])<=e['range'] and r.visible(tuple(e['pos']),tuple(b['pos']),b['walls']):
+            if hexgrid.distance(e['pos'],b['pos'])<=e['range'] and hexgrid.visible(tuple(e['pos']),tuple(b['pos']),b['walls']):
                 self.emit(kind='slash' if e['range']<=1 else 'attack',pos=b['pos'],source=e['pos'],color='#ff976f')
                 if self.rng.randrange(100)<min(45,self.protection_stat('evasion')):
                     self.emit(tr('adventure.0220'),color='#b8dcb0');self.emit(tr('adventure.0221'),pos=e['pos'],color='#d7d4c0');continue

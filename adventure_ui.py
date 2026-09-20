@@ -56,7 +56,10 @@ class Effects:
         if b:
             if entity=='player':pos=self.position('player',b['pos'])
             iso=getattr(app,'iso',None)
-            if iso:return iso['ox']+(pos[0]-pos[1])*iso['u'],iso['oy']+(pos[0]+pos[1])*iso['u']/2-iso['u']*.85
+            if iso:
+                import hexgrid
+                x,y=hexgrid.center(pos,iso['u'],iso['ox'],iso['oy'])
+                return x,y-iso['u']*.85
         if entity=='player':pos=app.route.position() if hasattr(app,'route') else [app.game.x,app.game.y]
         return app.ox+(pos[0]-app.vx+.5)*app.tile,app.oy+(pos[1]-app.vy+.25)*app.tile
 

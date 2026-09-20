@@ -98,7 +98,7 @@ def guide(app):
     choices=g.guide_destinations()
     status=tk.Label(window,text='' if choices else tr('journey.none'),bg=PANEL,fg=GOLD);status.pack()
     def travel(city):
-        if not g.guide_travel(city):status.config(text=g.messages[-1]);app.refresh();return
-        app.route.clear();app.dialog=None;window.destroy();app.refresh()
+        if not app.route.start_guide(city):status.config(text=g.messages[-1]);app.refresh();return
+        app.dialog=None;window.destroy();app.refresh()
     for choice in choices:
         ttk.Button(window,text=tr('journey.destination',city=g.city_name(choice['city']),steps=choice['steps'],price=choice['price']),command=lambda city=choice['city']:travel(city)).pack(fill='x',padx=24,pady=6)

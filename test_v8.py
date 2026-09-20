@@ -18,9 +18,9 @@ class RevisionTests(unittest.TestCase):
     self.assertFalse(x<24 and y<16)
   self.assertGreater(east,west*2)
  def test_sites_reachable(self):
-  g=r.Game(2);self.assertEqual(len(g.special_sites),16);reachable=g.reachable_world((5,5))
+  g=r.Game(2);self.assertEqual(len(g.special_sites),24);reachable=g.reachable_world((5,5))
   self.assertTrue(all(tuple(s['pos']) in reachable for s in g.special_sites))
-  self.assertEqual(len({tuple(s['pos']) for s in g.special_sites}),16)
+  self.assertEqual(len({tuple(s['pos']) for s in g.special_sites}),24)
  def test_tradeoff_effects(self):
   g=r.Game(3)
   with patch.object(g.rng,'random',return_value=0):mod=p.module(0,g.rng,index=0)

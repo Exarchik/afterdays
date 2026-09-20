@@ -1,3 +1,4 @@
+import hexgrid
 """Field tests, cache searches, generator repairs and tracked elite hunts."""
 import copy,math,json
 from pathlib import Path
@@ -46,7 +47,7 @@ class Game(contracts.Game):
 
     def _kill_objectives(self,kind):
         for q in self.quests:
-            if q['status']=='active' and q['kind']=='hunt' and monster_rules.base_level(kind)<=q.get('level',1) and (q['target_kind'] is None or content.monster_id(q['target_kind'])==content.monster_id(kind)):
+            if q['status']=='active' and q['kind']=='hunt' and math.dist((self.x,self.y),self.cities[q['city']])<=10 and monster_rules.base_level(kind)<=q.get('level',1) and (q['target_kind'] is None or content.monster_id(q['target_kind'])==content.monster_id(kind)):
                 q['progress']=min(q['goal'],q['progress']+1)
 
     def constrain_targets(self,offers):
@@ -126,23 +127,37 @@ class Game(contracts.Game):
             elif q.get('pos')==[self.x,self.y]:return q
         return None
 
+    def unlock_cache(self,ident,angle):
+        q=self.local_expedition()
+        if self.battle or not q or q['id']!=ident or q['kind']!='cache' or q.get('lock_open') or [self.x,self.y]!=q['cache_pos'] or 'lock_target' not in q or self.count('parts')<1:return None
+        if not isinstance(angle,(int,float)) or not math.isfinite(angle) or not 0<=angle<=180:return None
+        if abs(angle-q['lock_target'])>12:
+            self.consume('parts');self.log(tr('update024.lock_fail'));return False
+        q['lock_open']=True
+        self.bag.append(dict(id=r.uid(),type_id='quest_item',kind='quest',name=tr('exp.parcel'),quest_id=q['id'],weight=0,value=0,rarity=0))
+        q['progress']=1
+        item=p.supply('food',self.rng.randint(1,3)) if self.rng.random()<.5 else p.ammunition(self.rng.choice(list(p.AMMO)),self.rng.randint(3,8))
+        p.add_to(self.loot,item)
+        if self.rng.random()<.05:
+            names=[k for k,v in r.GEAR.items() if v[0] in ('weapon','armor','helmet') and p.GEAR_MIN_LEVEL[k]<=q['level']]
+            p.add_to(self.loot,p.equipment(self.rng.choice(names),self.rng.choice([0,1]),self.rng,q['level']))
+        self.log(tr('exp.cache_found'));self.emit(tr('exp.cache_found'));return True
+
     def search(self):
         q=self.local_expedition()
         if not q:return super().search()
         if q['kind']=='generator':self._generator_request=q['id'];return True
         if q['kind']=='cache':
             pos=[self.x,self.y]
-            if pos in q['searched_cells']:self.log(tr('exp.already_searched'));return False
+            if pos in q['searched_cells']:
+                if pos==q['cache_pos'] and not q.get('lock_open'):
+                    if 'lock_target' not in q:q['lock_target']=self.rng.randint(15,165)
+                    self._lock_request=q['id'];return True
+                self.log(tr('exp.already_searched'));return False
             q['searched_cells'].append(pos);self.turn+=1;self.rad_turns=max(0,self.rad_turns-1)
             if pos!=q['cache_pos']:self.log(tr('exp.cache_empty'));return True
-            self.bag.append(dict(id=r.uid(),type_id='quest_item',kind='quest',name=tr('exp.parcel'),quest_id=q['id'],weight=0,value=0,rarity=0))
-            q['progress']=1
-            item=p.supply('food',self.rng.randint(1,3)) if self.rng.random()<.5 else p.ammunition(self.rng.choice(list(p.AMMO)),self.rng.randint(3,8))
-            p.add_to(self.loot,item)
-            if self.rng.random()<.05:
-                names=[k for k,v in r.GEAR.items() if v[0] in ('weapon','armor','helmet') and p.GEAR_MIN_LEVEL[k]<=q['level']]
-                p.add_to(self.loot,p.equipment(self.rng.choice(names),self.rng.choice([0,1]),self.rng,q['level']))
-            self.log(tr('exp.cache_found'));self.emit(tr('exp.cache_found'));return True
+            q['lock_target']=self.rng.randint(15,165)
+            self._lock_request=q['id'];self.log(tr('update024.lock_found'));return True
         if q['kind']=='elite_hunt':
             self.turn+=1;self.rad_turns=max(0,self.rad_turns-1)
             if q['track_index']<len(q['track'])-1:
@@ -150,7 +165,7 @@ class Game(contracts.Game):
             self.start_battle();b=self.battle;needed=1+self.rng.randint(2,3)
             occupied={tuple(b['pos'])}|set(map(tuple,b['walls']))
             # All selected positions must be connected to the player.
-            pool=[(x,y) for y in range(b['h']) for x in range(5,b['w']) if (x,y) not in occupied and r.path_to(tuple(b['pos']),(x,y),b['w'],b['h'],occupied-{tuple(b['pos'])})]
+            pool=[(x,y) for y in range(b['h']) for x in range(5,b['w']) if (x,y) not in occupied and hexgrid.path_to(tuple(b['pos']),(x,y),b['w'],b['h'],occupied-{tuple(b['pos'])})]
             if len(pool)<needed:self.battle=None;self.log(tr('exp.no_location'));return False
             positions=self.rng.sample(pool,needed);enemies=[]
             for n,pos in enumerate(positions):

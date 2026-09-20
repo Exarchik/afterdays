@@ -199,7 +199,7 @@ class Reputation:
 
     def schedule_thanks(self):
         self.init_reputation()
-        eligible = [i for i in range(12) if self.reputation(i)>=75]
+        eligible = [i for i in range(12) if self.reputation(i)>=75 and not self.local_record(i).get('thanks_issued') and not any(q['kind']=='thanks' and q['city']==i for q in self.quests)]
         if eligible and self.reputation_state['thanks_due'] is None:
             self.reputation_state['thanks_due'] = self.turn+self.rng.randint(60,100)
         return eligible
@@ -216,6 +216,7 @@ class Reputation:
                progress=1,goal=1,target_kind=None,pos=self.cities[city][:],unique=False,level=level,
                reward=round(100*level**1.3*reward_factor(self.reputation(city))),xp_reward=60+10*level)
         self.quests.append(q)
+        self.local_record(city)['thanks_issued']=True
         notice=tr('reputation.notice',city=self.city_name(city))
         self.log(notice);self.emit(tr('reputation.title'),color='#a5dabc')
         self._reputation_notice=notice

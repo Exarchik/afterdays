@@ -42,7 +42,7 @@ class SettlementTests(unittest.TestCase):
    item['promotion']['discount']=discount;base=super(type(g),g).price(item,0,True)
    self.assertEqual(g.price(item,0),max(2,round(base*(1-discount/100))))
    self.assertLess(g.price(item,0,False),g.price(item,0,True))
-  cost=g.price(item,0);before=g.money;self.assertTrue(g.buy(item['id'],0));self.assertEqual(before-g.money,cost);self.assertNotIn('promotion',item)
+  cost=g.price(item,0);before=g.money;self.assertTrue(g.buy(item['id'],0));self.assertEqual(before-g.money,cost);item=next(i for i in g.bag if i.get('paid_sale_cap')==cost-1);self.assertNotIn('promotion',item)
   g.local_record()['value']=100
   self.assertLess(g.price(item,0,False),cost);self.assertTrue(g.sell(item['id'],0));self.assertLess(g.money,before)
  def test_sale_purchase_failure_and_reload(self):

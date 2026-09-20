@@ -1,3 +1,4 @@
+import hexgrid
 from i18n import t as tr
 import sprites
 """Isometric arena, grid-based trading, technicians and perk selection."""
@@ -20,11 +21,14 @@ def region_color(color,x):
 def battle_camera(b,width,height,fx=None):
     w,h=b['w'],b['h']
     if b.get('dungeon'):
-        u=max(24,min(46,width/18,height/13))
+        u=.85*max(24,min(46,width/18,height/13))
         pos=fx.position('player',b['pos']) if hasattr(fx,'position') else b['pos']
-        return u,width/2-(pos[0]-pos[1])*u,height*.55-(pos[0]+pos[1])*u/2
-    u=min((width-30)/(w+h+1),(height-45)/((w+h)/2+2))
-    return u,(width-(w-h)*u)/2,max(40,(height-(w+h)*u/2)/2)
+        x,y=hexgrid.center(pos,u)
+        return u,width/2-x,height*.55-y
+    u=min((width-30)/(math.sqrt(3)*(w+(h-1)/2)),(height-65)/(1.125*(h-1)+1.5))
+    extent_x=math.sqrt(3)*u*(w-1+(h-1)/2)
+    extent_y=1.125*u*(h-1)
+    return u,(width-extent_x)/2,(height-extent_y)/2+15
 
 
 def draw_battle(app):
@@ -35,7 +39,7 @@ def draw_battle(app):
     w,h=b['w'],b['h']
     u,ox,oy=battle_camera(b,width,height,getattr(app,'fx',None))
     app.iso=dict(u=u,ox=ox,oy=oy,sprites=[])
-    def center(pos): return ox+(pos[0]-pos[1])*u,oy+(pos[0]+pos[1])*u/2
+    def center(pos): return hexgrid.center(pos,u,ox,oy)
     kind=b.get('biome','waste')
     palette={'waste':('#555642','#444835'),'forest':('#304a37','#293e30'),
              'ruin':('#54574f','#434a43'),'road':('#665e49','#494e3a'),
@@ -47,17 +51,17 @@ def draw_battle(app):
     while queue:
         pos=queue.popleft()
         if costs[pos]>=b['ap'] and not (b.get('dungeon') and b.get('cleared')):continue
-        for q in r.neighbors(*pos,w,h):
+        for q in hexgrid.neighbors(*pos,w,h):
             if q not in occupied and q not in costs:
                 costs[q]=costs[pos]+1;queue.append(q)
-    cells=sorted(((x,y) for y in range(h) for x in range(w)),key=lambda a:sum(a))
+    cells=sorted(((x,y) for y in range(h) for x in range(w)),key=lambda a:(a[1],a[0]))
     for x,y in cells:
         px,py=center((x,y))
         if px < -2*u or px > width+2*u or py < -2*u or py > height+2*u:continue
         color=colors[(x+y)%2]
         if kind=='road' and 4<=y<=6:color='#918060'
         reachable=(x,y) in costs
-        c.create_polygon(px,py-u/2,px+u,py,px,py+u/2,px-u,py,fill=color,
+        c.create_polygon(*hexgrid.polygon(px,py,u),fill=color,
                          outline='#849777' if reachable else '#35463a',width=1)
         if x==0 and not b.get('dungeon'):
             c.create_line(px-u,py,px,py+u/2,fill='#79d5b1',width=3)
@@ -124,9 +128,7 @@ def iso_cell(app,event):
     info=app.iso
     for a,b,d,e,pos in reversed(info['sprites']):
         if a<=event.x<=d and b<=event.y<=e:return pos
-    dx=(event.x-info['ox'])/info['u']
-    dy=2*(event.y-info['oy'])/info['u']
-    return math.floor((dx+dy)/2+.5),math.floor((dy-dx)/2+.5)
+    return hexgrid.cell(event.x,event.y,info['u'],info['ox'],info['oy'])
 
 
 class TradingPanel(tk.Frame):

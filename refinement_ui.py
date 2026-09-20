@@ -239,8 +239,8 @@ class Technician(tk.Frame):
             inspection_ui.result(self.app,item)
 
 
-def perks(app):
-    win=app.popup(tr('refinement_ui.0059'),'780x720')
+def perks(app,parent=None):
+    win=parent if parent is not None else app.popup(tr('refinement_ui.0059'),'780x720')
     tk.Label(win,text=tr('refinement_ui.0060', v0=app.game.pending_perks),bg=PANEL,fg=GOLD,font=('Segoe UI',15,'bold')).pack(pady=12)
     holder=tk.Canvas(win,bg=PANEL,highlightthickness=0);scroll=ttk.Scrollbar(win,command=holder.yview);scroll.pack(side='right',fill='y');holder.pack(fill='both',expand=True);holder.config(yscrollcommand=scroll.set)
     body=tk.Frame(holder,bg=PANEL);window=holder.create_window(0,0,window=body,anchor='nw')
@@ -248,12 +248,25 @@ def perks(app):
     holder.bind('<MouseWheel>',lambda e:holder.yview_scroll(-1 if e.delta>0 else 1,'units'))
     symbols=['◎','▣','♥','⬡','✚','⚒','¤','◈','⚑','ϟ']
     def choose(key):
-        if app.game.choose_perk(key):app.dialog=None;win.destroy();app.perk_prompted=-1;app.refresh()
+        if app.game.choose_perk(key):
+            if parent is None:app.dialog=None;win.destroy()
+            app.perk_prompted=-1;app.refresh()
     for n,(key,(name,desc)) in enumerate(p.PERKS.items()):
         card=tk.Frame(body,bg='#293b31',highlightbackground='#536957',highlightthickness=1);card.pack(fill='x',padx=14,pady=5)
         art=tk.Canvas(card,width=62,height=78,bg='#293b31',highlightthickness=0);art.pack(side='left')
         sprites.draw(art,'perk:'+key,2,9,58)
         text=tk.Frame(card,bg='#293b31');text.pack(side='left',fill='both',expand=True)
         tk.Label(text,text=tr('refinement_ui.0061', v0=name, v1=app.game.rank(key)),bg='#293b31',fg=TEXT,font=('Segoe UI',11,'bold'),anchor='w').pack(fill='x',pady=(8,3))
-        tk.Label(text,text=desc,bg='#293b31',fg=MUTED,wraplength=500,justify='left',anchor='w').pack(fill='x',pady=(0,8))
+        tk.Label(text,text=desc,bg='#293b31',fg=MUTED,wraplength=250 if parent is not None else 500,justify='left',anchor='w').pack(fill='x',pady=(0,8))
         ttk.Button(card,text=tr('refinement_ui.0062'),command=lambda k=key:choose(k),state='normal' if app.game.pending_perks else 'disabled').pack(side='right',padx=10)
+
+
+class PerksPanel(tk.Frame):
+    def __init__(self,parent,app):
+        super().__init__(parent,bg=PANEL);self.app=app;self.state=None
+    def refresh(self):
+        state=(id(self.app.game),self.app.game.pending_perks,tuple(self.app.game.rank(k) for k in p.PERKS))
+        if state==self.state:return
+        self.state=state
+        for widget in self.winfo_children():widget.destroy()
+        perks(self.app,self)

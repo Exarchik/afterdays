@@ -28,7 +28,7 @@ class Game(scavenging.Game):
         entry=next((v for v in self.shops.values() if v['items'] is items),None)
         if entry is None or entry.get('special_checked'):return items
         entry['special_checked']=True
-        pool=[i for i in items if i['kind'] in ('weapon','armor','helmet','module','sealed')]
+        pool=list(items)
         if pool and self.rng.random()<.08:
             item=self.rng.choice(pool)
             item['promotion']=dict(discount=self.rng.choices([30,50,75],[70,25,5])[0],city=self.city,merchant=merchant)
@@ -44,17 +44,28 @@ class Game(scavenging.Game):
         # Includes discounts and paid-price cap, even after reputation or merchant changes.
         return max(1,min(base,self.price(item,merchant,True)-1,item.get('paid_sale_cap',base)))
 
-    def buy(self,ident,merchant,qty=1):
-        item=next((i for i in self.stock(merchant) if i['id']==ident),None)
-        promo=item and self.promotion(item,merchant)
-        price=self.price(item,merchant,True) if item else 0
-        ok=super().buy(ident,merchant,qty)
-        if ok and promo:
-            def cap(obj):
-                obj['paid_sale_cap']=max(1,price-1);obj.pop('promotion',None)
-                if obj.get('contents'):cap(obj['contents'])
-            cap(item)
-        return ok
+    def prepare_purchase(self,item,merchant,unit_price):
+        if not self.promotion(item,merchant):return
+        def cap(obj):
+            obj['paid_sale_cap']=max(1,min(obj.get('paid_sale_cap',unit_price-1),unit_price-1))
+            obj.pop('promotion',None)
+            if obj.get('contents'):cap(obj['contents'])
+        cap(item)
+
+    def welcomed(self,city):
+        return city is not None and any(q['kind']=='thanks' and q['city']==city and q['status']=='done' for q in self.quests)
+
+    def city_name(self,city):
+        name=super().city_name(city)
+        return '🏅 '+name if self.welcomed(city) else name
+
+    def city_color(self,city,default='#e1e6d6'):
+        return '#81db97' if self.welcomed(city) else default
+
+    def quest_text(self,q):
+        text=super().quest_text(q)
+        if q['kind']=='hunt':text+='\n'+tr('update024.defense_radius')
+        return text
 
     def generator_toggle(self,ident,index):
         self._generator_shock=0

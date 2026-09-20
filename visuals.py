@@ -261,7 +261,7 @@ TYPE_ORDER.insert(TYPE_ORDER.index('parts'),'repairkit')
 TYPE_COLORS['repairkit']='#4d4935'
 TYPE_COLORS['trophy']='#503e32'
 def item_sort_key(item):
-    kind=item['kind'];return (TYPE_ORDER.index(kind) if kind in TYPE_ORDER else 99,-item.get('rarity',0),-item.get('level',1),item['name'],item['id'])
+    kind=item['kind'];return (0 if item.get('promotion') else 1,TYPE_ORDER.index(kind) if kind in TYPE_ORDER else 99,-item.get('rarity',0),-item.get('level',1),item['name'],item['id'])
 
 class ItemGrid(tk.Frame):
     def __init__(self, parent, on_select=None, height=160, columns=5):
@@ -327,6 +327,10 @@ class ItemGrid(tk.Frame):
             if item['kind'] in ('weapon','armor','helmet','module'):
                 c.create_rectangle(x+4,y+3,x+28,y+17,fill='#17201c',outline='')
                 c.create_text(x+6,y+9,text=f'L{item.get("level",1)}',fill=TEXT,font=('Segoe UI',8,'bold'),anchor='w')
+            if item['kind']=='quest' or item.get('quest_id'):
+                c.create_rectangle(x+4,y+3,x+24,y+18,fill='#17201c',outline='')
+                broken=item.get('quest_repair') and item.get('durability',0)<100
+                c.create_text(x+14,y+10,text='?' if broken else '✓',fill='#f2cb62' if broken else '#76e89a',font=('Segoe UI',11,'bold'))
             if item['kind']=='weapon' or item.get('qty',1)>1:
                 c.create_rectangle(x+cell-36,y+3,x+cell-4,y+17,fill='#17201c',outline='')
             if item['kind']=='weapon':c.create_text(x+cell-6,y+9,text=tr('visuals.0022', v0=item.get('ap', 2)),fill=TEXT,font=('Segoe UI',8,'bold'),anchor='e')
@@ -399,10 +403,10 @@ class EquipmentPanel(tk.Frame):
         bar.pack(fill='x', padx=4, pady=4)
         for n, (label, fn) in enumerate([(tr('visuals.0024'), app.equip_selected), (tr('visuals.0025'), app.modify),
                                        (tr('visuals.0026'), app.use_selected), (tr('visuals.0027'), app.drop_selected),
-                                       (tr('visuals.0028'), app.dismantle_selected), (tr('visuals.0029'), app.perks),
+                                       (tr('visuals.0028'), app.dismantle_selected),
                                        (tr('scav.repair_menu'), lambda: __import__('maintenance_ui').show(app))]):
-            ttk.Button(bar, text=label, command=fn).grid(row=n//2, column=n%2, sticky='ew', padx=2, pady=2)
-        bar.columnconfigure((0, 1), weight=1)
+            ttk.Button(bar, text=label, command=fn).grid(row=n//3, column=n%3, sticky='ew', padx=2, pady=2)
+        bar.columnconfigure((0, 1, 2), weight=1)
         self.drag = Drag(self, self.drop)
         self.paper.bind('<Button-1>', self.press_paper)
         self.paper.bind('<Button-3>',self.inspect_paper)

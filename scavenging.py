@@ -23,7 +23,7 @@ class Game(expeditions.Game):
 
     def repair_with_kit(self,ident):
         item=self.find(ident)
-        if self.battle or not item or item['kind'] not in ('weapon','armor','helmet') or item.get('durability',100)>=100 or self.count('repairkit')<1:return False
+        if self.battle or not item or not (item['kind'] in ('weapon','armor','helmet') or item.get('quest_repair')) or item.get('durability',100)>=100 or self.count('repairkit')<1:return False
         self.consume('repairkit');item['durability']=min(100,item.get('durability',0)+35)
         self.hp=min(self.hp,self.max_hp)
         self.log(tr('scav.repaired',name=item['name'],condition=round(item['durability'])));return True

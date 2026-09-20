@@ -9,7 +9,7 @@ class RouteController:
 
     def __init__(self,app):
         self.app=app;self.game=app.game;self.path=[];self.running=False
-        self.started=None;self.origin=(self.game.x,self.game.y)
+        self.guided_city=None;self.started=None;self.origin=(self.game.x,self.game.y)
         app.root.after(33,self.tick)
 
     def update_button(self):
@@ -17,7 +17,7 @@ class RouteController:
         if button:button.config(text=tr('journey.pause') if self.running else tr('journey.resume'),state='normal' if self.path and not self.app.game.battle else 'disabled')
 
     def clear(self):
-        self.path=[];self.running=False;self.started=None;self.game=self.app.game
+        self.path=[];self.running=False;self.started=None;self.guided_city=None;self.game=self.app.game
         self.origin=(self.game.x,self.game.y);self.update_button()
 
     def pause(self):
@@ -43,8 +43,19 @@ class RouteController:
             if self.game is not self.app.game or self.origin!=(self.app.game.x,self.app.game.y):self.clear();return
             self.running=True;self.started=time.monotonic();self.update_button()
 
+    def start_guide(self,city):
+        g=self.app.game
+        if not g.guide or g.road_event or g.battle:return False
+        choice=next((v for v in g.guide_destinations() if v['city']==city),None)
+        if not choice or g.money<choice['price']:
+            g.log(tr('journey.no_money'));return False
+        self.clear();g.money-=choice['price'];g.traveler=None
+        self.guided_city=city;self.path=[tuple(p) for p in choice['route']]
+        self.running=True;self.started=time.monotonic();self.update_button()
+        return True
+
     def segment_duration(self):
-        return self.seconds_per_cell*math.dist((self.app.game.x,self.app.game.y),self.path[0]) if self.path else self.seconds_per_cell
+        return self.seconds_per_cell/(2 if getattr(self,'guided_city',None) is not None else 1)*math.dist((self.app.game.x,self.app.game.y),self.path[0]) if self.path else self.seconds_per_cell
 
     def position(self):
         pos=(self.app.game.x,self.app.game.y)
@@ -78,11 +89,17 @@ class RouteController:
         if self.blocked():self.pause();return
         if time.monotonic()-self.started<self.segment_duration():self.position_player();return
         g=self.game;next_pos=self.path[0]
-        ok=self.app.world_step(next_pos[0]-g.x,next_pos[1]-g.y)
+        guided=getattr(self,'guided_city',None) is not None
+        g._guided_trip=guided
+        try:ok=self.app.world_step(next_pos[0]-g.x,next_pos[1]-g.y)
+        finally:g._guided_trip=False
         if not ok or (g.x,g.y)!=next_pos:self.clear()
         else:
             self.path.pop(0);self.origin=(g.x,g.y);self.started=time.monotonic()
-            if not self.path or g.battle or g.road_event or g.traveler or g.city is not None:self.pause()
+            if not self.path:
+                if guided:g.log(tr('update024.guide_arrived',city=g.city_name(self.guided_city)))
+                self.guided_city=None;self.pause()
+            elif g.battle or g.road_event or (not guided and (g.traveler or g.city is not None)):self.pause()
         self.app.refresh()
 
     def tick(self):

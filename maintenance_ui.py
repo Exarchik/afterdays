@@ -21,7 +21,7 @@ def show(app):
     preview=tk.Label(win,bg=PANEL,fg=TEXT);preview.pack(pady=8)
     def refresh():
         info.config(text=tr('scav.kits_available',qty=g.count('repairkit')))
-        grid.set_items([i for i in g.bag+list(g.equipped.values()) if i and i['kind'] in ('weapon','armor','helmet')]);select(grid.selection)
+        grid.set_items([i for i in g.bag+list(g.equipped.values()) if i and (i['kind'] in ('weapon','armor','helmet') or i.get('quest_repair'))]);select(grid.selection)
     def repair():
         if g.repair_with_kit(grid.selection):app.refresh()
         refresh()

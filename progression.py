@@ -1,3 +1,4 @@
+import hexgrid
 from i18n import t as tr
 """Afterdays v0.3: progression, stacks, economy, ammunition and maintenance."""
 import content
@@ -104,7 +105,7 @@ def item_value(item):
 
 
 def stack_key(item):
-    return (item['kind'],item.get('monster_kind') if item['kind']=='trophy' else item.get('ammo_type')) if item['kind'] in STACK_KINDS else None
+    return (item['kind'],item.get('monster_kind') if item['kind']=='trophy' else item.get('ammo_type'),item.get('paid_sale_cap')) if item['kind'] in STACK_KINDS else None
 
 
 def add_to(items,item):
@@ -361,6 +362,7 @@ class Game(r.ExpansionGame):
             return False
         bought=extract(stock,item,qty)
         self.money-=price
+        if hasattr(self,'prepare_purchase'):self.prepare_purchase(bought,merchant,price//qty)
         add_to(self.bag,bought)
         self.log(tr('progression.0040', v0=bought['name'], v1=qty, v2=price))
         return True
@@ -505,11 +507,11 @@ class Game(r.ExpansionGame):
         for e in b['enemies']:
             if e['kind']==8: e['hp']=min(e['max_hp'],e['hp']+3)
             for _ in range(e['speed']):
-                if math.dist(e['pos'],b['pos'])<=e['range'] and r.visible(tuple(e['pos']),tuple(b['pos']),b['walls']): break
+                if hexgrid.distance(e['pos'],b['pos'])<=e['range'] and hexgrid.visible(tuple(e['pos']),tuple(b['pos']),b['walls']): break
                 blocked=set(map(tuple,b['walls']))|{tuple(o['pos']) for o in b['enemies'] if o is not e}
-                route=r.path_to(tuple(e['pos']),tuple(b['pos']),b['w'],b['h'],blocked)
+                route=hexgrid.path_to(tuple(e['pos']),tuple(b['pos']),b['w'],b['h'],blocked)
                 if route and route[0]!=tuple(b['pos']): e['pos']=list(route[0])
-            if math.dist(e['pos'],b['pos'])<=e['range'] and r.visible(tuple(e['pos']),tuple(b['pos']),b['walls']):
+            if hexgrid.distance(e['pos'],b['pos'])<=e['range'] and hexgrid.visible(tuple(e['pos']),tuple(b['pos']),b['walls']):
                 if self.rng.randrange(100)<min(45,self.protection_stat('evasion')):
                     self.log(tr('progression.0053')); continue
                 damage=max(1,e['damage']+self.rng.randint(-2,2)-self.defense)

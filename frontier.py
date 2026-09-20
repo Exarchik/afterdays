@@ -1,3 +1,4 @@
+import hexgrid
 from i18n import t as tr
 """Location markets, cartographers and room-based dungeon expeditions."""
 import exploration
@@ -207,13 +208,13 @@ class Game(economy.Game):
         b=self.battle
         if b and b.get('dungeon'):
             for e in b['enemies']:
-                if math.dist(e['pos'],pos or b['pos'])<=5 and r.visible(tuple(e['pos']),tuple(pos or b['pos']),b['walls']):e['awake']=True
+                if hexgrid.distance(e['pos'],pos or b['pos'])<=5 and hexgrid.visible(tuple(e['pos']),tuple(pos or b['pos']),b['walls']):e['awake']=True
 
     def battle_move(self,target):
         b=self.battle
         if not b:return False
         blocked=set(map(tuple,b['walls']))|{tuple(e['pos']) for e in b['enemies']}
-        route=r.path_to(tuple(b['pos']),tuple(target),b['w'],b['h'],blocked) or []
+        route=hexgrid.path_to(tuple(b['pos']),tuple(target),b['w'],b['h'],blocked) or []
         before=b['pos'][:]
         if b.get('dungeon') and b.get('cleared'):
             if not route:self.log(tr('frontier.0034'));return False

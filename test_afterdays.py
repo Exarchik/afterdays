@@ -128,7 +128,8 @@ class AfterdaysTests(unittest.TestCase):
         g = Game(8)
         g.start_battle()
         money = g.money
-        g.victory()
+        from unittest.mock import patch
+        with patch.object(g.rng,'random',return_value=0):g.victory()
         self.assertGreater(g.money, money)
         self.assertGreaterEqual(len(g.loot), 1)
         item = g.loot[0]

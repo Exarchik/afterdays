@@ -193,7 +193,8 @@ class ProgressionTests(unittest.TestCase):
         app=SimpleNamespace(iso=dict(u=23,ox=350,oy=50,sprites=[]))
         for x in range(15):
             for y in range(11):
-                e=SimpleNamespace(x=350+(x-y)*23,y=50+(x+y)*23/2)
+                import hexgrid
+                px,py=hexgrid.center((x,y),23,350,50);e=SimpleNamespace(x=px,y=py)
                 self.assertEqual(iso_cell(app,e),(x,y))
 
     def test_partial_loot_stack_pickup_fits_capacity(self):

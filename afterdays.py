@@ -1,5 +1,6 @@
 """Afterdays — standalone turn-based RPG. Python 3.10+, Tkinter, no pip packages."""
 from __future__ import annotations
+import hexgrid
 from i18n import t as tr
 import content
 from debug_config import TEST_MODE, MapVisibility
@@ -352,7 +353,7 @@ class LegacyGame:
         if not b:
             return False
         occupied = set(map(tuple, b['walls'])) | {tuple(e['pos']) for e in b['enemies']}
-        route = path_to(tuple(b['pos']), tuple(target), b['w'], b['h'], occupied)
+        route = hexgrid.path_to(tuple(b['pos']), tuple(target), b['w'], b['h'], occupied)
         if not route or len(route) > b['ap']:
             self.log(tr('afterdays.0048'))
             return False
@@ -365,10 +366,10 @@ class LegacyGame:
         if not b or not weapon:
             return False, tr('afterdays.0049'), 0
         s = stats(weapon)
-        distance = math.dist(b['pos'], enemy['pos'])
+        distance = hexgrid.distance(b['pos'], enemy['pos'])
         if distance > s['range']:
             return False, tr('afterdays.0050'), 0
-        if not visible(tuple(b['pos']), tuple(enemy['pos']), b['walls']):
+        if not hexgrid.visible(tuple(b['pos']), tuple(enemy['pos']), b['walls']):
             return False, tr('afterdays.0051'), 0
         chance = max(45, min(98, s['accuracy'] - int(max(0, distance-3)*3)))
         return True, '', chance
@@ -424,7 +425,7 @@ class LegacyGame:
                 if math.dist(e['pos'], b['pos']) <= e['range'] and visible(tuple(e['pos']), tuple(b['pos']), b['walls']):
                     break
                 blocked = set(map(tuple, b['walls'])) | {tuple(other['pos']) for other in b['enemies'] if other is not e}
-                route = path_to(tuple(e['pos']), tuple(b['pos']), b['w'], b['h'], blocked)
+                route = hexgrid.path_to(tuple(e['pos']), tuple(b['pos']), b['w'], b['h'], blocked)
                 if route and route[0] != tuple(b['pos']):
                     e['pos'] = list(route[0])
             if math.dist(e['pos'], b['pos']) <= e['range'] and visible(tuple(e['pos']), tuple(b['pos']), b['walls']):
@@ -783,7 +784,7 @@ class ExpansionGame(LegacyGame):
                 if math.dist(e['pos'], b['pos']) <= e['range'] and visible(tuple(e['pos']), tuple(b['pos']), b['walls']):
                     break
                 blocked = set(map(tuple, b['walls'])) | {tuple(other['pos']) for other in b['enemies'] if other is not e}
-                route = path_to(tuple(e['pos']), tuple(b['pos']), b['w'], b['h'], blocked)
+                route = hexgrid.path_to(tuple(e['pos']), tuple(b['pos']), b['w'], b['h'], blocked)
                 if route and route[0] != tuple(b['pos']):
                     e['pos'] = list(route[0])
             if math.dist(e['pos'], b['pos']) <= e['range'] and visible(tuple(e['pos']), tuple(b['pos']), b['walls']):
@@ -1091,6 +1092,10 @@ def launch(test_hook=None):
             self.tabs.add(self.player_tab,text=tr('afterdays.0146'))
             self.player_panel=frontier_ui.PlayerPanel(self.player_tab,self)
             self.player_panel.pack(fill='both',expand=True)
+            self.perks_tab=ttk.Frame(self.tabs)
+            self.tabs.add(self.perks_tab,text=tr('update024.perks_tab'))
+            self.perks_panel=refinement_ui.PerksPanel(self.perks_tab,self)
+            self.perks_panel.pack(fill='both',expand=True)
             self.cartographer=lambda:frontier_ui.cartographer(self)
             self.guide=lambda:frontier_ui.guide(self)
             self.metro=lambda:frontier_ui.metro(self)
@@ -1172,6 +1177,11 @@ def launch(test_hook=None):
                 self.game._junkyard_request=None
                 import junkyard_ui
                 junkyard_ui.show(self,junk)
+            lock=getattr(self.game,'_lock_request',None)
+            if lock:
+                self.game._lock_request=None
+                import lock_ui
+                lock_ui.show(self,lock)
             if before_battle and not self.game.battle and self.game.loot:
                 self.tabs.select(self.loot_tab)
 
@@ -1197,7 +1207,8 @@ def launch(test_hook=None):
             self.flee_button.config(state='normal' if combat else 'disabled')
             self.tabs.tab(self.loot_tab, text=tr('afterdays.0152', v0=len(g.loot)))
             self.services.refresh()
-            self.location.config(text=g.city_name(g.city) if g.city is not None else TERRAINS[g.world[g.y][g.x]][1])
+            self.perks_panel.refresh()
+            self.location.config(text=g.city_name(g.city) if g.city is not None else TERRAINS[g.world[g.y][g.x]][1],fg=g.city_color(g.city,TEXT))
             self.city_info.config(text=(tr('afterdays.0153', v0=g.current_site['npc']) if g.current_site else tr('afterdays.0154') if g.city is not None else
                                       tr('afterdays.0155')) +
                                       tr('afterdays.0157', v0=g.x, v1=g.y, v2=g.region_level, v3=weapon['name'] if weapon else tr('afterdays.0156'), v4=ws.get('damage', 0), v5=ws.get('range', 0), v6=weapon['ap'] if weapon else '—'))
@@ -1242,7 +1253,7 @@ def launch(test_hook=None):
 
         def perks(self):
             if not self.dialog:
-                refinement_ui.perks(self)
+                self.tabs.select(self.perks_tab)
 
         def technician(self):
             if not self.game.battle and self.game.city in self.game.technicians:
@@ -1390,7 +1401,7 @@ def launch(test_hook=None):
                     if not self.map_city_known(n):continue
                     px,py = ox+(x+.5)*t, oy+(y+.5)*t
                     c.create_rectangle(px-t*.4,py-t*.4,px+t*.4,py+t*.4,outline=GOLD)
-                    c.create_text(px+8,py-9,text=self.game.city_name(n), fill=TEXT, anchor='w', font=('Segoe UI', 8))
+                    c.create_text(px+8,py-9,text=self.game.city_name(n), fill=self.game.city_color(n,TEXT), anchor='w', font=('Segoe UI', 8))
                 for q in self.game.quests:
                     if q['status'] != 'active':
                         continue
@@ -1406,7 +1417,7 @@ def launch(test_hook=None):
                 pos=[int((event.x-ox)//t), int((event.y-oy)//t)]
                 if pos in self.game.cities and self.map_city_known(self.game.cities.index(pos)):
                     n=self.game.cities.index(pos)
-                    detail.config(text=f'{self.game.city_name(n)} ({pos[0]}, {pos[1]}) · '+', '.join(MERCHANTS[m] for m in self.game.city_merchants[n])+(tr('afterdays.0182') if n in self.game.mayors else tr('afterdays.0183'))+(tr('afterdays.0184') if n in self.game.technicians else '')+tr('afterdays.0185', v0=self.game.region_at(pos[0], pos[1])))
+                    detail.config(text=f'{self.game.city_name(n)} ({pos[0]}, {pos[1]}) · '+', '.join(MERCHANTS[m] for m in self.game.city_merchants[n])+(tr('afterdays.0182') if n in self.game.mayors else tr('afterdays.0183'))+(tr('afterdays.0184') if n in self.game.technicians else '')+tr('afterdays.0185', v0=self.game.region_at(pos[0], pos[1]))+tr('update024.reputation',value=self.game.reputation(n)),fg=self.game.city_color(n,TEXT))
                 else:
                     q=next((q for q in self.game.quests if q.get('pos') == pos and q['status'] == 'active'), None)
                     detail.config(text=self.game.quest_text(q).replace('\n', ' · ') if q else tr('afterdays.0186', v0=pos[0], v1=pos[1], v2=self.game.region_at(pos[0], pos[1])))
@@ -1490,9 +1501,6 @@ def launch(test_hook=None):
                     if b and x == 0:
                         c.create_line(px+2, py+2, px+2, py+t-2, fill='#72ad91', width=3)
             adventure_ui.paint_world_extras(self)
-            if not b:
-                from frontier_ui import draw_metro
-                draw_metro(c,g,t,self.ox-self.vx*t,self.oy-self.vy*t,self.map_revealed)
             from expedition_ui import draw_search_areas
             draw_search_areas(c,g,t,self.ox-self.vx*t,self.oy-self.vy*t,(self.vx,self.vy,cols,rows))
             from border_ui import draw_border
@@ -1517,7 +1525,7 @@ def launch(test_hook=None):
                     if not self.map_city_known(idx):continue
                     if self.vx <= pos[0] < self.vx+cols and self.vy <= pos[1] < self.vy+rows:
                         px, py = center(pos)
-                        c.create_text(px, py-t*.67, text=g.city_name(idx), fill='#efe0b5', font=('Segoe UI', 8), anchor='s')
+                        c.create_text(px, py-t*.67, text=g.city_name(idx), fill=g.city_color(idx,'#efe0b5'), font=('Segoe UI', 8), anchor='s')
             if not b:
                 for q in g.quests:
                     if q['status'] != 'active':

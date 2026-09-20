@@ -47,7 +47,7 @@ class Game(Guides, QuestSystem, Border, Reputation, frontier.Game):
             if kind=='repair_delivery':
                 names=[k for k,v in r.GEAR.items() if v[0] in ('weapon','armor') and p.GEAR_MIN_LEVEL[k]<=q['level']]
                 item=p.equipment(self.rng.choice(names),rng=self.rng,level=q['level'])
-                item.update(kind='quest',quest_id=q['id'],quest_repair=True,durability=0.0,weight=0)
+                item.update(kind='quest',quest_id=q['id'],quest_repair=True,durability=float(self.rng.randint(0,50)),weight=0)
                 item.pop('slots',None);item.pop('modules',None)
                 q['repair_item']=item
             offers.append(q)
