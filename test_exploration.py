@@ -53,8 +53,8 @@ class ExplorationTests(unittest.TestCase):
    w,h,rooms,floor,start,chest=exploration.dungeon_layout(random.Random(seed));counts.add(len(rooms));layouts.add(tuple(map(tuple,rooms)))
    blocked={(x,y) for x in range(w) for y in range(h) if (x,y) not in floor}
    self.assertTrue(all(0<x<w-1 and 0<y<h-1 for x,y in floor))
-   for x,y,rw,rh in rooms:self.assertTrue(r.path_to(tuple(start),(x,y),w,h,blocked))
-   self.assertTrue(r.path_to(tuple(start),tuple(chest),w,h,blocked))
+   for x,y,rw,rh in rooms:self.assertIsNotNone(__import__('hexgrid').path_to(tuple(start),(x,y),w,h,blocked))
+   self.assertTrue(__import__('hexgrid').path_to(tuple(start),tuple(chest),w,h,blocked))
   self.assertGreaterEqual(len(counts),4);self.assertEqual(len(layouts),60)
  def test_twenty_events_resolve_once(self):
   self.assertEqual(len(road_additions.EVENTS),20);self.assertEqual(len({e[0] for e in a.ROAD_EVENTS}),51)

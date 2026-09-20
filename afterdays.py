@@ -1555,6 +1555,8 @@ def launch(test_hook=None):
         def map_hover(self, event):
             if self.game.battle:
                 pos = self.cell(event)
+                if getattr(self,'battle_hover',None)!=pos:
+                    self.battle_hover=pos;self.draw()
                 e = next((e for e in self.game.battle['enemies'] if tuple(e['pos']) == pos), None)
                 if e:
                     valid, reason, chance = self.game.shot_info(e)

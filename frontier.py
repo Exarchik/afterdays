@@ -163,7 +163,7 @@ class Game(economy.Game):
         b=self.battle
         if b and b.get('dungeon'):
             if not b['cleared']:self.log(tr('frontier.0029'));return False
-            if math.dist(b['pos'],b['chest'])<=1.5:
+            if hexgrid.distance(b['pos'],b['chest'])<=1:
                 if b['chest_open']:self.log(tr('frontier.0030'));return False
                 b['chest_open']=True
                 cap=economy.loot_rules(b['kills'])[2]
@@ -190,7 +190,7 @@ class Game(economy.Game):
         self.start_battle()
         b=self.battle
         w,h,rooms,floor,entrance,chest=exploration.dungeon_layout(self.rng)
-        positions=[pos for pos in sorted(floor) if math.dist(pos,entrance)>7 and list(pos)!=chest]
+        positions=[pos for pos in sorted(floor) if hexgrid.distance(pos,entrance)>7 and list(pos)!=chest]
         zone=q.get('zone',self.region_level)
         enemies=[]
         import monster_rules
@@ -198,7 +198,7 @@ class Game(economy.Game):
             kind=monster_rules.choose(self.rng,self.region_level)
             enemy=monster_rules.make(self.rng,kind,self.region_level,pos,boost=1.35 if q.get('unique') else 1)
             enemy['awake']=False;enemies.append(enemy)
-        b.update(w=w,h=h,rooms=rooms,walls=[list((x,y)) for y in range(h) for x in range(w) if (x,y) not in floor],
+        b.update(w=w,h=h,rooms=rooms,floor=[list(p) for p in sorted(floor)],organic=True,walls=[list((x,y)) for y in range(h) for x in range(w) if (x,y) not in floor],
                  pos=entrance[:],exit=entrance,chest=chest,chest_open=False,cleared=False,dungeon=True,
                  dungeon_kind=q['dungeon_kind'],biome='ruin',enemies=enemies,region_level=zone,kills=[],corpses=[])
         self.quest_battle=q['id'];self.wake_enemies()

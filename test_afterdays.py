@@ -87,7 +87,7 @@ class AfterdaysTests(unittest.TestCase):
             positions = [tuple(e['pos']) for e in b['enemies']]
             self.assertEqual(len(positions), len(set(positions)))
             for pos in positions:
-                self.assertTrue(path_to(tuple(b['pos']), pos, b['w'], b['h'], walls))
+                self.assertTrue(__import__('hexgrid').path_to(tuple(b['pos']), pos, b['w'], b['h'], walls))
 
     def test_line_of_sight_including_corners(self):
         self.assertTrue(visible((0, 0), (4, 3), []))

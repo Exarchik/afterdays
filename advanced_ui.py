@@ -21,7 +21,7 @@ def region_color(color,x):
 def battle_camera(b,width,height,fx=None):
     w,h=b['w'],b['h']
     if b.get('dungeon'):
-        u=.9*.85*max(24,min(46,width/18,height/13))
+        u=.7071*.9*.85*max(24,min(46,width/18,height/13))
         pos=fx.position('player',b['pos']) if hasattr(fx,'position') else b['pos']
         x,y=hexgrid.center(pos,u)
         return u,width/2-x,height*.55-y
@@ -53,19 +53,39 @@ def draw_battle(app):
         for q in hexgrid.neighbors(*pos,w,h):
             if q not in occupied and q not in costs:
                 costs[q]=costs[pos]+1;queue.append(q)
-    cells=sorted(((x,y) for y in range(h) for x in range(w)),key=lambda a:(hexgrid.center(a,1)[1],hexgrid.center(a,1)[0]))
+    floor=set(map(tuple,b.get('floor',[(x,y) for y in range(h) for x in range(w)])))
+    cells=sorted(floor,key=lambda a:(hexgrid.center(a,1)[1],hexgrid.center(a,1)[0]))
+    from organic_arenas import boundary_edges
+    # Cache unit geometry in the UI only; it never changes game RNG or save data.
+    signature=frozenset(floor)
+    if getattr(app,'_rim_signature',None)!=signature:
+        app._rim_signature=signature;app._rim_edges=boundary_edges(floor)
+    rim=app._rim_edges
+    depth=u*.65
+    for a,bp in sorted(rim,key=lambda edge:max(edge[0][1],edge[1][1])):
+        ax,ay=ox+a[0]*u,oy+a[1]*u;bx,by=ox+bp[0]*u,oy+bp[1]*u
+        if max(ax,bx)<-2*u or min(ax,bx)>width+2*u or max(ay,by)<-2*u or min(ay,by)>height+2*u:continue
+        c.create_polygon(ax,ay,bx,by,bx,by+depth,ax,ay+depth,fill='#293b36' if ax<bx else '#34473e',outline='#263730')
     for x,y in cells:
         px,py=center((x,y))
         if px < -2*u or px > width+2*u or py < -2*u or py > height+2*u:continue
-        color=colors[(x+y)%2]
+        color=colors[0]
         if kind=='road' and 4<=y<=6:color='#918060'
-        reachable=(x,y) in costs
-        c.create_polygon(*hexgrid.polygon(px,py,u),fill=color,
-                         outline='#849777' if reachable else '#35463a',width=1)
-        if x==0 and not b.get('dungeon'):
-            c.create_line(px-u,py,px,py+u/2,fill='#79d5b1',width=3)
+        c.create_polygon(*hexgrid.polygon(px,py,u),fill=color,outline=color,width=1)
         if (x*13+y*7)%9==0 and (x,y) not in walls:
             c.create_line(px-u*.3,py,px+u*.14,py+u*.1,fill='#a69e78' if kind!='forest' else '#698663')
+        if x==0 and not b.get('dungeon'):
+            c.create_line(px-u*.5,py,px+u*.5,py,fill='#79d5b1',width=3)
+    for a,bp in rim:
+        c.create_line(ox+a[0]*u,oy+a[1]*u,ox+bp[0]*u,oy+bp[1]*u,fill='#8c9479',width=1)
+    hovered=getattr(app,'battle_hover',None)
+    if hovered in floor:
+        px,py=center(hovered)
+        c.create_polygon(*hexgrid.polygon(px,py,u),fill='',outline='#bee5a6' if hovered in costs else '#d7866d',width=2)
+    for pos in costs:
+        if pos in walls:continue
+        px,py=center(pos)
+        if 0<=px<=width and 0<=py<=height:c.create_oval(px-1,py-1,px+1,py+1,fill='#91a88a',outline='')
     enemies={tuple(e['pos']):e for e in b['enemies']}
     for pos in cells:
         px,py=center(pos)
@@ -76,7 +96,7 @@ def draw_battle(app):
                 c.create_line(px-u*.32,py-u*.08,px+u*.30,py+u*.18,fill='#b4a080',width=2)
                 c.create_line(px-u*.26,py+u*.18,px+u*.26,py-u*.09,fill='#b4a080',width=2)
         if pos in walls:
-            if sprites.draw(c,'terrain:forest' if kind=='forest' else 'terrain:ruin' if kind in ('ruin','city') else 'terrain:cliff',px-u,py-u*1.65,2*u):pass
+            if sprites.draw(c,'terrain:forest' if kind=='forest' else 'terrain:ruin' if kind in ('ruin','city') else 'terrain:cliff',px-2*u,py+0.35*u-4*u,4*u):pass
             elif kind=='forest':
                 c.create_line(px,py,px,py-u*1.5,fill='#8a7f5d',width=max(2,int(u*.18)))
                 c.create_line(px-u*.5,py-u*1.3,px,py-u*.8,px+u*.42,py-u*1.65,fill='#91a17a',width=2)
@@ -104,9 +124,15 @@ def draw_battle(app):
         if pos in enemies:
             e=enemies[pos];valid,_,_=g.shot_info(e)
             px,py=center(app.fx.position(e['id'],e['pos'])) if hasattr(getattr(app,'fx',None),'position') else center(pos)
-            if valid:c.create_oval(px-u*.55,py-u*.16,px+u*.55,py+u*.25,outline=GOLD,width=2)
-            size=u*1.45
-            monster(c,e,px-size/2,py-size+.15*u,size)
+            if valid:
+                c.create_oval(
+                    px-u*1.10, py-u*.32,
+                    px+u*1.10, py+u*.50,
+                    outline=GOLD, width=2
+                )
+            size=u*2.9
+            sprite_top=py-size+0.5*u
+            monster(c,e,px-size/2,sprite_top,size)
             app.iso['sprites'].append((px-size/2,py-size,px+size/2,py+.18*u,pos))
             top=py-size-u*.18
             c.create_rectangle(px-u*.5,top,px+u*.5,top+3,fill='#23392d',outline='')

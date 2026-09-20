@@ -12,7 +12,7 @@ class FrontierTests(unittest.TestCase):
   for seed in range(5):
    g,q=self.dungeon(seed);b=g.battle;self.assertTrue(b['dungeon']);self.assertTrue(6<=len(b['enemies'])<=10)
    self.assertTrue(all(e['base_level']<=g.region_level+int(e.get('weak',False)) for e in b['enemies']))
-   for target in [b['chest']]+[e['pos'] for e in b['enemies']]:self.assertTrue(r.path_to(tuple(b['exit']),tuple(target),b['w'],b['h'],set(map(tuple,b['walls']))))
+   for target in [b['chest']]+[e['pos'] for e in b['enemies']]:self.assertTrue(__import__('hexgrid').path_to(tuple(b['exit']),tuple(target),b['w'],b['h'],set(map(tuple,b['walls']))))
    before=copy.deepcopy(b['enemies']);g.end_turn();self.assertEqual(before,b['enemies'])
    e=b['enemies'][0];g.wake_enemies(e['pos']);self.assertTrue(e['awake'])
  def test_chest_exit_and_no_double_reward(self):

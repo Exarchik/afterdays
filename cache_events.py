@@ -12,6 +12,11 @@ for name,terrain in CACHE_TYPES.items():
     adventure.ROAD_EVENTS.append((key,*adventure.EXTRA_EVENTS[key][1:]))
 
 class Game(settlements.Game):
+    def start_battle(self):
+        super().start_battle()
+        from organic_arenas import arena
+        arena(self)
+
     def road_cache(self,ident=None):
         if self.battle or self.road_event:return None
         return next((c for c in self.reputation_state.get('road_caches',[]) if not c['opened'] and c['pos']==[self.x,self.y] and (ident is None or c['id']==ident)),None)

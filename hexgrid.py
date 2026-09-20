@@ -38,7 +38,7 @@ def visible(a,b,walls):
 
 # Diamond footprint with clockwise-sloping q axis. The common affine
 # projection also transforms tile vertices, so adjacent edges meet exactly.
-HEIGHT_SCALE=1.2
+HEIGHT_SCALE=.9
 VERTICAL=1.125*HEIGHT_SCALE
 
 def center(pos,u,ox=0,oy=0):
