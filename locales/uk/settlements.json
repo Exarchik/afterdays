@@ -1,0 +1,7 @@
+{
+  "settlements.shock": "Удар струмом",
+  "settlements.metro_part": "Контролер тягового генератора",
+  "settlements.sale": "  [АКЦІЯ −{discount}%]",
+  "settlements.price": "  · {price} кр. за {qty} шт.",
+  "settlements.noise": "Перешкоди — зразок тимчасово втрачено"
+}

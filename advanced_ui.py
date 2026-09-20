@@ -198,7 +198,8 @@ class TradingPanel(tk.Frame):
         self.preview.delete('all')
         if not item:self.detail.config(text=tr('advanced_ui.0018'));return
         qty=self.amount(item)
-        price=self.app.game.price(item,self.merchant,self.source=='stock')
+        g=self.app.game
+        price=g.price(item,self.merchant,self.source=='stock')
         hidden=self.merchant==2 and self.source=='stock' and item['kind']=='sealed'
         shown=dict(item,kind='sealed',name=tr('advanced_ui.0019'),rarity=0) if hidden else item
         icon(self.preview,shown,2,5,76)
@@ -207,13 +208,21 @@ class TradingPanel(tk.Frame):
             sprites.draw(self.preview,'damage:'+damage_type(item),52,60,24)
         desc=tr('advanced_ui.0020') if hidden else self.app.description(item)
         allowed=self.source=='stock' or self.app.game.buys_kind(item,self.merchant)
-        self.detail.config(text=desc+tr('advanced_ui.0021', v0=price, v1=qty, v2=price * qty)+('' if allowed else tr('advanced_ui.0022')))
+        buying=self.source=='stock'
+        affordable=(g.money>=price*qty and g.weight+p.item_weight(item)/item.get('qty',1)*qty<=g.capacity+.0001) if buying else allowed
+        discount=g.promotion(item,self.merchant) if buying else 0
+        lines=([item['name'],desc] if hidden else desc.split('\n'));lines[0]=item['name']
+        self.detail.config(text='\n'.join(lines))
+        text=self.detail.text;text.configure(state='normal')
+        badge=tr('settlements.sale',discount=discount) if discount else ''
+        text.insert('1.end',tr('settlements.price',price=price*qty,qty=qty)+badge,'good' if affordable else 'bad')
+        text.configure(state='disabled')
 
     def refresh(self):
         g=self.app.game
-        items=g.stock(self.merchant)
+        items=[dict(i,promotion=i.get('promotion') if g.promotion(i,self.merchant) else None) for i in g.stock(self.merchant)]
         if self.merchant==2:
-            items=[dict(id=i['id'],kind='sealed',name=tr('advanced_ui.0023'),rarity=0,weight=0) if i['kind']=='sealed' else i for i in items]
+            items=[dict(id=i['id'],kind='sealed',name=tr('advanced_ui.0023'),rarity=0,weight=0,promotion=i.get('promotion')) if i['kind']=='sealed' else i for i in items]
         self.stock_grid.set_items(items)
         self.bag_grid.set_items(g.bag)
         self.title.config(text=tr('advanced_ui.0024', v0=g.merchant_title(self.merchant), v1=g.money, v2=g.weight, v3=g.capacity))

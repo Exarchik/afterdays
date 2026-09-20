@@ -11,8 +11,8 @@ import progression as p
 import adventure as a
 import economy
 
-METRO_CITIES=(0,2,3,7)
-METRO_PARTS={2:tr('frontier.0001'),3:tr('frontier.0002'),7:tr('frontier.0003')}
+METRO_CITIES=(0,2,3,7,10)
+METRO_PARTS={2:tr('frontier.0001'),3:tr('frontier.0002'),7:tr('frontier.0003'),10:tr('settlements.metro_part')}
 
 DUNGEONS=(tr('frontier.0004'),tr('frontier.0005'),tr('frontier.0006'))
 
@@ -120,8 +120,10 @@ class Game(economy.Game):
     def metro_cost(self,destination):
         if self.battle or self.city not in self.metro_unlocked or destination not in self.metro_unlocked or destination==self.city:return None
         blocked={(x,y) for y in range(32) for x in range(48) if not self.passable(x,y)}
-        first,last=sorted((METRO_CITIES.index(self.city),METRO_CITIES.index(destination)))
-        stations=METRO_CITIES[first:last+1];distance=0
+        from metro_routes import station_order
+        order=station_order(self)
+        first,last=sorted((order.index(self.city),order.index(destination)))
+        stations=order[first:last+1];distance=0
         for a,b in zip(stations,stations[1:]):
             route=r.path_to(tuple(self.cities[a]),tuple(self.cities[b]),48,32,blocked)
             if not route:return None

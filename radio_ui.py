@@ -1,5 +1,6 @@
 """Visual waveform matching; no accuracy percentages or warmer/colder hints."""
-import math
+import math,time
+from radio_interference import Interference
 import tkinter as tk
 from tkinter import ttk
 from inspection_ui import window
@@ -18,11 +19,14 @@ def show(app,quest_id):
     canvas=tk.Canvas(win,width=520,height=175,bg='#10221b',highlightthickness=0);canvas.pack(fill='x',padx=18)
     tk.Label(win,text=tr('exp.wave_target')+' — ━   '+tr('exp.wave_current')+' — ┄',bg=PANEL,fg=GOLD).pack()
     values=[tk.IntVar(value=v) for v in q['radio_values']];sliders=[]
+    interference=Interference(time.monotonic());state={'noise':False,'timer':None,'closed':False,'done':False}
     def update(*args):
         numbers=[v.get() for v in values];q['radio_values']=numbers;canvas.delete('all')
         width=max(200,canvas.winfo_width());height=175
         for y in range(15,height,25):canvas.create_line(0,y,width,y,fill='#294237')
-        canvas.create_line(*waveform(q['radio_target'],width,height),fill='#e8c886',width=3)
+        reference=interference.trace(width,height) if state['noise'] else waveform(q['radio_target'],width,height)
+        canvas.create_line(*reference,fill='#e8c886',width=3)
+        if state['noise']:canvas.create_text(width/2,12,text=tr('settlements.noise'),fill='#e8c886',font=('Segoe UI',9))
         canvas.create_line(*waveform(numbers,width,height),fill='#70ddd3',width=2,dash=(5,3))
     for i,key in enumerate(('frequency','amplitude','phase')):
         row=tk.Frame(win,bg=PANEL);row.pack(fill='x',padx=24,pady=3)
@@ -31,9 +35,22 @@ def show(app,quest_id):
     result=tk.Label(win,bg=PANEL,fg=TEXT);result.pack(pady=5)
     def confirm():
         if g.tune_radio(q['id'],[v.get() for v in values]):
+            state['done']=True;state['noise']=False;update()
             result.config(text=tr('radio_ui.0012'));button.config(state='disabled')
             for slider in sliders:slider.config(state='disabled')
         else:result.config(text=tr('radio_ui.0013',v0=q['radio_attempts']))
         app.refresh()
     button=ttk.Button(win,text=tr('radio_ui.0014'),command=confirm);button.pack(pady=8)
-    canvas.bind('<Configure>',update);update()
+    def tick():
+        state['timer']=None
+        if state['closed'] or state['done']:return
+        state['noise']=interference.advance(time.monotonic())
+        update();state['timer']=win.after(100,tick)
+    def destroyed(event):
+        if event.widget is not win:return
+        state['closed']=True
+        if state['timer'] is not None:
+            try:win.after_cancel(state['timer'])
+            except tk.TclError:pass
+    win.bind('<Destroy>',destroyed,add='+')
+    canvas.bind('<Configure>',update);update();state['timer']=win.after(100,tick)

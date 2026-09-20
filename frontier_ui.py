@@ -65,16 +65,9 @@ def cartographer(app):
     button=ttk.Button(window,text=tr('frontier_ui.0038'),command=buy,state='disabled' if t['purchased'] else 'normal');button.pack(pady=16)
 
 
-def draw_metro(canvas,g,t,ox,oy):
-    stations=g.metro_unlocked
-    def point(n):
-        x,y=g.cities[n];return ox+(x+.5)*t,oy+(y+.5)*t
-    for first,second in zip(stations,stations[1:]):
-        canvas.create_line(*point(first),*point(second),fill='#58d9d1',width=3,dash=(7,4))
-    for city in stations:
-        x,y=point(city)
-        canvas.create_oval(x-7,y-7,x+7,y+7,fill='#173b3a',outline='#58d9d1',width=2)
-        canvas.create_text(x,y,text=tr('frontier_ui.0039'),fill='#9afbf2',font=('Segoe UI',8,'bold'))
+def draw_metro(canvas,g,t,ox,oy,revealed=None):
+    from metro_routes import draw
+    draw(canvas,g,t,ox,oy,revealed)
 
 
 def metro(app):

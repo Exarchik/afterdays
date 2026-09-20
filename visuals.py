@@ -332,6 +332,9 @@ class ItemGrid(tk.Frame):
             if item['kind']=='weapon':c.create_text(x+cell-6,y+9,text=tr('visuals.0022', v0=item.get('ap', 2)),fill=TEXT,font=('Segoe UI',8,'bold'),anchor='e')
             elif item.get('qty',1)>1:c.create_text(x+cell-6,y+9,text=f'×{item["qty"]}',fill=TEXT,font=('Segoe UI',8,'bold'),anchor='e')
             if item['id']==self.selection:c.create_rectangle(x+5,y+16,x+9,y+20,fill='#ffffff',outline='')
+            if item.get('promotion'):
+                c.create_rectangle(x+4,y+19,x+45,y+34,fill='#28573d',outline='')
+                c.create_text(x+24,y+26,text=f"−{item['promotion']['discount']}%",fill='#b0f2a7',font=('Segoe UI',8,'bold'))
             short = item['name'][:10] + ('…' if len(item['name']) > 10 else '')
             c.create_text(x+cell/2, y+59, text=short, fill=color, font=('Segoe UI', 8))
             footer='?' if item['kind']=='sealed' else (f'{item.get("durability",100):.0f}%' if 'durability' in item else '')

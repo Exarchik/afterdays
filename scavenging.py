@@ -1,5 +1,6 @@
 """Maintenance, area contracts and persistent draggable junkyard searches."""
 import copy, math
+import junk_physics
 import afterdays as r
 import expeditions, economy
 import progression as p
@@ -111,6 +112,7 @@ class Game(expeditions.Game):
         for n in range(15):
             objects.append(dict(id='debris'+str(n),kind='debris',x=80+(n%5)*82+self.rng.randint(-10,10),y=150+(n//5)*70+self.rng.randint(-10,10),w=120,h=90,found=False,style=n%3))
         q['junk_objects']=objects
+        junk_physics.ensure(q)
 
     def accept_quest(self,ident):
         offer=next((q for q in self.mayor_offers() if q['id']==ident and q['status']=='offered'),None)
@@ -184,18 +186,25 @@ class Game(expeditions.Game):
 
     def junk_quest(self,ident):
         q=self.local_expedition()
-        return q if q and q['id']==ident and q['kind']=='junkyard' else None
+        if q and q['id']==ident and q['kind']=='junkyard':
+            junk_physics.ensure(q);return q
+        return None
 
     def junk_top(self,q,x,y):
-        return next((o for o in reversed(q['junk_objects']) if not o['found'] and contains(o,x,y)),None)
+        junk_physics.ensure(q)
+        return next((o for o in reversed(q['junk_objects']) if not o['found'] and junk_physics.covers(o,x,y)),None)
 
     def junk_move(self,ident,obj_id,x,y):
         q=self.junk_quest(ident)
         if not q or not all(isinstance(v,(int,float)) and math.isfinite(v) for v in (x,y)):return False
         obj=next((o for o in q['junk_objects'] if o['id']==obj_id and o['kind']=='debris'),None)
         if not obj:return False
-        obj['x']=max(0,min(640-obj['w'],x));obj['y']=max(0,min(440-obj['h'],y))
+        obj['x'],obj['y']=junk_physics.clamp(obj,x,y)
         q['junk_objects'].remove(obj);q['junk_objects'].append(obj);return True
+
+    def junk_tick(self,ident,dt,held=None,destination=None):
+        q=self.junk_quest(ident)
+        return junk_physics.tick(q,dt,held,destination) if q else []
 
     def junk_collect(self,ident,x,y):
         q=self.junk_quest(ident)
@@ -233,6 +242,7 @@ class Game(expeditions.Game):
         game=super().load(path)
         for q in game.quests:
             if q['status']!='active':continue
+            if q['kind']=='junkyard':junk_physics.ensure(q)
             if q['kind']=='generator' and 'generator_order' not in q:game.init_generator(q)
             if q['kind'] in ('scout','retrieve') and 'metro_city' not in q and not q.get('area') and not game.quest_ready(q):
                 pool=game.area_candidates(q)

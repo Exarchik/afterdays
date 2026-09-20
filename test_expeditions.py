@@ -98,9 +98,10 @@ class ExpeditionTests(unittest.TestCase):
  def test_metro_single_chain(self):
   from frontier_ui import draw_metro
   g=r.Game(1);g.quests.extend(dict(metro_city=c,status='done',kind='retrieve') for c in (2,3,7))
-  c=MagicMock();draw_metro(c,g,1,0,0)
-  lines=c.create_line.call_args_list;self.assertEqual(len(lines),3)
-  expected=[(0,2),(2,3),(3,7)]
+  c=MagicMock();draw_metro(c,g,1,0,0,lambda x,y:True)
+  lines=c.create_line.call_args_list;self.assertEqual(len(lines),4)
+  from metro_routes import station_order
+  order=station_order(g);expected=list(zip(order,order[1:]))
   for line,(a,b) in zip(lines,expected):self.assertEqual(line.args,tuple(v+.5 for v in g.cities[a]+g.cities[b]))
  def test_drop_damage_and_half_ammo(self):
   g=r.Game(7);g.start_battle();g.battle['kills']=[dict(kind=0,grade='normal',level=1)]

@@ -42,14 +42,14 @@ class MetroTests(unittest.TestCase):
   with tempfile.TemporaryDirectory() as td:
    path=Path(td)/'save.json';g.save(path);other=r.Game.load(path)
    self.assertEqual(other.metro_unlocked,[0,2]);self.assertEqual(other.quests,g.quests)
- def test_atlas_only_draws_unlocked_stations(self):
+ def test_atlas_fog_and_full_chain(self):
   class Canvas:
    def __init__(self):self.lines=[];self.stations=[]
    def create_line(self,*args,**kw):self.lines.append(args)
    def create_oval(self,*args,**kw):self.stations.append(args)
    def create_text(self,*args,**kw):pass
-  g=r.Game(8);c=Canvas();draw_metro(c,g,10,0,0);self.assertEqual(len(c.stations),1);self.assertFalse(c.lines)
-  self.repair(g,2);c=Canvas();draw_metro(c,g,10,0,0);self.assertEqual(len(c.stations),2);self.assertEqual(len(c.lines),1)
+  g=r.Game(8);c=Canvas();draw_metro(c,g,10,0,0);self.assertEqual(len(c.stations),1);self.assertTrue(c.lines)
+  c=Canvas();draw_metro(c,g,10,0,0,lambda x,y:True);self.assertEqual(len(c.stations),5);self.assertEqual(len(c.lines),4)
  def test_free_movement_only_after_clear(self):
   g=r.Game(71);q=offer_for(g,'purge');g.accept_quest(q['id']);q=g.quests[-1];g.x,g.y=q['pos'];g.search();b=g.battle
   b['ap']=0;self.assertFalse(g.battle_move((2,4)))

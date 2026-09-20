@@ -976,7 +976,7 @@ class ExpansionGame(LegacyGame):
 
 
 from progression import equipment, module, supply, stats, item_weight, item_value
-from scavenging import Game
+from settlements import Game
 from reputation import buy_factor, sell_factor
 
 # GUI imports are delayed so the model and tests work without a display.
@@ -1383,7 +1383,7 @@ def launch(test_hook=None):
                     c.create_rectangle(ox+x*t,oy+y*t,ox+(x+1)*t,oy+(y+1)*t,outline='#9fba51')
                 from border_ui import draw_border
                 draw_border(c,self.game,t,ox,oy,self.map_revealed)
-                frontier_ui.draw_metro(c,self.game,t,ox,oy)
+                frontier_ui.draw_metro(c,self.game,t,ox,oy,self.map_revealed)
                 from expedition_ui import draw_search_areas
                 draw_search_areas(c,self.game,t,ox,oy)
                 for n,(x,y) in enumerate(self.game.cities):
@@ -1490,6 +1490,9 @@ def launch(test_hook=None):
                     if b and x == 0:
                         c.create_line(px+2, py+2, px+2, py+t-2, fill='#72ad91', width=3)
             adventure_ui.paint_world_extras(self)
+            if not b:
+                from frontier_ui import draw_metro
+                draw_metro(c,g,t,self.ox-self.vx*t,self.oy-self.vy*t,self.map_revealed)
             from expedition_ui import draw_search_areas
             draw_search_areas(c,g,t,self.ox-self.vx*t,self.oy-self.vy*t,(self.vx,self.vy,cols,rows))
             from border_ui import draw_border

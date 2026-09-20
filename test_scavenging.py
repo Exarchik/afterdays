@@ -94,15 +94,17 @@ class ScavengingTests(unittest.TestCase):
   g,q=self.quest('junkyard');g.x,g.y=q['pos'];g.search();self.assertEqual(g._junkyard_request,q['id'])
   target=next(o for o in q['junk_objects'] if o['kind']=='target');self.assertFalse(g.junk_collect(q['id'],target['x']+10,target['y']+10))
   for obj in list(q['junk_objects']):
-   if obj['kind']=='debris':self.assertTrue(g.junk_move(q['id'],obj['id'],0,0))
+   if obj['kind']=='debris':self.assertTrue(g.junk_move(q['id'],obj['id'],850,560))
   for obj in q['junk_objects'][:]:
    if obj['kind']=='debris':continue
+   for scrap in list(q['junk_objects']):
+    if scrap['kind']=='debris':g.junk_move(q['id'],scrap['id'],850 if obj['x']<425 else 0,560 if obj['y']<280 else 0)
    self.assertTrue(g.junk_collect(q['id'],obj['x']+10,obj['y']+10));self.assertFalse(g.junk_collect(q['id'],obj['x']+10,obj['y']+10))
   self.assertTrue(g.quest_ready(q));self.assertTrue(g.loot);g.x,g.y=g.cities[q['city']];self.assertTrue(g.turn_in(q['id']));self.assertFalse(g.quest_equipment(q))
  def test_junk_state_persists_and_cancel_cleans_items(self):
   g,q=self.quest('junkyard');g.x,g.y=q['pos'];g.search()
   for obj in list(q['junk_objects']):
-   if obj['kind']=='debris':g.junk_move(q['id'],obj['id'],0,0)
+   if obj['kind']=='debris':g.junk_move(q['id'],obj['id'],850,560)
   target=next(o for o in q['junk_objects'] if o['kind']=='target');g.junk_collect(q['id'],target['x']+10,target['y']+10)
   h=self.save_reload(g);self.assertEqual(h.quests[-1]['junk_objects'],q['junk_objects']);self.assertEqual(h.quests[-1]['progress'],1)
   self.assertTrue(h.abandon_quest(q['id']));self.assertFalse(h.quest_equipment(q))

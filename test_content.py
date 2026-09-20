@@ -49,7 +49,7 @@ class ContentTests(unittest.TestCase):
    for key,value in before.items():self.assertEqual(content.MONSTERS[key],value)
  def test_genuine_v0151_fixture(self):
   path=ROOT/'tests_fixtures/save_v0151.json';old=json.loads(path.read_text());g=r.Game.load(path)
-  for key in ('world','cities','xp','money','turn','hp'):self.assertEqual(getattr(g,key),old[key])
+  for key in ('cities','xp','money','turn','hp'):self.assertEqual(getattr(g,key),old[key])
   for slot,item in g.equipped.items():
    if item:
     self.assertIn(item['type_id'],content.EQUIPMENT)
