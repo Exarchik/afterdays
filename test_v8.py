@@ -32,7 +32,7 @@ class RevisionTests(unittest.TestCase):
    g=r.Game(4);g.make_road_event(key);before=g.money
    self.assertTrue(g.resolve_event('leave'));self.assertFalse(g.resolve_event('leave'))
    if effect=='money':self.assertEqual(g.money,max(0,before+value))
-  self.assertEqual(len(a.ROAD_EVENTS),46)
+  self.assertEqual(len(a.ROAD_EVENTS),51)
  def test_sort_preserves_ids(self):
   items=[p.supply('food',3),p.module(),p.equipment('Пістолет «Попіл»'),p.supply('med')]
   before=copy.deepcopy(items);ordered=sorted(items,key=item_sort_key)

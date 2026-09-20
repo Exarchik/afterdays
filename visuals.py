@@ -263,6 +263,15 @@ TYPE_COLORS['trophy']='#503e32'
 def item_sort_key(item):
     kind=item['kind'];return (0 if item.get('promotion') else 1,TYPE_ORDER.index(kind) if kind in TYPE_ORDER else 99,-item.get('rarity',0),-item.get('level',1),item['name'],item['id'])
 
+def condition_color(value):
+    return '#75ce83' if value>=70 else '#e3c159' if value>25 else '#e66d63'
+
+def condition_bar(canvas,item,x,y,width,height=4):
+    if not item or 'durability' not in item:return
+    value=max(0,min(100,item['durability']));color=condition_color(value)
+    canvas.create_rectangle(x,y,x+width,y+height,fill='#18201b',outline=color,width=1)
+    if value>0:canvas.create_rectangle(x,y,x+width*value/100,y+height,fill=color,outline='')
+
 class ItemGrid(tk.Frame):
     def __init__(self, parent, on_select=None, height=160, columns=5):
         super().__init__(parent, bg=PANEL)
@@ -341,8 +350,8 @@ class ItemGrid(tk.Frame):
                 c.create_text(x+24,y+26,text=f"−{item['promotion']['discount']}%",fill='#b0f2a7',font=('Segoe UI',8,'bold'))
             short = item['name'][:10] + ('…' if len(item['name']) > 10 else '')
             c.create_text(x+cell/2, y+59, text=short, fill=color, font=('Segoe UI', 8))
-            footer='?' if item['kind']=='sealed' else (f'{item.get("durability",100):.0f}%' if 'durability' in item else '')
-            c.create_text(x+cell/2,y+71,text=footer,fill='#ed8c78' if item.get('durability',100)<25 else MUTED,font=('Segoe UI',7))
+            condition_bar(c,item,x+7,y+69,cell-14)
+            if item['kind']=='sealed':c.create_text(x+cell/2,y+71,text='?',fill=MUTED,font=('Segoe UI',7))
         c.configure(scrollregion=(0, 0, width, max(h, math.ceil(len(self.items)/self.columns)*h)))
 
 
@@ -454,6 +463,7 @@ class EquipmentPanel(tk.Frame):
             if item:
                 size = min(d-x-5, e-y-5)
                 icon(c, item, (x+d-size)/2, y+2, size)
+                condition_bar(c,item,x+4,e-7,d-x-8)
             else:
                 c.create_text((x+d)/2, (y+e)/2, text='+', fill='#708573', font=('Segoe UI', 20))
             if slot.startswith('weapon'):

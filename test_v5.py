@@ -100,7 +100,7 @@ class RefinementTests(unittest.TestCase):
                 g.make_road_event();event=g.road_event['kind'];self.assertTrue(event not in a.EXTRA_EVENTS or a.EXTRA_EVENTS[event][0]==terrain);g.resolve_event('leave')
         g.make_road_event('safe');before=copy.deepcopy(g.road_event);self.assertFalse(g.resolve_event('open'));self.assertEqual(before,g.road_event)
         p.add_to(g.bag,p.parts(10));money=g.money;self.assertTrue(g.resolve_event('open'));self.assertEqual(g.count('parts'),0);self.assertGreater(g.money,money)
-        self.assertEqual(len(a.EXTRA_EVENTS),10)
+        self.assertEqual(len(a.EXTRA_EVENTS),15)
 
     def test_preinstalled_modules_and_comparison(self):
         g=r.Game(9);g.xp=p.xp_for_level(12);counts=[]

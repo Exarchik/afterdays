@@ -100,7 +100,7 @@ class QuestRevisionTests(unittest.TestCase):
         self.assertGreater(u,30)
         import hexgrid
         px,py=hexgrid.center((2,4),u,ox,oy);self.assertAlmostEqual(px,400);self.assertAlmostEqual(py,330)
-        self.assertAlmostEqual(u,.85*max(24,min(46,800/18,600/13)))
+        self.assertAlmostEqual(u,.9*.85*max(24,min(46,800/18,600/13)))
         b['pos']=[19,22];u2,ox2,oy2=battle_camera(b,800,600);self.assertEqual(u,u2);self.assertNotEqual((ox,oy),(ox2,oy2))
         app=SimpleNamespace(iso=dict(u=u2,ox=ox2,oy=oy2,sprites=[]))
         self.assertEqual(iso_cell(app,SimpleNamespace(x=400,y=330)),(19,22))

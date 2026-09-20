@@ -6,8 +6,8 @@ from i18n import t as tr
 from visuals import PANEL,TEXT,GOLD
 
 def show(app,ident):
-    g=app.game;q=g.local_expedition()
-    if not q or q['id']!=ident or q['kind']!='cache' or 'lock_target' not in q:return
+    g=app.game;q=g.lock_context(ident)
+    if not q or 'lock_target' not in q:return
     win=app.popup(tr('update024.lock_title'),'580x490')
     tk.Label(win,text=tr('update024.lock_info'),bg=PANEL,fg=TEXT,wraplength=530,justify='left').pack(padx=20,pady=15)
     c=tk.Canvas(win,width=540,height=250,bg='#17221d',highlightthickness=0);c.pack(fill='both',expand=True,padx=15)

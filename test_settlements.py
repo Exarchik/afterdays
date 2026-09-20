@@ -4,7 +4,7 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock,patch
 import afterdays as r
 import progression as p
-import frontier,metro_routes,refinement_ui
+import frontier,metro_routes,refinement_ui,settlements
 from radio_interference import Interference
 from tests_fixtures.quest_offer import offer_for
 
@@ -39,7 +39,7 @@ class SettlementTests(unittest.TestCase):
   for _ in range(10):g.stock(0)
   self.assertEqual(item,snapshot)
   for discount in (30,50,75):
-   item['promotion']['discount']=discount;base=super(type(g),g).price(item,0,True)
+   item['promotion']['discount']=discount;base=super(settlements.Game,g).price(item,0,True)
    self.assertEqual(g.price(item,0),max(2,round(base*(1-discount/100))))
    self.assertLess(g.price(item,0,False),g.price(item,0,True))
   cost=g.price(item,0);before=g.money;self.assertTrue(g.buy(item['id'],0));self.assertEqual(before-g.money,cost);item=next(i for i in g.bag if i.get('paid_sale_cap')==cost-1);self.assertNotIn('promotion',item)

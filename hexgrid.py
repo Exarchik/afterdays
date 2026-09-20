@@ -36,12 +36,28 @@ def visible(a,b,walls):
     # A tiny consistent nudge resolves exact hex-edge ties symmetrically.
     return all(rounded(a[0]+(b[0]-a[0])*i/n+1e-7,a[1]+(b[1]-a[1])*i/n+1e-7) not in blocked for i in range(1,n))
 
+# Diamond footprint with clockwise-sloping q axis. The common affine
+# projection also transforms tile vertices, so adjacent edges meet exactly.
+HEIGHT_SCALE=1.2
+VERTICAL=1.125*HEIGHT_SCALE
+
 def center(pos,u,ox=0,oy=0):
-    return ox+math.sqrt(3)*u*(pos[0]+pos[1]/2),oy+1.5*u*.75*pos[1]
+    return ox+math.sqrt(3)*u*(pos[0]-pos[1]),oy+VERTICAL*u*(pos[0]+pos[1])
 
 def cell(px,py,u,ox=0,oy=0):
-    r=(py-oy)/(1.5*u*.75);q=(px-ox)/(math.sqrt(3)*u)-r/2
-    return rounded(q,r)
+    diff=(px-ox)/(math.sqrt(3)*u);total=(py-oy)/(VERTICAL*u)
+    return rounded((total+diff)/2,(total-diff)/2)
 
 def polygon(px,py,u):
-    return [v for i in range(6) for v in (px+u*math.cos(math.radians(30+60*i)),py+.75*u*math.sin(math.radians(30+60*i)))]
+    points=[]
+    for i in range(6):
+        angle=math.radians(30+60*i);x,y=math.cos(angle),math.sin(angle)
+        q=x/math.sqrt(3)-y/3;r=2*y/3
+        points.extend(center((q,r),u,px,py))
+    return points
+
+def bounds(w,h):
+    points=[]
+    for pos in ((0,0),(w-1,0),(0,h-1),(w-1,h-1)):
+        xy=polygon(*center(pos,1),1);points.extend(zip(xy[::2],xy[1::2]))
+    return min(x for x,y in points),min(y for x,y in points),max(x for x,y in points),max(y for x,y in points)

@@ -244,6 +244,11 @@ def road_window(app):
     def choose(key):
         if app.game.resolve_event(key):
             app.dialog=None;win.destroy();app.refresh()
+            ident=getattr(app.game,'_lock_request',None)
+            if ident:
+                app.game._lock_request=None
+                import lock_ui
+                lock_ui.show(app,ident)
         else:result.config(text=app.game.messages[-1])
     for key,label in event['choices']:
         ttk.Button(win,text=label,command=lambda key=key:choose(key)).pack(fill='x',padx=22,pady=4)
@@ -252,6 +257,11 @@ def road_window(app):
 def paint_world_extras(app):
     c,g=app.canvas,app.game
     trails=set(map(tuple,g.trails))
+    for cache in g.reputation_state.get('road_caches',[]):
+        x,y=cache['pos']
+        if not cache['opened'] and app.map_revealed(x,y) and app.vx<=x<app.vx+23 and app.vy<=y<app.vy+17:
+            px,py=app.ox+(x-app.vx+.5)*app.tile,app.oy+(y-app.vy+.5)*app.tile
+            c.create_text(px,py,text='▣',fill='#efc76b',font=('Segoe UI',15,'bold'))
     for y in range(app.vy,min(32,app.vy+17)):
         for x in range(app.vx,min(48,app.vx+23)):
             if not app.map_revealed(x,y):continue

@@ -21,14 +21,13 @@ def region_color(color,x):
 def battle_camera(b,width,height,fx=None):
     w,h=b['w'],b['h']
     if b.get('dungeon'):
-        u=.85*max(24,min(46,width/18,height/13))
+        u=.9*.85*max(24,min(46,width/18,height/13))
         pos=fx.position('player',b['pos']) if hasattr(fx,'position') else b['pos']
         x,y=hexgrid.center(pos,u)
         return u,width/2-x,height*.55-y
-    u=min((width-30)/(math.sqrt(3)*(w+(h-1)/2)),(height-65)/(1.125*(h-1)+1.5))
-    extent_x=math.sqrt(3)*u*(w-1+(h-1)/2)
-    extent_y=1.125*u*(h-1)
-    return u,(width-extent_x)/2,(height-extent_y)/2+15
+    left,top,right,bottom=hexgrid.bounds(w,h)
+    u=min((width-30)/(right-left),(height-65)/(bottom-top+1.6))
+    return u,width/2-(left+right)*u/2,(height+40)/2-(top+bottom)*u/2
 
 
 def draw_battle(app):
@@ -54,7 +53,7 @@ def draw_battle(app):
         for q in hexgrid.neighbors(*pos,w,h):
             if q not in occupied and q not in costs:
                 costs[q]=costs[pos]+1;queue.append(q)
-    cells=sorted(((x,y) for y in range(h) for x in range(w)),key=lambda a:(a[1],a[0]))
+    cells=sorted(((x,y) for y in range(h) for x in range(w)),key=lambda a:(hexgrid.center(a,1)[1],hexgrid.center(a,1)[0]))
     for x,y in cells:
         px,py=center((x,y))
         if px < -2*u or px > width+2*u or py < -2*u or py > height+2*u:continue

@@ -977,7 +977,7 @@ class ExpansionGame(LegacyGame):
 
 
 from progression import equipment, module, supply, stats, item_weight, item_value
-from settlements import Game
+from cache_events import Game
 from reputation import buy_factor, sell_factor
 
 # GUI imports are delayed so the model and tests work without a display.
@@ -1402,6 +1402,9 @@ def launch(test_hook=None):
                     px,py = ox+(x+.5)*t, oy+(y+.5)*t
                     c.create_rectangle(px-t*.4,py-t*.4,px+t*.4,py+t*.4,outline=GOLD)
                     c.create_text(px+8,py-9,text=self.game.city_name(n), fill=self.game.city_color(n,TEXT), anchor='w', font=('Segoe UI', 8))
+                for cache in self.game.reputation_state.get('road_caches',[]):
+                    x,y=cache['pos']
+                    if not cache['opened'] and self.map_revealed(x,y):c.create_text(ox+(x+.5)*t,oy+(y+.5)*t,text='▣',fill='#efc76b',font=('Segoe UI',10,'bold'))
                 for q in self.game.quests:
                     if q['status'] != 'active':
                         continue
