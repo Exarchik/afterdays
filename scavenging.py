@@ -18,13 +18,13 @@ class Game(expeditions.Game):
     def salvage_yield(self,item):
         # Item level and condition only: rarity, price, modules and perks cannot inflate it.
         level=max(1,int(item.get('level',1)))
-        condition=max(0,min(100,item.get('durability',100)))/100
+        condition=p.mr.condition(item)/100
         return max(1,min(100,math.floor(min(100,level*5)*(.2+.8*condition))))
 
     def repair_with_kit(self,ident):
         item=self.find(ident)
-        if self.battle or not item or not (item['kind'] in ('weapon','armor','helmet') or item.get('quest_repair')) or item.get('durability',100)>=100 or self.count('repairkit')<1:return False
-        self.consume('repairkit');item['durability']=min(100,item.get('durability',0)+35)
+        if self.battle or not item or not (item['kind'] in ('weapon','armor','helmet') or item.get('quest_repair')) or p.mr.condition(item)>=p.mr.max_condition(item) or self.count('repairkit')<1:return False
+        self.consume('repairkit');item['durability']=min(p.mr.max_condition(item),p.mr.condition(item)+35)
         self.hp=min(self.hp,self.max_hp)
         self.log(tr('scav.repaired',name=item['name'],condition=round(item['durability'])));return True
 

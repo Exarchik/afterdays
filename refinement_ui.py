@@ -56,7 +56,9 @@ def description(game,item):
     lines.append(tr('refinement_ui.0005'))
     field(tr('refinement_ui.0006'),p.item_weight(item),p.item_weight(current) if current else None,True,tr('refinement_ui.0007'))
     if 'qty' in item:lines.append(tr('refinement_ui.0008', v0=item['qty']))
-    if 'durability' in item:field(tr('refinement_ui.0009'),item['durability'],current.get('durability',100) if current else None,unit='%')
+    if 'durability' in item:
+        field(tr('refinement_ui.0009'),p.mr.condition(item),p.mr.condition(current) if current else None,unit='%')
+        field(tr('modules.max_condition'),p.mr.max_condition(item),p.mr.max_condition(current) if current else None,unit='%')
     if kind=='weapon':
         import adventure
         field(tr('refinement_ui.0010'),item['ap'],current['ap'] if current else None,True,tr('refinement_ui.0011'))
@@ -65,8 +67,8 @@ def description(game,item):
     values=p.stats(item);baseline=p.stats(current) if current else {}
     for key in dict.fromkeys(list(values)+list(baseline)):
         if values.get(key) or (compare and baseline.get(key)):
-            field(r.STAT_NAMES.get(key,key),values.get(key,0),baseline.get(key,0),unit='%' if key in ('accuracy','crit','evasion') else '')
-            if kind=='module':lines[-1]+=' [-]' if values.get(key,0)<0 else ' [+]'
+            field(r.STAT_NAMES.get(key,key),values.get(key,0),baseline.get(key,0),unit='%' if key in ('accuracy','crit','evasion','damage_percent','defense_percent','max_condition_percent','weight_percent','ammo_save_percent','reflect_percent') else '')
+            if kind=='module':lines[-1]+=' [+]' if (values.get(key,0)<0 if key=='weight_percent' else values.get(key,0)>0) else ' [-]'
     if 'slots' in item:
         field(tr('refinement_ui.0014'),item['slots'],current['slots'] if current else None)
         lines.append(tr('refinement_ui.0015', v0=len(item['modules']), v1=item['slots']))
@@ -74,6 +76,7 @@ def description(game,item):
         if not item['modules']:lines.append(tr('refinement_ui.0016'))
     elif kind=='module':
         lines.append(tr('refinement_ui.0017')+(tr('refinement_ui.0018') if item['target']=='weapon' else tr('refinement_ui.0019')))
+        lines.append(tr('modules.compatibility'))
         if item.get('tradeoff'):lines.append(tr('refinement_ui.0020'))
     elif kind=='med':lines.append(tr('refinement_ui.0021', v0=__import__('math').ceil(game.max_hp * 0.5)))
     elif kind=='rad':lines.append(tr('refinement_ui.0022'))
@@ -198,7 +201,10 @@ class Technician(tk.Frame):
         self.grid=v.ItemGrid(repair,self.describe,height=150,columns=7);self.grid.pack(fill='both',expand=True,padx=10,pady=6)
         self.detail=Detail(repair,height=10);self.detail.pack(fill='x',padx=10)
         row=tk.Frame(repair,bg=PANEL);row.pack(fill='x',padx=10,pady=10)
-        for target in (25,50,100):ttk.Button(row,text=tr('refinement_ui.0047', v0=target),command=lambda t=target:self.repair(t)).pack(side='left',expand=True,fill='x',padx=3)
+        self.repair_buttons={}
+        for target in (25,50,100):
+            button=ttk.Button(row,text=tr('refinement_ui.0047', v0=target),command=lambda t=target:self.repair(t))
+            button.pack(side='left',expand=True,fill='x',padx=3);self.repair_buttons[target]=button
         self.repair_status=tk.Label(repair,bg=PANEL,fg=GOLD);self.repair_status.pack(pady=5)
         self.amount.trace_add('write',lambda *a:self.chances());self.refresh()
     def chances(self):
@@ -220,7 +226,10 @@ class Technician(tk.Frame):
         self.chances();self.describe(self.grid.selection)
     def describe(self,i):
         item=self.app.game.find(i)
-        self.detail.config(text=description(self.app.game,item)+ (tr('refinement_ui.0054')+ ' · '.join(tr('refinement_ui.0055', v0=t, v1=self.app.game.repair_cost(item, t)) for t in (25,50,100)) if item else ''))
+        for target,button in self.repair_buttons.items():
+            actual=min(target,p.mr.max_condition(item)) if item else target
+            button.config(text=tr('refinement_ui.0047',v0=actual),state='normal' if item and self.app.game.repair_cost(item,target)>0 else 'disabled')
+        self.detail.config(text=description(self.app.game,item)+ (tr('refinement_ui.0054')+ ' · '.join(tr('refinement_ui.0055', v0=min(t,p.mr.max_condition(item)), v1=self.app.game.repair_cost(item, t)) for t in (25,50,100)) if item else ''))
     def repair(self,t):
         ok=self.app.game.repair(self.grid.selection,t)
         self.repair_status.config(text=self.app.game.messages[-1] if ok else tr('refinement_ui.0056'));self.refresh();self.app.refresh()

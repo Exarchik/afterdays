@@ -47,8 +47,9 @@ def module(tier=0, rng=None, index=None):
     ident=content.module_id(rng.randrange(len(MODULES)) if index is None else index)
     data=content.MODULE_DATA[ident]
     name,target,stat,base=content.name(ident),data['target'],data['stat'],data['base']
+    from module_rules import module_stats, VERSION
     return dict(id=uid(), type_id=ident, name=name, kind='module', rarity=tier, weight=.3,
-                value=30 * (tier + 1) ** 2, target=target, stats={stat: base * (tier + 1)})
+                value=30 * (tier + 1) ** 2, target=target, stats=module_stats(ident,tier,1),module_balance_version=VERSION)
 
 
 def supply(kind):
@@ -56,15 +57,13 @@ def supply(kind):
 
 
 def stats(item):
-    result = dict(item.get('stats', {}))
-    for mod in item.get('modules', []):
-        for key, value in mod['stats'].items():
-            result[key] = result.get(key, 0) + value
-    return result
+    from module_rules import gear_stats
+    return gear_stats(item)
 
 
 def item_weight(item):
-    return item['weight'] + sum(item_weight(m) for m in item.get('modules', []))
+    from module_rules import item_weight as effective_weight
+    return effective_weight(item)
 
 
 def item_value(item):
@@ -72,8 +71,8 @@ def item_value(item):
 
 
 def compatible(item, mod):
-    return mod['kind'] == 'module' and (mod['target'] == item['kind'] or
-           mod['target'] == 'protection' and item['kind'] in ('armor', 'helmet'))
+    from module_rules import compatible as check
+    return check(item, mod)
 
 
 def neighbors(x, y, w, h):
@@ -571,6 +570,8 @@ class LegacyGame:
 
 
 # Expanded content. All sprites are drawn locally with Canvas in visuals.py.
+STAT_NAMES.update({key:tr('modules.'+key) for key in ('weight_percent','ammo_save_percent','reflect_percent','damage_electric','damage_piercing')})
+STAT_NAMES.update(damage_percent=tr('modules.damage_percent'),defense_percent=tr('modules.defense_percent'),max_condition_percent=tr('modules.max_condition_percent'))
 STAT_NAMES.update(attack=tr('afterdays.0073'), pierce=tr('afterdays.0074'), crit=tr('afterdays.0075'), vitality=tr('afterdays.0076'),
                   capacity=tr('afterdays.0077'), evasion=tr('afterdays.0078'), regen=tr('afterdays.0079'))
 CITY_NAMES.extend([tr('afterdays.0080'), tr('afterdays.0081'), tr('afterdays.0082'), tr('afterdays.0083'),

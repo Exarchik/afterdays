@@ -268,7 +268,8 @@ def condition_color(value):
 
 def condition_bar(canvas,item,x,y,width,height=4):
     if not item or 'durability' not in item:return
-    value=max(0,min(100,item['durability']));color=condition_color(value)
+    from module_rules import condition
+    value=condition(item);color=condition_color(value)
     canvas.create_rectangle(x,y,x+width,y+height,fill='#18201b',outline=color,width=1)
     if value>0:canvas.create_rectangle(x,y,x+width*value/100,y+height,fill=color,outline='')
 
@@ -576,9 +577,17 @@ class ModificationPanel(tk.Frame):
         if not mod:
             mod = next((m for m in self.item['modules'] if m['id'] == item_id), None)
         if mod:
-            old = rules.stats(self.item)
-            self.preview.config(text=f"{mod['name']} · {rules.RARITIES[mod['rarity']][0]}\n"+
-                                '   '.join(f'{rules.STAT_NAMES[k]}: {old.get(k,0)} → {old.get(k,0)+sign*v}' for k,v in mod['stats'].items()))
+            import copy,progression as p
+            candidate=copy.deepcopy(self.item)
+            if sign>0:
+                candidate['modules'].append(copy.deepcopy(mod))
+            else:
+                candidate['modules']=[m for m in candidate['modules'] if m['id']!=mod['id']]
+            old,new=p.stats(self.item),p.stats(candidate)
+            keys=[k for k in dict.fromkeys([*old,*new]) if old.get(k,0)!=new.get(k,0)]
+            rows=[f"{rules.STAT_NAMES.get(k,k)}: {old.get(k,0):g} → {new.get(k,0):g}" for k in keys]
+            rows.append(tr('modules.condition_preview',before=p.mr.max_condition(self.item),after=p.mr.max_condition(candidate)))
+            self.preview.config(text=mod['name']+'\n'+' · '.join(rows))
 
     def inspect_top(self,event):
         n=next((n for n,(x,y,d,f) in enumerate(self.slot_rects) if x<=event.x<=d and y<=event.y<=f),None)

@@ -4,7 +4,16 @@
     "target": "weapon",
     "stat": "damage",
     "base": 3,
-    "sprite_id": "module_amplifier"
+    "sprite_id": "module_amplifier",
+    "rarity_stats": {
+      "damage": [
+        2,
+        3,
+        5,
+        7,
+        9
+      ]
+    }
   },
   "module_optics": {
     "legacy_index": 1,
@@ -18,7 +27,16 @@
     "target": "weapon",
     "stat": "accuracy",
     "base": 4,
-    "sprite_id": "module_stabilizer"
+    "sprite_id": "module_stabilizer",
+    "rarity_stats": {
+      "accuracy": [
+        3,
+        6,
+        8,
+        10,
+        12
+      ]
+    }
   },
   "module_armor_plate": {
     "legacy_index": 3,
@@ -32,70 +50,173 @@
     "target": "weapon",
     "stat": "damage",
     "base": 4,
-    "sprite_id": "module_burst_core"
+    "sprite_id": "module_burst_core",
+    "rarity_stats": {
+      "damage": [
+        3,
+        6,
+        9,
+        12,
+        15
+      ]
+    },
+    "fixed_penalties": {
+      "max_condition_percent": -30
+    }
   },
   "module_rangefinder": {
     "legacy_index": 5,
     "target": "weapon",
     "stat": "accuracy",
     "base": 5,
-    "sprite_id": "module_rangefinder"
+    "sprite_id": "module_rangefinder",
+    "rarity_stats": {
+      "accuracy": [
+        4,
+        8,
+        12,
+        16,
+        20
+      ]
+    },
+    "fixed_penalties": {
+      "damage_percent": -10
+    }
   },
   "module_accelerator": {
     "legacy_index": 6,
     "target": "weapon",
     "stat": "pierce",
     "base": 2,
-    "sprite_id": "module_accelerator"
+    "sprite_id": "module_accelerator",
+    "rarity_stats": {
+      "attack": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    }
   },
   "module_critical_processor": {
     "legacy_index": 7,
     "target": "weapon",
     "stat": "crit",
     "base": 5,
-    "sprite_id": "module_critical_processor"
+    "sprite_id": "module_critical_processor",
+    "rarity_stats": {
+      "crit": [
+        2,
+        4,
+        7,
+        10,
+        12
+      ]
+    }
   },
   "module_focusing_lens": {
     "legacy_index": 8,
     "target": "weapon",
     "stat": "range",
     "base": 1,
-    "sprite_id": "module_focusing_lens"
+    "sprite_id": "module_focusing_lens",
+    "rarity_stats": {
+      "range": [
+        1,
+        1,
+        1,
+        2,
+        2
+      ],
+      "attack": [
+        1,
+        1,
+        2,
+        2,
+        3
+      ]
+    }
   },
   "module_magnetic_coil": {
     "legacy_index": 9,
     "target": "weapon",
     "stat": "damage",
     "base": 5,
-    "sprite_id": "module_magnetic_coil"
+    "sprite_id": "module_magnetic_coil",
+    "rarity_stats": {
+      "damage_percent": [
+        5,
+        7,
+        9,
+        11,
+        15
+      ]
+    }
   },
   "module_ballistic_computer": {
     "legacy_index": 10,
     "target": "weapon",
     "stat": "accuracy",
     "base": 6,
-    "sprite_id": "module_ballistic_computer"
+    "sprite_id": "module_ballistic_computer",
+    "rarity_stats": {
+      "accuracy": [
+        4,
+        8,
+        12,
+        16,
+        20
+      ]
+    },
+    "fixed_penalties": {
+      "max_condition_percent": -30
+    }
   },
   "module_tungsten_channel": {
     "legacy_index": 11,
     "target": "weapon",
     "stat": "pierce",
     "base": 3,
-    "sprite_id": "module_tungsten_channel"
+    "sprite_id": "module_tungsten_channel",
+    "rarity_stats": {
+      "attack": [
+        2,
+        3,
+        4,
+        5,
+        7
+      ]
+    },
+    "fixed_penalties": {
+      "range": -2
+    }
   },
   "module_ceramic_inserts": {
     "legacy_index": 12,
     "target": "protection",
     "stat": "defense",
     "base": 2,
-    "sprite_id": "module_ceramic_inserts"
+    "sprite_id": "module_ceramic_inserts",
+    "fixed_penalties": {
+      "max_condition_percent": -20
+    }
   },
   "module_medical_lining": {
     "legacy_index": 13,
     "target": "protection",
     "stat": "vitality",
     "base": 8,
-    "sprite_id": "module_medical_lining"
+    "sprite_id": "module_medical_lining",
+    "rarity_stats": {
+      "vitality": [
+        3,
+        5,
+        8,
+        10,
+        15
+      ]
+    }
   },
   "module_servo": {
     "legacy_index": 14,
@@ -109,7 +230,16 @@
     "target": "protection",
     "stat": "evasion",
     "base": 3,
-    "sprite_id": "module_camouflage"
+    "sprite_id": "module_camouflage",
+    "rarity_stats": {
+      "evasion": [
+        2,
+        4,
+        6,
+        8,
+        10
+      ]
+    }
   },
   "module_regenerator": {
     "legacy_index": 16,
@@ -123,20 +253,206 @@
     "target": "protection",
     "stat": "vitality",
     "base": 10,
-    "sprite_id": "module_emergency_frame"
+    "sprite_id": "module_emergency_frame",
+    "rarity_stats": {
+      "vitality": [
+        5,
+        10,
+        15,
+        20,
+        25
+      ]
+    },
+    "fixed_penalties": {
+      "defense_percent": -20
+    }
   },
   "module_load_system": {
     "legacy_index": 18,
     "target": "protection",
     "stat": "capacity",
     "base": 3,
-    "sprite_id": "module_load_system"
+    "sprite_id": "module_load_system",
+    "fixed_penalties": {
+      "evasion": -5
+    }
   },
   "module_reactive_plates": {
     "legacy_index": 19,
     "target": "protection",
     "stat": "defense",
     "base": 3,
-    "sprite_id": "module_reactive_plates"
+    "sprite_id": "module_reactive_plates",
+    "fixed_penalties": {
+      "max_condition_percent": -40
+    }
+  },
+  "module_carbon_grip": {
+    "legacy_index": 20,
+    "target": "weapon",
+    "stat": "weight_percent",
+    "base": -8,
+    "sprite_id": "module_carbon_grip",
+    "rarity_stats": {
+      "weight_percent": [
+        -8,
+        -12,
+        -15,
+        -20,
+        -25
+      ]
+    }
+  },
+  "module_tactical_grip": {
+    "legacy_index": 21,
+    "target": "weapon",
+    "stat": "damage",
+    "base": 2,
+    "sprite_id": "module_tactical_grip",
+    "rarity_stats": {
+      "damage": [
+        2,
+        3,
+        5,
+        7,
+        9
+      ],
+      "accuracy": [
+        2,
+        4,
+        6,
+        8,
+        10
+      ]
+    },
+    "fixed_penalties": {
+      "weight_percent": 15
+    }
+  },
+  "module_electronic_compensator": {
+    "legacy_index": 22,
+    "target": "weapon",
+    "stat": "ammo_save_percent",
+    "base": 3,
+    "sprite_id": "module_electronic_compensator",
+    "rarity_stats": {
+      "ammo_save_percent": [
+        3,
+        5,
+        7,
+        8,
+        10
+      ]
+    }
+  },
+  "module_phase_approximator": {
+    "legacy_index": 23,
+    "target": "weapon",
+    "stat": "damage_electric",
+    "base": 2,
+    "sprite_id": "module_phase_approximator",
+    "rarity_stats": {
+      "damage_electric": [
+        2,
+        3,
+        5,
+        7,
+        9
+      ]
+    }
+  },
+  "module_gauss_accelerator": {
+    "legacy_index": 24,
+    "target": "weapon",
+    "stat": "damage_piercing",
+    "base": 2,
+    "sprite_id": "module_gauss_accelerator",
+    "rarity_stats": {
+      "damage_piercing": [
+        2,
+        3,
+        5,
+        7,
+        9
+      ]
+    }
+  },
+  "module_polyfiber": {
+    "legacy_index": 25,
+    "target": "protection",
+    "stat": "weight_percent",
+    "base": -8,
+    "sprite_id": "module_polyfiber",
+    "rarity_stats": {
+      "weight_percent": [
+        -8,
+        -12,
+        -15,
+        -20,
+        -25
+      ]
+    }
+  },
+  "module_quantum_mirror": {
+    "legacy_index": 26,
+    "target": "protection",
+    "stat": "reflect_percent",
+    "base": 2,
+    "sprite_id": "module_quantum_mirror",
+    "rarity_stats": {
+      "reflect_percent": [
+        2,
+        4,
+        6,
+        8,
+        10
+      ]
+    }
+  },
+  "module_synthetic_fiber": {
+    "legacy_index": 27,
+    "target": "protection",
+    "stat": "weight_percent",
+    "base": -5,
+    "sprite_id": "module_synthetic_fiber",
+    "rarity_stats": {
+      "weight_percent": [
+        -5,
+        -7,
+        -9,
+        -12,
+        -15
+      ],
+      "evasion": [
+        1,
+        2,
+        4,
+        6,
+        8
+      ]
+    }
+  },
+  "module_lead_fibers": {
+    "legacy_index": 28,
+    "target": "protection",
+    "stat": "defense",
+    "base": 3,
+    "sprite_id": "module_lead_fibers",
+    "rarity_stats": {
+      "defense": [
+        3,
+        6,
+        9,
+        12,
+        15
+      ],
+      "weight_percent": [
+        30,
+        25,
+        20,
+        15,
+        10
+      ]
+    }
   }
 }

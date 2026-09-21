@@ -24,7 +24,7 @@ class FrontierTests(unittest.TestCase):
   b['pos']=b['exit'][:];self.assertTrue(g.search());self.assertIsNone(g.battle);self.assertTrue(g.quest_ready(q))
   money=g.money;g.victory();self.assertEqual(g.money,money)
  def test_market_level_and_purchase(self):
-  g=r.Game(13);g.x,g.y=g.cities[9];level=g.region_level;items=g.stock(0);self.assertTrue(items)
+  g=r.Game(13);g.x,g.y=g.cities[9];g.record_at(g.cities[9])['value']=100;level=g.region_level;items=g.stock(0);self.assertTrue(items)
   item=next(i for i in items if i['kind']=='weapon');self.assertEqual(item['level'],level);self.assertGreater(level,g.level)
   ids=[i['id'] for i in items];g.xp=p.xp_for_level(2);self.assertEqual(ids,[i['id'] for i in g.stock(0)])
   g.money=10**8;self.assertTrue(g.buy(item['id'],0));self.assertFalse(g.equip(item['id'],'weapon1'))

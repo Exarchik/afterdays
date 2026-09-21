@@ -49,7 +49,7 @@ def resolve(game,choice):
             before=game.hp;game.hp=min(game.max_hp,game.hp+n);game.emit(f'+{game.hp-before} HP')
         elif kind=='reveal':game.reveal(game.x,game.y,n);game.emit(tr('road_additions.0066'))
         elif kind.startswith('repair_'):
-            item=game.weapon if kind=='repair_weapon' else game.equipped['armor'];item['durability']=min(100,item['durability']+n);game.emit(tr('road_additions.0067'))
+            item=game.weapon if kind=='repair_weapon' else game.equipped['armor'];item['durability']=min(__import__('module_rules').max_condition(item),__import__('module_rules').condition(item)+n);game.emit(tr('road_additions.0067'))
         else:
             item=p.parts(n) if kind=='parts' else p.fragments(n) if kind=='fragments' else p.ammunition('energy',n) if kind=='energy' else p.supply(kind,n)
             p.add_to(game.loot,item);game.emit(tr('road_additions.0068'))

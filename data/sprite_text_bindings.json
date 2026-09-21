@@ -10,5 +10,15 @@
   "sprites.0013": "npc:Астроном",
   "sprites.0014": "npc:Торговець Рейка",
   "sprites.0015": "npc:Радистка Ніка",
-  "sprites.0016": "npc:Астроном"
+  "sprites.0016": "npc:Астроном",
+  "adventure.0054": "npc_diver",
+  "adventure.0058": "npc_storekeeper",
+  "adventure.0064": "npc_guide",
+  "adventure.0066": "npc_energy_engineer",
+  "adventure.0070": "npc_master",
+  "update024.npc_1": "npc_storekeeper",
+  "update024.npc_3": "npc_locksmith",
+  "update024.npc_5": "npc_money_changer",
+  "update024.npc_6": "npc_guard",
+  "update024.npc_7": "npc_quartermaster"
 }

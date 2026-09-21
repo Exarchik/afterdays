@@ -12,6 +12,13 @@ for name,terrain in CACHE_TYPES.items():
     adventure.ROAD_EVENTS.append((key,*adventure.EXTRA_EVENTS[key][1:]))
 
 class Game(settlements.Game):
+    @classmethod
+    def load(cls,path):
+        game=super().load(path)
+        count=p.mr.migrate_game(game)
+        if count:game.log(tr('modules.detached',count=count))
+        return game
+
     def start_battle(self):
         super().start_battle()
         from organic_arenas import arena

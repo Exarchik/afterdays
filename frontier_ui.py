@@ -7,28 +7,34 @@ import adventure as a
 from visuals import PANEL, TEXT, GOLD
 
 def player_text(g):
-    w=g.weapon;s=p.stats(w) if w else {};base=s.get('damage',0)+2*(g.level-1) if w else 0
+    w=g.weapon;s=p.stats(w) if w else {};base=p.mr.shot_damage(w,g.level) if w else 0
     lines=[tr('frontier_ui.0001', v0=g.level, v1=g.money)+tr('scav.xp_remaining',level=g.level+1,xp=p.xp_for_level(g.level+1)-g.xp),tr('frontier_ui.0002', v0=g.hp, v1=g.max_hp),
            tr('frontier_ui.0003', v0=g.battle['ap'] if g.battle else g.max_ap, v1=g.max_ap),
-           tr('frontier_ui.0004', v0=g.defense, v1=min(45, g.protection_stat('evasion'))),
+           tr('frontier_ui.0004', v0=g.defense, v1=max(0,min(45, g.protection_stat('evasion')))),
            tr('frontier_ui.0005', v0=g.protection_stat('regen')),
            tr('frontier_ui.0006', v0=g.weight, v1=g.capacity),tr('frontier_ui.0007', v0=g.rad_turns),
            '', tr('frontier_ui.0008'),w['name'] if w else tr('frontier_ui.0009')]
     if w:
-        lines += [tr('frontier_ui.0010', v0=max(1, base - 2), v1=base + 2),
+        lines += [tr('frontier_ui.0010', v0=max(1,p.mr.shot_damage(w,g.level,-2)), v1=p.mr.shot_damage(w,g.level,2)),
                   tr('frontier_ui.0011', v0=a.DAMAGE_TYPES[a.damage_type(w)][0]),
                   tr('frontier_ui.0012', v0=min(65, 5 + s.get('crit', 0))),
                   tr('frontier_ui.0013', v0=s.get('accuracy', 0), v1=4 * g.rank('marksman')),
                   tr('frontier_ui.0014'),
                   tr('frontier_ui.0015', v0=s.get('range', 0), v1=s.get('attack', 0)),
-                  tr('frontier_ui.0016', v0=w['ap'], v1=w.get('durability', 100)),
+                  tr('frontier_ui.0016', v0=w['ap'], v1=p.mr.condition(w)),
                   f'{p.AMMO[w.get("ammo_type","pistol")][0]}: {g.count("ammo",w.get("ammo_type","pistol"))}']
+    if w:
+        for kind,amount in p.mr.shot_components(w,g.level,0,a.damage_type(w)).items():
+            lines.append(tr('modules.damage_component',kind=a.DAMAGE_TYPES[kind][0],amount=amount))
+        lines.append(tr('modules.ammo_chance',chance=p.mr.chance(s.get('ammo_save_percent',0))))
+    lines.append(tr('modules.reflect_chance',chance=p.mr.chance(g.protection_stat('reflect_percent'))))
     lines+=['',tr('frontier_ui.0017'),tr('frontier_ui.0018', v0=g.pending_perks)]
     for key,rank in g.perks.items():
         name,desc=p.PERKS[key];lines += [tr('frontier_ui.0019', v0=name, v1=rank),desc]
     if not g.perks:lines+=[tr('frontier_ui.0020')]
     labels={'damage':tr('frontier_ui.0021'),'range':tr('frontier_ui.0022'),'accuracy':tr('frontier_ui.0023'),'crit':tr('frontier_ui.0024'),'attack':tr('frontier_ui.0025'),
             'defense':tr('frontier_ui.0026'),'evasion':tr('frontier_ui.0027'),'vitality':tr('frontier_ui.0028'),'capacity':tr('frontier_ui.0029'),'regen':tr('frontier_ui.0030')}
+    labels.update({key:tr('modules.'+key) for key in p.mr.PERCENT_STATS|{'damage_electric','damage_piercing'}})
     lines+=['',tr('frontier_ui.0031')]
     for item in g.equipped.values():
         if not item:continue

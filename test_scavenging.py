@@ -46,7 +46,7 @@ class ScavengingTests(unittest.TestCase):
    self.assertEqual(g.stock(3),items)
  def test_salvage_price_rarity_modules_do_not_change_yield(self):
   g=r.Game(4);item=p.equipment('weapon_ash_pistol',level=10);self.assertEqual(g.salvage_yield(item),50)
-  other=copy.deepcopy(item);other.update(value=999999,rarity=4,modules=[p.module(4)])
+  other=copy.deepcopy(item);other.update(value=999999,rarity=4,modules=[p.module(4,index=0)])
   self.assertEqual(g.salvage_yield(item),g.salvage_yield(other))
   item['durability']=50;self.assertEqual(g.salvage_yield(item),30)
   item['durability']=0;self.assertEqual(g.salvage_yield(item),10)

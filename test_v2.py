@@ -15,7 +15,7 @@ class ExpansionTests(unittest.TestCase):
         return g.quests[-1]
 
     def test_content_and_guaranteed_city_supplies(self):
-        self.assertEqual((len(GEAR), len(MODULES), len(MONSTERS)), (30, 20, 12))
+        self.assertEqual((len(GEAR), len(MODULES), len(MONSTERS)), (30, 29, 12))
         g = Game(0)
         self.assertEqual(len(g.cities), 12)
         profiles = set()
@@ -133,7 +133,7 @@ class ExpansionTests(unittest.TestCase):
 
     def test_capacity_module_removal_and_replacement_rollback(self):
         g=Game(7)
-        armor=g.equipped['armor']
+        armor=g.equipped['armor'];armor['rarity']=4
         capacity=module(4,index=18)
         g.bag.append(capacity)
         self.assertTrue(g.install(armor['id'],capacity['id']))
@@ -153,7 +153,7 @@ class ExpansionTests(unittest.TestCase):
         self.assertIsNotNone(g.equipped['armor'])
 
     def test_module_drop_replaces_without_duplication(self):
-        g=Game(8)
+        g=Game(8);g.weapon['rarity']=3
         a=module(1,index=0)
         b=module(3,index=6)
         g.bag.extend([a,b])

@@ -23,10 +23,15 @@ def item_key(item):
     return item['name'] if item.get('name') in MANIFEST else kind
 
 NPC_ALIASES={'hunter':'traveler',tr('sprites.0001'):tr('sprites.0011'),tr('sprites.0002'):tr('sprites.0012'),tr('sprites.0003'):tr('sprites.0013'),tr('sprites.0004'):tr('sprites.0014'),tr('sprites.0005'):'food',tr('sprites.0006'):tr('sprites.0015'),tr('sprites.0007'):'traveler',tr('sprites.0008'):'tech',tr('sprites.0009'):tr('sprites.0016'),tr('sprites.0010'):'smith'}
+def npc_key(name):
+    # Prefer a dedicated portrait before the legacy shared-portrait aliases.
+    direct=next((asset for token,asset in NPC_TEXT_BINDINGS.items() if tr(token)==name),None)
+    if direct:return direct
+    return 'npc:'+NPC_ALIASES.get(name,name)
+
+
 def photo(widget,key,size=48):
-    if key and key.startswith('npc:'):key='npc:'+NPC_ALIASES.get(key[4:],key[4:])
-    if key and key.startswith('npc:'):
-        key=next((asset for token,asset in NPC_TEXT_BINDINGS.items() if 'npc:'+tr(token)==key),key)
+    if key and key.startswith('npc:'):key=npc_key(key[4:])
     if key not in MANIFEST or not hasattr(widget,'tk'):return None
     root=widget._root()
     if not hasattr(root,'_sprite_cache'):root._sprite_cache={};root._sprite_sheets={}
@@ -83,13 +88,15 @@ def inventory_photo(widget,item,width):
     width=max(w for w in (48,56,64,80,96,128) if w<=width)
     root=widget._root()
     if not hasattr(root,'_inventory_images'):root._inventory_images={};root._inventory_sheets={}
-    cache=(index,width)
+    sheet=entry.get('inventory_sheet','inventory')
+    cache=(sheet,index,width)
     if cache not in root._inventory_images:
         try:
-            if width not in root._inventory_sheets:root._inventory_sheets[width]=tk.PhotoImage(master=root,file=str(ROOT/f'inventory_{width}.png'))
+            sheet_key=(sheet,width)
+            if sheet_key not in root._inventory_sheets:root._inventory_sheets[sheet_key]=tk.PhotoImage(master=root,file=str(ROOT/f'{sheet}_{width}.png'))
             image=tk.PhotoImage(master=root,width=width,height=72)
             x,y=index%16*width,index//16*72
-            image.tk.call(str(image),'copy',str(root._inventory_sheets[width]),'-from',x,y,x+width,y+72,'-to',0,0)
+            image.tk.call(str(image),'copy',str(root._inventory_sheets[sheet_key]),'-from',x,y,x+width,y+72,'-to',0,0)
             root._inventory_images[cache]=image
         except (OSError,tk.TclError):return None
     return root._inventory_images[cache]

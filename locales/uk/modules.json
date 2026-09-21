@@ -1,0 +1,20 @@
+{
+  "modules.compatibility": "Модуль: рівень і рідкість не вищі за рівень і рідкість спорядження.",
+  "modules.detached": "Несумісні модулі знято без втрати предметів: {count}.",
+  "modules.damage_percent": "Сумарна шкода",
+  "modules.defense_percent": "Загальний захист гравця",
+  "modules.max_condition_percent": "Максимальна міцність",
+  "modules.max_condition": "Максимальний стан",
+  "modules.condition_preview": "Макс. стан: {before:g}% → {after:g}%",
+  "modules.weight_percent": "Вага спорядження",
+  "modules.ammo_save_percent": "Збереження набою",
+  "modules.reflect_percent": "Віддзеркалення атаки",
+  "modules.damage_electric": "Електрична шкода",
+  "modules.damage_piercing": "Пробійна шкода",
+  "modules.ammo_saved": "Набій збережено",
+  "modules.reflected": "Віддзеркалено!",
+  "modules.reflected_log": "{name}: віддзеркалення −{damage} HP.",
+  "modules.damage_component": "{kind}: {amount} шкоди до захисту цілі",
+  "modules.ammo_chance": "Шанс зберегти набій: {chance:g}%",
+  "modules.reflect_chance": "Шанс віддзеркалити атаку: {chance:g}%"
+}

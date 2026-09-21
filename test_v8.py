@@ -24,7 +24,7 @@ class RevisionTests(unittest.TestCase):
  def test_tradeoff_effects(self):
   g=r.Game(3)
   with patch.object(g.rng,'random',return_value=0):mod=p.module(0,g.rng,index=0)
-  self.assertGreater(mod['stats']['damage'],3);self.assertLess(mod['stats']['accuracy'],0)
+  self.assertGreater(mod['stats']['damage'],2);self.assertLess(mod['stats']['accuracy'],0)
   before=p.stats(g.weapon);g.weapon['modules']=[mod];after=p.stats(g.weapon)
   self.assertGreater(after['damage'],before['damage']);self.assertLess(after['accuracy'],before['accuracy'])
  def test_simple_events_once(self):

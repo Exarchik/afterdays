@@ -28,7 +28,7 @@ class Update025Tests(unittest.TestCase):
      points=hexgrid.polygon(*hexgrid.center((x,y),u,ox,oy),u)
      self.assertTrue(all(0<=xx<=800 for xx in points[::2]));self.assertTrue(all(0<=yy<=600 for yy in points[1::2]))
    b['dungeon']=True;u,ox,oy=battle_camera(b,800,600)
-   self.assertAlmostEqual(u,.9*.85*max(24,min(46,800/18,600/13)))
+   self.assertAlmostEqual(u,.7071*.9*.85*max(24,min(46,800/18,600/13)))
    x,y=hexgrid.center(b['pos'],u,ox,oy);self.assertAlmostEqual(x,400);self.assertAlmostEqual(y,330)
  def make_cache(self,theme):
   g=r.Game(1);g.x,g.y=20,18;g.world[18][20]=CACHE_TYPES[theme]

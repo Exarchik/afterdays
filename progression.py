@@ -4,6 +4,7 @@ from i18n import t as tr
 import content
 import copy
 import balance
+import module_rules as mr
 import json
 import math
 import os
@@ -61,13 +62,9 @@ def module(tier=0,rng=None,index=None,level=1):
     item=_base_module(tier,rng,index)
     item['level']=max(1,int(level))
     item['value']=round(30*(tier+1)**2*item['level']**1.3)
-    item['stats']={k:max(1,round(v*(1+.06*(item['level']-1)))) for k,v in item['stats'].items()}
-    if 'pierce' in item['stats']:
-        item['stats'].pop('pierce');item['stats']['attack']=tier+1
-    if rng is not None and rng.random()<.20:
-        key=next(iter(item['stats']));item['stats'][key]=max(1,round(item['stats'][key]*1.7))
-        drawback={'damage':('accuracy',-6),'range':('damage',-2),'accuracy':('range',-1),'attack':('accuracy',-5),'crit':('accuracy',-5),'defense':('capacity',-2),'vitality':('evasion',-3),'capacity':('defense',-1),'evasion':('vitality',-4),'regen':('capacity',-2)}[key]
-        item['stats'][drawback[0]]=drawback[1]*(1+tier//2);item['tradeoff']=True
+    item['tradeoff']=bool(rng is not None and rng.random()<.20)
+    item['stats']=mr.module_stats(item['type_id'],tier,item['level'],item['tradeoff'])
+    item['module_balance_version']=mr.VERSION
     return item
 
 
@@ -87,17 +84,11 @@ def parts(qty):return supply('parts',qty)
 
 
 def stats(item):
-    result=_base_stats(item)
-    if 'durability' in item:
-        condition=max(0,min(100,item['durability']))/100
-        for key in ('damage','defense'):
-            if result.get(key):
-                result[key]=max(1,round(result[key]*(.5+.5*condition))) if condition else 0
-    return result
+    return mr.gear_stats(item)
 
 
 def item_weight(item):
-    return item['weight']*item.get('qty',1)+sum(item_weight(m) for m in item.get('modules',[]))
+    return mr.item_weight(item)
 
 
 def item_value(item):
@@ -186,7 +177,8 @@ class Game(r.ExpansionGame):
 
     @property
     def defense(self):
-        return max(0,sum(stats(i).get('defense',0) for i in self.equipped.values() if i)+self.rank('armorer'))
+        base=sum(stats(i).get('defense',0) for i in self.equipped.values() if i)+self.rank('armorer')
+        return max(0,round(base*max(0,1+self.protection_stat('defense_percent')/100)))
 
     def protection_stat(self,key):
         return sum(stats(i).get(key,0) for i in self.equipped.values()
@@ -231,17 +223,29 @@ class Game(r.ExpansionGame):
             return False
         return super().equip(item_id,slot)
 
+    def _module_allowed(self,item_id,mod_id):
+        item,mod=self.find(item_id),self.find(mod_id)
+        if not mr.compatible(item,mod):
+            self.log(tr('modules.compatibility'));return False
+        if mod.get('level',1)>self.level:
+            self.log(tr('progression.0029'));return False
+        return True
+
     def install(self,item_id,mod_id):
-        mod=self.find(mod_id)
-        if mod and mod.get('level',1)>self.level:
-            return False
-        return super().install(item_id,mod_id)
+        if not self._module_allowed(item_id,mod_id):return False
+        def change():
+            ok=super(Game,self).install(item_id,mod_id)
+            if ok:mr.clamp_condition(self.find(item_id))
+            return ok
+        return self._change_gear(change)
 
     def put_module(self,item_id,mod_id,slot_index):
-        mod=self.find(mod_id)
-        if mod and mod.get('level',1)>self.level:
-            return False
-        return super().put_module(item_id,mod_id,slot_index)
+        if not self._module_allowed(item_id,mod_id):return False
+        def change():
+            ok=super(Game,self).put_module(item_id,mod_id,slot_index)
+            if ok:mr.clamp_condition(self.find(item_id))
+            return ok
+        return self._change_gear(change)
 
     def use(self,kind):
         if kind not in ('med','food') or not self.count(kind):
@@ -333,11 +337,11 @@ class Game(r.ExpansionGame):
         if buying:
             amount=item.get('sealed_price',round(85*self.level**1.3)) if merchant==2 and item['kind']!='repairkit' else base*(.5 if merchant==3 else 1.15)
             return max(1,round(amount*(1-min(.30,.05*self.rank('trader')))))
-        condition=.25+.75*item.get('durability',100)/100
+        condition=.25+.75*mr.condition(item)/100
         return max(1,int(base*condition*(.22 if merchant==2 else .30 if merchant==3 else .50)))
 
     def buys_kind(self,item,merchant):
-        if item['kind']=='quest' or item.get('durability',100)<25:
+        if item['kind']=='quest' or mr.condition(item)<25:
             return False
         if item['kind'] in ('parts','fragments'):
             return True
@@ -381,7 +385,7 @@ class Game(r.ExpansionGame):
         return True
 
     def salvage_yield(self,item):
-        return max(1,int(item['value']*.12*(.25+.75*item.get('durability',100)/100)/2))
+        return max(1,int(item['value']*.12*(.25+.75*mr.condition(item)/100)/2))
 
     def dismantle(self,item_id):
         if self.battle: return False
@@ -423,8 +427,10 @@ class Game(r.ExpansionGame):
         return True
 
     def repair_cost(self,item,target=100):
-        if target not in (25,50,100) or 'durability' not in item or item['durability']>=target: return 0
-        return max(1,math.ceil(item['value']*.22*((target-item['durability'])/100)*(1-min(.3,.05*self.rank('trader')))))
+        if target not in (25,50,100) or 'durability' not in item: return 0
+        target=min(target,mr.max_condition(item))
+        if mr.condition(item)>=target:return 0
+        return max(1,math.ceil(item['value']*.22*((target-mr.condition(item))/100)*(1-min(.3,.05*self.rank('trader')))))
 
     def repair(self,item_id,target=100):
         if self.battle or self.city not in self.technicians:
@@ -440,13 +446,13 @@ class Game(r.ExpansionGame):
             self.log(tr('progression.0048', v0=cost))
             return False
         self.money-=cost
-        item['durability']=float(target)
+        item['durability']=float(min(target,mr.max_condition(item)))
         self.log(tr('progression.0049', v0=item['name'], v1=cost))
         return True
 
     def wear(self,item,amount):
         if item and 'durability' in item:
-            item['durability']=round(max(0,item['durability']-amount*(1-min(.7,.15*self.rank('engineer')))),2)
+            item['durability']=round(max(0,mr.condition(item)-amount*(1-min(.7,.15*self.rank('engineer')))),2)
             self.hp=min(self.hp,self.max_hp)
 
     def shot_info(self,enemy):

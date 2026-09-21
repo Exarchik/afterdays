@@ -1050,5 +1050,113 @@
     "index": 11,
     "sheet": "trophies",
     "columns": 4
+  },
+  "module_carbon_grip": {
+    "index": 0,
+    "sheet": "expansion028",
+    "columns": 6,
+    "inventory_sheet": "inventory_expansion028"
+  },
+  "module_tactical_grip": {
+    "index": 1,
+    "sheet": "expansion028",
+    "columns": 6,
+    "inventory_sheet": "inventory_expansion028"
+  },
+  "module_electronic_compensator": {
+    "index": 2,
+    "sheet": "expansion028",
+    "columns": 6,
+    "inventory_sheet": "inventory_expansion028"
+  },
+  "module_phase_approximator": {
+    "index": 3,
+    "sheet": "expansion028",
+    "columns": 6,
+    "inventory_sheet": "inventory_expansion028"
+  },
+  "module_gauss_accelerator": {
+    "index": 4,
+    "sheet": "expansion028",
+    "columns": 6,
+    "inventory_sheet": "inventory_expansion028"
+  },
+  "module_polyfiber": {
+    "index": 5,
+    "sheet": "expansion028",
+    "columns": 6,
+    "inventory_sheet": "inventory_expansion028"
+  },
+  "module_quantum_mirror": {
+    "index": 6,
+    "sheet": "expansion028",
+    "columns": 6,
+    "inventory_sheet": "inventory_expansion028"
+  },
+  "module_synthetic_fiber": {
+    "index": 7,
+    "sheet": "expansion028",
+    "columns": 6,
+    "inventory_sheet": "inventory_expansion028"
+  },
+  "module_lead_fibers": {
+    "index": 8,
+    "sheet": "expansion028",
+    "columns": 6,
+    "inventory_sheet": "inventory_expansion028"
+  },
+  "npc_diver": {
+    "index": 9,
+    "sheet": "expansion028",
+    "columns": 6,
+    "inventory_sheet": "inventory_expansion028"
+  },
+  "npc_storekeeper": {
+    "index": 10,
+    "sheet": "expansion028",
+    "columns": 6,
+    "inventory_sheet": "inventory_expansion028"
+  },
+  "npc_guide": {
+    "index": 11,
+    "sheet": "expansion028",
+    "columns": 6,
+    "inventory_sheet": "inventory_expansion028"
+  },
+  "npc_energy_engineer": {
+    "index": 12,
+    "sheet": "expansion028",
+    "columns": 6,
+    "inventory_sheet": "inventory_expansion028"
+  },
+  "npc_master": {
+    "index": 13,
+    "sheet": "expansion028",
+    "columns": 6,
+    "inventory_sheet": "inventory_expansion028"
+  },
+  "npc_locksmith": {
+    "index": 14,
+    "sheet": "expansion028",
+    "columns": 6,
+    "inventory_sheet": "inventory_expansion028"
+  },
+  "npc_money_changer": {
+    "index": 15,
+    "sheet": "expansion028",
+    "columns": 6,
+    "inventory_sheet": "inventory_expansion028"
+  },
+  "npc_quartermaster": {
+    "index": 16,
+    "sheet": "expansion028",
+    "columns": 6,
+    "inventory_sheet": "inventory_expansion028"
+  },
+  "npc_guard": {
+    "index": 17,
+    "sheet": "expansion028",
+    "columns": 6,
+    "inventory_sheet": "inventory_expansion028"
   }
 }

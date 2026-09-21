@@ -26,7 +26,7 @@ def monster_text(g,e):
       tr('inspection_ui.0015', v0=3 if e['kind'] == 8 else 0),tr('inspection_ui.0016', v0=g.enemy_xp(e)),
       tr('inspection_ui.0017')+(tr('inspection_ui.0018') if g.battle.get('dungeon') and not e.get('awake') else tr('inspection_ui.0019')),
       tr('inspection_ui.0020', v0=balance.multiplier(e.get('attack', 0), g.defense)),
-      tr('inspection_ui.0021', v0=min(45, g.protection_stat('evasion'))),tr('inspection_ui.0022')]
+      tr('inspection_ui.0021', v0=max(0,min(45, g.protection_stat('evasion')))),tr('inspection_ui.0022')]
     for key,(label,color) in a.DAMAGE_TYPES.items():
         value=e.get('resists',{}).get(key,0);lines.append(f'{label}\t'+(tr('inspection_ui.0023', v0=value) if value>0 else tr('inspection_ui.0024', v0=-value) if value<0 else '0%'))
     desc=content.t(content.monster_id(e)+'.description')

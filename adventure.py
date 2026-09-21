@@ -487,6 +487,16 @@ class Game(p.Game):
             self.emit(tr('adventure.0211') if path and len(path)>b['ap'] else tr('adventure.0212'),color='#ffcb79')
         return ok
 
+    def _finish_enemy(self,e,weapon=None):
+        b=self.battle
+        if not b or e not in b['enemies']:return
+        b.setdefault('corpses',[]).append(dict(pos=e['pos'][:],kind=e['kind'],type_id=content.monster_id(e),grade=e.get('grade','normal')))
+        b.setdefault('kills',[]).append(dict(kind=e['kind'],type_id=content.monster_id(e),grade=e.get('grade','normal'),level=e.get('level',b.get('region_level',1))))
+        b['enemies'].remove(e)
+        earned=self.enemy_xp(e);self.gain_xp(earned)
+        if hasattr(self,'monster_killed'):self.monster_killed(e,earned,weapon)
+        self._kill_objectives(e['kind'])
+
     def shoot(self,enemy_id):
         b=self.battle;w=self.weapon
         if not b or not w:return False
@@ -499,25 +509,25 @@ class Game(p.Game):
         elif b['ap']<w['ap']:reason=tr('adventure.0215')
         elif not valid:reason=tr('adventure.0216')
         if reason:self.log(reason if not why else why);self.emit(reason,color='#ffcb79');return False
-        b['ap']-=w['ap'];self.consume('ammo',1,w.get('ammo_type','pistol'))
+        b['ap']-=w['ap']
+        saved=p.mr.chance(p.stats(w).get('ammo_save_percent',0))
+        if saved and self.rng.random()*100<saved:self.emit(tr('modules.ammo_saved'),color='#9cdcd8')
+        else:self.consume('ammo',1,w.get('ammo_type','pistol'))
         element=damage_type(w);color=DAMAGE_TYPES[element][1]
         self.emit(kind='attack',pos=e['pos'],source=b['pos'],color=color)
         if self.rng.randrange(100)<chance:
             s=p.stats(w);critical=self.rng.randrange(100)<min(65,5+s.get('crit',0))
-            raw=s['damage']+(self.level-1)*2+self.rng.randint(-2,2)
-            base=balance.damage(raw*(1.6 if critical else 1),s.get('attack',0),e.get('defense',e.get('armor',0)))
-            resist=e.get('resists',RESISTANCES.get(e['kind'],{})).get(element,0)
-            amount=max(1,round(base*(1-resist/100)))
+            components=p.mr.shot_components(w,self.level,self.rng.randint(-2,2),element)
+            dealt={}
+            for kind,raw in components.items():
+                base=balance.damage(raw*(1.6 if critical else 1),s.get('attack',0),e.get('defense',e.get('armor',0)))
+                resist=e.get('resists',RESISTANCES.get(e['kind'],{})).get(kind,0)
+                dealt[kind]=max(1,round(base*(1-resist/100)))
+            amount=sum(dealt.values())
             e['hp']-=amount
             self.emit((tr('adventure.0217') if critical else '')+f'−{amount}',pos=e['pos'],color='#ffbf82' if critical else '#ff9d84')
-            self.log(f'{e["name"]}: −{amount} HP ({DAMAGE_TYPES[element][0]}).')
-            if e['hp']<=0:
-                b.setdefault('corpses',[]).append(dict(pos=e['pos'][:],kind=e['kind'],type_id=content.monster_id(e),grade=e.get('grade','normal')))
-                b.setdefault('kills',[]).append(dict(kind=e['kind'],type_id=content.monster_id(e),grade=e.get('grade','normal'),level=e.get('level',b.get('region_level',1))))
-                b['enemies'].remove(e)
-                earned=self.enemy_xp(e);self.gain_xp(earned)
-                if hasattr(self,'monster_killed'):self.monster_killed(e,earned,w)
-                self._kill_objectives(e['kind'])
+            self.log(f'{e["name"]}: −{amount} HP ('+', '.join(f'{DAMAGE_TYPES[k][0]}: {v}' for k,v in dealt.items())+').')
+            if e['hp']<=0:self._finish_enemy(e,w)
             if not b['enemies']:self.victory()
         else:self.emit(tr('adventure.0218'),color='#d7d4c0');self.log(tr('adventure.0219'))
         self.wear(w,.6)
@@ -526,7 +536,7 @@ class Game(p.Game):
     def end_turn(self):
         b=self.battle
         if not b:return
-        for e in b['enemies']:
+        for e in list(b['enemies']):
             if b.get('dungeon') and not e.get('awake'):continue
             if content.MONSTER_DATA[content.monster_id(e)]['regen']:e['hp']=min(e['max_hp'],e['hp']+content.MONSTER_DATA[content.monster_id(e)]['regen'])
             motion=[e['pos'][:]]
@@ -542,6 +552,15 @@ class Game(p.Game):
                 if self.rng.randrange(100)<min(45,self.protection_stat('evasion')):
                     self.emit(tr('adventure.0220'),color='#b8dcb0');self.emit(tr('adventure.0221'),pos=e['pos'],color='#d7d4c0');continue
                 damage=balance.damage(e['damage']+self.rng.randint(-2,2),e.get('attack',0),self.defense)
+                reflected=p.mr.chance(self.protection_stat('reflect_percent'))
+                if reflected and self.rng.random()*100<reflected:
+                    self.emit(tr('modules.reflected'),color='#c7a8ff')
+                    self.emit(kind='attack',pos=e['pos'],source=b['pos'],color='#c7a8ff')
+                    e['hp']-=damage;self.emit(f'−{damage}',pos=e['pos'],color='#c7a8ff')
+                    self.log(tr('modules.reflected_log',name=e['name'],damage=damage))
+                    if e['hp']<=0:self._finish_enemy(e)
+                    if not b['enemies']:self.victory();return
+                    continue
                 self.hp-=damage;self.emit(f'−{damage}',color='#ff8f79')
                 if hasattr(self,'test_armor_hit'):self.test_armor_hit(damage)
                 self.wear(self.equipped['armor'],.5);self.wear(self.equipped['helmet'],.25)
@@ -649,7 +668,8 @@ class Game(p.Game):
             count=1+(self.rng.random()<.04)
             pool=[n for n,m in enumerate(r.MODULES) if m[1]==('weapon' if item['kind']=='weapon' else 'protection')]
             for _ in range(min(count,item['slots'])):
-                item['modules'].append(p.module(self.rng.choices(range(5),[65,24,8,2.5,.5])[0],self.rng,self.rng.choice(pool),item['level']))
+                item['modules'].append(p.module(self.rng.choices(range(item['rarity']+1),[65,24,8,2.5,.5][:item['rarity']+1])[0],self.rng,self.rng.choice(pool),item['level']))
+        p.mr.clamp_condition(item)
         return item
 
     def craft_odds(self,amount):

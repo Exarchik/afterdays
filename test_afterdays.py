@@ -14,7 +14,7 @@ class AfterdaysTests(unittest.TestCase):
         base = stats(weapon)
         weight = g.weight
         self.assertTrue(g.install(weapon['id'], mod['id']))
-        self.assertEqual(stats(weapon)['damage'], base['damage'] + 3)
+        self.assertEqual(stats(weapon)['damage'], base['damage'] + 2)
         self.assertNotIn(mod, g.bag)
         self.assertEqual(g.weight, weight)
         self.assertTrue(g.uninstall(weapon['id'], mod['id']))
