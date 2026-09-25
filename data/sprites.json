@@ -1158,5 +1158,443 @@
     "sheet": "expansion028",
     "columns": 6,
     "inventory_sheet": "inventory_expansion028"
+  },
+  "quest:junkyard": {
+    "index": 0,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "quest:field_test": {
+    "index": 1,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "quest:generator": {
+    "index": 2,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "quest:cache": {
+    "index": 3,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "quest:elite_hunt": {
+    "index": 4,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "quest:repair_delivery": {
+    "index": 5,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "quest:permit": {
+    "index": 6,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "quest:thanks": {
+    "index": 7,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "quest:delivery": {
+    "index": 8,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "quest:radio": {
+    "index": 9,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "quest:trophies": {
+    "index": 10,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "quest:metro": {
+    "index": 11,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "quest:torn_map": {
+    "index": 12,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "quest:recruit_smith": {
+    "index": 13,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "quest:recruit_tech": {
+    "index": 14,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "quest:settlement_permission": {
+    "index": 15,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "repairkit": {
+    "index": 16,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "courier_parcel": {
+    "index": 17,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "stash_parcel": {
+    "index": 18,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "relic_item": {
+    "index": 19,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "junk_component": {
+    "index": 20,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "metro_component": {
+    "index": 21,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "torn_map_item": {
+    "index": 22,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "restored_map_item": {
+    "index": 23,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "settlement_permit": {
+    "index": 24,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "service_metro": {
+    "index": 25,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "service_board": {
+    "index": 26,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "service_cartographer": {
+    "index": 27,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "action_delivery": {
+    "index": 28,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "action_radio": {
+    "index": 29,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "dungeon_chest": {
+    "index": 30,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "dungeon_exit": {
+    "index": 31,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "npc_printer": {
+    "index": 32,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "npc_meteorologist": {
+    "index": 33,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "npc_doctor": {
+    "index": 34,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "npc_communications": {
+    "index": 35,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "npc_hunter": {
+    "index": 36,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "npc_roamer_smith": {
+    "index": 37,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "npc_cartographer": {
+    "index": 38,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "npc_roamer_tech": {
+    "index": 39,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "npc_wounded": {
+    "index": 40,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "event_theme:wounded": {
+    "index": 41,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "event_theme:wreck": {
+    "index": 42,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "event_theme:camp": {
+    "index": 43,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "event_theme:mines": {
+    "index": 44,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "event_theme:signal": {
+    "index": 45,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "event_theme:pilgrims": {
+    "index": 46,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "event_theme:provisions": {
+    "index": 47,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "event_theme:snare": {
+    "index": 48,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "event_theme:safe": {
+    "index": 49,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "event_theme:pharmacy": {
+    "index": 50,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "event_theme:terminal": {
+    "index": 51,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "event_theme:courier": {
+    "index": 52,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "event_theme:toll": {
+    "index": 53,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "event_theme:storm": {
+    "index": 54,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "event_theme:meteor": {
+    "index": 55,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "event_theme:water": {
+    "index": 56,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "corpse:monster_rodent": {
+    "index": 57,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "corpse:monster_feral": {
+    "index": 58,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "corpse:monster_spitter": {
+    "index": 60,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "corpse:monster_blind_hound": {
+    "index": 59,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "corpse:monster_shellback": {
+    "index": 63,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "corpse:monster_acid_tick": {
+    "index": 62,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "corpse:monster_ash_wolf": {
+    "index": 61,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "corpse:monster_sentry_drone": {
+    "index": 65,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "corpse:monster_swamp_mutant": {
+    "index": 64,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "corpse:monster_bone_giant": {
+    "index": 68,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "corpse:monster_spark": {
+    "index": 67,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "corpse:monster_chimera_spider": {
+    "index": 66,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "obstacle:forest": {
+    "index": 69,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "obstacle:ruin": {
+    "index": 70,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "obstacle:cliff": {
+    "index": 71,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "obstacle:barricade": {
+    "index": 72,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
   }
 }

@@ -978,7 +978,7 @@ class ExpansionGame(LegacyGame):
 
 
 from progression import equipment, module, supply, stats, item_weight, item_value
-from cache_events import Game
+from restoration import Game
 from reputation import buy_factor, sell_factor
 
 # GUI imports are delayed so the model and tests work without a display.
@@ -1191,9 +1191,10 @@ def launch(test_hook=None):
             self.route.update_button()
             self.fx.ingest()
             g = self.game
+            g.process_settlers()
             g.check_thanks()
             if not self.dialog and not g.battle and not getattr(self,'_notice_open',False):
-                notice_key=next((key for key in ('_border_notice','_mayor_notice','_reputation_notice') if getattr(g,key,None)),None)
+                notice_key=next((key for key in ('_border_notice','_mayor_notice','_reputation_notice','_settler_notice') if getattr(g,key,None)),None)
                 if notice_key:
                     notice=getattr(g,notice_key);setattr(g,notice_key,None);self._notice_open=True
                     def show_notice(text=notice):
@@ -1542,6 +1543,11 @@ def launch(test_hook=None):
                             py -= t*.30
                         c.create_oval(px-t*.3,py-t*.3,px+t*.3,py+t*.3,fill='#ae7ed2' if q.get('unique') else '#c9a252',outline='#f9dd8d',width=2)
                         c.create_text(px,py,text='✓' if g.quest_ready(q) else '!',fill='#14291f',font=('Segoe UI',max(10,int(t*.45)),'bold'))
+                for npc in g.settlers():
+                    pos=npc['pos']
+                    if npc['state'] in ('offered','active','permission') and self.map_revealed(*pos) and self.vx<=pos[0]<self.vx+cols and self.vy<=pos[1]<self.vy+rows:
+                        px,py=center(pos)
+                        sprites.draw(c,'npc_roamer_'+npc['role'],px-t*.4,py-t*.4,t*.8)
                 if g.traveler and g.traveler['pos'] == [g.x,g.y]:
                     px,py=center((g.x,g.y))
                     c.create_text(px+t*.4,py-t*.5,text='¤',fill='#f1d383',font=('Segoe UI',16,'bold'))

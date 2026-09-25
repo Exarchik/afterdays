@@ -11,12 +11,16 @@ NPC_TEXT_BINDINGS=content.read('sprite_text_bindings.json')
 SIZES=(16,24,32,48,64,96,144,192)
 
 def item_key(item):
+    if item.get('art_id') in MANIFEST:return item['art_id']
     kind=item.get('kind')
     if kind=='trophy':return 'trophy_'+content.monster_id(item.get('monster_type_id',item.get('monster_kind',0)))
-    if kind=='repairkit':return 'repair'
+    if kind=='repairkit':return 'repairkit'
     if kind=='sealed':return 'sealed'
     if kind=='ammo':return 'ammo:'+item.get('ammo_type','pistol')
-    if kind=='quest' and not item.get('quest_repair'):return 'quest_item'
+    if kind=='quest' and not item.get('quest_repair'):
+        if item.get('delivery') or item.get('type_id')=='quest_parcel':return 'courier_parcel'
+        key={tr('exp.parcel'):'stash_parcel',tr('scav.relic'):'relic_item',tr('scav.junk_part'):'junk_component'}.get(item.get('name'))
+        return key or 'quest_item'
     ident=item.get('type_id')
     data=content.EQUIPMENT.get(ident) or content.MODULE_DATA.get(ident)
     if data:return data['sprite_id']
@@ -24,6 +28,7 @@ def item_key(item):
 
 NPC_ALIASES={'hunter':'traveler',tr('sprites.0001'):tr('sprites.0011'),tr('sprites.0002'):tr('sprites.0012'),tr('sprites.0003'):tr('sprites.0013'),tr('sprites.0004'):tr('sprites.0014'),tr('sprites.0005'):'food',tr('sprites.0006'):tr('sprites.0015'),tr('sprites.0007'):'traveler',tr('sprites.0008'):'tech',tr('sprites.0009'):tr('sprites.0016'),tr('sprites.0010'):'smith'}
 def npc_key(name):
+    if name=='hunter':return 'npc_hunter'
     # Prefer a dedicated portrait before the legacy shared-portrait aliases.
     direct=next((asset for token,asset in NPC_TEXT_BINDINGS.items() if tr(token)==name),None)
     if direct:return direct
@@ -100,3 +105,10 @@ def inventory_photo(widget,item,width):
             root._inventory_images[cache]=image
         except (OSError,tk.TclError):return None
     return root._inventory_images[cache]
+
+
+def quest_key(q):
+    return "quest:metro" if "metro_city" in q else "quest:"+q["kind"]
+
+def corpse_key(corpse):
+    return "corpse:"+content.monster_id(corpse.get("type_id",corpse.get("kind",0)))

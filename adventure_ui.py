@@ -108,6 +108,7 @@ def paint_snapshot(app):
 
 def service_picture(c,key,x,y,npc=None):
     sprite=('npc:'+npc if npc else 'npc:'+key) if key in ('smith','food','fence','tech','mayor','traveler','hunter') else {'stash':'stash','rest':'rest','search':'loot','perks':'perk:tactician','atlas':'site','board':'journal'}.get(key)
+    sprite={'settlers':'npc_roamer_smith','torn_map':'quest:torn_map','board':'service_board','metro':'service_metro','cartographer':'npc_cartographer','guide':'npc_guide','action_delivery':'action_delivery','action_radio':'action_radio'}.get(key,sprite)
     if sprites.draw(c,sprite,x,y,52):return
     samples={'hunter':dict(name=tr('adventure_ui.0001'),kind='sealed',rarity=0),'smith':dict(name=tr('adventure_ui.0002'),kind='weapon',rarity=1),
              'food':p.supply('food'),'fence':dict(name=tr('adventure_ui.0003'),kind='sealed',rarity=0),
@@ -132,11 +133,14 @@ class Services(tk.Frame):
     def refresh(self):
         app=self.app;g=app.game;items=[]
         if not g.battle:
+            import restoration_ui
+            if g.local_settlers():items.append(('settlers',tr('restoration.settlers'),lambda:restoration_ui.settlers(app)))
+            if any(q['kind']=='torn_map' and q['status']=='active' and not q['map_solved'] for q in g.quests):items.append(('torn_map',tr('restoration.assemble'),lambda:restoration_ui.maps(app)))
             for m,key in enumerate(('smith','food','fence')):
                 if g.available_merchant(m):items.append((key,g.merchant_title(m),lambda m=m:app.shop(m)))
-            if g.city in g.metro_unlocked:items.append(('atlas',tr('adventure_ui.0010'),app.metro))
-            if getattr(g,'guide',False):items.append(('traveler',tr('journey.guide'),app.guide))
-            if getattr(g,'cartographer',False):items.append(('atlas',tr('adventure_ui.0011'),app.cartographer))
+            if g.city in g.metro_unlocked:items.append(('metro',tr('adventure_ui.0010'),app.metro))
+            if getattr(g,'guide',False):items.append(('guide',tr('journey.guide'),app.guide))
+            if getattr(g,'cartographer',False):items.append(('cartographer',tr('adventure_ui.0011'),app.cartographer))
             if g.available_merchant(4):items.append(('hunter',tr('adventure_ui.0012'),lambda:app.shop(4)))
             if g.available_merchant(3):items.append(('traveler',tr('adventure_ui.0013'),lambda:app.shop(3)))
             if g.city in g.technicians:items.append(('tech',tr('adventure_ui.0014'),app.technician))
@@ -148,7 +152,7 @@ class Services(tk.Frame):
             elif g.city is None:
                 items.append(('search',tr('adventure_ui.0018'),lambda:app.act(g.search)))
             if hasattr(g,'destination_quest') and g.destination_quest():
-                q=g.destination_quest();items.append(('search',tr('adventure_ui.0019') if q['kind']=='delivery' else tr('adventure_ui.0020'),lambda:app.act(g.search)))
+                q=g.destination_quest();items.append(('action_delivery' if q['kind']=='delivery' else 'action_radio',tr('adventure_ui.0019') if q['kind']=='delivery' else tr('adventure_ui.0020'),lambda:app.act(g.search)))
             if getattr(g,'local_expedition',lambda:None)() and g.city is not None:items.append(('search',tr('adventure_ui.0018'),lambda:app.act(g.search)))
             if g.road_event:items.append(('traveler',tr('adventure_ui.0021'),app.road_dialog))
         items.extend([('perks',tr('adventure_ui.0022', v0=g.pending_perks),app.perks),('atlas',tr('debug.atlas_button') if TEST_MODE else tr('adventure_ui.0023'),app.atlas)])
@@ -237,7 +241,8 @@ def road_window(app):
     if not event:return
     win=app.popup(event['title'],'660x410')
     picture=tk.Canvas(win,height=90,bg=PANEL,highlightthickness=0);picture.pack(fill='x')
-    service_picture(picture,'traveler',295,18)
+    from event_art import EVENT_ART
+    sprites.draw(picture,EVENT_ART.get(event['kind'],'event_theme:camp'),285,8,80)
     tk.Label(win,text=event['title'],bg=PANEL,fg=GOLD,font=('Segoe UI',15,'bold')).pack(pady=8)
     tk.Label(win,text=event['body'],bg=PANEL,fg=TEXT,wraplength=600).pack(padx=20,pady=8)
     result=tk.Label(win,bg=PANEL,fg='#eaa58c');result.pack()

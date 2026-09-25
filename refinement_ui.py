@@ -102,10 +102,15 @@ class QuestCards(tk.Frame):
         ttk.Button(controls,text=tr('refinement_ui.0030'),command=self.turn_in).pack(side='left',expand=True,fill='x')
         ttk.Button(controls,text=tr('quests.abandon'),command=self.abandon).pack(side='left',expand=True,fill='x')
         if not mayor:ttk.Button(self,text=tr('refinement_ui.0031'),command=app.atlas).pack(fill='x',padx=8,pady=3)
+        if mayor:
+            import restoration_ui
+            self.permission_button=ttk.Button(self,text=tr('restoration.permission'),command=lambda:restoration_ui.permission(app))
         self.refresh()
     def selected(self):return next((q for q in self.entries if q['id']==self.selection),None)
     def refresh(self):
         g=self.app.game
+        if self.mayor:
+            self.permission_button.pack(fill='x',padx=8,pady=3) if g.settlement_requests() else self.permission_button.pack_forget()
         self.rep_label.config(text=tr('reputation.short',value=g.reputation()) if self.mayor else '')
         self.entries=([q for q in g.mayor_offers() if q['status']=='offered']+[q for q in g.quests if q['city']==g.city]) if self.mayor else list(g.quests)
         self.entries.sort(key=lambda q:(q['status']=='done',not g.can_turn_in(q),not g.quest_ready(q)))
@@ -123,7 +128,7 @@ class QuestCards(tk.Frame):
                 self.rects.append((y,y+30,'done'));y+=34;continue
             color='#d0a0f5' if q.get('unique') else '#8aa78e' if q['status']=='done' else GOLD
             c.create_rectangle(5,y,w-5,y+h-3,fill=('#173b60' if q['id']==self.selection else '#102c4a') if self.app.game.quest_ready(q) else '#334a3d' if q['id']==self.selection else '#22332b',outline=color)
-            if not sprites.draw(c,'quest:'+q['kind'],10,y+5,30):c.create_text(25,y+20,text=QUEST_ICONS.get(q['kind'],'!'),fill=color,font=('Segoe UI',17))
+            if not sprites.draw(c,sprites.quest_key(q),10,y+5,30):c.create_text(25,y+20,text=QUEST_ICONS.get(q['kind'],'!'),fill=color,font=('Segoe UI',17))
             title=('★ ' if q.get('unique') else '')+f'L{q.get("level",q.get("zone",1))} · '+q['title']
             immediate=self.app.game.can_turn_in(q)
             unread=q['status']=='offered' and not q.get('seen',False)

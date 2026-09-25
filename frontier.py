@@ -182,7 +182,7 @@ class Game(economy.Game):
         if ok:
             for item in self.bag:
                 q=next((q for q in self.quests if q['id']==item.get('quest_id') and 'metro_city' in q),None)
-                if q:item['name']=q['part_name']
+                if q:item.update(name=q['part_name'],art_id='metro_component')
         return ok
 
     def start_dungeon(self,q):

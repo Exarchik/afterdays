@@ -92,11 +92,16 @@ def draw_battle(app):
         if list(pos)!=b['pos'] and pos not in enemies and (px < -2*u or px > width+2*u or py < -2*u or py > height+2*u):continue
         for corpse in b.get('corpses',[]):
             if tuple(corpse['pos'])==pos:
-                sprites.draw(c,'corpse',px-u*.6,py-u*.5,u*1.2)
-                c.create_line(px-u*.32,py-u*.08,px+u*.30,py+u*.18,fill='#b4a080',width=2)
-                c.create_line(px-u*.26,py+u*.18,px+u*.26,py-u*.09,fill='#b4a080',width=2)
+                corpse_size=4.0
+                sprites.draw(
+                    c,
+                    sprites.corpse_key(corpse),
+                    px - corpse_size / 2,
+                    py + u * 0.1 - corpse_size / 2,
+                    corpse_size,
+                )
         if pos in walls:
-            if sprites.draw(c,'terrain:forest' if kind=='forest' else 'terrain:ruin' if kind in ('ruin','city') else 'terrain:cliff',px-2*u,py+1.2*u-4*u,4*u):pass
+            if sprites.draw(c,'obstacle:forest' if kind=='forest' else 'obstacle:ruin' if kind in ('ruin','city') else 'obstacle:cliff',px-2*u,py+1.2*u-4*u,4*u):pass
             elif kind=='forest':
                 c.create_line(px,py,px,py-u*1.5,fill='#8a7f5d',width=max(2,int(u*.18)))
                 c.create_line(px-u*.5,py-u*1.3,px,py-u*.8,px+u*.42,py-u*1.65,fill='#91a17a',width=2)
@@ -110,6 +115,7 @@ def draw_battle(app):
                     c.create_line(px+u*.2,py-z*.45,px+u*.6,py-z*.62,fill='#263b32',width=3)
         if b.get('dungeon') and list(pos) in (b['exit'],b['chest']):
             is_exit=list(pos)==b['exit']
+            sprites.draw(c,'dungeon_exit' if is_exit else 'dungeon_chest',px-u,py-u*1.7,u*2)
             color='#80e3b4' if is_exit else '#94876b' if b['chest_open'] else '#f4c86b'
             c.create_oval(px-u*.7,py-u*.35,px+u*.7,py+u*.35,outline=color,width=3)
             c.create_text(px,py-u*.65,text=tr('advanced_ui.0001') if is_exit else tr('advanced_ui.0002'),fill=color,font=('Segoe UI',8,'bold'))

@@ -20,5 +20,10 @@
   "update024.npc_3": "npc_locksmith",
   "update024.npc_5": "npc_money_changer",
   "update024.npc_6": "npc_guard",
-  "update024.npc_7": "npc_quartermaster"
+  "update024.npc_7": "npc_quartermaster",
+  "adventure.0052": "npc_printer",
+  "adventure.0056": "npc_meteorologist",
+  "adventure.0060": "npc_doctor",
+  "adventure.0062": "npc_communications",
+  "adventure.0068": "npc_cartographer"
 }

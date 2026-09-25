@@ -34,7 +34,7 @@ class ScavengingTests(unittest.TestCase):
   g=r.Game(4);g.money=100000
   for merchant in (0,2):
    items=g.stock(merchant);kit=next(i for i in items if i['kind']=='repairkit');qty=kit['qty']
-   self.assertEqual(sprites.item_key(kit),'repair');self.assertLess(g.price(kit,merchant,False),g.price(kit,merchant,True))
+   self.assertEqual(sprites.item_key(kit),'repairkit');self.assertLess(g.price(kit,merchant,False),g.price(kit,merchant,True))
    self.assertTrue(g.buy(kit['id'],merchant,qty));self.assertFalse(any(i['kind']=='repairkit' for i in g.stock(merchant)))
    self.assertTrue(all(i['kind']=='sealed' for i in g.stock(2))) if merchant==2 else None
   g.turn+=40;self.assertTrue(any(i['kind']=='repairkit' for i in g.stock(2)))
