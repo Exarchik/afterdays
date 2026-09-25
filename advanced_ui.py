@@ -92,14 +92,8 @@ def draw_battle(app):
         if list(pos)!=b['pos'] and pos not in enemies and (px < -2*u or px > width+2*u or py < -2*u or py > height+2*u):continue
         for corpse in b.get('corpses',[]):
             if tuple(corpse['pos'])==pos:
-                corpse_size=4.0
-                sprites.draw(
-                    c,
-                    sprites.corpse_key(corpse),
-                    px - corpse_size / 2,
-                    py + u * 0.1 - corpse_size / 2,
-                    corpse_size,
-                )
+                size=u*2.9
+                sprites.draw(c,sprites.corpse_key(corpse),px-size/2,py+u*.1-size/2,size)
         if pos in walls:
             if sprites.draw(c,'obstacle:forest' if kind=='forest' else 'obstacle:ruin' if kind in ('ruin','city') else 'obstacle:cliff',px-2*u,py+1.2*u-4*u,4*u):pass
             elif kind=='forest':
@@ -144,6 +138,17 @@ def draw_battle(app):
             c.create_rectangle(px-u*.5,top,px+u*.5,top+3,fill='#23392d',outline='')
             c.create_rectangle(px-u*.5,top,px-u*.5+u*e['hp']/e['max_hp'],top+3,fill='#d88667',outline='')
             c.create_text(px,top-7,text=f'L{e.get("level",1)}'+(' · z' if b.get('dungeon') and not e.get('awake') else ''),fill='#e6c18d',font=('Segoe UI',7))
+    target=enemies.get(hovered)
+    if target:
+        valid,reason,chance=g.shot_info(target)
+        pos=app.fx.position(target['id'],target['pos']) if hasattr(getattr(app,'fx',None),'position') else target['pos']
+        px,py=center(pos);py=max(18,py-u*3.7)
+        label=tr('update030.hit_chance',chance=chance) if valid else reason
+        text=c.create_text(px,py,text=label,fill='#94e8aa' if valid else '#e5aa83',font=('Segoe UI',10,'bold'),tags='hit_chance')
+        box=c.bbox(text)
+        if box:
+            background=c.create_rectangle(box[0]-5,box[1]-3,box[2]+5,box[3]+3,fill='#15251c',outline='#60876b',tags='hit_chance')
+            c.tag_lower(background,text)
     app.map_title.config(text=tr('advanced_ui.0003', v0=r.TERRAINS[kind][1].upper(), v1=b.get('region_level', 1), v2=b['ap'], v3=b.get('max_ap', 6)))
     weapon=g.weapon
     ammo=p.AMMO[weapon.get('ammo_type','pistol')][0] if weapon else '—'
@@ -196,6 +201,7 @@ class TradingPanel(tk.Frame):
         bottom=tk.Frame(self,bg=PANEL);bottom.pack(fill='x',padx=12,pady=5)
         self.preview=tk.Canvas(bottom,width=82,height=90,bg=PANEL,highlightthickness=0)
         self.preview.pack(side='left')
+        self.preview.bind('<Button-3>',lambda e:__import__('item_actions').show(self.app,self.item(),e,self))
         from refinement_ui import Detail
         self.detail=Detail(bottom,height=8)
         self.detail.pack(side='left',fill='both',expand=True)
@@ -288,6 +294,9 @@ class TradingPanel(tk.Frame):
         else:self.describe()
 
     def drop(self,payload,xr,yr):
+        if payload['source']=='bag' and payload['item'].get('kind')=='module' and inside(self.bag_grid.canvas,xr,yr):
+            ident=self.bag_grid.hit(xr-self.bag_grid.canvas.winfo_rootx(),yr-self.bag_grid.canvas.winfo_rooty())
+            self.app.act(lambda:self.app.game.quick_module(ident,payload['item']['id']));self.refresh();return
         source=payload['source']
         target=self.bag_grid.canvas if source=='stock' else self.stock_grid.canvas
         if inside(target,xr,yr):self.trade(source,payload['item']['id'])

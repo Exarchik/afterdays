@@ -190,7 +190,7 @@ class Game(r.ExpansionGame):
 
     @staticmethod
     def region_at(x,y=5):
-        return 1+max(0,int((math.hypot(x-5,y-5)-3)//3))
+        return min(15,1+max(0,int((math.hypot(x-5,y-5)-3)//3)))
 
     def count(self,kind,ammo_type=None):
         return sum(i.get('qty',1) for i in self.bag if i['kind']==kind and
@@ -268,7 +268,7 @@ class Game(r.ExpansionGame):
     def step(self,dx,dy):
         if self.battle:
             return self.battle_move((self.battle['pos'][0]+dx,self.battle['pos'][1]+dy))
-        if abs(dx)+abs(dy)!=1 or not (0<=self.x+dx<48 and 0<=self.y+dy<32):
+        if abs(dx)+abs(dy)!=1 or not (0<=self.x+dx<len(self.world[0]) and 0<=self.y+dy<32):
             return False
         self.x+=dx; self.y+=dy
         self.turn+=1; self.travel_steps+=1

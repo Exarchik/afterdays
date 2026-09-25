@@ -27,9 +27,9 @@ class Border:
         if not hasattr(self,'_border_edges'):
             self._border_edges=[]
             for y in range(32):
-                for x in range(48):
+                for x in range(len(self.world[0])):
                     for b in ((x+1,y),(x,y+1)):
-                        if b[0]<48 and b[1]<32 and self.border_edge((x,y),b):self._border_edges.append(((x,y),b))
+                        if b[0]<len(self.world[0]) and b[1]<32 and self.border_edge((x,y),b):self._border_edges.append(((x,y),b))
         return self._border_edges
 
     def can_step(self,dx,dy):
@@ -46,7 +46,7 @@ class Border:
         seen={tuple(start)};queue=deque(seen)
         while queue:
             a=queue.popleft()
-            for b in r.neighbors(*a,48,32):
+            for b in r.neighbors(*a,len(self.world[0]),len(self.world)):
                 if b not in seen and self.passable(*b) and self.can_cross(a,b):seen.add(b);queue.append(b)
         return seen
 

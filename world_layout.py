@@ -1,6 +1,8 @@
 """Seeded town placement and a connected, varying overworld road network."""
 import math
 import random
+WIDTH=62
+HEIGHT=32
 
 def build(rng_state):
     # Independent stream: layout changes do not consume combat/event randomness.
@@ -10,13 +12,13 @@ def build(rng_state):
     rng.shuffle(sectors)
     for col,row in sectors:
         candidates=[(x,y) for y in range(max(2,row*10+2),min(30,(row+1)*10))
-                    for x in range(max(2,col*12+2),min(46,(col+1)*12))
+                    for x in range(max(2,col*WIDTH//4+2),min(WIDTH-2,(col+1)*WIDTH//4))
                     if all(math.dist((x,y),p)>=6 for p in cities)]
         # Fixed sectors have enough space; a farthest point also guarantees termination.
         if not candidates:
-            candidates=[max(((x,y) for y in range(2,30) for x in range(2,46)),key=lambda p:min(math.dist(p,c) for c in cities))]
+            candidates=[max(((x,y) for y in range(2,30) for x in range(2,WIDTH-2)),key=lambda p:min(math.dist(p,c) for c in cities))]
         cities.append(list(rng.choice(candidates)))
-    world=[[rng.choices(('waste','forest','ruin'),(65,23,12))[0] for _ in range(48)] for _ in range(32)]
+    world=[[rng.choices(('waste','forest','ruin'),(65,23,12))[0] for _ in range(WIDTH)] for _ in range(HEIGHT)]
     connected={0};edges=[]
     while len(connected)<len(cities):
         distance,a,b=min((math.dist(cities[a],cities[b]),a,b) for a in sorted(connected) for b in range(len(cities)) if b not in connected)

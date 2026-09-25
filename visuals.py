@@ -241,7 +241,7 @@ def terrain(c, kind, x, y, t, gx, gy, game, battle=False):
         c.create_line(x+t*.14, y+t*.9, x+t*.8, y+t*.88, fill='#827960')
     elif kind == 'road':
         cx, cy = x+t/2, y+t/2
-        for nx, ny in rules.neighbors(gx, gy, 48, 32):
+        for nx, ny in rules.neighbors(gx, gy, len(game.world[0]), len(game.world)):
             if game.world[ny][nx] in ('road', 'city'):
                 c.create_line(cx, cy, cx+(nx-gx)*t/2, cy+(ny-gy)*t/2, fill='#9b8967', width=max(2, int(t*.23)))
                 c.create_line(cx, cy, cx+(nx-gx)*t/2, cy+(ny-gy)*t/2, fill='#c1ae7c', dash=(2, 4))
@@ -293,12 +293,9 @@ class ItemGrid(tk.Frame):
 
     def inspect_event(self,event):
         item=next((i for i in self.items if i['id']==self.hit(event.x,event.y)),None)
-        parent=self
-        while parent is not None:
-            if hasattr(parent,'app'):
-                import inspection_ui
-                inspection_ui.inspect_item(parent.app,item);return
-            parent=getattr(parent,'master',None)
+        import item_actions
+        app,owner=item_actions.locate(self)
+        return item_actions.show(app,item,event,owner,self)
 
     def set_items(self, items):
         self.items = sorted(items,key=item_sort_key)
@@ -473,8 +470,8 @@ class EquipmentPanel(tk.Frame):
 
     def inspect_paper(self,event):
         slot=next((s for s,(a,b,d,e) in self.slots.items() if a<=event.x<=d and b<=event.y<=e),None)
-        import inspection_ui
-        inspection_ui.inspect_item(self.app,self.app.game.equipped.get(slot))
+        import item_actions
+        return item_actions.show(self.app,self.app.game.equipped.get(slot),event,self)
 
     def press_paper(self, event):
         slot = next((s for s,(a,b,d,e) in self.slots.items() if a <= event.x <= d and b <= event.y <= e), None)
@@ -493,6 +490,17 @@ class EquipmentPanel(tk.Frame):
         g = self.app.game
         if g.battle:
             self.app.act(lambda: g.log(tr('visuals.0031')))
+            return
+        if payload['item'].get('kind')=='module':
+            target_item=None
+            if inside(self.paper,xr,yr):
+                x,y=xr-self.paper.winfo_rootx(),yr-self.paper.winfo_rooty()
+                target=next((slot for slot,(a,b,c,d) in self.slots.items() if a<=x<=c and b<=y<=d),None)
+                target_item=g.equipped.get(target)
+            elif inside(self.grid.canvas,xr,yr):
+                ident=self.grid.hit(xr-self.grid.canvas.winfo_rootx(),yr-self.grid.canvas.winfo_rooty())
+                target_item=g.find(ident)
+            if target_item:self.app.act(lambda:g.quick_module(target_item['id'],payload['item']['id']))
             return
         if inside(self.paper, xr, yr):
             x, y = xr-self.paper.winfo_rootx(), yr-self.paper.winfo_rooty()
@@ -592,8 +600,8 @@ class ModificationPanel(tk.Frame):
     def inspect_top(self,event):
         n=next((n for n,(x,y,d,f) in enumerate(self.slot_rects) if x<=event.x<=d and y<=event.y<=f),None)
         item=self.item['modules'][n] if n is not None and n<len(self.item['modules']) else self.item if n is None else None
-        import inspection_ui
-        inspection_ui.inspect_item(self.app,item)
+        import item_actions
+        return item_actions.show(self.app,item,event,self)
 
     def press_bag(self, e):
         self.grid.select_event(e)

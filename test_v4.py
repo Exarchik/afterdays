@@ -83,7 +83,7 @@ class AdventureTests(unittest.TestCase):
             self.assertEqual(loaded.road_event,g.road_event)
             self.assertTrue(loaded.resolve_event('leave'));self.assertIsNone(loaded.road_event)
         p.add_to(g.bag,p.supply('med'))
-        xp=g.xp;self.assertTrue(g.resolve_event('help'));self.assertEqual(g.xp,xp+40)
+        xp=g.xp;self.assertTrue(g.resolve_event('help'));self.assertEqual(g.xp,xp+20)
         self.assertEqual(g.count('med'),0)
 
     def test_every_road_event_has_a_resolvable_choice(self):

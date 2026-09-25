@@ -9,11 +9,11 @@ from PIL import Image,ImageDraw,ImageFont
 def render(seed=13,destination='Afterdays-world.png'):
     g=afterdays.Game(seed)
     atlas=Image.open(ROOT/'terrain_v2.png');size=40
-    out=Image.new('RGB',(48*size,32*size+64),'#17201c');d=ImageDraw.Draw(out)
+    out=Image.new('RGB',(len(g.world[0])*size,len(g.world)*size+64),'#17201c');d=ImageDraw.Draw(out)
     font=ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',20)
-    d.text((16,12),f'AFTERDAYS · Повна мапа 48 × 32 · seed {seed} · без туману війни',font=font,fill='#e4e9ce')
-    for y in range(32):
-        for x in range(48):
+    d.text((16,12),f'AFTERDAYS · Повна мапа {len(g.world[0])} × {len(g.world)} · seed {seed} · без туману війни',font=font,fill='#e4e9ce')
+    for y in range(len(g.world)):
+        for x in range(len(g.world[0])):
             n=INDEX[tile_key(g,x,y)];tx=n%32*64;ty=n//32*64
             tile=atlas.crop((tx,ty,tx+64,ty+64)).resize((size,size),Image.Resampling.LANCZOS)
             out.paste(tile,(x*size,64+y*size))

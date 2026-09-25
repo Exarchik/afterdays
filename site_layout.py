@@ -23,7 +23,7 @@ def place(game,count):
     layouts=[]
     for ox in range(7):
         for oy in range(7):
-            pts=[(x,y) for y in range(oy,32,7) for x in range(ox,48,7) if all(math.dist((x,y),c)>1.5 for c in game.cities)]
+            pts=[(x,y) for y in range(oy,32,7) for x in range(ox,len(game.world[0]),7) if all(math.dist((x,y),c)>1.5 for c in game.cities)]
             if len(pts)>=count:layouts.append(pts)
     pts=max(layouts,key=lambda ps:sum(p in reachable for p in ps))
     start=min(pts,key=lambda p:abs(math.dist(p,(5,5))-4))
@@ -47,6 +47,6 @@ def road_path(game,start):
             route=[]
             while pos is not None:route.append(pos);pos=previous[pos]
             return route[::-1]
-        for nxt in neighbors(*pos,48,32):
+        for nxt in neighbors(*pos,len(game.world[0]),len(game.world)):
             if nxt not in previous and game.passable(*nxt):previous[nxt]=pos;queue.append(nxt)
     return []

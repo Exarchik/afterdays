@@ -33,7 +33,7 @@ class Game(economy.Game):
     def spawn_cartographer(self):
         size=self.rng.randint(3,6)
         boxes=[(x,y) for y in range(max(0,self.y-size),min(32-size,self.y+size)+1)
-               for x in range(max(0,self.x-size),min(48-size,self.x+size)+1)
+               for x in range(max(0,self.x-size),min(len(self.world[0])-size,self.x+size)+1)
                if any(not self.revealed(xx,yy) for yy in range(y,y+size) for xx in range(x,x+size))]
         if not boxes:return False
         x,y=self.rng.choice(boxes)
@@ -120,13 +120,13 @@ class Game(economy.Game):
 
     def metro_cost(self,destination):
         if self.battle or self.city not in self.metro_unlocked or destination not in self.metro_unlocked or destination==self.city:return None
-        blocked={(x,y) for y in range(32) for x in range(48) if not self.passable(x,y)}
+        blocked={(x,y) for y in range(32) for x in range(len(self.world[0])) if not self.passable(x,y)}
         from metro_routes import station_order
         order=station_order(self)
         first,last=sorted((order.index(self.city),order.index(destination)))
         stations=order[first:last+1];distance=0
         for a,b in zip(stations,stations[1:]):
-            route=r.path_to(tuple(self.cities[a]),tuple(self.cities[b]),48,32,blocked)
+            route=r.path_to(tuple(self.cities[a]),tuple(self.cities[b]),len(self.world[0]),len(self.world),blocked)
             if not route:return None
             distance+=len(route)
         return (50,max(1,math.ceil(distance/5)),distance)

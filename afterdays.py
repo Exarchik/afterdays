@@ -276,7 +276,7 @@ class LegacyGame:
     def step(self, dx, dy):
         if self.battle:
             return self.battle_move((self.battle['pos'][0]+dx, self.battle['pos'][1]+dy))
-        if abs(dx) + abs(dy) != 1 or not (0 <= self.x+dx < 48 and 0 <= self.y+dy < 32):
+        if abs(dx) + abs(dy) != 1 or not (0 <= self.x+dx < len(self.world[0]) and 0 <= self.y+dy < 32):
             return False
         self.x += dx
         self.y += dy
@@ -855,7 +855,7 @@ class ExpansionGame(LegacyGame):
         q['status'] = 'active'
         if q['kind'] in ('retrieve', 'scout', 'purge'):
             occupied = {tuple(t['pos']) for t in self.quests if t.get('pos') and t['status'] == 'active'}
-            candidates = [(x, y) for y in range(32) for x in range(48)
+            candidates = [(x, y) for y in range(32) for x in range(len(self.world[0]))
                           if 4 <= abs(x-self.x)+abs(y-self.y) <= 12 and [x, y] not in self.cities and (x, y) not in occupied]
             if hasattr(self, 'quest_locations'):candidates=self.quest_locations(q)
             if not candidates:
@@ -978,7 +978,7 @@ class ExpansionGame(LegacyGame):
 
 
 from progression import equipment, module, supply, stats, item_weight, item_value
-from restoration import Game
+from update030 import Game
 from reputation import buy_factor, sell_factor
 
 # GUI imports are delayed so the model and tests work without a display.
@@ -1012,6 +1012,7 @@ def launch(test_hook=None):
             self.dialog = None
             self.hover = None
             root.after_idle(lambda:sprites.decorate(root))
+            root._afterdays_app=self
             root.title(tr('afterdays.0131'))
             sw,sh=root.winfo_screenwidth(),root.winfo_screenheight()
             root.geometry(f'1260x880+{max(0,(sw-1260)//2)}+{max(0,(sh-880)//2)}')
@@ -1044,11 +1045,14 @@ def launch(test_hook=None):
             left.pack_propagate(False)
             self.map_title = tk.Label(left, bg=BG, fg=GOLD, anchor='w', font=('Segoe UI', 12, 'bold'))
             self.map_title.pack(fill='x', pady=(0, 6))
+            from combat_hud import CombatHUD
+            self.combat_hud=CombatHUD(left,self)
             self.canvas = tk.Canvas(left, bg='#17201c', highlightthickness=1, highlightbackground='#475244')
             self.canvas.pack(fill='both', expand=True)
             self.canvas.bind('<Configure>', lambda e: self.draw())
             self.canvas.bind('<Button-1>', self.map_click)
             self.canvas.bind('<Motion>', self.map_hover)
+            self.canvas.bind('<Leave>',self.clear_battle_hover)
             import inspection_ui
             self.canvas.bind('<Button-3>',lambda e:inspection_ui.inspect_monster(self,e))
             self.hint = tk.Label(left, bg=BG, fg=MUTED, anchor='w', justify='left', wraplength=680, height=4)
@@ -1204,6 +1208,7 @@ def launch(test_hook=None):
             weapon = g.weapon
             ws = stats(weapon) if weapon else {}
             self.status.config(text=tr('afterdays.0151', v0=g.hp, v1=g.max_hp, v2=g.defense, v3=g.weight, v4=g.capacity, v5=g.money, v6=g.level, v7=g.xp, v8=progression.xp_for_level(g.level + 1), v9=g.turn,v10=progression.xp_for_level(g.level+1)-g.xp))
+            self.combat_hud.refresh()
             combat = g.battle is not None
             self.end_button.config(state='normal' if combat else 'disabled')
             self.flee_button.config(state='normal' if combat else 'disabled')
@@ -1377,11 +1382,11 @@ def launch(test_hook=None):
             layout = {}
             def paint(event=None):
                 c.delete('all');c._terrain_refs=[]
-                t = min(c.winfo_width()/48, c.winfo_height()/32)
-                ox, oy = (c.winfo_width()-48*t)/2, (c.winfo_height()-32*t)/2
+                t = min(c.winfo_width()/len(self.game.world[0]), c.winfo_height()/32)
+                ox, oy = (c.winfo_width()-len(self.game.world[0])*t)/2, (c.winfo_height()-32*t)/2
                 layout.update(t=t, ox=ox, oy=oy)
                 for y in range(32):
-                    for x in range(48):
+                    for x in range(len(self.game.world[0])):
                         if not self.map_revealed(x,y):
                             c.create_rectangle(ox+x*t,oy+y*t,ox+(x+1)*t,oy+(y+1)*t,fill='#101714',outline='')
                             continue
@@ -1470,7 +1475,7 @@ def launch(test_hook=None):
             self.tile = max(8, min(width/cols, height/rows))
             t = self.tile
             self.ox, self.oy = (width-cols*t)/2, (height-rows*t)/2
-            self.vx, self.vy = (0, 0) if b else (max(0, min(48-cols, g.x-cols//2)), max(0, min(32-rows, g.y-rows//2)))
+            self.vx, self.vy = (0, 0) if b else (max(0, min(len(g.world[0])-cols, g.x-cols//2)), max(0, min(32-rows, g.y-rows//2)))
             walls = set(map(tuple, b['walls'])) if b else set()
             reachable = {}
             if b:
@@ -1559,6 +1564,10 @@ def launch(test_hook=None):
                 return advanced_ui.iso_cell(self,event)
             return int((event.x-self.ox)//self.tile)+self.vx, int((event.y-self.oy)//self.tile)+self.vy
 
+        def clear_battle_hover(self,event=None):
+            self.battle_hover=None
+            if self.game.battle:self.draw()
+
         def map_hover(self, event):
             if self.game.battle:
                 pos = self.cell(event)
@@ -1572,8 +1581,8 @@ def launch(test_hook=None):
 
             else:
                 pos=self.cell(event)
-                if 0<=pos[0]<48 and 0<=pos[1]<32:
-                    edges=[(pos,q) for q in neighbors(*pos,48,32) if self.game.border_edge(pos,q)]
+                if 0<=pos[0]<len(self.game.world[0]) and 0<=pos[1]<32:
+                    edges=[(pos,q) for q in neighbors(*pos,len(self.game.world[0]),len(self.game.world)) if self.game.border_edge(pos,q)]
                     if edges and self.map_revealed(*pos):
                         gate=any(self.game.checkpoint(a,b) for a,b in edges)
                         self.hint.config(text=tr('border.open_hint') if gate and self.game.border_open else tr('border.locked') if gate else tr('border.fence'))
@@ -1600,7 +1609,7 @@ def launch(test_hook=None):
                     return
                 enemy = next((e for e in b['enemies'] if e['pos'] == [x, y]), None)
                 self.act(lambda: self.game.shoot(enemy['id']) if enemy else self.game.battle_move((x, y)))
-            elif 0 <= x < 48 and 0 <= y < 32:
+            elif 0 <= x < len(self.game.world[0]) and 0 <= y < len(self.game.world):
                 self.route.set_target((x,y))
 
         def key(self, event):

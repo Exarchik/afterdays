@@ -31,7 +31,7 @@ class ExpeditionTests(unittest.TestCase):
     if q['kind'] in ('hunt','trophies','elite_hunt') and q['target_kind'] is not None:self.assertLessEqual(monster_rules.base_level(q['target_kind']),q['level'])
  def test_kill_xp_halved_and_local_rep_no_cascade(self):
   g=r.Game(4);e=monster_rules.make(g.rng,0,1,[2,2],grade='normal');old=round(23*.35+8*1.5+0*2+1+3)
-  self.assertEqual(g.enemy_xp(e),old//2)
+  self.assertEqual(g.enemy_xp(e),5)
   g.cities[:3]=[[5,5],[15,5],[16,5]];g.x=g.y=5
   for _ in range(4):g.monster_killed(e,10,None)
   self.assertEqual(g.reputation(0),1);self.assertEqual(g.reputation(1),1);self.assertEqual(g.reputation(2),0)

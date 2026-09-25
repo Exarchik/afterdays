@@ -158,10 +158,10 @@ class Game(p.Game):
     def _build_world(self):
         for kind,count in [('water',8),('cliff',7)]:
             for _ in range(count):
-                cx,cy=self.rng.randrange(2,46),self.rng.randrange(2,30)
+                cx,cy=self.rng.randrange(2,len(self.world[0])-2),self.rng.randrange(2,30)
                 rx,ry=self.rng.randint(1,5),self.rng.randint(1,4)
                 for y in range(max(0,cy-ry),min(32,cy+ry+1)):
-                    for x in range(max(0,cx-rx),min(48,cx+rx+1)):
+                    for x in range(max(0,cx-rx),min(len(self.world[0]),cx+rx+1)):
                         if ((x-cx)/rx)**2+((y-cy)/ry)**2<=1 and self.world[y][x] not in ('road','city') and math.dist((x,y),(5,5))>2:
                             self.world[y][x]=kind
         reachable=self.reachable_world((5,5))
@@ -171,10 +171,10 @@ class Game(p.Game):
     def build_radiation(self):
         self.radiation={}
         for _ in range(10):
-            cx=self.rng.choices(range(2,46),weights=[x**2 for x in range(2,46)])[0]
+            cx=self.rng.choices(range(2,len(self.world[0])-2),weights=[x**2 for x in range(2,len(self.world[0])-2)])[0]
             cy=self.rng.choices(range(2,30),weights=[y**2 for y in range(2,30)])[0];radius=self.rng.randint(1,5)
             for y in range(max(0,cy-radius),min(32,cy+radius+1)):
-                for x in range(max(0,cx-radius),min(48,cx+radius+1)):
+                for x in range(max(0,cx-radius),min(len(self.world[0]),cx+radius+1)):
                     if not (x<24 and y<16) and math.dist((x,y),(cx,cy))<=radius and self.passable(x,y) and [x,y] not in self.cities and math.dist((x,y),(5,5))>2:
                         self.radiation[f'{x},{y}']=self.rng.randint(2,4)
 
@@ -192,12 +192,12 @@ class Game(p.Game):
         for (name,npc,role),pos in zip(SITES,place(self,len(SITES))):
             self.special_sites.append(dict(id=r.uid(),name=name,npc=npc,role=role,pos=list(pos),found=False,city_id=None))
 
-    def passable(self,x,y):return 0<=x<48 and 0<=y<32 and self.world[y][x] not in BLOCKED
+    def passable(self,x,y):return 0<=x<len(self.world[0]) and 0<=y<32 and self.world[y][x] not in BLOCKED
 
     def reachable_world(self,start):
         seen={tuple(start)};queue=deque(seen)
         while queue:
-            for q in r.neighbors(*queue.popleft(),48,32):
+            for q in r.neighbors(*queue.popleft(),len(self.world[0]),len(self.world)):
                 if q not in seen and self.passable(*q):seen.add(q);queue.append(q)
         return seen
 
@@ -646,7 +646,7 @@ class Game(p.Game):
     def reveal(self,x,y,radius=2):
         known=set(self.explored)
         for yy in range(max(0,y-radius),min(32,y+radius+1)):
-            for xx in range(max(0,x-radius),min(48,x+radius+1)):
+            for xx in range(max(0,x-radius),min(len(self.world[0]),x+radius+1)):
                 if math.dist((x,y),(xx,yy))<=radius:known.add(f'{xx},{yy}')
         self.explored=sorted(known)
         for n,pos in enumerate(self.cities):

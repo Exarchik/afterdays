@@ -10,7 +10,7 @@ class Game(scavenging.Game):
     def clear_city_edges(self):
         for cx,cy in self.cities[:12]:
             for y in range(max(0,cy-1),min(32,cy+2)):
-                for x in range(max(0,cx-1),min(48,cx+2)):
+                for x in range(max(0,cx-1),min(len(self.world[0]),cx+2)):
                     if self.world[y][x]=='cliff':self.world[y][x]='waste'
                     self.radiation.pop(f'{x},{y}',None)
 

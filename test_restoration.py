@@ -34,7 +34,7 @@ class RestorationTests(unittest.TestCase):
 
     def test_recruit_both_roles_permission_return_delay_save(self):
         for role in ('smith','tech'):
-            g=r.Game(4);n=g.create_settler(role);self.assertIsNotNone(n)
+            g=r.Game(4);g.reputation_state['visited_cities'].append(g.eligible_settlements(role)[0]);n=g.create_settler(role);self.assertIsNotNone(n)
             self.assertTrue(g.recruit(n['id']));q=g.quests[-1];ident=q['id'];pos=n['pos'][:]
             city=g.eligible_settlements(role)[0];g.x,g.y=g.cities[city]
             self.assertTrue(g.authorize_settlement(ident));self.assertNotIn(city,g.eligible_settlements(role))
@@ -55,7 +55,7 @@ class RestorationTests(unittest.TestCase):
         self.assertIsNone(g.create_settler('smith'));self.assertIsNone(g.create_settler('tech'))
 
     def test_abandon_releases_city_and_removes_permit(self):
-        g=r.Game(4);n=g.create_settler('smith');g.recruit(n['id']);q=g.quests[-1]
+        g=r.Game(4);g.reputation_state['visited_cities'].append(g.eligible_settlements('smith')[0]);n=g.create_settler('smith');g.recruit(n['id']);q=g.quests[-1]
         city=g.eligible_settlements('smith')[0];g.x,g.y=g.cities[city];g.authorize_settlement(q['id'])
         self.assertTrue(g.abandon_quest(q['id']));self.assertIn(city,g.eligible_settlements('smith'))
         self.assertFalse(any(i.get('quest_id')==q['id'] for i in g.bag));self.assertEqual(n['state'],'offered')

@@ -1,6 +1,6 @@
 """Same cell-edge fence geometry in the world view and schematic atlas."""
-def draw_border(canvas,game,t,ox,oy,revealed,viewport=(0,0,48,32)):
-    vx,vy,w,h=viewport
+def draw_border(canvas,game,t,ox,oy,revealed,viewport=None):
+    vx,vy,w,h=viewport or (0,0,len(game.world[0]),len(game.world))
     for a,b in game.border_edges():
         if not any(vx<=x<vx+w and vy<=y<vy+h for x,y in (a,b)):continue
         if not (revealed(*a) or revealed(*b)):continue

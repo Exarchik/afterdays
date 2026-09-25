@@ -110,7 +110,7 @@ class QuestCards(tk.Frame):
     def refresh(self):
         g=self.app.game
         if self.mayor:
-            self.permission_button.pack(fill='x',padx=8,pady=3) if g.settlement_requests() else self.permission_button.pack_forget()
+            self.permission_button.pack(before=self.canvas,fill='x',padx=8,pady=3) if g.settlement_requests() else self.permission_button.pack_forget()
         self.rep_label.config(text=tr('reputation.short',value=g.reputation()) if self.mayor else '')
         self.entries=([q for q in g.mayor_offers() if q['status']=='offered']+[q for q in g.quests if q['city']==g.city]) if self.mayor else list(g.quests)
         self.entries.sort(key=lambda q:(q['status']=='done',not g.can_turn_in(q),not g.quest_ready(q)))

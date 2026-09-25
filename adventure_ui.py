@@ -232,6 +232,9 @@ class Storage(tk.Frame):
         if item:self.drag.begin(e,dict(item=item,direction=direction))
 
     def drop(self,payload,xr,yr):
+        if payload['direction']=='deposit' and payload['item'].get('kind')=='module' and inside(self.bag.canvas,xr,yr):
+            ident=self.bag.hit(xr-self.bag.canvas.winfo_rootx(),yr-self.bag.canvas.winfo_rooty())
+            self.app.act(lambda:self.app.game.quick_module(ident,payload['item']['id']));self.refresh();return
         direction=payload['direction'];target=self.bag.canvas if direction=='withdraw' else self.stored.canvas
         if inside(target,xr,yr):self.select(payload['item']['id'],direction);self.transfer()
 
@@ -268,11 +271,11 @@ def paint_world_extras(app):
             px,py=app.ox+(x-app.vx+.5)*app.tile,app.oy+(y-app.vy+.5)*app.tile
             c.create_text(px,py,text='▣',fill='#efc76b',font=('Segoe UI',15,'bold'))
     for y in range(app.vy,min(32,app.vy+17)):
-        for x in range(app.vx,min(48,app.vx+23)):
+        for x in range(app.vx,min(len(g.world[0]),app.vx+23)):
             if not app.map_revealed(x,y):continue
             px,py=app.ox+(x-app.vx+.5)*app.tile,app.oy+(y-app.vy+.5)*app.tile;t=app.tile
             if (x,y) in trails:
-                for q in r.neighbors(x,y,48,32):
+                for q in r.neighbors(x,y,len(g.world[0]),len(g.world)):
                     if q in trails:c.create_line(px,py,px+(q[0]-x)*t*.5,py+(q[1]-y)*t*.5,fill='#c5b590',dash=(3,2),width=2)
             if f'{x},{y}' in g.radiation:
                 c.create_rectangle(px-t*.42,py-t*.42,px+t*.42,py+t*.42,outline='#8dae56')

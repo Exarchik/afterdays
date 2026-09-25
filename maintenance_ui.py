@@ -17,6 +17,7 @@ def show(app):
         usable=bool(item and mr.condition(item)<mr.max_condition(item) and g.count('repairkit'))
         button.config(state='normal' if usable else 'disabled')
         preview.config(text=tr('scav.repair_preview',before=round(mr.condition(item)),after=round(min(mr.max_condition(item),mr.condition(item)+35))) if item else '')
+    win.app=app
     grid=ItemGrid(win,select,height=220,columns=6);grid.pack(fill='both',expand=True,padx=12)
     detail=Detail(win,height=8);detail.pack(fill='both',expand=True,padx=12)
     preview=tk.Label(win,bg=PANEL,fg=TEXT);preview.pack(pady=8)

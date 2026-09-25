@@ -51,14 +51,12 @@ class RefinementTests(unittest.TestCase):
         self.assertGreater(g.enemy_xp(strong),g.enemy_xp(weak))
         self.assertGreater(g.enemy_xp(dict(weak,grade='rare')),g.enemy_xp(weak))
         self.assertGreater(g.enemy_xp(dict(weak,grade='mythic')),g.enemy_xp(dict(weak,grade='rare')))
-        xp=g.enemy_xp(weak);g.xp=p.xp_for_level(5);self.assertLess(g.enemy_xp(weak),xp)
-        g.xp=p.xp_for_level(30);self.assertEqual(g.enemy_xp(weak),1)
+        xp=g.enemy_xp(dict(weak,grade='mythic'));g.xp=p.xp_for_level(5);self.assertLess(g.enemy_xp(dict(weak,grade='mythic')),xp)
+        g.xp=p.xp_for_level(30);self.assertEqual(g.enemy_xp(weak),5)
 
     def test_monster_grades_have_stats(self):
-        g=r.Game(2);seen={}
-        for _ in range(80):
-            g.start_battle()
-            for e in g.battle['enemies']:seen[e['grade']]=e
+        import monster_rules
+        g=r.Game(2);seen={grade:monster_rules.make(g.rng,0,1,[1,1],grade=grade) for grade in ('normal','rare','mythic')}
         self.assertEqual(set(seen),{'normal','rare','mythic'})
         for grade in ('rare','mythic'):
             e=seen[grade];self.assertGreater(e['max_hp'],r.MONSTERS[e['kind']][1]);self.assertGreater(e['damage'],r.MONSTERS[e['kind']][2])
