@@ -44,6 +44,7 @@ def player_text(g):
 
 class PlayerPanel(tk.Frame):
     def __init__(self,parent,app):
+        """Ініціалізує об’єкт, його початковий стан і потрібні залежності."""
         super().__init__(parent,bg=PANEL);self.app=app
         self.xp=tk.Label(self,bg=PANEL,fg=GOLD);self.xp.pack(pady=(12,4))
         self.bar=ttk.Progressbar(self);self.bar.pack(fill='x',padx=12,pady=4)
@@ -52,6 +53,7 @@ class PlayerPanel(tk.Frame):
         self.text=tk.Text(body,bg=PANEL,fg=TEXT,wrap='word',font=('Segoe UI',10),relief='flat',width=30,yscrollcommand=scroll.set)
         self.text.pack(fill='both',expand=True);scroll.config(command=self.text.yview)
     def refresh(self):
+        """Оновлює віджети відповідно до поточного стану гри."""
         g=self.app.game;low=p.xp_for_level(g.level);high=p.xp_for_level(g.level+1)
         self.xp.config(text=tr('frontier_ui.0032', v0=g.xp - low, v1=high - low, v2=high - g.xp))
         self.bar.config(maximum=high-low,value=g.xp-low)
@@ -98,7 +100,7 @@ def metro(app):
 def guide(app):
     g=app.game
     if not g.guide:return
-    window=app.popup(tr('journey.guide'),'590x390')
+    window=app.popup(tr('journey.guide'),'590x530')
     tk.Label(window,text=tr('journey.guide'),bg=PANEL,fg=GOLD,font=('Segoe UI',16,'bold')).pack(pady=14)
     tk.Label(window,text=tr('journey.guide_info'),bg=PANEL,fg=TEXT,wraplength=530,justify='left').pack(padx=20,pady=8)
     choices=g.guide_destinations()

@@ -8,6 +8,7 @@ from afterdays import Game, equipment, module, stats, item_weight, item_value, p
 
 class AfterdaysTests(unittest.TestCase):
     def test_modules_roundtrip_preserves_identity_weight_and_stats(self):
+        """Перевіряє сценарій «modules roundtrip preserves identity weight and stats» та очікувані результати."""
         g = Game(1)
         weapon = g.weapon
         mod = next(i for i in g.bag if i['kind'] == 'module' and i['target'] == 'weapon')
@@ -23,6 +24,7 @@ class AfterdaysTests(unittest.TestCase):
         self.assertEqual(g.weight, weight)
 
     def test_module_compatibility_capacity_and_combat_lock(self):
+        """Перевіряє сценарій «module compatibility capacity and combat lock» та очікувані результати."""
         g = Game(2)
         weapon = g.weapon
         armor_mod = next(i for i in g.bag if i['kind'] == 'module' and i['target'] == 'protection')
@@ -39,6 +41,7 @@ class AfterdaysTests(unittest.TestCase):
         self.assertFalse(g.unequip('weapon1'))
 
     def test_equipment_swap_preserves_total_weight(self):
+        """Перевіряє сценарій «equipment swap preserves total weight» та очікувані результати."""
         g = Game(3)
         new = equipment('Лазер «Промінь»', 4)
         self.assertTrue(g.accept(new))
@@ -51,6 +54,7 @@ class AfterdaysTests(unittest.TestCase):
         self.assertEqual(g.weight, weight)
 
     def test_buy_overweight_is_atomic(self):
+        """Перевіряє сценарій «buy overweight is atomic» та очікувані результати."""
         g = Game(4)
         target = g.stock(0)[0]
         g.money = 10000
@@ -64,6 +68,7 @@ class AfterdaysTests(unittest.TestCase):
         self.assertIn(target, g.stock(0))
 
     def test_merchants_and_installed_module_value(self):
+        """Перевіряє сценарій «merchants and installed module value» та очікувані результати."""
         g = Game(5)
         g.local_record()['value']=50
         armor = g.equipped['armor']
@@ -79,6 +84,7 @@ class AfterdaysTests(unittest.TestCase):
         self.assertIsNone(g.find(mod['id']))
 
     def test_generated_enemies_always_reachable(self):
+        """Перевіряє сценарій «generated enemies always reachable» та очікувані результати."""
         for seed in range(100):
             g = Game(seed)
             g.start_battle()
@@ -90,6 +96,7 @@ class AfterdaysTests(unittest.TestCase):
                 self.assertTrue(__import__('hexgrid').path_to(tuple(b['pos']), pos, b['w'], b['h'], walls))
 
     def test_line_of_sight_including_corners(self):
+        """Перевіряє сценарій «line of sight including corners» та очікувані результати."""
         self.assertTrue(visible((0, 0), (4, 3), []))
         self.assertFalse(visible((0, 0), (4, 0), [(2, 0)]))
         self.assertFalse(visible((0, 0), (2, 2), [(1, 0)]))
@@ -97,6 +104,7 @@ class AfterdaysTests(unittest.TestCase):
             self.assertEqual(visible(a, b, [(2, 2)]), visible(b, a, [(2, 2)]))
 
     def test_blocked_shot_does_not_spend_ap(self):
+        """Перевіряє сценарій «blocked shot does not spend ap» та очікувані результати."""
         g = Game(6)
         g.start_battle()
         b = g.battle
@@ -109,6 +117,7 @@ class AfterdaysTests(unittest.TestCase):
         self.assertEqual(b['ap'], 6)
 
     def test_turn_heal_switch_flee(self):
+        """Перевіряє сценарій «turn heal switch flee» та очікувані результати."""
         g = Game(7)
         g.equipped['weapon2'] = equipment('Пістолет «Попіл»')
         g.start_battle()
@@ -125,6 +134,7 @@ class AfterdaysTests(unittest.TestCase):
         self.assertIsNone(g.battle)
 
     def test_victory_loot_capacity_and_defeat(self):
+        """Перевіряє сценарій «victory loot capacity and defeat» та очікувані результати."""
         g = Game(8)
         g.start_battle()
         money = g.money
@@ -144,6 +154,7 @@ class AfterdaysTests(unittest.TestCase):
         self.assertIsNone(g.battle)
 
     def test_save_load_preserves_items_battle_stock_and_rng(self):
+        """Перевіряє сценарій «save load preserves items battle stock and rng» та очікувані результати."""
         g = Game(9)
         stock = g.stock(2)
         mod = g.bag[0]
@@ -162,6 +173,7 @@ class AfterdaysTests(unittest.TestCase):
         self.assertEqual(loaded.rng.random(), g.rng.random())
 
     def test_enemy_turn_and_stock_refresh(self):
+        """Перевіряє сценарій «enemy turn and stock refresh» та очікувані результати."""
         g = Game(10)
         first = [i['id'] for i in g.stock(2)]
         self.assertEqual(first, [i['id'] for i in g.stock(2)])

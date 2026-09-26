@@ -10,6 +10,7 @@ from item_actions import personal_actions
 
 class Update030Tests(unittest.TestCase):
     def test_world_size_cap_and_east_reachability(self):
+        """Перевіряє сценарій «world size cap and east reachability» та очікувані результати."""
         for seed in range(6):
             g=r.Game(seed)
             self.assertEqual(len(g.world),32);self.assertEqual({len(row) for row in g.world},{62})
@@ -21,6 +22,7 @@ class Update030Tests(unittest.TestCase):
             self.assertFalse(g.passable(62,10));self.assertFalse(g.passable(-1,10))
 
     def test_old_save_extends_once_without_moving_cities_or_consuming_rng(self):
+        """Перевіряє сценарій «old save extends once without moving cities or consuming rng» та очікувані результати."""
         path=Path(__file__).parent/'tests_fixtures/save_v029.json';data=json.loads(path.read_text())
         g=r.Game.load(path)
         self.assertEqual(g.cities,data['cities']);self.assertEqual([row[:48] for row in g.world],data['world'])
@@ -35,6 +37,7 @@ class Update030Tests(unittest.TestCase):
         self.assertEqual(len(h.world[0]),62)
 
     def test_exploration_and_path_to_far_east(self):
+        """Перевіряє сценарій «exploration and path to far east» та очікувані результати."""
         from journey import world_route
         from site_layout import road_path
         g=r.Game(4);g.reputation_state['border_open']=True
@@ -44,6 +47,7 @@ class Update030Tests(unittest.TestCase):
         self.assertTrue(road_path(g,pos))
 
     def test_xp_buckets_and_actual_event_rewards(self):
+        """Перевіряє сценарій «xp buckets and actual event rewards» та очікувані результати."""
         self.assertEqual([event_xp(n) for n in (0,10,15,20,25,30,35,40,100)],[0,5,10,10,15,15,20,20,20])
         g=r.Game(4);before=g.xp;g.make_road_event('wounded')
         self.assertIn('20 XP',str(g.road_event['choices']))
@@ -54,6 +58,7 @@ class Update030Tests(unittest.TestCase):
         self.assertFalse(g._event_xp_context)
 
     def test_monster_xp_halved_and_rounded_to_five(self):
+        """Перевіряє сценарій «monster xp halved and rounded to five» та очікувані результати."""
         self.assertEqual([kill_xp(n) for n in (1,12,21,22,26,41,59,70,86,125)],[5,5,10,10,15,20,30,35,45,65])
         g=r.Game(4)
         for ident in content.MONSTER_IDS:
@@ -63,6 +68,7 @@ class Update030Tests(unittest.TestCase):
         g.xp=p.xp_for_level(100);self.assertEqual(g.enemy_xp(e),5)
 
     def test_discovered_town_does_not_enable_settler_but_visit_does(self):
+        """Перевіряє сценарій «discovered town does not enable settler but visit does» та очікувані результати."""
         for role in ('smith','tech'):
             g=r.Game(4);city=next(c for c in g.eligible_settlements(role) if c!=0)
             g.reveal(*g.cities[city],1);self.assertIn(city,g.known_cities)
@@ -71,12 +77,14 @@ class Update030Tests(unittest.TestCase):
             self.assertIn(city,g.recruit_candidates(role));self.assertIsNotNone(g.create_settler(role))
 
     def gear(self,slots=3):
+        """Готує або імітує операцію «gear» для перевірок Update030Tests."""
         g=r.Game(4);w=g.weapon;w.update(rarity=2,slots=slots,modules=[])
         mods=[p.module(tier=0,rng=random.Random(n),index=0,level=1) for n in range(4)]
         g.bag.extend(mods)
         return g,w,mods
 
     def test_quick_module_prepends_and_ejects_last_only(self):
+        """Перевіряє сценарій «quick module prepends and ejects last only» та очікувані результати."""
         g,w,mods=self.gear()
         for m in mods[:3]:self.assertTrue(g.quick_module(w['id'],m['id']))
         self.assertEqual([m['id'] for m in w['modules']],[m['id'] for m in mods[2::-1]])
@@ -87,6 +95,7 @@ class Update030Tests(unittest.TestCase):
         self.assertEqual(len(ids),len(set(ids)))
 
     def test_quick_module_restrictions_and_atomic_weight_rollback(self):
+        """Перевіряє сценарій «quick module restrictions and atomic weight rollback» та очікувані результати."""
         g,w,mods=self.gear();before=copy.deepcopy((g.bag,g.equipped))
         mods[0]['level']=2;self.assertFalse(g.quick_module(w['id'],mods[0]['id']));mods[0]['level']=1
         mods[0]['rarity']=4;self.assertFalse(g.quick_module(w['id'],mods[0]['id']));mods[0]['rarity']=0
@@ -102,6 +111,7 @@ class Update030Tests(unittest.TestCase):
         self.assertEqual((g.bag,g.equipped),before)
 
     def test_context_actions_obey_ownership_combat_and_quest_locks(self):
+        """Перевіряє сценарій «context actions obey ownership combat and quest locks» та очікувані результати."""
         g=r.Game(4);w=g.weapon
         codes=lambda item:{code for code,args in personal_actions(g,item)}
         self.assertIn('unequip',codes(w));self.assertIn('modify',codes(w));self.assertNotIn('drop',codes(w))
@@ -114,6 +124,7 @@ class Update030Tests(unittest.TestCase):
         g.battle['ap']=1;self.assertNotIn('use',codes(med))
 
     def test_hud_points_colors_and_weapon_switch_cost(self):
+        """Перевіряє сценарій «hud points colors and weapon switch cost» та очікувані результати."""
         from combat_hud import CombatHUD
         g=r.Game(4);g.equipped['weapon2']=p.equipment('weapon_ash_pistol',level=1);g.start_battle()
         before=g.battle['ap'];g.switch();self.assertEqual(g.battle['ap'],before)

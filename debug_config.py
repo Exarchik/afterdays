@@ -16,12 +16,15 @@ class MapVisibility:
     show_full_map=False
 
     def map_revealed(self,x,y):
+        """Визначає видимість клітинки з урахуванням тестового режиму."""
         return (TEST_MODE and self.show_full_map) or self.game.revealed(x,y)
 
     def map_city_known(self,index):
+        """Визначає, чи слід показувати місто на карті."""
         return (TEST_MODE and self.show_full_map) or index in self.game.known_cities
 
     def toggle_test_map(self):
+        """Перемикає повне відкриття карти у тестовому режимі."""
         if not TEST_MODE:return
         self.show_full_map=not self.show_full_map
         self.refresh()

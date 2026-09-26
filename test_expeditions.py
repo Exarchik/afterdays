@@ -9,11 +9,14 @@ from tests_fixtures.quest_offer import offer_for
 
 class ExpeditionTests(unittest.TestCase):
  def contract(self,kind,seed=4):
+  """Готує або імітує операцію «contract» для перевірок ExpeditionTests."""
   g=r.Game(seed);q=offer_for(g,kind);self.assertTrue(g.accept_quest(q['id']),kind);return g,g.quests[-1]
  def return_to_giver(self,g,q):
+  """Готує або імітує операцію «return to giver» для перевірок ExpeditionTests."""
   g.battle=None;g.x,g.y=g.cities[q['city']]
   money=g.money;self.assertTrue(g.turn_in(q['id']));self.assertEqual(g.money,money+q['reward']);self.assertFalse(g.turn_in(q['id']))
  def test_species_levels_and_wilderness(self):
+  """Перевіряє сценарій «species levels and wilderness» та очікувані результати."""
   levels=[monster_rules.base_level(i) for i in range(12)];self.assertEqual(sorted(levels),list(range(1,13)))
   g=r.Game(1)
   for level in range(1,16):
@@ -25,11 +28,13 @@ class ExpeditionTests(unittest.TestCase):
    g.start_battle();self.assertTrue(all(e['kind'] in (0,1) for e in g.battle['enemies']))
    self.assertTrue(all(e['weak'] for e in g.battle['enemies'] if e['kind']==1))
  def test_quest_targets_cannot_exceed_quest_level(self):
+  """Перевіряє сценарій «quest targets cannot exceed quest level» та очікувані результати."""
   for seed in range(5):
    g=r.Game(seed);g.mayor_offers()
    for q in g.offers[str(g.city)]:
     if q['kind'] in ('hunt','trophies','elite_hunt') and q['target_kind'] is not None:self.assertLessEqual(monster_rules.base_level(q['target_kind']),q['level'])
  def test_kill_xp_halved_and_local_rep_no_cascade(self):
+  """Перевіряє сценарій «kill xp halved and local rep no cascade» та очікувані результати."""
   g=r.Game(4);e=monster_rules.make(g.rng,0,1,[2,2],grade='normal');old=round(23*.35+8*1.5+0*2+1+3)
   self.assertEqual(g.enemy_xp(e),5)
   g.cities[:3]=[[5,5],[15,5],[16,5]];g.x=g.y=5
@@ -37,6 +42,7 @@ class ExpeditionTests(unittest.TestCase):
   self.assertEqual(g.reputation(0),1);self.assertEqual(g.reputation(1),1);self.assertEqual(g.reputation(2),0)
   g.gain_xp(100);self.assertEqual(g.reputation(0),1)
  def test_rep_fraction_save_and_different_level(self):
+  """Перевіряє сценарій «rep fraction save and different level» та очікувані результати."""
   g=r.Game(4);g.monster_killed({},20,None);self.assertEqual(g.reputation(),0)
   with tempfile.TemporaryDirectory() as td:
    path=Path(td)/'save.json';g.save(path);h=r.Game.load(path)
@@ -44,6 +50,7 @@ class ExpeditionTests(unittest.TestCase):
   with patch.object(h,'region_at',return_value=2):h.monster_killed({},40,None)
   self.assertEqual(h.reputation(),1)
  def test_field_armor_and_return_equipped(self):
+  """Перевіряє сценарій «field armor and return equipped» та очікувані результати."""
   g=r.Game(4);offer=offer_for(g,'field_test');item=p.equipment('armor_plate_jacket' if 'armor_plate_jacket' in r.GEAR else next(k for k,v in r.GEAR.items() if v[0]=='armor'),level=1)
   item.update(field_test=True,quest_id=offer['id'],value=0,weight=0,modules=[],slots=0);offer['test_item']=item
   self.assertTrue(g.accept_quest(offer['id']));q=g.quests[-1];gear=g.quest_equipment(q)
@@ -51,6 +58,7 @@ class ExpeditionTests(unittest.TestCase):
   self.assertFalse(g.buys_kind(gear,0));self.assertFalse(g.dismantle(gear['id']));self.assertFalse(g.drop_item(gear['id']))
   self.return_to_giver(g,q);self.assertIsNone(g.equipped['armor']);self.assertIsNone(g.quest_equipment(q))
  def test_field_weapon_requires_actual_kill_with_test_weapon(self):
+  """Перевіряє сценарій «field weapon requires actual kill with test weapon» та очікувані результати."""
   g=r.Game(4);offer=offer_for(g,'field_test');item=p.equipment('weapon_ash_pistol',level=1)
   item.update(field_test=True,quest_id=offer['id'],value=0,weight=0,modules=[],slots=0);offer['test_item']=item
   self.assertTrue(g.accept_quest(offer['id']));q=g.quests[-1];gear=g.quest_equipment(q)
@@ -59,6 +67,7 @@ class ExpeditionTests(unittest.TestCase):
   with patch.object(g.rng,'randrange',return_value=0):self.assertTrue(g.shoot(e['id']))
   self.assertTrue(g.quest_ready(q));g.battle=None;self.assertTrue(g.abandon_quest(q['id']));self.assertIsNone(g.quest_equipment(q))
  def test_generator_solvable_consumes_materials_once(self):
+  """Перевіряє сценарій «generator solvable consumes materials once» та очікувані результати."""
   g,q=self.contract('generator');g.x,g.y=q['pos'];self.assertTrue(g.search());self.assertEqual(g._generator_request,q['id'])
   self.assertFalse(g.repair_generator(q['id']))
   for n in q['generator_order']:self.assertTrue(g.generator_toggle(q['id'],n))
@@ -66,6 +75,7 @@ class ExpeditionTests(unittest.TestCase):
   p.add_to(g.bag,p.parts(q['material_qty']) if q['material']=='parts' else p.fragments(q['material_qty']))
   self.assertTrue(g.repair_generator(q['id']));self.assertEqual(g.count(q['material']),0);self.assertFalse(g.repair_generator(q['id']));self.return_to_giver(g,q)
  def test_cache_all_nine_cells_once_and_return(self):
+  """Перевіряє сценарій «cache all nine cells once and return» та очікувані результати."""
   g,q=self.contract('cache');a,b,c,d=q['area'];target=q['cache_pos']
   self.assertEqual((c-a+1)*(d-b+1),9)
   for y in range(b,d+1):
@@ -75,6 +85,7 @@ class ExpeditionTests(unittest.TestCase):
   g.x,g.y=target;self.assertTrue(g.search());self.assertFalse(g.quest_ready(q));p.add_to(g.bag,p.parts(1));self.assertTrue(g.unlock_cache(q['id'],q['lock_target']));self.assertTrue(g.quest_ready(q));self.assertTrue(g.loot)
   before=copy.deepcopy(g.loot);self.assertIsNone(g.local_expedition());self.return_to_giver(g,q);self.assertEqual(before,g.loot);self.assertIsNone(g.quest_equipment(q))
  def test_elite_tracks_boss_minions_and_victory(self):
+  """Перевіряє сценарій «elite tracks boss minions and victory» та очікувані результати."""
   g,q=self.contract('elite_hunt');self.assertIn(len(q['track']),(2,3))
   for pos in q['track']:
    g.x,g.y=pos;self.assertTrue(g.search())
@@ -82,6 +93,7 @@ class ExpeditionTests(unittest.TestCase):
   self.assertIn(b['enemies'][0]['grade'],('rare','mythic'));self.assertTrue(all(e['grade']=='normal' for e in b['enemies'][1:]))
   b['kills']=[dict(kind=e['kind'],grade=e['grade'],level=e['level']) for e in b['enemies']];b['enemies']=[];g.victory();self.assertTrue(g.quest_ready(q));self.return_to_giver(g,q)
  def test_new_quest_state_survives_save(self):
+  """Перевіряє сценарій «new quest state survives save» та очікувані результати."""
   for kind in ('field_test','generator','cache','elite_hunt'):
    g,q=self.contract(kind)
    self.assertIn(q['title'],g.quest_text(q));self.assertIsInstance(g.quest_item_views(q),list)
@@ -89,13 +101,16 @@ class ExpeditionTests(unittest.TestCase):
     path=Path(td)/'save.json';g.save(path);h=r.Game.load(path)
    self.assertEqual(q,next(x for x in h.quests if x['id']==q['id']))
  def test_trophy_values_and_drop_rules(self):
+  """Перевіряє сценарій «trophy values and drop rules» та очікувані результати."""
   for n in range(12):self.assertEqual(economy.trophy(n)['value'],2*(4+n))
   self.assertAlmostEqual(economy.loot_rules([dict(grade='normal')])[0],.0375)
  def test_radio_waveform_has_visual_parameters(self):
+  """Перевіряє сценарій «radio waveform has visual parameters» та очікувані результати."""
   from radio_ui import waveform
   ref=waveform([10,10,10])
   for values in ([11,10,10],[10,11,10],[10,10,11]):self.assertNotEqual(ref,waveform(values))
  def test_metro_single_chain(self):
+  """Перевіряє сценарій «metro single chain» та очікувані результати."""
   from frontier_ui import draw_metro
   g=r.Game(1);g.quests.extend(dict(metro_city=c,status='done',kind='retrieve') for c in (2,3,7))
   c=MagicMock();draw_metro(c,g,1,0,0,lambda x,y:True)
@@ -104,12 +119,14 @@ class ExpeditionTests(unittest.TestCase):
   order=station_order(g);expected=list(zip(order,order[1:]))
   for line,(a,b) in zip(lines,expected):self.assertEqual(line.args,tuple(v+.5 for v in g.cities[a]+g.cities[b]))
  def test_drop_damage_and_half_ammo(self):
+  """Перевіряє сценарій «drop damage and half ammo» та очікувані результати."""
   g=r.Game(7);g.start_battle();g.battle['kills']=[dict(kind=0,grade='normal',level=1)]
   with patch.object(g.rng,'random',return_value=0):g.victory()
   gear=[i for i in g.loot if i['kind'] in ('weapon','armor','helmet')]
   self.assertTrue(all(10<=i['durability']<=95 for i in gear))
   self.assertLessEqual(sum(i['qty'] for i in g.loot if i['kind']=='ammo'),12)
  def test_unseen_badge_and_green_offers(self):
+  """Перевіряє сценарій «unseen badge and green offers» та очікувані результати."""
   from refinement_ui import QuestCards
   from types import SimpleNamespace
   g=r.Game(4);q=offer_for(g,'generator');q.pop('seen',None)
@@ -126,6 +143,7 @@ class ExpeditionTests(unittest.TestCase):
    path=Path(td)/'save.json';g.save(path);h=r.Game.load(path)
   self.assertTrue(next(x for x in h.offers['0'] if x['id']==q['id'])['seen'])
  def test_cache_does_not_reveal_exact_target_on_map(self):
+  """Перевіряє сценарій «cache does not reveal exact target on map» та очікувані результати."""
   from expedition_ui import draw_search_areas
   g,q=self.contract('cache');c=MagicMock();draw_search_areas(c,g,10,0,0)
   self.assertEqual(c.create_rectangle.call_count,1);self.assertEqual(c.create_oval.call_count,0)

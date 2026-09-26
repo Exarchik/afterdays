@@ -2,6 +2,7 @@
 GOLD="#eac56d"
 class ScrapArt:
     def draw_scrap(self,s):
+        """Малює фрагмент сміття з його матеріалом, контуром і деталями."""
         c = self.canvas
         points = [v for px,py in s.points for v in (s.x+px,s.y+py)]
         c.create_polygon(points,fill=s.color,outline='#222a23',width=2,tags=(s.tag,'body'+s.tag))

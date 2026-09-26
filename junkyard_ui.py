@@ -16,6 +16,7 @@ def show(app,ident):
 
 class Junkyard(ScrapArt):
     def __init__(self,app,game,quest):
+        """Ініціалізує об’єкт, його початковий стан і потрібні залежності."""
         self.app,self.game,self.quest=app,game,quest;self.ident=quest['id']
         self.closed=False;self.timer=None;self.drag=None;self.pointer=(0,0);self.offset=(0,0)
         self.scale=1;self.ox=self.oy=0;self.last_tick=time.monotonic()
@@ -35,15 +36,18 @@ class Junkyard(ScrapArt):
         self.win.bind('<Destroy>',self.destroyed,add='+')
         self.draw();self.timer=self.win.after(16,self.tick)
 
+    # Перетворює координати між моделлю та зображенням.
     def coordinates(self,event):return ((event.x-self.ox)/self.scale,(event.y-self.oy)/self.scale)
 
     def update_status(self,message=''):
+        """Оновлює текст стану поточної взаємодії."""
         q=self.quest
         value=tr('scav.junk_progress',count=q['progress'],goal=q['goal'])
         value+=tr('scav.return_giver') if self.game.quest_ready(q) else ''
         self.status.config(text=value+(' · '+message if message else ''))
 
     def draw(self,event=None):
+        """Перемальовує карту або арену й видимі позначення."""
         if self.closed:return
         c=self.canvas;c.delete('all');c._junk_refs=[]
         # Draw in the source game's coordinate space, then fit uniformly to this window.
@@ -70,6 +74,7 @@ class Junkyard(ScrapArt):
         self.update_status()
 
     def press(self,event):
+        """Запам’ятовує початок натискання чи перетягування."""
         self.canvas.focus_set();self.pointer=self.coordinates(event)
         obj=self.game.junk_top(self.quest,*self.pointer)
         if obj is None:return
@@ -79,28 +84,35 @@ class Junkyard(ScrapArt):
         self.canvas.tag_raise(obj['id']);self.canvas.itemconfigure('body'+obj['id'],outline=GOLD,width=3)
         self.canvas.config(cursor='fleur');self.update_status(tr('scav.junk_drag'))
 
+    # Обробляє рух курсора і переміщення вибраного об’єкта.
     def motion(self,event):self.pointer=self.coordinates(event)
 
     def release(self,event=None):
+        """Завершує перетягування та застосовує результат."""
         if self.closed:return
         if self.drag:self.canvas.itemconfigure('body'+self.drag,outline='#222a23',width=2)
         self.drag=None;self.canvas.config(cursor='')
 
     def focus_out(self,event):
+        """Скасовує активну взаємодію після втрати фокусу."""
         if not self.closed:self.win.after_idle(self.check_focus)
 
     def check_focus(self):
+        """Перевіряє фокус перед продовженням взаємодії."""
         if not self.closed and self.win.focus_displayof() is None:self.release()
 
+    # Обробляє збирання предмета правою кнопкою.
     def collect_right(self,event):self.collect(*self.coordinates(event))
 
     def collect(self,x,y):
+        """Переносить доступний предмет зі здобичі до сумки."""
         obj=self.game.junk_top(self.quest,x,y)
         if not obj or obj['kind']=='debris':self.update_status(tr('scav.junk_blocked'));return
         if self.game.junk_collect(self.ident,x,y):
             self.canvas.delete(obj['id']);self.update_status();self.app.refresh()
 
     def tick(self):
+        """Виконує черговий кадр оновлення та планує наступний."""
         self.timer=None
         if self.closed:return
         now=time.monotonic();dt=min(.05,now-self.last_tick);self.last_tick=now
@@ -110,6 +122,7 @@ class Junkyard(ScrapArt):
         self.timer=self.win.after(16,self.tick)
 
     def destroyed(self,event):
+        """Прибирає таймери після знищення віджета."""
         if event.widget is not self.win:return
         self.closed=True;self.drag=None
         if self.timer is not None:

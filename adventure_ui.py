@@ -15,15 +15,18 @@ from visuals import BG,PANEL,TEXT,MUTED,GOLD,icon,ItemGrid,Drag,inside
 
 class Effects:
     def __init__(self,app):
+        """Ініціалізує об’єкт, його початковий стан і потрібні залежності."""
         self.app=app;self.game=app.game;self.active=[];self.snapshot=None;self.until=0
         app.root.after(33,self.tick)
 
     @property
     def blocked(self):
+        """Перевіряє, чи дозволяє поточний стан продовжувати рух."""
         now=time.monotonic()
         return (self.snapshot is not None and now<self.until) or any(e['kind']=='move' and now<e['start']+e['duration'] for e in self.active)
 
     def ingest(self):
+        """Приймає нові ігрові події для показу анімацій."""
         g=self.app.game
         if g is not self.game:
             self.active=[];self.snapshot=None;self.game=g
@@ -41,6 +44,7 @@ class Effects:
             self.until=now+max(1.15,timeline+1.0)
 
     def position(self,entity,fallback):
+        """Повертає проміжну позицію для плавної анімації."""
         now=time.monotonic()
         moves=[e for e in self.active if e['kind']=='move' and e.get('entity')==entity]
         for e in moves:
@@ -52,6 +56,7 @@ class Effects:
         return fallback
 
     def point(self,pos,entity=None):
+        """Перетворює логічну позицію на екранні координати."""
         app=self.app;b=self.snapshot if self.snapshot is not None and time.monotonic()<self.until else app.game.battle
         if b:
             if entity=='player':pos=self.position('player',b['pos'])
@@ -64,6 +69,7 @@ class Effects:
         return app.ox+(pos[0]-app.vx+.5)*app.tile,app.oy+(pos[1]-app.vy+.25)*app.tile
 
     def render(self):
+        """Відображає поточний кадр візуальних ефектів."""
         c=self.app.canvas;c.delete('fx')
         now=time.monotonic();battle=bool(self.app.game.battle or self.blocked)
         for e in self.active:
@@ -87,6 +93,7 @@ class Effects:
                 c.create_text(px,y,text=e['text'],fill=e['color'],font=('Segoe UI',11,'bold'),tags='fx')
 
     def tick(self):
+        """Виконує черговий кадр оновлення та планує наступний."""
         now=time.monotonic()
         had_motion=any(e['kind']=='move' for e in self.active)
         self.active=[e for e in self.active if now<e['start']+e['duration']]
@@ -123,6 +130,7 @@ def service_picture(c,key,x,y,npc=None):
 
 class Services(tk.Frame):
     def __init__(self,parent,app):
+        """Ініціалізує об’єкт, його початковий стан і потрібні залежності."""
         super().__init__(parent,bg=PANEL)
         self.app=app;self.entries=[];self.rects=[]
         self.canvas=tk.Canvas(self,bg=PANEL,height=300,highlightthickness=0,cursor='hand2')
@@ -131,6 +139,7 @@ class Services(tk.Frame):
         self.canvas.bind('<Button-1>',self.click)
 
     def refresh(self):
+        """Оновлює віджети відповідно до поточного стану гри."""
         app=self.app;g=app.game;items=[]
         if not g.battle:
             import restoration_ui
@@ -159,6 +168,7 @@ class Services(tk.Frame):
         self.entries=items;self.paint()
 
     def paint(self):
+        """Малює актуальне представлення даних на Canvas."""
         c=self.canvas;c.delete('all');self.rects=[]
         width=max(320,c.winfo_width());cell=width/3;h=102
         c.config(height=math.ceil(len(self.entries)/3)*h)
@@ -170,12 +180,14 @@ class Services(tk.Frame):
             c.create_text(x+cell/2,y+74,text=label,fill=GOLD if key in ('mayor','stash') else TEXT,font=('Segoe UI',9),width=cell-12)
 
     def click(self,e):
+        """Обробляє натискання на елемент панелі за координатами курсора."""
         for (x,y,d,f),fn in self.rects:
             if x<=e.x<=d and y<=e.y<=f:fn();break
 
 
 class Storage(tk.Frame):
     def __init__(self,parent,app):
+        """Ініціалізує об’єкт, його початковий стан і потрібні залежності."""
         super().__init__(parent,bg=PANEL);self.app=app;self.selection=None;self.direction='withdraw'
         self.label=tk.Label(self,bg=PANEL,fg=GOLD,font=('Segoe UI',13,'bold'));self.label.pack(pady=12)
         tk.Label(self,text=tr('adventure_ui.0024'),bg=PANEL,fg=MUTED).pack()
@@ -201,24 +213,29 @@ class Storage(tk.Frame):
         self.refresh()
 
     def item(self):
+        """Знаходить предмет, обраний у поточній панелі."""
         source=self.app.game.stash if self.direction=='withdraw' else self.app.game.bag
         return next((i for i in source if i['id']==self.selection),None)
 
     def select(self,item_id,direction):
+        """Обробляє вибір елемента та оновлює його опис."""
         self.selection,self.direction=item_id,direction
         item=self.item()
         if item:self.detail.config(text=self.app.description(item).replace('\n',' · '))
 
     def all(self):
+        """Застосовує операцію до всіх доступних предметів."""
         item=self.item()
         if item:self.qty.set(str(item.get('qty',1)))
 
     def refresh(self):
+        """Оновлює віджети відповідно до поточного стану гри."""
         g=self.app.game;self.stored.set_items(g.stash);self.bag.set_items(g.bag)
         self.label.config(text=tr('adventure_ui.0030', v0=g.weight, v1=g.capacity))
         self.app.refresh()
 
     def transfer(self):
+        """Переносить вибраний предмет між контейнерами."""
         item=self.item()
         if not item:return
         try:qty=max(1,min(int(self.qty.get()),item.get('qty',1)))
@@ -228,10 +245,12 @@ class Storage(tk.Frame):
         self.detail.config(text=self.app.game.messages[-1] if ok else tr('adventure_ui.0031'))
 
     def press(self,e,grid,direction):
+        """Запам’ятовує початок натискання чи перетягування."""
         grid.select_event(e);item=self.item()
         if item:self.drag.begin(e,dict(item=item,direction=direction))
 
     def drop(self,payload,xr,yr):
+        """Обробляє відпускання предмета над ціллю перетягування."""
         if payload['direction']=='deposit' and payload['item'].get('kind')=='module' and inside(self.bag.canvas,xr,yr):
             ident=self.bag.hit(xr-self.bag.canvas.winfo_rootx(),yr-self.bag.canvas.winfo_rooty())
             self.app.act(lambda:self.app.game.quick_module(ident,payload['item']['id']));self.refresh();return

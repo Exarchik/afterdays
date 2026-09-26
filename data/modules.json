@@ -61,7 +61,7 @@
       ]
     },
     "fixed_penalties": {
-      "max_condition_percent": -30
+      "strength": -30
     }
   },
   "module_rangefinder": {
@@ -80,7 +80,7 @@
       ]
     },
     "fixed_penalties": {
-      "damage_percent": -10
+      "local_damage_percent": -15
     }
   },
   "module_accelerator": {
@@ -170,7 +170,7 @@
       ]
     },
     "fixed_penalties": {
-      "max_condition_percent": -30
+      "strength": -30
     }
   },
   "module_tungsten_channel": {
@@ -199,7 +199,7 @@
     "base": 2,
     "sprite_id": "module_ceramic_inserts",
     "fixed_penalties": {
-      "max_condition_percent": -20
+      "strength": -20
     }
   },
   "module_medical_lining": {
@@ -264,7 +264,7 @@
       ]
     },
     "fixed_penalties": {
-      "defense_percent": -20
+      "local_defense_percent": -20
     }
   },
   "module_load_system": {
@@ -284,7 +284,7 @@
     "base": 3,
     "sprite_id": "module_reactive_plates",
     "fixed_penalties": {
-      "max_condition_percent": -40
+      "strength": -40
     }
   },
   "module_carbon_grip": {
@@ -300,8 +300,16 @@
         -15,
         -20,
         -25
+      ],
+      "attack": [
+        1,
+        2,
+        3,
+        4,
+        5
       ]
-    }
+    },
+    "weight": 0.1
   },
   "module_tactical_grip": {
     "legacy_index": 21,
@@ -325,9 +333,7 @@
         10
       ]
     },
-    "fixed_penalties": {
-      "weight_percent": 15
-    }
+    "weight": 1.5
   },
   "module_electronic_compensator": {
     "legacy_index": 22,
@@ -390,8 +396,16 @@
         -15,
         -20,
         -25
+      ],
+      "defense": [
+        1,
+        2,
+        3,
+        4,
+        5
       ]
-    }
+    },
+    "weight": 0.05
   },
   "module_quantum_mirror": {
     "legacy_index": 26,
@@ -430,7 +444,8 @@
         6,
         8
       ]
-    }
+    },
+    "weight": 0.05
   },
   "module_lead_fibers": {
     "legacy_index": 28,
@@ -445,14 +460,8 @@
         9,
         12,
         15
-      ],
-      "weight_percent": [
-        30,
-        25,
-        20,
-        15,
-        10
       ]
-    }
+    },
+    "weight": 1.5
   }
 }

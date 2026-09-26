@@ -18,6 +18,7 @@ def toggle_cells(board,index):
 
 class Game(contracts.Game):
     def start_battle(self):
+        """Створює бойовий стан, ворогів та арену поточної зустрічі."""
         super().start_battle()
         for n,old in enumerate(self.battle['enemies']):
             kind=monster_rules.choose(self.rng,self.region_level)
@@ -25,6 +26,7 @@ class Game(contracts.Game):
 
     def monster_killed(self,enemy,xp,weapon):
         # Independent fractional points at each nearby location: never cascade to neighbours.
+        """Обробляє смерть ворога, досвід і квестовий прогрес."""
         earned=xp/(40*max(1,self.region_level))
         positions=set(map(tuple,self.cities))|{tuple(s['pos']) for s in self.special_sites}
         for pos in positions:
@@ -38,6 +40,7 @@ class Game(contracts.Game):
             if q:q['progress']=1;self.emit(tr('exp.test_done'),color='#9edba2')
 
     def test_armor_hit(self,damage):
+        """Зараховує отриману шкоду для випробування квестового захисту."""
         if damage<=0:return
         for slot in ('armor','helmet'):
             item=self.equipped.get(slot)
@@ -46,11 +49,13 @@ class Game(contracts.Game):
             if q:q['progress']=1;self.emit(tr('exp.test_done'),color='#9edba2')
 
     def _kill_objectives(self,kind):
+        """Оновлює завдання на вбивство з перевіркою типу ворога і зони."""
         for q in self.quests:
             if q['status']=='active' and q['kind']=='hunt' and math.dist((self.x,self.y),self.cities[q['city']])<=10 and monster_rules.base_level(kind)<=q.get('level',1) and (q['target_kind'] is None or content.monster_id(q['target_kind'])==content.monster_id(kind)):
                 q['progress']=min(q['goal'],q['progress']+1)
 
     def constrain_targets(self,offers):
+        """Обмежує квестові цілі допустимими рівнями монстрів."""
         for q in offers:
             if q['kind'] not in ('hunt','trophies'):continue
             if q.get('target_kind') is not None and monster_rules.base_level(q['target_kind'])>q.get('level',self.region_at(*self.cities[q['city']])):
@@ -61,6 +66,7 @@ class Game(contracts.Game):
         return offers
 
     def _raw_mayor_offers(self):
+        """Формує набір кандидатів завдань до застосування обмежень репутації."""
         offers=super()._raw_mayor_offers()
         if self.city not in self.mayors:return offers
         self.constrain_targets(offers)
@@ -80,12 +86,15 @@ class Game(contracts.Game):
             offers.append(q)
         return offers
 
+    # Повертає актуальний список доступних завдань квестодавця.
     def mayor_offers(self):return self.constrain_targets(super().mayor_offers())
 
     def quest_equipment(self,q):
+        """Знаходить виданий квестовий предмет спорядження."""
         return next((i for i in self.bag+[i for i in self.equipped.values() if i] if i.get('quest_id')==q['id']),None)
 
     def accept_quest(self,ident):
+        """Приймає завдання і створює його цілі та необхідні квестові предмети."""
         offer=next((q for q in self.mayor_offers() if q['id']==ident and q['status']=='offered'),None)
         if not offer or offer['kind'] not in KINDS:return super().accept_quest(ident)
         if sum(q['status']=='active' for q in self.quests)>=8:return False
@@ -118,6 +127,7 @@ class Game(contracts.Game):
         self.log(tr('exp.accepted',title=q['title']));return True
 
     def local_expedition(self):
+        """Знаходить активне завдання з мінігрою на поточній клітинці."""
         if self.battle or self.road_event:return None
         for q in self.quests:
             if q['status']!='active' or q['kind'] not in ('generator','cache','elite_hunt') or self.quest_ready(q):continue
@@ -128,6 +138,7 @@ class Game(contracts.Game):
         return None
 
     def unlock_cache(self,ident,angle):
+        """Обробляє результат відкриття замкненого сховку."""
         q=self.local_expedition()
         if self.battle or not q or q['id']!=ident or q['kind']!='cache' or q.get('lock_open') or [self.x,self.y]!=q['cache_pos'] or 'lock_target' not in q or self.count('parts')<1:return None
         if not isinstance(angle,(int,float)) or not math.isfinite(angle) or not 0<=angle<=180:return None
@@ -144,6 +155,7 @@ class Game(contracts.Game):
         self.log(tr('exp.cache_found'));self.emit(tr('exp.cache_found'));return True
 
     def search(self):
+        """Виконує пошук на місцевості та перевіряє квестові цілі."""
         q=self.local_expedition()
         if not q:return super().search()
         if q['kind']=='generator':self._generator_request=q['id'];return True
@@ -175,11 +187,13 @@ class Game(contracts.Game):
         return False
 
     def generator_toggle(self,ident,index):
+        """Перемикає рубильник, перевіряє порядок і застосовує наслідки помилки."""
         q=self.local_expedition()
         if not q or q['id']!=ident or q['kind']!='generator' or type(index)!=int or not 0<=index<9:return False
         q['generator_board']=toggle_cells(q['generator_board'],index);return True
 
     def repair_generator(self,ident):
+        """Перевіряє завершення ремонту генератора та оновлює завдання."""
         q=self.local_expedition()
         if not q or q['id']!=ident or q['kind']!='generator':return False
         if not all(q['generator_board']):self.log(tr('exp.generator_unsolved'));return False
@@ -188,11 +202,13 @@ class Game(contracts.Game):
         self.log(tr('exp.generator_done'));return True
 
     def quest_ready(self,q):
+        """Перевіряє виконання всіх умов для здачі завдання."""
         if q['kind'] in ('field_test','cache'):
             return q['status']=='active' and q['progress']>=q['goal'] and bool(self.quest_equipment(q))
         return super().quest_ready(q)
 
     def clear_quest_items(self,ident):
+        """Прибирає предмети, що належать завершеному або скасованому завданню."""
         for items in (self.bag,self.stash,self.loot):items[:]=[i for i in items if i.get('quest_id')!=ident]
         for slot,item in self.equipped.items():
             if item and item.get('quest_id')==ident:self.equipped[slot]=None
@@ -201,40 +217,50 @@ class Game(contracts.Game):
         self.hp=min(self.hp,self.max_hp)
 
     def turn_in(self,ident):
+        """Перевіряє умови здачі, видає нагороду й завершує завдання."""
         ok=super().turn_in(ident)
         if ok:self.clear_quest_items(ident)
         return ok
 
     def abandon_quest(self,ident):
+        """Скасовує завдання, очищує його предмети та застосовує штраф."""
         ok=super().abandon_quest(ident)
         if ok:self.clear_quest_items(ident)
         return ok
 
     def buys_kind(self,item,merchant):
+        """Перевіряє, чи приймає торговець цей предмет."""
         return False if item.get('quest_id') else super().buys_kind(item,merchant)
     def dismantle(self,ident):
+        """Розбирає спорядження й повертає матеріали у сумку."""
         item=self.find(ident)
         return False if item and item.get('quest_id') else super().dismantle(ident)
     def drop_item(self,ident,qty=None):
+        """Викидає дозволений предмет з інвентаря."""
         item=self.find(ident)
         return False if item and item.get('quest_id') else super().drop_item(ident,qty)
     def install(self,ident,mod_id):
+        """Встановлює сумісний модуль у вільний слот спорядження."""
         item=self.find(ident)
         return False if item and item.get('quest_id') else super().install(ident,mod_id)
     def uninstall(self,ident,mod_id):
+        """Знімає модуль і повертає його в інвентар."""
         item=self.find(ident)
         return False if item and item.get('quest_id') else super().uninstall(ident,mod_id)
     def put_module(self,ident,mod_id,slot_index):
+        """Встановлює модуль у конкретний слот із заміною попереднього."""
         item=self.find(ident)
         return False if item and item.get('quest_id') else super().put_module(ident,mod_id,slot_index)
 
     def quest_item_views(self,q):
+        """Повертає предмети для показу в описі завдання."""
         if q['kind']=='field_test':return [self.quest_equipment(q) or q['test_item']]
         if q['kind']=='generator':return [p.parts(q['material_qty']) if q['material']=='parts' else p.fragments(q['material_qty'])]
         if q['kind']=='cache':return [self.quest_equipment(q) or dict(name=tr('exp.parcel'),kind='quest',rarity=0)]
         return super().quest_item_views(q)
 
     def quest_text(self,q):
+        """Формує опис цілі, прогресу й винагороди завдання."""
         if q['kind'] not in KINDS:return super().quest_text(q)
         kind=q['kind'];desc=tr('exp.desc_'+kind)
         if kind=='field_test':desc+='\n'+q['test_item']['name']+' · '+tr('exp.test_weapon' if q['test_item']['kind']=='weapon' else 'exp.test_armor')
@@ -246,6 +272,7 @@ class Game(contracts.Game):
 
     @classmethod
     def load(cls,path):
+        """Завантажує збереження та застосовує міграції цієї версії."""
         game=super().load(path)
         if json.loads(Path(path).read_text(encoding='utf-8'))['version']<17:
             for offers in game.offers.values():

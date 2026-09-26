@@ -29,7 +29,9 @@ def personal_actions(g,item):
         for target in ('weapon1','weapon2') if kind=='weapon' else (kind,):actions.append(('equip',(target,)))
     if kind=='sealed' and bag:actions.append(('open',()))
     if kind=='repairkit' and bag:actions.append(('use_kit',()))
-    if kind in ('weapon','armor','helmet') and not quest:actions.append(('modify',()))
+    if kind in ('weapon','armor','helmet') and not quest:
+        actions.append(('modify',()))
+        if item.get('modules'):actions.append(('remove_modules',()))
     if (kind in ('weapon','armor','helmet') or item.get('quest_repair')) and p.mr.condition(item)<p.mr.max_condition(item):
         if g.count('repairkit'):actions.append(('repair_kit',()))
         if g.city in g.technicians:
@@ -81,6 +83,7 @@ def show(app,item,event,owner=None,grid=None):
             elif code=='unequip':fn=lambda slot=args[0]:run(lambda:g.unequip(slot))
             elif code=='switch':fn=lambda:run(g.switch)
             elif code in ('use','open','use_kit'):fn=lambda:selected(app.use_selected)
+            elif code=='remove_modules':fn=lambda:run(lambda:g.remove_modules(ident))
             elif code=='modify':fn=lambda:selected(app.modify)
             elif code=='repair_kit':fn=lambda:run(lambda:g.repair_with_kit(ident))
             elif code=='repair':fn=lambda target=args[0]:run(lambda:g.repair(ident,target))

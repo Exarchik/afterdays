@@ -33,7 +33,7 @@ def settlers(app):
         label=tr('restoration.roamer_'+n['role'])+' · '+tr('restoration.accept' if n['state']=='offered' else 'restoration.return')
         if n['state']=='active':
             action=lambda:None;label=tr('restoration.seek_city')
-        entries.append((label,'npc_roamer_'+n['role'],g.quest_text(q),action))
+        entries.append((label,'npc:mayor' if n['role']=='mayor' else 'npc_roamer_'+n['role'],g.quest_text(q),action))
     choice(app,tr('restoration.settlers'),entries)
 
 

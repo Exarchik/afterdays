@@ -14,27 +14,32 @@ for name,terrain in CACHE_TYPES.items():
 class Game(settlements.Game):
     @classmethod
     def load(cls,path):
+        """Завантажує збереження та застосовує міграції цієї версії."""
         game=super().load(path)
         count=p.mr.migrate_game(game)
         if count:game.log(tr('modules.detached',count=count))
         return game
 
     def start_battle(self):
+        """Створює бойовий стан, ворогів та арену поточної зустрічі."""
         super().start_battle()
         from organic_arenas import arena
         arena(self)
 
     def road_cache(self,ident=None):
+        """Знаходить дорожній сховок на поточній клітинці."""
         if self.battle or self.road_event:return None
         return next((c for c in self.reputation_state.get('road_caches',[]) if not c['opened'] and c['pos']==[self.x,self.y] and (ident is None or c['id']==ident)),None)
 
     def lock_context(self,ident):
+        """Визначає квестовий або дорожній замок для мінігри."""
         cache=self.road_cache(ident)
         if cache:return cache
         q=self.local_expedition()
         return q if q and q['id']==ident and q['kind']=='cache' and q.get('cache_pos')==[self.x,self.y] else None
 
     def cache_contents(self,theme,level):
+        """Генерує вміст сховку за його темою та рівнем."""
         amount=1+min(3,(level-1)//4);ammo=6+2*level
         if theme=='medical':items=[p.supply('med',amount+1),p.supply('rad',amount)]
         elif theme=='armory':items=[p.ammunition(self.rng.choice(list(p.AMMO)),ammo*2),p.supply('repairkit')]
@@ -48,6 +53,7 @@ class Game(settlements.Game):
         return items
 
     def resolve_event(self,choice):
+        """Застосовує вибраний результат дорожньої події."""
         event=self.road_event
         if not event or event['kind'] not in {'locked_'+k for k in CACHE_TYPES}:return super().resolve_event(choice)
         if choice not in ('act','leave'):return False
@@ -62,11 +68,13 @@ class Game(settlements.Game):
         self._lock_request=cache['id'];self.log(tr('cache_events.found'));return True
 
     def search(self):
+        """Виконує пошук на місцевості та перевіряє квестові цілі."""
         cache=self.road_cache()
         if cache:self._lock_request=cache['id'];return True
         return super().search()
 
     def unlock_cache(self,ident,angle):
+        """Обробляє результат відкриття замкненого сховку."""
         cache=self.road_cache(ident)
         if cache is None:return super().unlock_cache(ident,angle)
         if type(angle) not in (int,float) or not math.isfinite(angle) or not 0<=angle<=180 or self.count('parts')<1:return None

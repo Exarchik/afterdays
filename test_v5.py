@@ -8,6 +8,7 @@ from refinement_ui import description
 
 class RefinementTests(unittest.TestCase):
     def test_health_and_medkit(self):
+        """Перевіряє сценарій «health and medkit» та очікувані результати."""
         g=r.Game(5);self.assertEqual((g.hp,g.max_hp),(25,25))
         g.xp=p.xp_for_level(5);self.assertEqual(g.max_hp,45)
         g.choose_perk('hardy');self.assertEqual(g.max_hp,55)
@@ -15,6 +16,7 @@ class RefinementTests(unittest.TestCase):
         g.hp=g.max_hp;count=g.count('med');self.assertFalse(g.use('med'));self.assertEqual(g.count('med'),count)
 
     def test_salvage_types_and_modules_return(self):
+        """Перевіряє сценарій «salvage types and modules return» та очікувані результати."""
         g=r.Game(5)
         for name in ['Пістолет «Попіл»','Куртка з пластинами','Шолом «Шукач»']:
             item=p.equipment(name);mod=p.module(index=0 if item['kind']=='weapon' else 3);item['modules']=[mod];g.bag.append(item)
@@ -24,6 +26,7 @@ class RefinementTests(unittest.TestCase):
         self.assertTrue(g.buys_kind(p.fragments(2),1))
 
     def test_crafting_atomic_and_correct_target(self):
+        """Перевіряє сценарій «crafting atomic and correct target» та очікувані результати."""
         g=r.Game(10)
         for kind,fn,target in [('parts',p.parts,'weapon'),('fragments',p.fragments,'protection')]:
             p.add_to(g.bag,fn(300));before=g.count(kind)
@@ -38,6 +41,7 @@ class RefinementTests(unittest.TestCase):
         state=g.rng.getstate();before=g.count('parts');self.assertFalse(g.craft_module('parts',10));self.assertEqual(g.rng.getstate(),state);self.assertEqual(before,g.count('parts'))
 
     def test_partial_repairs(self):
+        """Перевіряє сценарій «partial repairs» та очікувані результати."""
         g=r.Game(3);item=g.weapon;item['durability']=10;g.money=10000
         self.assertLess(g.repair_cost(item,25),g.repair_cost(item,100))
         for t in (25,50,100):
@@ -47,6 +51,7 @@ class RefinementTests(unittest.TestCase):
         item['durability']=5;g.money=0;self.assertFalse(g.repair(item['id'],25));self.assertEqual(item['durability'],5)
 
     def test_monster_xp_scaling(self):
+        """Перевіряє сценарій «monster xp scaling» та очікувані результати."""
         g=r.Game(5);weak=dict(kind=0,level=1);strong=dict(kind=9,level=1)
         self.assertGreater(g.enemy_xp(strong),g.enemy_xp(weak))
         self.assertGreater(g.enemy_xp(dict(weak,grade='rare')),g.enemy_xp(weak))
@@ -55,6 +60,7 @@ class RefinementTests(unittest.TestCase):
         g.xp=p.xp_for_level(30);self.assertEqual(g.enemy_xp(weak),5)
 
     def test_monster_grades_have_stats(self):
+        """Перевіряє сценарій «monster grades have stats» та очікувані результати."""
         import monster_rules
         g=r.Game(2);seen={grade:monster_rules.make(g.rng,0,1,[1,1],grade=grade) for grade in ('normal','rare','mythic')}
         self.assertEqual(set(seen),{'normal','rare','mythic'})
@@ -62,6 +68,7 @@ class RefinementTests(unittest.TestCase):
             e=seen[grade];self.assertGreater(e['max_hp'],r.MONSTERS[e['kind']][1]);self.assertGreater(e['damage'],r.MONSTERS[e['kind']][2])
 
     def test_fog_discovery_and_save(self):
+        """Перевіряє сценарій «fog discovery and save» та очікувані результати."""
         g=r.Game(1);self.assertEqual(g.known_cities,[0]);self.assertLess(len(g.explored),20)
         self.assertFalse(g.revealed(*g.cities[1]));g.reveal(*g.cities[1],2);self.assertIn(1,g.known_cities)
         old=set(g.explored);g.reveal(30,20,2);self.assertTrue(old.issubset(g.explored))
@@ -70,6 +77,7 @@ class RefinementTests(unittest.TestCase):
             path=Path(tmp)/'save.json';g.save(path);loaded=r.Game.load(path);self.assertEqual(g.explored,loaded.explored);self.assertEqual(g.known_cities,loaded.known_cities)
 
     def test_mayor_map_reward_once(self):
+        """Перевіряє сценарій «mayor map reward once» та очікувані результати."""
         g=r.Game(1)
         for n in range(3):
             q=dict(id=f'q{n}',kind='hunt',city=0,status='active',title='Test',progress=1,goal=1,target_kind=None,reward=10,pos=None)
@@ -79,6 +87,7 @@ class RefinementTests(unittest.TestCase):
         self.assertFalse(g.turn_in('q2'));self.assertEqual(len(g.known_cities),2)
 
     def test_rad_protection_exact_duration_and_price(self):
+        """Перевіряє сценарій «rad protection exact duration and price» та очікувані результати."""
         g=r.Game(8);p.add_to(g.bag,p.supply('rad',2));self.assertTrue(g.use('rad'));self.assertEqual(g.rad_turns,10)
         # Quiet road lets duration be measured without encounters or hunger.
         g.world[5][6]='road';g.radiation={'6,5':3,'5,5':3};g.bag.append(p.supply('food',100))
@@ -91,6 +100,7 @@ class RefinementTests(unittest.TestCase):
         self.assertIn('rad',{i['kind'] for i in g.stock(1)})
 
     def test_extra_events_filters_and_transaction(self):
+        """Перевіряє сценарій «extra events filters and transaction» та очікувані результати."""
         g=r.Game(2);g.x,g.y=6,5
         for terrain in ('road','forest','ruin','waste'):
             g.world[g.y][g.x]=terrain
@@ -101,6 +111,7 @@ class RefinementTests(unittest.TestCase):
         self.assertEqual(len(a.EXTRA_EVENTS),15)
 
     def test_preinstalled_modules_and_comparison(self):
+        """Перевіряє сценарій «preinstalled modules and comparison» та очікувані результати."""
         g=r.Game(9);g.xp=p.xp_for_level(12);counts=[]
         for _ in range(1600):
             item=g.roll_item();self.assertLessEqual(item.get('level',1),g.level)
@@ -116,6 +127,7 @@ class RefinementTests(unittest.TestCase):
         item['durability']=1;self.assertIn('[-]',description(g,item))
 
     def test_migrate_v4_health(self):
+        """Перевіряє сценарій «migrate v4 health» та очікувані результати."""
         g=r.Game(4);g.hp=50
         with tempfile.TemporaryDirectory() as tmp:
             path=Path(tmp)/'save.json';g.save(path);data=json.loads(path.read_text());data['version']=4

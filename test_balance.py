@@ -9,11 +9,13 @@ from refinement_ui import description
 
 class BalanceTests(unittest.TestCase):
  def test_xp_curve(self):
+  """Перевіряє сценарій «xp curve» та очікувані результати."""
   total=0
   for level in range(1,100):
    self.assertEqual(p.xp_for_level(level),total);total+=balance.level_cost(level)
   self.assertEqual(p.xp_for_level(14),22080);self.assertEqual(balance.level_cost(13),4368)
  def test_monster_scaling_and_weapon_models(self):
+  """Перевіряє сценарій «monster scaling and weapon models» та очікувані результати."""
   for kind in range(12):
    e=dict(kind=kind,level=5,grade='mythic');balance.set_monster(e)
    self.assertEqual(e['attack'],balance.MONSTER_STATS[kind][0]+12)
@@ -24,6 +26,7 @@ class BalanceTests(unittest.TestCase):
    self.assertEqual(two['stats']['attack']-one['stats']['attack'],2)
   self.assertEqual(p.equipment('Гаус-карабін «Імпульс»',level=10)['stats']['attack'],36)
  def test_combat_both_directions(self):
+  """Перевіряє сценарій «combat both directions» та очікувані результати."""
   self.assertEqual(balance.damage(10,15,10),13);self.assertEqual(balance.damage(10,15,20),8)
   g=r.Game(8);g.start_battle();b=g.battle;b['walls']=[];b['pos']=[1,1];b['enemies']=b['enemies'][:1]
   e=b['enemies'][0];e.update(pos=[2,1],hp=1000,max_hp=1000,damage=10,attack=15,defense=20,resists={},speed=0,range=1)
@@ -32,6 +35,7 @@ class BalanceTests(unittest.TestCase):
    self.assertTrue(g.shoot(e['id']));self.assertEqual(e['hp'],1000-expected)
    hp=g.hp;expected=balance.damage(10,15,g.defense);g.end_turn();self.assertEqual(g.hp,hp-expected)
  def test_quest_reward_fixed_after_level_up(self):
+  """Перевіряє сценарій «quest reward fixed after level up» та очікувані результати."""
   g=r.Game(4);q=offer_for(g,'retrieve',unique=True)
   g.accept_quest(q['id']);q=g.quests[-1];self.assertEqual(q['level'],1)
   reward=q['reward'];g.xp=p.xp_for_level(7);g.x,g.y=q['relic_pos'];g.search();g.x,g.y=g.cities[0]
@@ -40,10 +44,12 @@ class BalanceTests(unittest.TestCase):
   self.assertTrue(all(i['level']==1 for i in awarded));self.assertEqual(g.xp-xp,80);self.assertEqual(q['reward'],reward)
   for i in awarded:self.assertTrue(all(m['level']==1 for m in i.get('modules',[])))
  def test_high_level_contract(self):
+  """Перевіряє сценарій «high level contract» та очікувані результати."""
   g=r.Game(2);g.x,g.y=g.cities[2];q=g.mayor_offers()[0]
   self.assertEqual(q['level'],g.region_level);self.assertEqual(q['xp_reward'],(40+5*(q['level']-1))*(2 if q['unique'] else 1))
   for _ in range(10):self.assertEqual(g.reward_item(4,1,level=q['level'])['level'],q['level'])
  def test_traveler_distribution(self):
+  """Перевіряє сценарій «traveler distribution» та очікувані результати."""
   g=r.Game(9);counts=[0]*5
   for _ in range(1500):
    p.Game.spawn_traveler(g)
@@ -52,6 +58,7 @@ class BalanceTests(unittest.TestCase):
    for item in items:counts[item['rarity']]+=1
   for count,expected in zip(counts,balance.TRAVELER_WEIGHTS):self.assertLess(abs(count/30-expected),3)
  def test_old_save_migration_once(self):
+  """Перевіряє сценарій «old save migration once» та очікувані результати."""
   g=r.Game(10);g.xp=60*13*14+780;g.hp=70
   g.weapon['stats'].pop('attack');mod=p.module(index=6);mod['stats']={'pierce':8};g.weapon['modules']=[mod]
   g.equipped['armor']=p.equipment('Куртка з пластинами',level=7);g.equipped['armor']['stats']['defense']=6
@@ -62,6 +69,7 @@ class BalanceTests(unittest.TestCase):
    self.assertEqual(other.equipped['armor']['stats']['defense'],9)
    other.save(path);again=r.Game.load(path);self.assertEqual(other.xp,again.xp);self.assertEqual(other.equipped,again.equipped)
  def test_table_and_crafting(self):
+  """Перевіряє сценарій «table and crafting» та очікувані результати."""
   g=r.Game(2);item=p.equipment('Пістолет «Попіл»',level=2);text=description(g,item)
   self.assertIn('Характеристика\tЗначення\tРізниця',text);self.assertIn('Атака\t12',text);self.assertIn('[+]',text)
   g.bag.append(p.parts(150));before={i['id'] for i in g.bag};self.assertTrue(g.craft_module('parts',150));self.assertEqual(g.count('parts'),0)

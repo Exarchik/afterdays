@@ -48,7 +48,7 @@ def module(tier=0, rng=None, index=None):
     data=content.MODULE_DATA[ident]
     name,target,stat,base=content.name(ident),data['target'],data['stat'],data['base']
     from module_rules import module_stats, VERSION
-    return dict(id=uid(), type_id=ident, name=name, kind='module', rarity=tier, weight=.3,
+    return dict(id=uid(), type_id=ident, name=name, kind='module', rarity=tier, weight=data.get('weight',.3),
                 value=30 * (tier + 1) ** 2, target=target, stats=module_stats(ident,tier,1),module_balance_version=VERSION)
 
 
@@ -128,6 +128,7 @@ def visible(a, b, walls):
 
 class LegacyGame:
     def __init__(self, seed=None):
+        """Ініціалізує об’єкт, його початковий стан і потрібні залежності."""
         self.rng = random.Random(seed)
         self.messages = []
         self.turn = 0
@@ -160,42 +161,52 @@ class LegacyGame:
 
     @property
     def level(self):
+        """Обчислює поточний рівень гравця за накопиченим досвідом."""
         return 1 + self.xp // 100
 
     @property
     def max_hp(self):
+        """Обчислює максимальне здоров’я з рівня, перків і спорядження."""
         return 100 + (self.level - 1) * 8
 
     @property
     def weight(self):
+        """Підсумовує вагу предметів, які несе гравець."""
         return round(sum(item_weight(i) for i in self.bag) +
                      sum(item_weight(i) for i in self.equipped.values() if i), 2)
 
     @property
     def capacity(self):
+        """Обчислює максимальну вагу з урахуванням бонусів."""
         return 35.0
 
     @property
     def defense(self):
+        """Обчислює сумарний захист екіпіровки й перків."""
         return sum(stats(i).get('defense', 0) for i in self.equipped.values() if i)
 
     @property
     def weapon(self):
+        """Повертає зброю з активної руки."""
         return self.equipped[self.active]
 
     @property
     def city(self):
+        """Визначає поселення під поточною позицією гравця."""
         return self.cities.index([self.x, self.y]) if [self.x, self.y] in self.cities else None
 
     def log(self, msg):
+        """Додає повідомлення до журналу гри."""
         self.messages.append(msg)
         self.messages = self.messages[-80:]
 
     def find(self, item_id):
+        """Знаходить предмет за ідентифікатором."""
         return next((i for i in self.bag + [v for v in self.equipped.values() if v]
                      if i['id'] == item_id), None)
 
     def accept(self, item):
+        """Перевіряє можливість отримання предмета і додає його до сумки."""
         if self.weight + item_weight(item) > self.capacity + .0001:
             self.log(tr('afterdays.0030'))
             return False
@@ -203,6 +214,7 @@ class LegacyGame:
         return True
 
     def equip(self, item_id, slot):
+        """Одягає предмет у відповідний слот спорядження."""
         if self.battle:
             self.log(tr('afterdays.0031'))
             return False
@@ -221,6 +233,7 @@ class LegacyGame:
         return True
 
     def unequip(self, slot):
+        """Знімає предмет зі слота назад у сумку."""
         if self.battle or not self.equipped[slot]:
             return False
         self.bag.append(self.equipped[slot])
@@ -228,6 +241,7 @@ class LegacyGame:
         return True
 
     def install(self, item_id, mod_id):
+        """Встановлює сумісний модуль у вільний слот спорядження."""
         if self.battle:
             return False
         item, mod = self.find(item_id), self.find(mod_id)
@@ -242,6 +256,7 @@ class LegacyGame:
         return True
 
     def uninstall(self, item_id, mod_id):
+        """Знімає модуль і повертає його в інвентар."""
         if self.battle:
             return False
         item = self.find(item_id)
@@ -255,6 +270,7 @@ class LegacyGame:
         return True
 
     def use(self, kind):
+        """Застосовує ефект розхідника і зменшує його кількість."""
         item = next((i for i in self.bag if i['kind'] == kind), None)
         if not item:
             self.log(tr('afterdays.0034') if kind == 'med' else tr('afterdays.0035'))
@@ -274,6 +290,7 @@ class LegacyGame:
         return True
 
     def step(self, dx, dy):
+        """Виконує крок світом і запускає пов’язані з ходом події."""
         if self.battle:
             return self.battle_move((self.battle['pos'][0]+dx, self.battle['pos'][1]+dy))
         if abs(dx) + abs(dy) != 1 or not (0 <= self.x+dx < len(self.world[0]) and 0 <= self.y+dy < 32):
@@ -298,6 +315,7 @@ class LegacyGame:
         return True
 
     def search(self):
+        """Виконує пошук на місцевості та перевіряє квестові цілі."""
         if self.battle or self.city is not None:
             return False
         key = [self.x, self.y]
@@ -313,10 +331,12 @@ class LegacyGame:
         return True
 
     def roll_item(self):
+        """Генерує випадковий предмет за поточними правилами."""
         tier = self.rng.choices(range(5), [50, 28, 14, 6, 2])[0]
         return module(tier, self.rng) if self.rng.random() < .65 else equipment(tier=tier, rng=self.rng)
 
     def start_battle(self):
+        """Створює бойовий стан, ворогів та арену поточної зустрічі."""
         w, h = 15, 11
         pos = (1, 5)
         walls = {(x, y) for y in range(h) for x in range(3, w-1)
@@ -348,6 +368,7 @@ class LegacyGame:
         self.log(tr('afterdays.0047'))
 
     def battle_move(self, target):
+        """Переміщує гравця по арені й витрачає необхідні ОД."""
         b = self.battle
         if not b:
             return False
@@ -361,6 +382,7 @@ class LegacyGame:
         return True
 
     def shot_info(self, enemy):
+        """Повертає допустимість пострілу, причину відмови та шанс влучання."""
         b, weapon = self.battle, self.weapon
         if not b or not weapon:
             return False, tr('afterdays.0049'), 0
@@ -374,6 +396,7 @@ class LegacyGame:
         return True, '', chance
 
     def shoot(self, enemy_id):
+        """Перевіряє можливість пострілу та обробляє його наслідки."""
         b = self.battle
         if not b:
             return False
@@ -403,6 +426,7 @@ class LegacyGame:
         return True
 
     def switch(self):
+        """Перемикає активну руку зі зброєю."""
         other = 'weapon2' if self.active == 'weapon1' else 'weapon1'
         if not self.equipped[other]:
             self.log(tr('afterdays.0056'))
@@ -416,6 +440,7 @@ class LegacyGame:
         return True
 
     def end_turn(self):
+        """Передає хід ворогам і відновлює ОД наступного ходу."""
         b = self.battle
         if not b:
             return
@@ -439,6 +464,7 @@ class LegacyGame:
         self.log(tr('afterdays.0059', v0=b['round']))
 
     def victory(self):
+        """Завершує переможний бій і нараховує його результати."""
         self.battle = None
         reward = self.rng.randint(45, 85)
         self.money += reward
@@ -446,6 +472,7 @@ class LegacyGame:
         self.log(tr('afterdays.0060', v0=reward))
 
     def flee(self):
+        """Намагається вивести гравця з бою."""
         if not self.battle:
             return False
         if self.battle['pos'][0] != 0 or self.battle['ap'] < 2:
@@ -456,6 +483,7 @@ class LegacyGame:
         return True
 
     def defeat(self):
+        """Обробляє поразку гравця і завершує бойовий стан."""
         loss = min(self.money, max(25, self.money // 4))
         self.money -= loss
         self.x, self.y = self.cities[0]
@@ -465,6 +493,7 @@ class LegacyGame:
         self.log(tr('afterdays.0063', v0=loss))
 
     def rest(self):
+        """Відновлює гравця під час відпочинку в поселенні."""
         if self.city is None or self.battle:
             return False
         if self.hp == self.max_hp:
@@ -480,6 +509,7 @@ class LegacyGame:
         return True
 
     def stock(self, merchant):
+        """Повертає або оновлює асортимент торговця."""
         if self.city is None or self.battle:
             return []
         key = f'{self.city}:{merchant}'
@@ -496,14 +526,17 @@ class LegacyGame:
         return entry['items']
 
     def price(self, item, merchant, buying=True):
+        """Обчислює ціну купівлі або продажу предмета."""
         if buying:
             return 85 if merchant == 2 else int(item_value(item)*1.15)
         return max(1, int(item_value(item) * (.22 if merchant == 2 else .50)))
 
     def buys_kind(self, item, merchant):
+        """Перевіряє, чи приймає торговець цей предмет."""
         return merchant == 2 or item['kind'] in (('weapon', 'armor', 'helmet', 'module') if merchant == 0 else ('food', 'med'))
 
     def buy(self, item_id, merchant):
+        """Перевіряє ціну й місткість та купує вибрану кількість товару."""
         items = self.stock(merchant)
         item = next((i for i in items if i['id'] == item_id), None)
         if not item:
@@ -520,6 +553,7 @@ class LegacyGame:
         return True
 
     def sell(self, item_id, merchant):
+        """Продає дозволений товар і нараховує гроші."""
         if self.city is None or self.battle:
             return False
         item = next((i for i in self.bag if i['id'] == item_id), None)
@@ -533,6 +567,7 @@ class LegacyGame:
         return True
 
     def collect(self, item_id):
+        """Переносить доступний предмет зі здобичі до сумки."""
         if self.battle:
             return False
         item = next((i for i in self.loot if i['id'] == item_id), None)
@@ -542,6 +577,7 @@ class LegacyGame:
         return False
 
     def save(self, path):
+        """Записує стан гри у файл збереження."""
         data = {key: value for key, value in vars(self).items() if key != 'rng'}
         data['version'] = 1
         data['rng_state'] = self.rng.getstate()
@@ -553,6 +589,7 @@ class LegacyGame:
 
     @classmethod
     def load(cls, path):
+        """Завантажує збереження та застосовує міграції цієї версії."""
         data = json.loads(Path(path).read_text(encoding='utf-8'))
         if data.pop('version', None) != 1:
             raise ValueError(tr('afterdays.0071'))
@@ -571,6 +608,7 @@ class LegacyGame:
 
 # Expanded content. All sprites are drawn locally with Canvas in visuals.py.
 STAT_NAMES.update({key:tr('modules.'+key) for key in ('weight_percent','ammo_save_percent','reflect_percent','damage_electric','damage_piercing')})
+STAT_NAMES.update(strength=tr('update031.strength'),local_damage_percent=tr('update031.local_damage'),local_defense_percent=tr('update031.local_defense'))
 STAT_NAMES.update(damage_percent=tr('modules.damage_percent'),defense_percent=tr('modules.defense_percent'),max_condition_percent=tr('modules.max_condition_percent'))
 STAT_NAMES.update(attack=tr('afterdays.0073'), pierce=tr('afterdays.0074'), crit=tr('afterdays.0075'), vitality=tr('afterdays.0076'),
                   capacity=tr('afterdays.0077'), evasion=tr('afterdays.0078'), regen=tr('afterdays.0079'))
@@ -587,6 +625,7 @@ QUEST_LABELS = {'hunt': tr('afterdays.0088'), 'retrieve': tr('afterdays.0089'),
 
 class ExpansionGame(LegacyGame):
     def __init__(self, seed=None):
+        """Ініціалізує об’єкт, його початковий стан і потрібні залежності."""
         super().__init__(seed)
         self.cities.extend([p[:] for p in EXTRA_CITIES])
         self.city_merchants = [[0, 1, 2] if i == 0 else [1] +
@@ -601,6 +640,7 @@ class ExpansionGame(LegacyGame):
         self._connect_cities()
 
     def _connect_cities(self):
+        """Прокладає дороги між основними поселеннями."""
         for point in self.cities[5:]:
             near = min(self.cities[:5], key=lambda p: math.dist(p, point))
             for x in range(min(near[0], point[0]), max(near[0], point[0])+1):
@@ -611,18 +651,22 @@ class ExpansionGame(LegacyGame):
             self.world[y][x] = 'city'
 
     def protection_stat(self, key):
+        """Підсумовує вказаний бонус захисного спорядження."""
         return sum(stats(i).get(key, 0) for i in self.equipped.values() if i and i['kind'] != 'weapon')
 
     @property
     def capacity(self):
+        """Обчислює максимальну вагу з урахуванням бонусів."""
         return 35.0 + self.protection_stat('capacity')
 
     @property
     def max_hp(self):
+        """Обчислює максимальне здоров’я з рівня, перків і спорядження."""
         return 100 + (self.level-1)*8 + self.protection_stat('vitality')
 
     def _change_gear(self, fn):
         # Transactional rollback if removing a load-bearing item would overload the player.
+        """Атомарно змінює спорядження з відкатом при перевищенні місткості."""
         import copy
         before = copy.deepcopy((self.bag, self.equipped))
         ok = fn()
@@ -634,15 +678,19 @@ class ExpansionGame(LegacyGame):
         return ok
 
     def equip(self, item_id, slot):
+        """Одягає предмет у відповідний слот спорядження."""
         return self._change_gear(lambda: super(ExpansionGame, self).equip(item_id, slot))
 
     def unequip(self, slot):
+        """Знімає предмет зі слота назад у сумку."""
         return self._change_gear(lambda: super(ExpansionGame, self).unequip(slot))
 
     def uninstall(self, item_id, mod_id):
+        """Знімає модуль і повертає його в інвентар."""
         return self._change_gear(lambda: super(ExpansionGame, self).uninstall(item_id, mod_id))
 
     def put_module(self, item_id, mod_id, slot_index):
+        """Встановлює модуль у конкретний слот із заміною попереднього."""
         item = self.find(item_id)
         mod = self.find(mod_id)
         if self.battle or not item or not mod or mod not in self.bag or not compatible(item, mod):
@@ -661,6 +709,7 @@ class ExpansionGame(LegacyGame):
         return self._change_gear(replace)
 
     def available_merchant(self, merchant):
+        """Перевіряє доступність вказаного торговця у поточній локації."""
         if self.battle:
             return False
         if merchant == 3:
@@ -668,6 +717,7 @@ class ExpansionGame(LegacyGame):
         return self.city is not None and merchant in self.city_merchants[self.city]
 
     def stock(self, merchant):
+        """Повертає або оновлює асортимент торговця."""
         if not self.available_merchant(merchant):
             return []
         if merchant == 3:
@@ -687,16 +737,19 @@ class ExpansionGame(LegacyGame):
         return entry['items']
 
     def price(self, item, merchant, buying=True):
+        """Обчислює ціну купівлі або продажу предмета."""
         if merchant == 3:
             return max(1, int(item_value(item) * (.5 if buying else .3)))
         return super().price(item, merchant, buying)
 
     def buys_kind(self, item, merchant):
+        """Перевіряє, чи приймає торговець цей предмет."""
         if item['kind'] == 'quest':
             return False
         return merchant == 3 or super().buys_kind(item, merchant)
 
     def sell(self, item_id, merchant):
+        """Продає дозволений товар і нараховує гроші."""
         if not self.available_merchant(merchant):
             return False
         item = next((i for i in self.bag if i['id'] == item_id), None)
@@ -708,6 +761,7 @@ class ExpansionGame(LegacyGame):
         return True
 
     def spawn_traveler(self):
+        """Обирає й створює випадкового мандрівника поблизу гравця."""
         rare = equipment(tier=self.rng.choice([3, 4]), rng=self.rng)
         self.traveler = dict(pos=[self.x, self.y], items=[rare, module(4, self.rng)] +
                              [supply('food') for _ in range(5)] + [supply('med') for _ in range(3)])
@@ -715,6 +769,7 @@ class ExpansionGame(LegacyGame):
         self.log(tr('afterdays.0096'))
 
     def step(self, dx, dy):
+        """Виконує крок світом і запускає пов’язані з ходом події."""
         in_battle = bool(self.battle)
         old = [self.x, self.y]
         ok = super().step(dx, dy)
@@ -726,12 +781,14 @@ class ExpansionGame(LegacyGame):
         return ok
 
     def _visit_objectives(self):
+        """Оновлює завдання, пов’язані з відвідуванням поточної клітинки."""
         for q in self.quests:
             if q['status'] == 'active' and q['kind'] == 'scout' and not q.get('area') and q['pos'] == [self.x, self.y]:
                 q['progress'] = 1
                 self.log(tr('afterdays.0097'))
 
     def start_battle(self):
+        """Створює бойовий стан, ворогів та арену поточної зустрічі."""
         super().start_battle()
         danger = min(5, int(math.hypot(self.x-5, self.y-5)//9))
         for e in self.battle['enemies']:
@@ -742,6 +799,7 @@ class ExpansionGame(LegacyGame):
                      speed=speed, armor=armor, kind=kind)
 
     def shoot(self, enemy_id):
+        """Перевіряє можливість пострілу та обробляє його наслідки."""
         b = self.battle
         if not b:
             return False
@@ -775,6 +833,7 @@ class ExpansionGame(LegacyGame):
         return True
 
     def end_turn(self):
+        """Передає хід ворогам і відновлює ОД наступного ходу."""
         b = self.battle
         if not b:
             return
@@ -807,6 +866,7 @@ class ExpansionGame(LegacyGame):
         self.log(tr('afterdays.0105', v0=b['round']))
 
     def victory(self):
+        """Завершує переможний бій і нараховує його результати."""
         quest_id = self.quest_battle
         super().victory()
         if quest_id:
@@ -817,17 +877,20 @@ class ExpansionGame(LegacyGame):
         self.quest_battle = None
 
     def flee(self):
+        """Намагається вивести гравця з бою."""
         ok = super().flee()
         if ok:
             self.quest_battle = None
         return ok
 
     def defeat(self):
+        """Обробляє поразку гравця і завершує бойовий стан."""
         super().defeat()
         self.quest_battle = None
         self.traveler = None
 
     def mayor_offers(self):
+        """Повертає актуальний список доступних завдань квестодавця."""
         if self.city not in self.mayors or self.battle:
             return []
         key = str(self.city)
@@ -845,6 +908,7 @@ class ExpansionGame(LegacyGame):
         return self.offers[key]
 
     def accept_quest(self, quest_id):
+        """Приймає завдання і створює його цілі та необхідні квестові предмети."""
         offer = next((q for q in self.mayor_offers() if q['id'] == quest_id and q['status'] == 'offered'), None)
         if not offer:
             return False
@@ -868,11 +932,13 @@ class ExpansionGame(LegacyGame):
         return True
 
     def _kill_objectives(self, kind):
+        """Оновлює завдання на вбивство з перевіркою типу ворога і зони."""
         for q in self.quests:
             if q['status'] == 'active' and q['kind'] == 'hunt' and (q['target_kind'] is None or content.monster_id(q.get('target_type_id') or q['target_kind']) == content.monster_id(kind)):
                 q['progress'] = min(q['goal'], q['progress']+1)
 
     def quest_ready(self, q):
+        """Перевіряє виконання всіх умов для здачі завдання."""
         if q['status'] != 'active':
             return False
         if q['kind'] == 'supplies':
@@ -882,6 +948,7 @@ class ExpansionGame(LegacyGame):
         return q['progress'] >= q['goal']
 
     def quest_text(self, q):
+        """Формує опис цілі, прогресу й винагороди завдання."""
         kind = q['kind']
         if kind == 'hunt':
             target = tr('afterdays.0110') if q['target_kind'] is None else MONSTERS[q['target_kind']][0]
@@ -902,6 +969,7 @@ class ExpansionGame(LegacyGame):
         return tr('afterdays.0121', v0=q['title'], v1=desc, v2=CITY_NAMES[q['city']], v3=q['reward'], v4=state)
 
     def turn_in(self, quest_id):
+        """Перевіряє умови здачі, видає нагороду й завершує завдання."""
         q = next((q for q in self.quests if q['id'] == quest_id), None)
         if self.battle or not q or self.city != q['city'] or not self.quest_ready(q):
             self.log(tr('afterdays.0122'))
@@ -919,6 +987,7 @@ class ExpansionGame(LegacyGame):
         return True
 
     def search(self):
+        """Виконує пошук на місцевості та перевіряє квестові цілі."""
         if self.battle or self.city is not None:
             return False
         for q in self.quests:
@@ -943,6 +1012,7 @@ class ExpansionGame(LegacyGame):
         return super().search()
 
     def save(self, path):
+        """Записує стан гри у файл збереження."""
         data = {key: value for key, value in vars(self).items() if key != 'rng'}
         data['version'] = 2
         data['rng_state'] = self.rng.getstate()
@@ -954,6 +1024,7 @@ class ExpansionGame(LegacyGame):
 
     @classmethod
     def load(cls, path):
+        """Завантажує збереження та застосовує міграції цієї версії."""
         data = json.loads(Path(path).read_text(encoding='utf-8'))
         version = data.pop('version', None)
         if version not in (1, 2):
@@ -978,7 +1049,7 @@ class ExpansionGame(LegacyGame):
 
 
 from progression import equipment, module, supply, stats, item_weight, item_value
-from update030 import Game
+from update031 import Game
 from reputation import buy_factor, sell_factor
 
 # GUI imports are delayed so the model and tests work without a display.
@@ -999,6 +1070,7 @@ def launch(test_hook=None):
 
     class App(MapVisibility):
         def __init__(self, root):
+            """Ініціалізує об’єкт, його початковий стан і потрібні залежності."""
             self.root = root
             root.app=self
             self.game = Game()
@@ -1149,6 +1221,7 @@ def launch(test_hook=None):
             self.refresh()
 
         def listbox(self, parent, height=14):
+            """Створює список із прокручуванням для вибору елементів."""
             frame = tk.Frame(parent, bg=PANEL)
             frame.pack(fill='both', expand=True, padx=8, pady=8)
             scroll = ttk.Scrollbar(frame)
@@ -1161,6 +1234,7 @@ def launch(test_hook=None):
             return box
 
         def act(self, fn):
+            """Виконує ігрову дію та оновлює інтерфейс."""
             self.route.pause()
             if self.fx.blocked:
                 return
@@ -1191,6 +1265,7 @@ def launch(test_hook=None):
                 self.tabs.select(self.loot_tab)
 
         def refresh(self):
+            """Оновлює віджети відповідно до поточного стану гри."""
             if self.route.game is not self.game:self.route.clear()
             self.route.update_button()
             self.fx.ingest()
@@ -1241,6 +1316,7 @@ def launch(test_hook=None):
             self.root.after_idle(self.offer_notices)
 
         def offer_notices(self):
+            """Показує нові повідомлення про доступні події й завдання."""
             if self.dialog or self.fx.blocked:
                 return
             if self.game.road_event:
@@ -1250,33 +1326,41 @@ def launch(test_hook=None):
                 self.perks()
 
         def road_dialog(self):
+            """Відкриває варіанти дії для поточної дорожньої події."""
             if not self.dialog and self.game.road_event:
                 adventure_ui.road_window(self)
 
         def storage(self):
+            """Відкриває інтерфейс власного сховища."""
             if self.game.regular_city and not self.game.battle:
                 win=self.popup(tr('afterdays.0161'),'940x680')
                 adventure_ui.Storage(win,self).pack(fill='both',expand=True)
 
         def perks(self):
+            """Відкриває вибір та перегляд перків."""
             if not self.dialog:
                 self.tabs.select(self.perks_tab)
 
         def technician(self):
+            """Відкриває вкладки послуг техніка."""
             if not self.game.battle and self.game.city in self.game.technicians:
                 win=self.popup(tr('afterdays.0162'),'790x690')
                 refinement_ui.Technician(win,self).pack(fill='both',expand=True)
 
         def description(self,item):
+            """Формує читабельний опис предмета або стану."""
             return refinement_ui.description(self.game,item)
 
         def selected_id(self):
+            """Повертає ідентифікатор поточного вибору."""
             return self.inv_panel.selection
 
         def describe_selection(self):
+            """Оновлює інформацію про поточний вибір."""
             self.inv_panel.select(self.selected_id())
 
         def equip_selected(self):
+            """Одягає вибраний предмет у вказаний слот."""
             if self.game.battle:
                 self.act(lambda: self.game.log(tr('afterdays.0163')))
                 return
@@ -1295,6 +1379,7 @@ def launch(test_hook=None):
                 self.act(lambda: self.game.equip(item_id, item['kind']))
 
         def use_selected(self):
+            """Застосовує дію використання до вибраного предмета."""
             item = self.game.find(self.selected_id())
             if item and item['kind']=='repairkit':
                 import maintenance_ui
@@ -1312,6 +1397,7 @@ def launch(test_hook=None):
                 self.act(lambda: self.game.use(item['kind']))
 
         def drop_selected(self):
+            """Викидає вибраний предмет після потрібних перевірок."""
             item = self.game.find(self.selected_id())
             if item and item['kind'] == 'quest':
                 self.act(lambda: self.game.log(tr('afterdays.0167')))
@@ -1322,6 +1408,7 @@ def launch(test_hook=None):
                 self.refresh()
 
         def dismantle_selected(self):
+            """Запускає розбір вибраного спорядження."""
             item=self.game.find(self.selected_id())
             if self.game.battle or not item or item['kind'] not in ('weapon','armor','helmet'):
                 return
@@ -1333,6 +1420,7 @@ def launch(test_hook=None):
                 self.act(lambda:self.game.dismantle(item['id']))
 
         def popup(self, title, geometry):
+            """Створює й центрує додаткове вікно інтерфейсу."""
             self.route.pause()
             self.root.after_idle(lambda:sprites.decorate(self.root))
             win = tk.Toplevel(self.root)
@@ -1354,6 +1442,7 @@ def launch(test_hook=None):
             return win
 
         def modify(self):
+            """Відкриває встановлення та зняття модулів."""
             item = self.game.find(self.selected_id())
             if not item or 'slots' not in item:
                 return
@@ -1365,11 +1454,13 @@ def launch(test_hook=None):
             panel.pack(fill='both', expand=True)
 
         def mayor(self):
+            """Відкриває список пропозицій місцевого квестодавця."""
             if (self.game.city not in self.game.mayors and not self.game.regular_city) or self.game.battle:return
             win=self.popup(tr('afterdays.0178')+self.game.city_name(self.game.city),'750x670')
             refinement_ui.QuestCards(win,self,mayor=True).pack(fill='both',expand=True)
 
         def atlas(self):
+            """Відкриває оглядову карту світу."""
             import frontier_ui
             win = self.popup(tr('afterdays.0179'), '1000x730')
             tk.Label(win, text=tr('afterdays.0180'), bg=PANEL, fg=GOLD,
@@ -1444,21 +1535,25 @@ def launch(test_hook=None):
                 win.bind('<KeyPress-M>',toggle_atlas_visibility)
 
         def shop(self, merchant):
+            """Відкриває інтерфейс вибраного торговця."""
             if not self.game.available_merchant(merchant):
                 return
             win=self.popup(self.game.merchant_title(merchant), '960x730')
             advanced_ui.TradingPanel(win,self,merchant).pack(fill='both',expand=True)
 
         def collect_selected(self):
+            """Забирає вибраний предмет здобичі."""
             sel=self.loot_list.selection
             if sel:self.act(lambda:self.game.collect(sel))
 
         def collect_all(self):
+            """Намагається забрати всі доступні предмети здобичі."""
             for item in list(self.game.loot):
                 self.game.collect(item['id'])
             self.refresh()
 
         def draw(self):
+            """Перемальовує карту або арену й видимі позначення."""
             c, g = self.canvas, self.game
             if self.fx.snapshot is not None and self.fx.blocked:
                 adventure_ui.paint_snapshot(self)
@@ -1552,7 +1647,7 @@ def launch(test_hook=None):
                     pos=npc['pos']
                     if npc['state'] in ('offered','active','permission') and self.map_revealed(*pos) and self.vx<=pos[0]<self.vx+cols and self.vy<=pos[1]<self.vy+rows:
                         px,py=center(pos)
-                        sprites.draw(c,'npc_roamer_'+npc['role'],px-t*.4,py-t*.4,t*.8)
+                        sprites.draw(c,'npc:mayor' if npc['role']=='mayor' else 'npc_roamer_'+npc['role'],px-t*.4,py-t*.4,t*.8)
                 if g.traveler and g.traveler['pos'] == [g.x,g.y]:
                     px,py=center((g.x,g.y))
                     c.create_text(px+t*.4,py-t*.5,text='¤',fill='#f1d383',font=('Segoe UI',16,'bold'))
@@ -1560,15 +1655,18 @@ def launch(test_hook=None):
                                    tr('journey.hint')))
 
         def cell(self, event):
+            """Перетворює координати курсора на клітинку карти."""
             if self.game.battle:
                 return advanced_ui.iso_cell(self,event)
             return int((event.x-self.ox)//self.tile)+self.vx, int((event.y-self.oy)//self.tile)+self.vy
 
         def clear_battle_hover(self,event=None):
+            """Прибирає ціль наведення після виходу курсора з арени."""
             self.battle_hover=None
             if self.game.battle:self.draw()
 
         def map_hover(self, event):
+            """Оновлює підсвічування й підказку клітинки під курсором."""
             if self.game.battle:
                 pos = self.cell(event)
                 if getattr(self,'battle_hover',None)!=pos:
@@ -1588,6 +1686,7 @@ def launch(test_hook=None):
                         self.hint.config(text=tr('border.open_hint') if gate and self.game.border_open else tr('border.locked') if gate else tr('border.fence'))
 
         def world_step(self, dx, dy):
+            """Передає команду переміщення гравця на карті."""
             g = self.game
             if not g.can_step(dx,dy):
                 g.step(dx,dy)
@@ -1599,6 +1698,7 @@ def launch(test_hook=None):
             return g.step(dx, dy)
 
         def map_click(self, event):
+            """Обробляє натискання на клітинку карти або бойову ціль."""
             if self.dialog:
                 return
             self.canvas.focus_set()
@@ -1613,6 +1713,7 @@ def launch(test_hook=None):
                 self.route.set_target((x,y))
 
         def key(self, event):
+            """Обробляє гарячі клавіші гри."""
             if self.dialog:
                 return
             key = event.keysym.lower()
@@ -1651,6 +1752,7 @@ def launch(test_hook=None):
             return 'break'
 
         def save(self):
+            """Записує стан гри у файл збереження."""
             self.route.pause()
             try:
                 self.game.save(save_path)
@@ -1660,6 +1762,7 @@ def launch(test_hook=None):
             self.refresh()
 
         def load(self):
+            """Завантажує збереження та застосовує міграції цієї версії."""
             self.route.pause()
             if not save_path.exists():
                 messagebox.showinfo(tr('afterdays.0198'), tr('afterdays.0199'), parent=self.root)
@@ -1676,6 +1779,7 @@ def launch(test_hook=None):
                 messagebox.showerror(tr('afterdays.0203'), str(exc), parent=self.root)
 
         def new(self):
+            """Починає нову гру та скидає стан інтерфейсу."""
             self.route.pause()
             if messagebox.askyesno(tr('afterdays.0204'), tr('afterdays.0205'), parent=self.root):
                 self.game = Game()
@@ -1683,6 +1787,7 @@ def launch(test_hook=None):
                 self.refresh()
 
         def close(self):
+            """Завершує роботу вікна і пов’язаних таймерів."""
             self.route.pause()
             answer = messagebox.askyesnocancel('Afterdays', tr('afterdays.0206'), parent=self.root)
             if answer is None:
@@ -1696,6 +1801,7 @@ def launch(test_hook=None):
             self.root.destroy()
 
         def help(self):
+            """Показує довідку з керування."""
             messagebox.showinfo(tr('afterdays.0208'),
                 tr('afterdays.0209'), parent=self.root)
 

@@ -20,37 +20,48 @@ def loot_rules(kills):
  return min(1,.10+.05*normal+.10*rare+.25*mythic)*.25,2+rare+2*mythic,4 if mythic else 3 if rare else 1
 class Game(a.Game):
  def __init__(self,seed=None):
+  """Ініціалізує об’єкт, його початковий стан і потрібні залежності."""
   super().__init__(seed);self.add_hunters()
  def add_hunters(self):
+  """Додає мисливців до наборів торговців поселень."""
   for n in HUNTER_CITIES:
    if 4 not in self.city_merchants[n]:self.city_merchants[n].append(4)
  def available_merchant(self,m):
+  """Перевіряє доступність вказаного торговця у поточній локації."""
   roaming=self.traveler and self.traveler.get('hunter') and self.traveler['pos']==[self.x,self.y]
   if m==4:return not self.battle and (bool(roaming) or self.city in HUNTER_CITIES)
   if m==3 and roaming:return False
   return super().available_merchant(m)
+ # Повертає назву торговця для інтерфейсу.
  def merchant_title(self,m):return tr('economy.0002') if m==4 else super().merchant_title(m)
  def stock(self,m):
+  """Повертає або оновлює асортимент торговця."""
   if m==4:return []
   return super().stock(m)
  def spawn_traveler(self):
+  """Обирає й створює випадкового мандрівника поблизу гравця."""
   if self.rng.random()<.30:
    self.traveler=dict(hunter=True,pos=[self.x,self.y],items=[]);self.last_traveler_turn=self.turn;self.log(tr('economy.0003'))
   else:super().spawn_traveler()
  def buys_kind(self,item,m):
+  """Перевіряє, чи приймає торговець цей предмет."""
   if m==4:return item['kind']=='trophy'
   if item['kind']=='trophy':return m in (1,2,3)
   return super().buys_kind(item,m)
  def price(self,item,m,buying=True):
+  """Обчислює ціну купівлі або продажу предмета."""
   if item['kind']=='trophy' and not buying:return item['value']*(2 if m==4 else 1)
   return super().price(item,m,buying)
+ # Рахує доступні трофеї вказаного виду монстра.
  def trophy_count(self,kind):return sum(i.get('qty',1) for i in self.bag if i['kind']=='trophy' and content.monster_id(i.get('monster_type_id',i['monster_kind']))==content.monster_id(kind))
  def consume_trophies(self,kind,qty):
+  """Вилучає потрібну кількість трофеїв із сумки."""
   for item in list(self.bag):
    if item['kind']=='trophy' and content.monster_id(item.get('monster_type_id',item['monster_kind']))==content.monster_id(kind):
     take=min(qty,item['qty']);p.extract(self.bag,item,take);qty-=take
     if not qty:break
  def reward_item(self,cap=4,minimum=0,level=None):
+  """Генерує спорядження для нагороди з обмеженнями рівня й рідкості."""
   tier=self.rng.choices(list(range(minimum,cap+1)),WEIGHTS[minimum:cap+1])[0]
   level=self.rng.randint(max(1,self.level-2),self.level) if level is None else max(1,int(level))
   category=self.rng.choice(['weapon','armor','helmet','module'])
@@ -63,12 +74,15 @@ class Game(a.Game):
   p.mr.clamp_condition(item)
   return item
  def monster_loot_level(self,kills,fallback=1):
+  """Обчислює допустимий рівень здобичі за переможених монстрів."""
   source=self.rng.choice(kills) if kills else {}
   level=max(1,int(source.get('level',fallback)))
   return self.rng.randint(max(1,level-2),level)
  def start_battle(self):
+  """Створює бойовий стан, ворогів та арену поточної зустрічі."""
   super().start_battle();self.battle['kills']=[]
  def victory(self):
+  """Завершує переможний бій і нараховує його результати."""
   if not self.battle:return
   b=self.battle;self._last_battle=copy.deepcopy(b);kills=b.get('kills',[])
   chance,rolls,cap=loot_rules(kills)
@@ -94,6 +108,7 @@ class Game(a.Game):
    if q:q['progress']=1;self.emit(tr('economy.0004'),color='#c7a0f1')
   self.log(tr('economy.0005', v0=credits, v1=rolls, v2=chance, v3=drops))
  def price_quest(self,q):
+  """Розраховує винагороду завдання з урахуванням його рівня."""
   zone=q.get('level',q.get('zone',self.region_at(*self.cities[q['city']])))
   multiplier=2 if q.get('unique') else 1
   fee=round(BASE_REWARDS[q['kind']]*zone**1.3*multiplier)
@@ -102,6 +117,7 @@ class Game(a.Game):
   if q['kind']=='trophies':compensation=3*trophy(q['target_kind'])['value']*q['goal']
   q.update(reward=fee+compensation,economy_scaled=True,zone=zone,level=zone,xp_reward=(40+5*(zone-1))*multiplier)
  def mayor_offers(self):
+  """Повертає актуальний список доступних завдань квестодавця."""
   offers=super().mayor_offers()
   if not offers:return offers
   if not any(q['kind']=='trophies' for q in offers):
@@ -111,9 +127,11 @@ class Game(a.Game):
    if q['status']=='offered' and not q.get('economy_scaled'):self.price_quest(q)
   return offers
  def quest_ready(self,q):
+  """Перевіряє виконання всіх умов для здачі завдання."""
   if q['kind']=='trophies':return q['status']=='active' and self.trophy_count(q['target_kind'])>=q['goal']
   return super().quest_ready(q)
  def quest_text(self,q):
+  """Формує опис цілі, прогресу й винагороди завдання."""
   if q['kind']=='trophies':
    text=tr('economy.0007', v0=q['title'], v1=BODY_NAMES[q['target_kind']], v2=self.trophy_count(q['target_kind']), v3=q['goal'], v4=self.city_name(q['city']), v5=q['reward'], v6=80 if q.get('unique') else 40)
   else:text=super().quest_text(q)
@@ -122,6 +140,7 @@ class Game(a.Game):
   if q.get('unique'):text+=tr('economy.0009')
   return text
  def turn_in(self,quest_id):
+  """Перевіряє умови здачі, видає нагороду й завершує завдання."""
   q=next((q for q in self.quests if q['id']==quest_id),None)
   ok=super().turn_in(quest_id)
   if ok:
@@ -135,6 +154,7 @@ class Game(a.Game):
   return ok
  @classmethod
  def load(cls,path):
+  """Завантажує збереження та застосовує міграції цієї версії."""
   version=json.loads(Path(path).read_text(encoding='utf-8'))['version'];game=super().load(path);game.add_hunters()
   if version<7:
    def reprice(item):

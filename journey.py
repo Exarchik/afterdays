@@ -46,13 +46,16 @@ def world_route(game,destination,start=None):
 class Guides:
     @property
     def guide(self):
+        """Перевіряє доступність послуг провідника."""
         return bool(not self.battle and self.traveler and self.traveler.get('guide') and self.traveler['pos']==[self.x,self.y])
 
     def available_merchant(self,merchant):
-        if self.guide and merchant in (3,4):return False
+        """Перевіряє доступність вказаного торговця у поточній локації."""
+        if self.traveler and self.traveler.get('guide') and self.traveler.get('pos')==[self.x,self.y] and merchant in (3,4):return False
         return super().available_merchant(merchant)
 
     def guide_destinations(self):
+        """Повертає доступні міста, маршрути й ціни провідника."""
         choices=[]
         for city in range(min(12,len(self.cities))):
             if city not in self.known_cities or self.cities[city]==[self.x,self.y]:continue
@@ -63,6 +66,7 @@ class Guides:
         return sorted(choices,key=lambda c:(c['distance'],c['city']))[:3]
 
     def spawn_traveler(self):
+        """Обирає й створює випадкового мандрівника поблизу гравця."""
         if self.rng.random()<.30 and self.guide_destinations():
             self.traveler=dict(guide=True,pos=[self.x,self.y],items=[])
             self.last_traveler_turn=self.turn
@@ -71,6 +75,7 @@ class Guides:
         return super().spawn_traveler()
 
     def guide_travel(self,city):
+        """Оплачує безпечну подорож провідником і проходить маршрут."""
         if not self.guide or self.road_event:return False
         choice=next((c for c in self.guide_destinations() if c['city']==city),None)
         if choice is None:return False

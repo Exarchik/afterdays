@@ -8,14 +8,17 @@ from i18n import t as tr
 
 class QuestSystem:
     def quest_capacity(self,city):
+        """Визначає максимальну кількість завдань за репутацією."""
         if city not in self.mayors:return 1
         rep=self.reputation(city)
         return 2+(rep>=25)+(rep>=50)+(rep>=75)
 
     def active_for(self,city):
+        """Знаходить незавершені завдання вказаного квестодавця."""
         return [q for q in self.quests if q['city']==city and q['status']=='active']
 
     def mayor_offers(self):
+        """Повертає актуальний список доступних завдань квестодавця."""
         offers=super().mayor_offers() if self.city in self.mayors else self.bulletin_offers()
         if self.city is None or self.battle:return []
         slots=max(0,self.quest_capacity(self.city)-len(self.active_for(self.city)))
@@ -24,6 +27,7 @@ class QuestSystem:
         return available[:slots]
 
     def bulletin_offers(self):
+        """Повертає пропозиції дошки оголошень у місті без мера."""
         if self.battle or not self.regular_city or self.city in self.mayors:return []
         key=f'bulletin:{self.city}';entry=self.reputation_state.setdefault('bulletins',{}).get(key)
         if entry is None or self.turn-entry['turn']>=100:
@@ -40,11 +44,13 @@ class QuestSystem:
         return entry['items']
 
     def trading_city(self,merchant):
+        """Визначає місто, на репутацію якого впливає поточна торгівля."""
         if merchant in (3,4) and self.traveler and self.traveler['pos']==[self.x,self.y] and (merchant==3 or self.traveler.get('hunter')):
             return min(range(12),key=lambda n:math.dist((self.x,self.y),self.cities[n]))
         return self.city
 
     def change_reputation(self,amount,city):
+        """Змінює репутацію джерела та сусідніх локацій."""
         origin=self.cities[city]
         positions=set(map(tuple,self.cities))|{tuple(s['pos']) for s in self.special_sites}
         for pos in positions:
@@ -52,6 +58,7 @@ class QuestSystem:
                 record=self.record_at(pos);record['value']=max(0,min(100,record['value']+amount))
 
     def abandon_quest(self,quest_id):
+        """Скасовує завдання, очищує його предмети та застосовує штраф."""
         q=next((q for q in self.quests if q['id']==quest_id and q['status']=='active'),None)
         if not q or self.battle:return False
         for items in (self.bag,self.stash,self.loot):items[:]=[i for i in items if i.get('quest_id')!=quest_id]
@@ -68,27 +75,33 @@ class QuestSystem:
         self.log(tr('quests.cancelled',title=q['title']));return True
 
     def quest_return_city(self,q):
+        """Визначає місто, у якому потрібно здати завдання."""
         if q['kind']=='repair_delivery':
             site=next((s for s in self.special_sites if s['id']==q['destination']),None)
             return site['city_id'] if site else None
         return q['city']
 
     def quest_return_pos(self,q):
+        """Повертає координати місця здачі завдання."""
         return q['pos'] if q['kind']=='repair_delivery' else self.cities[q['city']]
 
     def can_turn_in(self,q):
+        """Перевіряє готовність завдання та присутність гравця в місці здачі."""
         return not self.battle and self.quest_ready(q) and [self.x,self.y]==list(self.quest_return_pos(q))
 
     def quest_ready(self,q):
+        """Перевіряє виконання всіх умов для здачі завдання."""
         if q['kind']=='repair_delivery':
             return q['status']=='active' and any(i.get('quest_id')==q['id'] and i.get('durability',0)>=100 for i in self.bag)
         return super().quest_ready(q)
 
     def stash_transfer(self,item_id,direction,qty=1):
+        """Переміщує предмети між сумкою і сховищем із перевіркою обмежень."""
         if any(i['id']==item_id and i.get('quest_id') for i in self.bag+self.stash):return False
         return super().stash_transfer(item_id,direction,qty)
 
     def quest_item_views(self,q):
+        """Повертає предмети для показу в описі завдання."""
         if q['kind']=='repair_delivery':
             item=next((i for i in self.bag if i.get('quest_id')==q['id']),q['repair_item'])
             return [item]
@@ -99,6 +112,7 @@ class QuestSystem:
         return []
 
     def prepare_quest_rewards(self,q):
+        """Генерує і зберігає предметні нагороди завдання."""
         signature=bool(q.get('unique'))
         if 'reward_items' in q and q.get('reward_unique')==signature:return q['reward_items']
         gifts=[]
@@ -113,11 +127,13 @@ class QuestSystem:
         return gifts
 
     def give_quest_items(self,q):
+        """Передає гравцю підготовлені предметні нагороди."""
         for item in self.prepare_quest_rewards(q):
             if not self.accept(copy.deepcopy(item)):p.add_to(self.stash,copy.deepcopy(item))
             self.log(tr('reputation.gift',name=item['name']))
 
     def turn_in(self,quest_id):
+        """Перевіряє умови здачі, видає нагороду й завершує завдання."""
         q=next((q for q in self.quests if q['id']==quest_id),None)
         if q and q['kind']=='repair_delivery':
             if not self.can_turn_in(q):return False
@@ -128,6 +144,7 @@ class QuestSystem:
         return super().turn_in(quest_id)
 
     def repair(self,item_id,target=100):
+        """Виконує платний ремонт до вибраного рівня стану."""
         ok=super().repair(item_id,target)
         if ok:
             item=self.find(item_id)

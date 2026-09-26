@@ -6,24 +6,30 @@ from i18n import t as tr
 class Border:
     @property
     def border_open(self):
+        """Перевіряє наявність дозволу на вихід із початкової зони."""
         self.init_reputation()
         return self.reputation_state.get('border_open',False)
 
     def inside_border(self,pos):
+        """Перевіряє належність клітинки до початкової зони."""
         return self.region_at(*pos)<=2
 
     def border_edge(self,a,b):
+        """Визначає, чи ребро між клітинками перетинає паркан."""
         return self.inside_border(a)!=self.inside_border(b)
 
     def checkpoint(self,a,b):
+        """Перевіряє, чи є на переході дорожній блокпост."""
         return self.border_edge(a,b) and all(self.world[y][x] in ('road','city') for x,y in (a,b))
 
     def can_cross(self,a,b):
+        """Перевіряє можливість перетину ребра між клітинками."""
         if not self.border_edge(a,b):return True
         # Returning players from older saves outside the fence can come home.
         return self.checkpoint(a,b) and (self.border_open or self.inside_border(b))
 
     def border_edges(self):
+        """Повертає кешовану геометрію межі початкової зони."""
         if not hasattr(self,'_border_edges'):
             self._border_edges=[]
             for y in range(32):
@@ -33,9 +39,11 @@ class Border:
         return self._border_edges
 
     def can_step(self,dx,dy):
+        """Перевіряє допустимість одного переміщення гравця."""
         return super().can_step(dx,dy)
 
     def step(self,dx,dy):
+        """Виконує крок світом і запускає пов’язані з ходом події."""
         a=(self.x,self.y);b=(self.x+dx,self.y+dy)
         if not self.battle and abs(dx)+abs(dy)==1 and self.passable(*b) and not self.can_cross(a,b):
             text=tr('border.locked') if self.checkpoint(a,b) else tr('border.fence')
@@ -43,6 +51,7 @@ class Border:
         return super().step(dx,dy)
 
     def player_reachable_world(self,start):
+        """Знаходить клітинки, доступні гравцеві з урахуванням блокпостів."""
         seen={tuple(start)};queue=deque(seen)
         while queue:
             a=queue.popleft()
@@ -51,14 +60,17 @@ class Border:
         return seen
 
     def quest_locations(self,q):
+        """Обирає допустимі клітинки для цілі завдання."""
         reachable=self.player_reachable_world(self.cities[q['city']])
         return [pos for pos in super().quest_locations(q) if pos in reachable and (q.get('level',self.region_at(*self.cities[q['city']]))<3 or self.region_at(*pos)>=3)]
 
     def metro_cost(self,destination):
+        """Обчислює вартість і тривалість доступної поїздки метро."""
         if not self.border_open and destination in range(len(self.cities)) and self.inside_border((self.x,self.y)) and not self.inside_border(self.cities[destination]):return None
         return super().metro_cost(destination)
 
     def check_border_quest(self):
+        """Перевіряє умови видачі квесту на відкриття блокпостів."""
         if self.turn<self.reputation_state.get('permit_retry',0):return
         if self.border_open or any(q['kind']=='permit' for q in self.quests):return
         eligible=[i for i in range(12) if self.reputation(i)>=75]
@@ -72,10 +84,12 @@ class Border:
         self.log(self._border_notice)
 
     def check_thanks(self):
+        """Перевіряє появу квесту подяки від міста."""
         self.check_border_quest()
         return super().check_thanks()
 
     def turn_in(self,quest_id):
+        """Перевіряє умови здачі, видає нагороду й завершує завдання."""
         q=next((q for q in self.quests if q['id']==quest_id),None)
         if q and q['kind']=='permit':
             if self.battle or self.city!=q['city'] or not self.quest_ready(q):return False
@@ -86,5 +100,6 @@ class Border:
         return super().turn_in(quest_id)
 
     def quest_text(self,q):
+        """Формує опис цілі, прогресу й винагороди завдання."""
         if q['kind']=='permit':return tr('border.quest_done') if q['status']=='done' else tr('border.quest',city=self.city_name(q['city']))
         return super().quest_text(q)

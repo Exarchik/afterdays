@@ -169,6 +169,7 @@ def iso_cell(app,event):
 
 class TradingPanel(tk.Frame):
     def __init__(self,parent,app,merchant):
+        """Ініціалізує об’єкт, його початковий стан і потрібні залежності."""
         super().__init__(parent,bg=PANEL)
         self.app,self.merchant=app,merchant
         self.selection=None;self.source=None
@@ -215,23 +216,28 @@ class TradingPanel(tk.Frame):
         self.refresh()
 
     def item(self):
+        """Знаходить предмет, обраний у поточній панелі."""
         items=self.app.game.stock(self.merchant) if self.source=='stock' else self.app.game.bag
         return next((i for i in items if i['id']==self.selection),None)
 
     def amount(self,item):
+        """Повертає вибрану кількість товару для операції."""
         if p.stack_key(item) is None:return 1
         try:return max(1,min(int(self.qty.get()),item.get('qty',1)))
         except ValueError:return 1
 
     def set_qty(self,n):
+        """Змінює кількість товару та оновлює підсумкову ціну."""
         item=self.item()
         if item:self.qty.set(str(item.get('qty',1) if n is None else min(n,item.get('qty',1))))
 
     def select(self,item_id,source):
+        """Обробляє вибір елемента та оновлює його опис."""
         self.selection,self.source=item_id,source
         self.describe()
 
     def describe(self):
+        """Показує характеристики вибраного предмета."""
         if not hasattr(self,'preview'):return
         item=self.item()
         self.preview.delete('all')
@@ -258,6 +264,7 @@ class TradingPanel(tk.Frame):
         text.configure(state='disabled')
 
     def refresh(self):
+        """Оновлює віджети відповідно до поточного стану гри."""
         g=self.app.game
         items=[dict(i,promotion=i.get('promotion') if g.promotion(i,self.merchant) else None) for i in g.stock(self.merchant)]
         if self.merchant==2:
@@ -271,6 +278,7 @@ class TradingPanel(tk.Frame):
         self.app.refresh()
 
     def press(self,event,grid,source):
+        """Запам’ятовує початок натискання чи перетягування."""
         grid.select_event(event)
         item=self.item()
         if item:
@@ -278,6 +286,7 @@ class TradingPanel(tk.Frame):
             self.drag.begin(event,dict(item=shown,source=source))
 
     def trade(self,source,item_id=None):
+        """Виконує купівлю або продаж у вибраній панелі."""
         if item_id is not None:self.selection,self.source=item_id,source
         if self.source!=source:return
         item=self.item()
@@ -294,6 +303,7 @@ class TradingPanel(tk.Frame):
         else:self.describe()
 
     def drop(self,payload,xr,yr):
+        """Обробляє відпускання предмета над ціллю перетягування."""
         if payload['source']=='bag' and payload['item'].get('kind')=='module' and inside(self.bag_grid.canvas,xr,yr):
             ident=self.bag_grid.hit(xr-self.bag_grid.canvas.winfo_rootx(),yr-self.bag_grid.canvas.winfo_rooty())
             self.app.act(lambda:self.app.game.quick_module(ident,payload['item']['id']));self.refresh();return
@@ -304,6 +314,7 @@ class TradingPanel(tk.Frame):
 
 class TechnicianPanel(tk.Frame):
     def __init__(self,parent,app):
+        """Ініціалізує об’єкт, його початковий стан і потрібні залежності."""
         super().__init__(parent,bg=PANEL)
         self.app=app
         self.label=tk.Label(self,bg=PANEL,fg=GOLD,font=('Segoe UI',13,'bold'));self.label.pack(pady=12)
@@ -313,16 +324,19 @@ class TechnicianPanel(tk.Frame):
         self.refresh()
 
     def refresh(self):
+        """Оновлює віджети відповідно до поточного стану гри."""
         g=self.app.game
         self.label.config(text=tr('advanced_ui.0029', v0=g.money))
         self.grid.set_items([i for i in list(g.equipped.values())+g.bag if i and 'durability' in i])
         self.app.refresh()
 
     def describe(self,item_id):
+        """Показує характеристики вибраного предмета."""
         item=self.app.game.find(item_id)
         if item:self.detail.config(text=self.app.description(item)+tr('advanced_ui.0030', v0=self.app.game.repair_cost(item)))
 
     def repair(self):
+        """Виконує платний ремонт до вибраного рівня стану."""
         if self.grid.selection:
             self.app.game.repair(self.grid.selection)
             self.refresh()

@@ -29,8 +29,11 @@ def name(ident):return t(ident+'.name')
 
 class AliasDict(dict):
     """Old names are accepted on input; iteration always yields stable IDs."""
+    # Повертає елемент за ключем, застосовуючи сумісність ідентифікаторів.
     def __getitem__(self,key):return super().__getitem__(entity_id(key))
+    # Повертає значення за ключем або значення за замовчуванням.
     def get(self,key,default=None):return super().get(entity_id(key),default)
+    # Перевіряє наявність ключа з урахуванням сумісності ідентифікаторів.
     def __contains__(self,key):return super().__contains__(entity_id(key))
 
 GEAR=AliasDict({key:tuple(value[k] for k in ('kind','damage','range','defense','accuracy','weight','ap')) for key,value in EQUIPMENT.items()})
@@ -40,9 +43,12 @@ WEAPON_ATTACK=AliasDict({k:v['attack'] for k,v in EQUIPMENT.items() if v['kind']
 WEAPON_DAMAGE=AliasDict({k:v['damage_type'] for k,v in EQUIPMENT.items() if v['kind']=='weapon'})
 MODULES=[(name(k),v['target'],v['stat'],v['base']) for k in MODULE_IDS for v in [MODULE_DATA[k]]]
 class Monsters:
+    # Повертає кількість доступних елементів.
     def __len__(self):return len(MONSTER_IDS)
+    # Дозволяє послідовний перебір доступних елементів.
     def __iter__(self):return (self[k] for k in MONSTER_IDS)
     def __getitem__(self,key):
+        """Повертає елемент за ключем, застосовуючи сумісність ідентифікаторів."""
         ident=monster_id(key);v=MONSTER_DATA[ident]
         return (name(ident),)+tuple(v[k] for k in ('hp','damage','range','speed','armor','color'))
 MONSTERS=Monsters()
@@ -59,7 +65,7 @@ def identify_item(item):
         elif kind=='quest':ident='quest_parcel' if item.get('delivery') else 'quest_item'
         else:ident='item_'+str(kind)
         item['type_id']=ident
-    if ident in EQUIPMENT or ident in MODULE_DATA or ident in CONSUMABLES:item['name']=name(ident)
+    if ident in EQUIPMENT or ident in MODULE_DATA or ident in CONSUMABLES:item['name']=name(ident)+(' '+ '★'*min(3,item.get('upgrades',0)) if item.get('upgrades') else '')
     if kind=='trophy':item['monster_type_id']=monster_id(item.get('monster_kind',0));item['name']=t(item['monster_type_id']+'.trophy')
     for mod in item.get('modules',[]):identify_item(mod)
     if item.get('contents'):identify_item(item['contents'])

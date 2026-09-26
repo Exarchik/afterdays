@@ -88,6 +88,7 @@ def resistance_text(enemy):
 
 class Game(p.Game):
     def __init__(self,seed=None):
+        """Ініціалізує об’єкт, його початковий стан і потрібні залежності."""
         super().__init__(seed)
         self.city_names=r.random.Random(repr(self.rng.getstate())).sample([content.t(key) for key in content.read('city_names.json')],len(self.cities))
         self.world_distance_remainder=0.0
@@ -109,27 +110,34 @@ class Game(p.Game):
         self.rad_turns=0
         self.reveal(self.x,self.y,2)
 
+    # Повертає назву міста з відповідними статусними позначками.
     def city_name(self,index):return self.city_names[index]
 
+    # Перевіряє, чи перебуває гравець у звичайному місті.
     @property
     def regular_city(self):return self.city is not None and self.city<12
 
     @property
     def current_site(self):
+        """Повертає поточну особливу локацію."""
         return next((s for s in self.special_sites if s['found'] and s['pos']==[self.x,self.y]),None)
 
     def merchant_title(self,m):
+        """Повертає назву торговця для інтерфейсу."""
         site=self.current_site
         return site['npc'] if site and site['role']=='merchant' else r.MERCHANTS[m]
 
+    # Обчислює кількість ще не витрачених виборів перків.
     @property
     def pending_perks(self):return max(0,self.level//2-sum(self.perks.values()))
 
     @property
     def max_ap(self):
+        """Обчислює максимальний запас очок дії."""
         return 6+min(4,self.rank('tactician'))+(min(2,self.rank('adrenaline')) if self.hp<self.max_hp/2 else 0)
 
     def choose_perk(self,key):
+        """Перевіряє доступність і вивчає черговий ранг перка."""
         before=self.max_ap
         ok=super().choose_perk(key)
         if ok and self.battle:
@@ -139,6 +147,7 @@ class Game(p.Game):
         return ok
 
     def emit(self,text='',kind='text',pos=None,scene=None,color='#ecd598',source=None,entity=None):
+        """Ставить коротке повідомлення або ефект у чергу відображення."""
         if not hasattr(self,'_events'):self._events=[]
         scene=scene or ('battle' if self.battle else 'world')
         if pos is None:
@@ -148,14 +157,17 @@ class Game(p.Game):
                                  source=list(source) if source else None,entity=entity))
 
     def emit_move(self,path,entity):
+        """Додає подію руху для плавної анімації."""
         if len(path)<2:return
         self.emit(kind='move',pos=path[-1],source=path[0],entity=entity,scene='battle')
         self._events[-1]['path']=[list(pos) for pos in path]
 
     def pop_events(self):
+        """Забирає накопичені візуальні події та очищує чергу."""
         events=self._events[:];self._events.clear();return events
 
     def _build_world(self):
+        """Генерує місцевість, міста та пов’язані елементи світу."""
         for kind,count in [('water',8),('cliff',7)]:
             for _ in range(count):
                 cx,cy=self.rng.randrange(2,len(self.world[0])-2),self.rng.randrange(2,30)
@@ -169,6 +181,7 @@ class Game(p.Game):
         self.add_sites()
 
     def build_radiation(self):
+        """Розподіляє радіаційні поля за географічними правилами."""
         self.radiation={}
         for _ in range(10):
             cx=self.rng.choices(range(2,len(self.world[0])-2),weights=[x**2 for x in range(2,len(self.world[0])-2)])[0]
@@ -179,6 +192,7 @@ class Game(p.Game):
                         self.radiation[f'{x},{y}']=self.rng.randint(2,4)
 
     def add_sites(self):
+        """Розміщує особливі локації та під’єднує їх до доріг."""
         if self.special_sites:
             reachable=self.reachable_world((5,5));existing={s['name'] for s in self.special_sites}
             for name,npc,role in SITES[:16]:
@@ -192,9 +206,11 @@ class Game(p.Game):
         for (name,npc,role),pos in zip(SITES,place(self,len(SITES))):
             self.special_sites.append(dict(id=r.uid(),name=name,npc=npc,role=role,pos=list(pos),found=False,city_id=None))
 
+    # Перевіряє прохідність клітинки місцевості.
     def passable(self,x,y):return 0<=x<len(self.world[0]) and 0<=y<32 and self.world[y][x] not in BLOCKED
 
     def reachable_world(self,start):
+        """Знаходить зв’язану область прохідних клітинок від заданого старту."""
         seen={tuple(start)};queue=deque(seen)
         while queue:
             for q in r.neighbors(*queue.popleft(),len(self.world[0]),len(self.world)):
@@ -202,10 +218,12 @@ class Game(p.Game):
         return seen
 
     def can_step(self,dx,dy):
+        """Перевіряє допустимість одного переміщення гравця."""
         from journey import world_edge
         return not self.road_event and world_edge(self,(self.x,self.y),(self.x+dx,self.y+dy))
 
     def discover(self,site_id=None):
+        """Відкриває найближчі локації й оновлює туман війни."""
         hidden=[s for s in self.special_sites if not s['found']]
         site=next((s for s in hidden if s['id']==site_id),None) if site_id else min(hidden,key=lambda s:math.dist(s['pos'],(self.x,self.y)),default=None)
         if not site:return False
@@ -224,6 +242,7 @@ class Game(p.Game):
         return True
 
     def step(self,dx,dy):
+        """Виконує крок світом і запускає пов’язані з ходом події."""
         if self.battle:return self.battle_move((self.battle['pos'][0]+dx,self.battle['pos'][1]+dy))
         if not self.can_step(dx,dy):
             self.log(tr('adventure.0141') if self.road_event else tr('adventure.0142'))
@@ -249,6 +268,7 @@ class Game(p.Game):
         return True
 
     def _world_time_tick(self):
+        """Оновлює залежні від часу ефекти та події світу."""
         self.turn+=1;self.travel_steps+=1
         if self.travel_steps%8==0:
             if self.consume('food'):
@@ -264,6 +284,7 @@ class Game(p.Game):
         return True
 
     def hurt_world(self,damage,label=tr('adventure.0151')):
+        """Наносить шкоду поза боєм і показує її причину."""
         if label==tr('adventure.0152'):damage=min(damage,max(0,self.hp-1))
         self.hp-=damage;self.emit(f'−{damage} HP',color='#ff927c')
         self.log(f'{label}: −{damage} HP.')
@@ -271,6 +292,7 @@ class Game(p.Game):
         return True
 
     def use(self,kind):
+        """Застосовує ефект розхідника і зменшує його кількість."""
         if kind=='rad':
             if not self.count('rad') or (self.battle and self.battle['ap']<2):return False
             self.consume('rad');self.rad_turns=10
@@ -283,21 +305,25 @@ class Game(p.Game):
         return ok
 
     def _visit_objectives(self):
+        """Оновлює завдання, пов’язані з відвідуванням поточної клітинки."""
         previous={q['id']:q['progress'] for q in self.quests}
         super()._visit_objectives()
         for q in self.quests:
             if q['progress']!=previous[q['id']]:self.emit(tr('adventure.0155'),color='#b3d794')
 
     def _kill_objectives(self,kind):
+        """Оновлює завдання на вбивство з перевіркою типу ворога і зони."""
         previous={q['id']:q['progress'] for q in self.quests}
         super()._kill_objectives(kind)
         for q in self.quests:
             if q['progress']!=previous[q['id']]:self.emit(tr('adventure.0156', v0=q['progress'], v1=q['goal']),color='#c7a0f1')
 
     def gain_xp(self,amount):
+        """Нараховує досвід і обробляє наслідки підвищення рівня."""
         self.xp+=amount;self.emit(f'+{amount} XP',color='#99c9ff')
 
     def make_road_event(self,key=None):
+        """Створює дорожню подію та доступні варіанти відповіді."""
         if self.battle or self.road_event:return False
         data=next((e for e in ROAD_EVENTS if e[0]==key),None) if key else self.rng.choice([e for e in ROAD_EVENTS if (e[0] not in EXTRA_EVENTS or EXTRA_EVENTS[e[0]][0]==self.world[self.y][self.x]) and (e[0] not in road_additions.BY_KEY or road_additions.BY_KEY[e[0]][1]==self.world[self.y][self.x])])
         if not data:return False
@@ -306,6 +332,7 @@ class Game(p.Game):
         self.last_event_turn=self.turn;self.log(title);return True
 
     def resolve_event(self,choice):
+        """Застосовує вибраний результат дорожньої події."""
         event=self.road_event
         if not event or choice not in [c[0] for c in event['choices']]:return False
         kind=event['kind']
@@ -345,6 +372,7 @@ class Game(p.Game):
         return True
 
     def stock(self,merchant):
+        """Повертає або оновлює асортимент торговця."""
         site=self.current_site
         if site and site['role']=='merchant' and merchant==0 and not self.battle:
             key=f'site:{site["id"]}'
@@ -356,16 +384,19 @@ class Game(p.Game):
         return super().stock(merchant)
 
     def buys_kind(self,item,merchant):
+        """Перевіряє, чи приймає торговець цей предмет."""
         if self.current_site and self.current_site['role']=='merchant' and item['kind'] in ('food','med'):return True
         return super().buys_kind(item,merchant)
 
     def rest(self):
+        """Відновлює гравця під час відпочинку в поселенні."""
         before=self.turn
         ok=super().rest() if self.regular_city else False
         self.rad_turns=max(0,self.rad_turns-(self.turn-before))
         return ok
 
     def stash_transfer(self,item_id,direction,qty=1):
+        """Переміщує предмети між сумкою і сховищем із перевіркою обмежень."""
         if not self.regular_city or self.battle:return False
         if direction not in ('deposit','withdraw'):return False
         source=self.bag if direction=='deposit' else self.stash
@@ -373,7 +404,7 @@ class Game(p.Game):
         if not item or item['kind']=='quest' or not isinstance(qty,int) or not 1<=qty<=item.get('qty',1):return False
         preview=copy.deepcopy(item)
         if p.stack_key(preview):preview['qty']=qty
-        if direction=='withdraw' and (self.weight+p.item_weight(preview)>self.capacity+.0001 or item.get('level',1)>self.level):
+        if direction=='withdraw' and (self.weight+p.item_weight(preview)>self.capacity+.0001):
             self.log(tr('adventure.0167'));return False
         moved=p.extract(source,item,qty)
         p.add_to(self.stash if direction=='deposit' else self.bag,moved)
@@ -381,6 +412,7 @@ class Game(p.Game):
         return True
 
     def mayor_offers(self):
+        """Повертає актуальний список доступних завдань квестодавця."""
         if self.city not in self.mayors or self.battle:return []
         key=str(self.city)
         if key not in self.offer_refresh:self.offer_refresh[key]=self.turn
@@ -407,6 +439,7 @@ class Game(p.Game):
         return offers
 
     def quest_locations(self,q):
+        """Обирає допустимі клітинки для цілі завдання."""
         origin=tuple(self.cities[q['city']])
         ceiling=q.get('level',q.get('zone',self.region_at(*origin)))+1
         occupied={tuple(t['pos']) for t in self.quests if t.get('pos') and t['status']=='active' and t['id']!=q['id']}
@@ -416,11 +449,13 @@ class Game(p.Game):
         return nearby or pool
 
     def accept_quest(self,quest_id):
+        """Приймає завдання і створює його цілі та необхідні квестові предмети."""
         ok=super().accept_quest(quest_id)
         if ok:self.emit(tr('adventure.0185'),color='#c7a0f1')
         return ok
 
     def quest_text(self,q):
+        """Формує опис цілі, прогресу й винагороди завдання."""
         k=q['kind'];unique=q.get('unique',False)
         if k=='hunt':
             target=tr('adventure.0186') if q['target_kind'] is None else r.MONSTERS[q['target_kind']][0]
@@ -434,6 +469,7 @@ class Game(p.Game):
         return (tr('adventure.0200') if unique else '')+tr('adventure.0201', v0=q['title'], v1=desc, v2=self.city_name(q['city']), v3=q['reward'], v4=80 if unique else 40, v5=state)
 
     def turn_in(self,quest_id):
+        """Перевіряє умови здачі, видає нагороду й завершує завдання."""
         xp=self.xp
         ok=super().turn_in(quest_id)
         if ok:
@@ -450,6 +486,7 @@ class Game(p.Game):
         return ok
 
     def search(self):
+        """Виконує пошук на місцевості та перевіряє квестові цілі."""
         if self.road_event:self.log(tr('adventure.0205'));return False
         old={q['id']:q['progress'] for q in self.quests}
         before=self.turn
@@ -460,11 +497,13 @@ class Game(p.Game):
         return ok
 
     def switch(self):
+        """Перемикає активну руку зі зброєю."""
         other='weapon2' if self.active=='weapon1' else 'weapon1'
         if not self.equipped[other]:self.emit(tr('adventure.0207'));return False
         self.active=other;self.emit(tr('adventure.0208'));return True
 
     def start_battle(self):
+        """Створює бойовий стан, ворогів та арену поточної зустрічі."""
         super().start_battle()
         self.battle.update(ap=self.max_ap,max_ap=self.max_ap,corpses=[])
         for e in self.battle['enemies']:
@@ -478,6 +517,7 @@ class Game(p.Game):
             if grade!='normal':e['name']=(tr('adventure.0209') if grade=='rare' else tr('adventure.0210'))+e['name']
 
     def battle_move(self,target):
+        """Переміщує гравця по арені й витрачає необхідні ОД."""
         if not self.battle:return False
         ok=super().battle_move(target)
         if not ok:
@@ -488,6 +528,7 @@ class Game(p.Game):
         return ok
 
     def _finish_enemy(self,e,weapon=None):
+        """Завершує смерть ворога й обробляє пов’язані нагороди."""
         b=self.battle
         if not b or e not in b['enemies']:return
         b.setdefault('corpses',[]).append(dict(pos=e['pos'][:],kind=e['kind'],type_id=content.monster_id(e),grade=e.get('grade','normal')))
@@ -498,6 +539,7 @@ class Game(p.Game):
         self._kill_objectives(e['kind'])
 
     def shoot(self,enemy_id):
+        """Перевіряє можливість пострілу та обробляє його наслідки."""
         b=self.battle;w=self.weapon
         if not b or not w:return False
         e=next((e for e in b['enemies'] if e['id']==enemy_id),None)
@@ -534,6 +576,7 @@ class Game(p.Game):
         return True
 
     def end_turn(self):
+        """Передає хід ворогам і відновлює ОД наступного ходу."""
         b=self.battle
         if not b:return
         for e in list(b['enemies']):
@@ -573,16 +616,19 @@ class Game(p.Game):
         self.log(tr('adventure.0222', v0=b['round']))
 
     def victory(self):
+        """Завершує переможний бій і нараховує його результати."""
         if self.battle:self._last_battle=copy.deepcopy(self.battle)
         qid=self.quest_battle
         super().victory()
         if qid:self.emit(tr('adventure.0223'),color='#c7a0f1')
 
     def defeat(self):
+        """Обробляє поразку гравця і завершує бойовий стан."""
         if self.battle:self._last_battle=copy.deepcopy(self.battle)
         super().defeat();self.road_event=None
 
     def save(self,path):
+        """Записує стан гри у файл збереження."""
         content.migrate(self)
         data={k:v for k,v in vars(self).items() if k!='rng' and not k.startswith('_')}
         data.update(version=18,rng_state=self.rng.getstate())
@@ -591,6 +637,7 @@ class Game(p.Game):
 
     @classmethod
     def load(cls,path):
+        """Завантажує збереження та застосовує міграції цієї версії."""
         data=json.loads(Path(path).read_text(encoding='utf-8'));version=data.get('version')
         if version not in (1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18):raise ValueError(tr('adventure.0224'))
         game=cls(0)
@@ -641,9 +688,11 @@ class Game(p.Game):
             for e in game.battle['enemies']:e.setdefault('resists',copy.deepcopy(RESISTANCES.get(e['kind'],{})))
         return game
 
+    # Перевіряє, чи була клітинка відкрита гравцем.
     def revealed(self,x,y):return f'{x},{y}' in self.explored
 
     def reveal(self,x,y,radius=2):
+        """Відкриває клітинки карти у заданій області."""
         known=set(self.explored)
         for yy in range(max(0,y-radius),min(32,y+radius+1)):
             for xx in range(max(0,x-radius),min(len(self.world[0]),x+radius+1)):
@@ -654,6 +703,7 @@ class Game(p.Game):
                 self.known_cities.append(n);self.emit(tr('adventure.0228'),color='#d8c38e')
 
     def enemy_xp(self,enemy):
+        """Обчислює досвід за конкретного ворога."""
         _,hp,damage,reach,speed,armor,_=r.MONSTERS[content.monster_id(enemy)]
         base=round(hp*.35+damage*1.5+armor*2+reach+speed)
         level=enemy.get('level',1)
@@ -662,6 +712,7 @@ class Game(p.Game):
         return max(1,max(2,round(base*(1+.25*(level-1))*multiplier*(.6**gap)))//2)
 
     def roll_item(self):
+        """Генерує випадковий предмет за поточними правилами."""
         if self.rng.random()<.06:return p.supply('rad')
         item=super().roll_item()
         if item['kind'] in ('weapon','armor','helmet') and self.rng.random()<.08:
@@ -673,9 +724,11 @@ class Game(p.Game):
         return item
 
     def craft_odds(self,amount):
+        """Повертає розподіл рідкості модуля залежно від кількості матеріалів."""
         return [80,18,2,0,0] if amount<30 else [45,35,17,3,0] if amount<75 else [15,30,35,18,2] if amount<150 else [5,15,35,35,10]
 
     def craft_module(self,kind,amount):
+        """Перевіряє ресурси, розігрує результат і створює модуль у техніка."""
         if self.battle or self.city not in self.technicians or kind not in ('parts','fragments') or not isinstance(amount,int) or amount<10 or self.count(kind)<amount:return False
         target='weapon' if kind=='parts' else 'protection'
         pool=[n for n,m in enumerate(r.MODULES) if m[1]==target]
@@ -688,6 +741,7 @@ class Game(p.Game):
         self.log(tr('adventure.0229')+item['name']+' · '+r.RARITIES[tier][0]);return True
 
     def resolve_extra_event(self,kind,choice):
+        """Застосовує наслідки додаткового типу дорожньої події."""
         cost={'meal':('food',1),'open':('parts',10),'fix':('parts',5)}.get(choice)
         if cost and self.count(cost[0])<cost[1]:self.log(tr('adventure.0230'));return False
         if choice=='pay' and self.money<20:self.log(tr('adventure.0231'));return False
@@ -720,5 +774,6 @@ class Game(p.Game):
         return True
 
     def price(self,item,merchant,buying=True):
+        """Обчислює ціну купівлі або продажу предмета."""
         if item['kind']=='rad' and buying:return 2*super().price(p.supply('med'),merchant,True)
         return super().price(item,merchant,buying)

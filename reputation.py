@@ -18,13 +18,16 @@ def reward_factor(rep):
 
 class Reputation:
     def init_reputation(self):
+        """Створює початкові записи локальної репутації."""
         if not hasattr(self, 'reputation_state'):
             self.reputation_state = dict(locations={}, boards={}, thanks_due=None, coordinate_keys=True)
 
     def location_key(self, pos):
+        """Перетворює координати локації на ключ запису репутації."""
         return f"loc:{pos[0]},{pos[1]}"
 
     def migrate_reputation_keys(self):
+        """Оновлює старі ключі репутації до поточного формату."""
         self.init_reputation()
         if self.reputation_state.get('coordinate_keys'):return
         old=self.reputation_state['locations'];converted={}
@@ -35,20 +38,24 @@ class Reputation:
         self.reputation_state['coordinate_keys']=True
 
     def record_at(self,pos):
+        """Повертає або створює запис репутації за координатами."""
         self.migrate_reputation_keys()
         return self.reputation_state['locations'].setdefault(self.location_key(pos),dict(value=0,turnover=0))
 
     def local_record(self, city=None):
+        """Повертає запис репутації для поточного місця."""
         city = self.city if city is None else city
         return self.record_at(self.cities[city]) if city is not None else None
 
     def reputation(self, city=None):
+        """Повертає значення репутації у вибраній локації."""
         city=self.city if city is None else city
         if city is None:return 50
         self.migrate_reputation_keys()
         return self.reputation_state['locations'].get(self.location_key(self.cities[city]),{}).get('value',0)
 
     def add_reputation(self, amount=0, turnover=0, city=None):
+        """Нараховує репутацію за ігрову дію."""
         city=self.city if city is None else city
         if city is None:return
         origin=self.cities[city];record=self.local_record(city)
@@ -65,6 +72,7 @@ class Reputation:
         self.check_border_quest()
 
     def price(self, item, merchant, buying=True):
+        """Обчислює ціну купівлі або продажу предмета."""
         city=self.trading_city(merchant)
         rep = self.reputation(city) if city is not None else 50
         # Hunters pay twice face value; their own retail price has a matching spread.
@@ -79,28 +87,33 @@ class Reputation:
         return min(value, purchase(rep)-1)
 
     def buy(self, item_id, merchant, qty=1):
+        """Перевіряє ціну й місткість та купує вибрану кількість товару."""
         money = self.money
         ok = super().buy(item_id, merchant, qty)
         if ok:self.add_reputation(turnover=money-self.money,city=self.trading_city(merchant))
         return ok
 
     def sell(self, item_id, merchant, qty=1):
+        """Продає дозволений товар і нараховує гроші."""
         money = self.money
         ok = super().sell(item_id, merchant, qty)
         if ok:self.add_reputation(turnover=self.money-money,city=self.trading_city(merchant))
         return ok
 
     def repair(self, item_id, target=100):
+        """Виконує платний ремонт до вибраного рівня стану."""
         money=self.money
         ok=super().repair(item_id,target)
         if ok:self.add_reputation(turnover=money-self.money)
         return ok
 
     def repair_cost(self, item, target=100):
+        """Обчислює ціну ремонту предмета до вибраного стану."""
         cost = super().repair_cost(item, target)
         return max(1, math.ceil(cost*.5)) if cost and self.city is not None and self.reputation()>=50 else cost
 
     def stock(self, merchant):
+        """Повертає або оновлює асортимент торговця."""
         rep = self.reputation()
         if merchant == 4:
             if self.city is None or rep < 50 or not self.available_merchant(4):return []
@@ -134,11 +147,13 @@ class Reputation:
         return items
 
     def price_quest(self, q):
+        """Розраховує винагороду завдання з урахуванням його рівня."""
         super().price_quest(q)
         q['base_reward'] = q['reward']
         q['reward'] = max(1,round(q['base_reward']*reward_factor(self.reputation(q['city']))))
 
     def mayor_offers(self):
+        """Повертає актуальний список доступних завдань квестодавця."""
         if self.city not in self.mayors or self.battle:return []
         self.init_reputation()
         key = str(self.city)
@@ -180,6 +195,7 @@ class Reputation:
         return visible
 
     def turn_in(self, quest_id):
+        """Перевіряє умови здачі, видає нагороду й завершує завдання."""
         q = next((q for q in self.quests if q['id']==quest_id),None)
         if q and q['kind']=='thanks':
             if self.battle or self.city!=q['city'] or not self.quest_ready(q):return False
@@ -193,11 +209,13 @@ class Reputation:
         return ok
 
     def quest_text(self, q):
+        """Формує опис цілі, прогресу й винагороди завдання."""
         if q['kind']=='thanks':
             return tr('reputation.quest', city=self.city_name(q['city']), money=q['reward'], xp=q['xp_reward'])
         return super().quest_text(q)
 
     def schedule_thanks(self):
+        """Планує одноразові подяки міст із достатньою репутацією."""
         self.init_reputation()
         eligible = [i for i in range(12) if self.reputation(i)>=75 and not self.local_record(i).get('thanks_issued') and not any(q['kind']=='thanks' and q['city']==i for q in self.quests)]
         if eligible and self.reputation_state['thanks_due'] is None:
@@ -205,6 +223,7 @@ class Reputation:
         return eligible
 
     def check_thanks(self):
+        """Перевіряє появу квесту подяки від міста."""
         eligible = self.schedule_thanks()
         due = self.reputation_state['thanks_due']
         if not eligible or due is None or self.turn<due or self.battle:return
@@ -222,6 +241,7 @@ class Reputation:
         self._reputation_notice=notice
 
     def step(self, dx, dy):
+        """Виконує крок світом і запускає пов’язані з ходом події."""
         ok=super().step(dx,dy)
         if ok:self.check_thanks()
         return ok

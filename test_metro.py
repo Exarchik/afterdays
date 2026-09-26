@@ -10,6 +10,7 @@ from frontier_ui import draw_metro
 
 class MetroTests(unittest.TestCase):
  def repair(self,g,city):
+  """Виконує платний ремонт до вибраного рівня стану."""
   g.x,g.y=g.cities[city];offers=g.mayor_offers();q=next(q for q in offers if q.get('metro_city')==city)
   self.assertTrue(q['unique']);self.assertIsNone(q['pos']);self.assertTrue(g.accept_quest(q['id']))
   q=g.quests[-1];self.assertNotIn(city,g.metro_unlocked);self.assertIn('генератора метро',g.quest_text(q))
@@ -19,6 +20,7 @@ class MetroTests(unittest.TestCase):
   g.x,g.y=g.cities[city];self.assertTrue(g.turn_in(q['id']));self.assertIn(city,g.metro_unlocked)
   self.assertFalse(any(i.get('quest_id')==q['id'] for i in g.bag));return q
  def test_unlock_contracts_and_refresh(self):
+  """Перевіряє сценарій «unlock contracts and refresh» та очікувані результати."""
   g=r.Game(19);self.assertEqual(g.metro_unlocked,[0]);self.assertFalse(g.metro_travel(2))
   self.assertFalse(any('metro_city' in q for q in g.mayor_offers()))
   for city in METRO_CITIES[1:]:
@@ -27,6 +29,7 @@ class MetroTests(unittest.TestCase):
    self.assertFalse(g.turn_in(q['id']))
   self.assertEqual(g.metro_unlocked,list(METRO_CITIES))
  def test_safe_travel_cost_and_atomic_failure(self):
+  """Перевіряє сценарій «safe travel cost and atomic failure» та очікувані результати."""
   g=r.Game(23);self.repair(g,2);g.money=49;before=(g.money,g.turn,g.x,g.y)
   self.assertFalse(g.metro_travel(0));self.assertEqual(before,(g.money,g.turn,g.x,g.y))
   fare,turns,steps=g.metro_cost(0);self.assertEqual(turns,math.ceil(steps/5))
@@ -37,26 +40,34 @@ class MetroTests(unittest.TestCase):
   self.assertEqual(g.rad_turns,max(0,10-turns));self.assertEqual(g.city,0);self.assertIsNone(g.battle)
   self.assertFalse(g.metro_travel(0));self.assertFalse(g.metro_travel(3))
  def test_active_contract_and_unlocked_save(self):
+  """Перевіряє сценарій «active contract and unlocked save» та очікувані результати."""
   g=r.Game(27);self.repair(g,2);g.x,g.y=g.cities[3];q=next(q for q in g.mayor_offers() if 'metro_city' in q);g.accept_quest(q['id'])
   g.turn+=100;self.assertFalse(any(q.get('metro_city')==3 for q in g.mayor_offers()))
   with tempfile.TemporaryDirectory() as td:
    path=Path(td)/'save.json';g.save(path);other=r.Game.load(path)
    self.assertEqual(other.metro_unlocked,[0,2]);self.assertEqual(other.quests,g.quests)
  def test_atlas_fog_and_full_chain(self):
+  """Перевіряє сценарій «atlas fog and full chain» та очікувані результати."""
   class Canvas:
+   # Ініціалізує об’єкт, його початковий стан і потрібні залежності.
    def __init__(self):self.lines=[];self.stations=[]
+   # Готує або імітує операцію «create line» для перевірок Canvas.
    def create_line(self,*args,**kw):self.lines.append(args)
+   # Готує або імітує операцію «create oval» для перевірок Canvas.
    def create_oval(self,*args,**kw):self.stations.append(args)
+   # Готує або імітує операцію «create text» для перевірок Canvas.
    def create_text(self,*args,**kw):pass
   g=r.Game(8);c=Canvas();draw_metro(c,g,10,0,0);self.assertEqual(len(c.stations),1);self.assertTrue(c.lines)
   c=Canvas();draw_metro(c,g,10,0,0,lambda x,y:True);self.assertEqual(len(c.stations),5);self.assertEqual(len(c.lines),4)
  def test_free_movement_only_after_clear(self):
+  """Перевіряє сценарій «free movement only after clear» та очікувані результати."""
   g=r.Game(71);q=offer_for(g,'purge');g.accept_quest(q['id']);q=g.quests[-1];g.x,g.y=q['pos'];g.search();b=g.battle
   b['ap']=0;self.assertFalse(g.battle_move((2,4)))
   b['enemies']=[];g.victory();round=b['round'];self.assertTrue(g.battle_move(b['chest']));self.assertEqual(b['ap'],0)
   self.assertTrue(g.search());self.assertTrue(g.battle_move(b['exit']));self.assertEqual(b['round'],round)
   self.assertFalse(g.battle_move((0,0)));self.assertTrue(g.search());self.assertTrue(g.quest_ready(q))
  def test_movement_interpolation_and_input_block(self):
+  """Перевіряє сценарій «movement interpolation and input block» та очікувані результати."""
   g=r.Game(5);g.start_battle();g.pop_events();app=SimpleNamespace(game=g,root=SimpleNamespace(after=lambda *args:None))
   fx=Effects(app)
   g.emit_move([[1,1],[2,1],[2,2]],'player')
@@ -68,6 +79,7 @@ class MetroTests(unittest.TestCase):
   with patch('adventure_ui.time.monotonic',return_value=101):
    self.assertFalse(fx.blocked);self.assertEqual(fx.position('player',[2,2]),[2,2])
  def test_monster_motion_records_actual_path(self):
+  """Перевіряє сценарій «monster motion records actual path» та очікувані результати."""
   g=r.Game(12);g.start_battle();b=g.battle;b['walls']=[];b['pos']=[1,1];b['enemies']=b['enemies'][:1]
   e=b['enemies'][0];e.update(pos=[8,1],speed=2,range=1);g.pop_events();g.end_turn()
   moves=[event for event in g.pop_events() if event['kind']=='move'];self.assertEqual(len(moves),1)

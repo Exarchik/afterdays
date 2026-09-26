@@ -18,6 +18,12 @@ def build(rng_state):
         if not candidates:
             candidates=[max(((x,y) for y in range(2,30) for x in range(2,WIDTH-2)),key=lambda p:min(math.dist(p,c) for c in cities))]
         cities.append(list(rng.choice(candidates)))
+    available=set(range(1,12));selected=[0]
+    for target in (WIDTH*.25,WIDTH*.5,WIDTH*.75,WIDTH-4):
+        city=min(available,key=lambda i:(abs(cities[i][0]-target),cities[i][1]))
+        selected.append(city);available.remove(city)
+    assigned=dict(zip((0,2,3,7,10),selected));rest=iter(sorted(available))
+    cities=[cities[assigned[i] if i in assigned else next(rest)] for i in range(12)]
     world=[[rng.choices(('waste','forest','ruin'),(65,23,12))[0] for _ in range(WIDTH)] for _ in range(HEIGHT)]
     connected={0};edges=[]
     while len(connected)<len(cities):

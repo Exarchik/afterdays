@@ -134,6 +134,7 @@ def extract(items,item,qty=1):
 
 class Game(r.ExpansionGame):
     def __init__(self,seed=None):
+        """Ініціалізує об’єкт, його початковий стан і потрібні залежності."""
         super().__init__(seed)
         self.perks={}
         self.technicians=TECHNICIANS[:]
@@ -148,19 +149,23 @@ class Game(r.ExpansionGame):
 
     @property
     def level(self):
+        """Обчислює поточний рівень гравця за накопиченим досвідом."""
         level=1
         while self.xp >= xp_for_level(level+1):
             level+=1
         return level
 
     def rank(self,key):
+        """Повертає кількість вивчених рангів перка."""
         return getattr(self,'perks',{}).get(key,0)
 
     @property
     def pending_perks(self):
+        """Обчислює кількість ще не витрачених виборів перків."""
         return max(0,self.level//3-sum(self.perks.values()))
 
     def choose_perk(self,key):
+        """Перевіряє доступність і вивчає черговий ранг перка."""
         if key not in PERKS or not self.pending_perks:
             return False
         self.perks[key]=self.rank(key)+1
@@ -169,34 +174,42 @@ class Game(r.ExpansionGame):
 
     @property
     def capacity(self):
+        """Обчислює максимальну вагу з урахуванням бонусів."""
         return max(1,35+self.protection_stat('capacity')+self.rank('carrier')*5)
 
     @property
     def max_hp(self):
+        """Обчислює максимальне здоров’я з рівня, перків і спорядження."""
         return max(1,25+(self.level-1)*5+self.protection_stat('vitality')+self.rank('hardy')*10)
 
     @property
     def defense(self):
+        """Обчислює сумарний захист екіпіровки й перків."""
         base=sum(stats(i).get('defense',0) for i in self.equipped.values() if i)+self.rank('armorer')
         return max(0,round(base*max(0,1+self.protection_stat('defense_percent')/100)))
 
     def protection_stat(self,key):
+        """Підсумовує вказаний бонус захисного спорядження."""
         return sum(stats(i).get(key,0) for i in self.equipped.values()
                    if i and i['kind']!='weapon' and (i.get('durability',100)>0 or key=='capacity'))
 
     @property
     def region_level(self):
+        """Повертає рівень поточної локації."""
         return self.region_at(self.x,self.y)
 
     @staticmethod
     def region_at(x,y=5):
+        """Обчислює рівень локації за відстанню від старту."""
         return min(15,1+max(0,int((math.hypot(x-5,y-5)-3)//3)))
 
     def count(self,kind,ammo_type=None):
+        """Рахує доступні одиниці предметів потрібного типу."""
         return sum(i.get('qty',1) for i in self.bag if i['kind']==kind and
                    (ammo_type is None or i.get('ammo_type')==ammo_type))
 
     def consume(self,kind,qty=1,ammo_type=None):
+        """Витрачає задану кількість предметів потрібного типу."""
         if self.count(kind,ammo_type)<qty:
             return False
         left=qty
@@ -210,6 +223,7 @@ class Game(r.ExpansionGame):
         return True
 
     def accept(self,item):
+        """Перевіряє можливість отримання предмета і додає його до сумки."""
         if self.weight+item_weight(item)>self.capacity+.0001:
             self.log(tr('progression.0028'))
             return False
@@ -217,6 +231,7 @@ class Game(r.ExpansionGame):
         return True
 
     def equip(self,item_id,slot):
+        """Одягає предмет у відповідний слот спорядження."""
         item=self.find(item_id)
         if item and item.get('level',1)>self.level:
             self.log(tr('progression.0029'))
@@ -224,6 +239,7 @@ class Game(r.ExpansionGame):
         return super().equip(item_id,slot)
 
     def _module_allowed(self,item_id,mod_id):
+        """Перевіряє рівень, рідкість і сумісність модуля зі спорядженням."""
         item,mod=self.find(item_id),self.find(mod_id)
         if not mr.compatible(item,mod):
             self.log(tr('modules.compatibility'));return False
@@ -232,6 +248,7 @@ class Game(r.ExpansionGame):
         return True
 
     def install(self,item_id,mod_id):
+        """Встановлює сумісний модуль у вільний слот спорядження."""
         if not self._module_allowed(item_id,mod_id):return False
         def change():
             ok=super(Game,self).install(item_id,mod_id)
@@ -240,6 +257,7 @@ class Game(r.ExpansionGame):
         return self._change_gear(change)
 
     def put_module(self,item_id,mod_id,slot_index):
+        """Встановлює модуль у конкретний слот із заміною попереднього."""
         if not self._module_allowed(item_id,mod_id):return False
         def change():
             ok=super(Game,self).put_module(item_id,mod_id,slot_index)
@@ -248,6 +266,7 @@ class Game(r.ExpansionGame):
         return self._change_gear(change)
 
     def use(self,kind):
+        """Застосовує ефект розхідника і зменшує його кількість."""
         if kind not in ('med','food') or not self.count(kind):
             self.log(tr('progression.0030'))
             return False
@@ -266,6 +285,7 @@ class Game(r.ExpansionGame):
         return True
 
     def step(self,dx,dy):
+        """Виконує крок світом і запускає пов’язані з ходом події."""
         if self.battle:
             return self.battle_move((self.battle['pos'][0]+dx,self.battle['pos'][1]+dy))
         if abs(dx)+abs(dy)!=1 or not (0<=self.x+dx<len(self.world[0]) and 0<=self.y+dy<32):
@@ -290,12 +310,14 @@ class Game(r.ExpansionGame):
         return True
 
     def roll_item(self):
+        """Генерує випадковий предмет за поточними правилами."""
         max_tier=min(4,self.level//3)
         tier=self.rng.choices(list(range(max_tier+1)),[55,27,12,5,1][:max_tier+1])[0]
         level=self.rng.randint(max(1,self.level-2),self.level)
         return module(tier,self.rng,level=level) if self.rng.random()<.55 else equipment(tier=tier,rng=self.rng,level=level)
 
     def stock(self,merchant):
+        """Повертає або оновлює асортимент торговця."""
         if not self.available_merchant(merchant):
             return []
         if merchant==3:
@@ -326,6 +348,7 @@ class Game(r.ExpansionGame):
         return entry['items']
 
     def spawn_traveler(self):
+        """Обирає й створює випадкового мандрівника поблизу гравця."""
         item=equipment(tier=self.rng.choices(range(5),balance.TRAVELER_WEIGHTS)[0],rng=self.rng,level=self.region_level)
         self.traveler=dict(pos=[self.x,self.y],items=[item,module(self.rng.choices(range(5),balance.TRAVELER_WEIGHTS)[0],self.rng,level=self.region_level),
                            supply('food',8),supply('med',5),ammunition('pistol',60)])
@@ -333,6 +356,7 @@ class Game(r.ExpansionGame):
         self.log(tr('progression.0037'))
 
     def price(self,item,merchant,buying=True):
+        """Обчислює ціну купівлі або продажу предмета."""
         base=item_value(item)/item.get('qty',1)
         if buying:
             amount=item.get('sealed_price',round(85*self.level**1.3)) if merchant==2 and item['kind']!='repairkit' else base*(.5 if merchant==3 else 1.15)
@@ -341,6 +365,7 @@ class Game(r.ExpansionGame):
         return max(1,int(base*condition*(.22 if merchant==2 else .30 if merchant==3 else .50)))
 
     def buys_kind(self,item,merchant):
+        """Перевіряє, чи приймає торговець цей предмет."""
         if item['kind']=='quest' or mr.condition(item)<25:
             return False
         if item['kind'] in ('parts','fragments'):
@@ -351,6 +376,7 @@ class Game(r.ExpansionGame):
         return super().buys_kind(item,merchant)
 
     def buy(self,item_id,merchant,qty=1):
+        """Перевіряє ціну й місткість та купує вибрану кількість товару."""
         stock=self.stock(merchant)
         item=next((i for i in stock if i['id']==item_id),None)
         if not item or not isinstance(qty,int) or not 1<=qty<=item.get('qty',1):
@@ -372,6 +398,7 @@ class Game(r.ExpansionGame):
         return True
 
     def sell(self,item_id,merchant,qty=1):
+        """Продає дозволений товар і нараховує гроші."""
         if not self.available_merchant(merchant): return False
         item=next((i for i in self.bag if i['id']==item_id),None)
         if not item or not isinstance(qty,int) or not 1<=qty<=item.get('qty',1): return False
@@ -385,9 +412,11 @@ class Game(r.ExpansionGame):
         return True
 
     def salvage_yield(self,item):
+        """Обчислює кількість матеріалів, яку дасть розбір предмета."""
         return max(1,int(item['value']*.12*(.25+.75*mr.condition(item)/100)/2))
 
     def dismantle(self,item_id):
+        """Розбирає спорядження й повертає матеріали у сумку."""
         if self.battle: return False
         item=next((i for i in self.bag if i['id']==item_id),None)
         if not item or item['kind'] not in ('weapon','armor','helmet'):
@@ -401,6 +430,7 @@ class Game(r.ExpansionGame):
         return True
 
     def drop_item(self,item_id,qty=None):
+        """Викидає дозволений предмет з інвентаря."""
         if self.battle: return False
         item=next((i for i in self.bag if i['id']==item_id),None)
         if not item or item['kind']=='quest': return False
@@ -411,6 +441,7 @@ class Game(r.ExpansionGame):
         return False
 
     def collect(self,item_id):
+        """Переносить доступний предмет зі здобичі до сумки."""
         if self.battle and not (self.battle.get('dungeon') and self.battle.get('cleared')): return False
         item=next((i for i in self.loot if i['id']==item_id),None)
         if not item: return False
@@ -427,12 +458,14 @@ class Game(r.ExpansionGame):
         return True
 
     def repair_cost(self,item,target=100):
+        """Обчислює ціну ремонту предмета до вибраного стану."""
         if target not in (25,50,100) or 'durability' not in item: return 0
         target=min(target,mr.max_condition(item))
         if mr.condition(item)>=target:return 0
         return max(1,math.ceil(item['value']*.22*((target-mr.condition(item))/100)*(1-min(.3,.05*self.rank('trader')))))
 
     def repair(self,item_id,target=100):
+        """Виконує платний ремонт до вибраного рівня стану."""
         if self.battle or self.city not in self.technicians:
             self.log(tr('progression.0046'))
             return False
@@ -451,15 +484,18 @@ class Game(r.ExpansionGame):
         return True
 
     def wear(self,item,amount):
+        """Зменшує стан спорядження з урахуванням міцності та перка інженера."""
         if item and 'durability' in item:
-            item['durability']=round(max(0,mr.condition(item)-amount*(1-min(.7,.15*self.rank('engineer')))),2)
+            item['durability']=round(max(0,mr.condition(item)-amount*max(.1,1-mr.aggregate(item).get('strength',0)/100)*(1-min(.7,.15*self.rank('engineer')))),2)
             self.hp=min(self.hp,self.max_hp)
 
     def shot_info(self,enemy):
+        """Повертає допустимість пострілу, причину відмови та шанс влучання."""
         valid,reason,chance=super().shot_info(enemy)
         return valid,reason,min(98,chance+self.rank('marksman')*4) if valid else chance
 
     def shoot(self,enemy_id):
+        """Перевіряє можливість пострілу та обробляє його наслідки."""
         w=self.weapon
         if not self.battle or not w: return False
         if w.get('durability',100)<=0:
@@ -476,6 +512,7 @@ class Game(r.ExpansionGame):
         return ok
 
     def start_battle(self):
+        """Створює бойовий стан, ворогів та арену поточної зустрічі."""
         super().start_battle()
         b=self.battle
         kind=self.world[self.y][self.x]
@@ -508,6 +545,7 @@ class Game(r.ExpansionGame):
         self.log(tr('progression.0052', v0=self.region_level, v1=r.TERRAINS[b['biome']][1]))
 
     def end_turn(self):
+        """Передає хід ворогам і відновлює ОД наступного ходу."""
         b=self.battle
         if not b: return
         for e in b['enemies']:
@@ -532,6 +570,7 @@ class Game(r.ExpansionGame):
         self.log(tr('progression.0054', v0=b['round']))
 
     def victory(self):
+        """Завершує переможний бій і нараховує його результати."""
         region=self.battle.get('region_level',self.region_level) if self.battle else self.region_level
         quest_id=self.quest_battle
         self.battle=None; self.quest_battle=None
@@ -545,6 +584,7 @@ class Game(r.ExpansionGame):
         self.log(tr('progression.0055', v0=reward))
 
     def mayor_offers(self):
+        """Повертає актуальний список доступних завдань квестодавця."""
         offers=super().mayor_offers()
         for n,q in enumerate(offers):
             if q.get('scaled'): continue
@@ -559,12 +599,14 @@ class Game(r.ExpansionGame):
         return offers
 
     def quest_ready(self,q):
+        """Перевіряє виконання всіх умов для здачі завдання."""
         if q['status']!='active': return False
         if q['kind']=='supplies':
             return self.count('food') >= q.get('food_need',5 if q.get('unique') else 3) and self.count('med') >= q.get('med_need',3 if q.get('unique') else 2)
         return super().quest_ready(q)
 
     def quest_text(self,q):
+        """Формує опис цілі, прогресу й винагороди завдання."""
         text=super().quest_text(q)
         if q['kind']=='supplies':
             f,m=(5,3) if q.get('unique') else (3,2)
@@ -575,6 +617,7 @@ class Game(r.ExpansionGame):
         return text
 
     def turn_in(self,quest_id):
+        """Перевіряє умови здачі, видає нагороду й завершує завдання."""
         q=next((q for q in self.quests if q['id']==quest_id),None)
         if self.battle or not q or self.city!=q['city'] or not self.quest_ready(q):
             self.log(tr('progression.0066')); return False
@@ -588,6 +631,7 @@ class Game(r.ExpansionGame):
         return True
 
     def search(self):
+        """Виконує пошук на місцевості та перевіряє квестові цілі."""
         before=self.battle
         ok=super().search()
         self.loot=normalize(self.loot)
@@ -604,6 +648,7 @@ class Game(r.ExpansionGame):
         return ok
 
     def save(self,path):
+        """Записує стан гри у файл збереження."""
         data={k:v for k,v in vars(self).items() if k!='rng'}
         data.update(version=3,rng_state=self.rng.getstate())
         path=Path(path); path.parent.mkdir(parents=True,exist_ok=True)
@@ -613,6 +658,7 @@ class Game(r.ExpansionGame):
 
     @classmethod
     def load(cls,path):
+        """Завантажує збереження та застосовує міграції цієї версії."""
         data=json.loads(Path(path).read_text(encoding='utf-8'))
         version=data.pop('version',None)
         if version not in (1,2,3): raise ValueError(tr('progression.0069'))

@@ -17,11 +17,13 @@ def contains(obj,x,y):return obj['x']<=x<=obj['x']+obj['w'] and obj['y']<=y<=obj
 class Game(expeditions.Game):
     def salvage_yield(self,item):
         # Item level and condition only: rarity, price, modules and perks cannot inflate it.
+        """Обчислює кількість матеріалів, яку дасть розбір предмета."""
         level=max(1,int(item.get('level',1)))
         condition=p.mr.condition(item)/100
         return max(1,min(100,math.floor(min(100,level*5)*(.2+.8*condition))))
 
     def repair_with_kit(self,ident):
+        """Витрачає ремкомплект і відновлює стан обраного спорядження."""
         item=self.find(ident)
         if self.battle or not item or not (item['kind'] in ('weapon','armor','helmet') or item.get('quest_repair')) or p.mr.condition(item)>=p.mr.max_condition(item) or self.count('repairkit')<1:return False
         self.consume('repairkit');item['durability']=min(p.mr.max_condition(item),p.mr.condition(item)+35)
@@ -29,10 +31,12 @@ class Game(expeditions.Game):
         self.log(tr('scav.repaired',name=item['name'],condition=round(item['durability'])));return True
 
     def buys_kind(self,item,merchant):
+        """Перевіряє, чи приймає торговець цей предмет."""
         if item['kind']=='repairkit':return merchant in (0,1,2,3)
         return super().buys_kind(item,merchant)
 
     def stock(self,merchant):
+        """Повертає або оновлює асортимент торговця."""
         items=super().stock(merchant)
         if not self.available_merchant(merchant) or merchant not in (0,2,3):return items
         entry=self.traveler if merchant==3 else next((v for v in self.shops.values() if v['items'] is items),None)
@@ -42,6 +46,7 @@ class Game(expeditions.Game):
         return items
 
     def craft_failure(self,amount):
+        """Обчислює ймовірність невдалого створення модуля за кількістю матеріалів."""
         if amount<=10:return .70
         if amount<75:return .70-(amount-10)*.45/65
         if amount<150:return .25-(amount-75)*.25/75
@@ -49,6 +54,7 @@ class Game(expeditions.Game):
 
     def craft_odds(self,amount):
         # Conditional rarity, given a successful craft; interpolate smoothly to 1000.
+        """Повертає розподіл рідкості модуля залежно від кількості матеріалів."""
         points=[(10,[80,18,2,0,0]),(75,[15,30,35,18,2]),(150,[5,15,35,35,10]),(500,[0,5,20,45,30]),(1000,[0,0,10,40,50])]
         if amount<=10:return points[0][1]
         for (lo,a),(hi,b) in zip(points,points[1:]):
@@ -56,17 +62,22 @@ class Game(expeditions.Game):
         return points[-1][1]
 
     def craft_module(self,kind,amount):
+        """Перевіряє ресурси, розігрує результат і створює модуль у техніка."""
         self._craft_failed=False
-        if self.battle or self.city not in self.technicians or kind not in ('parts','fragments') or type(amount)!=int or not 10<=amount<=1000 or self.count(kind)<amount or self.weight+.3>self.capacity:return False
-        self.consume(kind,amount)
+        if self.battle or self.city not in self.technicians or kind not in ('parts','fragments') or type(amount)!=int or not 10<=amount<=1000 or self.count(kind)<amount:return False
+        state=self.rng.getstate()
         if self.rng.random()<self.craft_failure(amount):
-            self._craft_failed=True;self.log(tr('scav.craft_failed',amount=amount));return False
+            self.consume(kind,amount);self._craft_failed=True;self.log(tr('scav.craft_failed',amount=amount));return False
         pool=[n for n,m in enumerate(r.MODULES) if m[1]==('weapon' if kind=='parts' else 'protection')]
         tier=self.rng.choices(range(5),self.craft_odds(amount))[0]
-        item=p.module(tier,self.rng,self.rng.choice(pool),self.level);p.add_to(self.bag,item)
+        item=p.module(tier,self.rng,self.rng.choice(pool),self.region_level)
+        if self.weight+p.item_weight(item)>self.capacity+.0001:
+            self.rng.setstate(state);self.log(tr('update031.no_space'));return False
+        self.consume(kind,amount);p.add_to(self.bag,item)
         self.log(tr('adventure.0229')+item['name']+' · '+r.RARITIES[tier][0]);return True
 
     def _raw_mayor_offers(self):
+        """Формує набір кандидатів завдань до застосування обмежень репутації."""
         offers=super()._raw_mayor_offers()
         if self.city in self.mayors and not any(q['kind']=='junkyard' for q in offers):
             q=dict(id=r.uid(),kind='junkyard',title=tr('scav.junkyard'),city=self.city,status='offered',progress=0,goal=3,pos=None,target_kind=None,
@@ -75,12 +86,14 @@ class Game(expeditions.Game):
         return offers
 
     def mayor_offers(self):
+        """Повертає актуальний список доступних завдань квестодавця."""
         offers=super().mayor_offers()
         for q in offers:
             if q['kind']=='scout' and q['status']=='offered':q['goal']=9
         return offers
 
     def area_candidates(self,q):
+        """Знаходить допустимі ділянки для області квестового пошуку."""
         reachable=self.player_reachable_world(self.cities[q['city']]);minimum=3 if q['level']>=3 else 1
         def valid(pos):
             x,y=pos
@@ -91,16 +104,19 @@ class Game(expeditions.Game):
         return [pos for pos in sorted(reachable & self.reachable_world(tuple(self.cities[q['city']]))) if pos not in occupied and valid(pos)]
 
     def setup_area(self,q,candidates):
+        """Призначає область пошуку та початковий стан її дослідження."""
         x,y=self.rng.choice(candidates);q.update(pos=[x,y],area=[x-1,y-1,x+1,y+1],searched_cells=[],visited_cells=[])
         q['goal']=9 if q['kind']=='scout' else 1;q['progress']=0
         if q['kind']=='retrieve':q['relic_pos']=[self.rng.randint(x-1,x+1),self.rng.randint(y-1,y+1)]
 
     def init_generator(self,q):
+        """Готує послідовність рубильників і стан генератора."""
         q['generator_order']=self.rng.sample(list(range(5)),5);q['generator_input']=[]
         q.pop('generator_board',None)
 
     def init_junkyard(self,q):
         # Rectangles are both the visible drawing and hit-test bounds; all debris can be moved.
+        """Готує фізичні об’єкти та приховану здобич мінігри звалища."""
         objects=[]
         for n in range(q['goal']):
             objects.append(dict(id='target'+str(n),kind='target',x=110+n*115,y=190+n%2*60,w=36,h=36,found=False))
@@ -115,6 +131,7 @@ class Game(expeditions.Game):
         junk_physics.ensure(q)
 
     def accept_quest(self,ident):
+        """Приймає завдання і створює його цілі та необхідні квестові предмети."""
         offer=next((q for q in self.mayor_offers() if q['id']==ident and q['status']=='offered'),None)
         area=offer and offer['kind'] in ('scout','retrieve') and 'metro_city' not in offer
         if offer and (area or offer['kind']=='junkyard'):
@@ -133,6 +150,7 @@ class Game(expeditions.Game):
         return ok
 
     def _visit_objectives(self):
+        """Оновлює завдання, пов’язані з відвідуванням поточної клітинки."""
         super()._visit_objectives()
         for q in self.quests:
             if q['kind']=='scout' and q['status']=='active' and q.get('area') and in_area(q,self.x,self.y):
@@ -141,6 +159,7 @@ class Game(expeditions.Game):
                     q['visited_cells'].append(pos);q['progress']=len(q['visited_cells']);self.emit(tr('scav.scout_progress',count=q['progress']))
 
     def local_expedition(self):
+        """Знаходить активне завдання з мінігрою на поточній клітинці."""
         if not self.battle and not self.road_event:
             for q in self.quests:
                 if q['status']!='active' or (self.quest_ready(q) and q['kind']!='junkyard'):continue
@@ -149,6 +168,7 @@ class Game(expeditions.Game):
         return super().local_expedition()
 
     def search(self):
+        """Виконує пошук на місцевості та перевіряє квестові цілі."""
         q=self.local_expedition()
         if q and q['kind']=='junkyard':
             if not q.get('junk_opened'):
@@ -165,9 +185,11 @@ class Game(expeditions.Game):
         return super().search()
 
     def relic_item(self,q):
+        """Створює предмет реліквії для відповідного завдання."""
         return dict(id=r.uid(),type_id='quest_item',kind='quest',name=tr('scav.relic'),quest_id=q['id'],rarity=2,weight=0,value=0)
 
     def generator_toggle(self,ident,index):
+        """Перемикає рубильник, перевіряє порядок і застосовує наслідки помилки."""
         q=self.local_expedition()
         if not q or q['id']!=ident or q['kind']!='generator' or type(index)!=int or not 0<=index<5:return False
         entered=q['generator_input']
@@ -177,6 +199,7 @@ class Game(expeditions.Game):
         return True
 
     def repair_generator(self,ident):
+        """Перевіряє завершення ремонту генератора та оновлює завдання."""
         q=self.local_expedition()
         if not q or q['id']!=ident or q['kind']!='generator':return False
         if q['generator_input']!=q['generator_order']:self.log(tr('exp.generator_unsolved'));return False
@@ -185,16 +208,19 @@ class Game(expeditions.Game):
         self.log(tr('exp.generator_done'));return True
 
     def junk_quest(self,ident):
+        """Повертає доступне завдання звалища за ідентифікатором."""
         q=self.local_expedition()
         if q and q['id']==ident and q['kind']=='junkyard':
             junk_physics.ensure(q);return q
         return None
 
     def junk_top(self,q,x,y):
+        """Знаходить верхній предмет сміття під координатами курсора."""
         junk_physics.ensure(q)
         return next((o for o in reversed(q['junk_objects']) if not o['found'] and junk_physics.covers(o,x,y)),None)
 
     def junk_move(self,ident,obj_id,x,y):
+        """Зсуває вибраний об’єкт сміття в межах мінігри."""
         q=self.junk_quest(ident)
         if not q or not all(isinstance(v,(int,float)) and math.isfinite(v) for v in (x,y)):return False
         obj=next((o for o in q['junk_objects'] if o['id']==obj_id and o['kind']=='debris'),None)
@@ -203,10 +229,12 @@ class Game(expeditions.Game):
         q['junk_objects'].remove(obj);q['junk_objects'].append(obj);return True
 
     def junk_tick(self,ident,dt,held=None,destination=None):
+        """Оновлює фізичний стан сміття за один кадр."""
         q=self.junk_quest(ident)
         return junk_physics.tick(q,dt,held,destination) if q else []
 
     def junk_collect(self,ident,x,y):
+        """Збирає відкритий предмет і оновлює прогрес завдання."""
         q=self.junk_quest(ident)
         if not q:return False
         obj=self.junk_top(q,x,y)
@@ -221,15 +249,18 @@ class Game(expeditions.Game):
         return True
 
     def quest_ready(self,q):
+        """Перевіряє виконання всіх умов для здачі завдання."""
         if q['kind']=='junkyard':return q['status']=='active' and q['progress']>=q['goal'] and sum(i.get('quest_id')==q['id'] for i in self.bag)>=q['goal']
         return super().quest_ready(q)
 
     def quest_item_views(self,q):
+        """Повертає предмети для показу в описі завдання."""
         if q['kind']=='junkyard':return [dict(kind='quest',name=tr('scav.junk_part'),rarity=0,qty=q['goal'])]
         if q['kind']=='retrieve' and 'metro_city' not in q:return [self.quest_equipment(q) or self.relic_item(q)]
         return super().quest_item_views(q)
 
     def quest_text(self,q):
+        """Формує опис цілі, прогресу й винагороди завдання."""
         if q['kind']=='junkyard' or (q['kind'] in ('scout','retrieve') and 'metro_city' not in q):
             desc=tr('scav.desc_'+q['kind'])
             if q.get('area'):desc+='\n'+tr('exp.area',x=q['area'][0],y=q['area'][1],xx=q['area'][2],yy=q['area'][3])
@@ -239,6 +270,7 @@ class Game(expeditions.Game):
 
     @classmethod
     def load(cls,path):
+        """Завантажує збереження та застосовує міграції цієї версії."""
         game=super().load(path)
         for q in game.quests:
             if q['status']!='active':continue

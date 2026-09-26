@@ -20,17 +20,21 @@ DUNGEONS=(tr('frontier.0004'),tr('frontier.0005'),tr('frontier.0006'))
 class Game(economy.Game):
     @property
     def cartographer(self):
+        """Перевіряє, чи доступний картограф у поточній точці."""
         return bool(not self.battle and self.traveler and self.traveler.get('cartographer') and self.traveler['pos']==[self.x,self.y])
 
     def available_merchant(self,m):
+        """Перевіряє доступність вказаного торговця у поточній локації."""
         if self.cartographer and m in (3,4):return False
         return super().available_merchant(m)
 
     def spawn_traveler(self):
+        """Обирає й створює випадкового мандрівника поблизу гравця."""
         if self.rng.random()<.20:self.spawn_cartographer()
         else:super().spawn_traveler()
 
     def spawn_cartographer(self):
+        """Створює зустріч із картографом."""
         size=self.rng.randint(3,6)
         boxes=[(x,y) for y in range(max(0,self.y-size),min(32-size,self.y+size)+1)
                for x in range(max(0,self.x-size),min(len(self.world[0])-size,self.x+size)+1)
@@ -43,6 +47,7 @@ class Game(economy.Game):
         return True
 
     def buy_map(self):
+        """Оплачує послугу картографа й відкриває ділянку карти."""
         if not self.cartographer or self.traveler['purchased']:return False
         t=self.traveler;x,y,size=t['box']
         cells={f'{xx},{yy}' for yy in range(y,y+size) for xx in range(x,x+size)}
@@ -55,11 +60,13 @@ class Game(economy.Game):
         self.log(tr('frontier.0010', v0=size, v1=size));return True
 
     def name_dungeon(self,q):
+        """Обирає назву та тип квестового підземелля."""
         if q['kind']=='purge':
             if 'dungeon_kind' not in q:q['dungeon_kind']=self.rng.choice(DUNGEONS)
             q['title']=(tr('frontier.0011') if q.get('unique') else tr('frontier.0012'))+q['dungeon_kind']
 
     def mayor_offers(self):
+        """Повертає актуальний список доступних завдань квестодавця."""
         offers=super().mayor_offers()
         for q in offers:
             self.name_dungeon(q)
@@ -77,6 +84,7 @@ class Game(economy.Game):
         return offers
 
     def stock(self,merchant):
+        """Повертає або оновлює асортимент торговця."""
         items=super().stock(merchant)
         if merchant==2:
             for n,item in enumerate(items):
@@ -87,10 +95,12 @@ class Game(economy.Game):
         return items
 
     def buys_kind(self,item,merchant):
+        """Перевіряє, чи приймає торговець цей предмет."""
         if item['kind']=='sealed':return False
         return super().buys_kind(item,merchant)
 
     def open_chest(self,item_id):
+        """Відкриває доступну скриню і передає її вміст до здобичі."""
         if self.battle:return None
         chest=next((i for i in self.bag if i['id']==item_id and i['kind']=='sealed'),None)
         if not chest or not chest.get('contents'):return None
@@ -100,6 +110,7 @@ class Game(economy.Game):
         self.log(tr('frontier.0015')+item['name']);return item
 
     def ordinary_search(self):
+        """Розігрує звичайний пошук предметів на клітинці."""
         pos=[self.x,self.y]
         if pos in self.searched:self.log(tr('frontier.0016'));return False
         self.searched.append(pos);self.turn+=1;self.rad_turns=max(0,self.rad_turns-1)
@@ -116,9 +127,11 @@ class Game(economy.Game):
 
     @property
     def metro_unlocked(self):
+        """Повертає список станцій метро, відкритих гравцем."""
         return [city for city in METRO_CITIES if city==0 or any(q.get('metro_city')==city and q['status']=='done' for q in self.quests)]
 
     def metro_cost(self,destination):
+        """Обчислює вартість і тривалість доступної поїздки метро."""
         if self.battle or self.city not in self.metro_unlocked or destination not in self.metro_unlocked or destination==self.city:return None
         blocked={(x,y) for y in range(32) for x in range(len(self.world[0])) if not self.passable(x,y)}
         from metro_routes import station_order
@@ -132,6 +145,7 @@ class Game(economy.Game):
         return (50,max(1,math.ceil(distance/5)),distance)
 
     def metro_travel(self,destination):
+        """Оплачує поїздку метро й переносить гравця до станції."""
         if self.road_event:return False
         cost=self.metro_cost(destination)
         if cost is None:self.log(tr('frontier.0020'));return False
@@ -143,6 +157,7 @@ class Game(economy.Game):
         self.log(tr('frontier.0022', v0=self.city_name(destination), v1=turns));return True
 
     def turn_in(self,quest_id):
+        """Перевіряє умови здачі, видає нагороду й завершує завдання."""
         q=next((q for q in self.quests if q['id']==quest_id),None)
         ok=super().turn_in(quest_id)
         if ok and q.get('metro_city') in METRO_CITIES:
@@ -150,6 +165,7 @@ class Game(economy.Game):
         return ok
 
     def quest_text(self,q):
+        """Формує опис цілі, прогресу й винагороди завдання."""
         text=super().quest_text(q)
         if 'metro_city' in q:
             text=text.replace(tr('frontier.0024'),tr('frontier.0025', v0=q['part_name']))
@@ -160,6 +176,7 @@ class Game(economy.Game):
         return text
 
     def search(self):
+        """Виконує пошук на місцевості та перевіряє квестові цілі."""
         b=self.battle
         if b and b.get('dungeon'):
             if not b['cleared']:self.log(tr('frontier.0029'));return False
@@ -186,6 +203,7 @@ class Game(economy.Game):
         return ok
 
     def start_dungeon(self,q):
+        """Створює бойовий стан квестового підземелля."""
         self.name_dungeon(q)
         self.start_battle()
         b=self.battle
@@ -205,12 +223,14 @@ class Game(economy.Game):
         self.log(tr('frontier.0033'))
 
     def wake_enemies(self,pos=None):
+        """Активує ворогів, до яких гравець наблизився."""
         b=self.battle
         if b and b.get('dungeon'):
             for e in b['enemies']:
                 if hexgrid.distance(e['pos'],pos or b['pos'])<=5 and hexgrid.visible(tuple(e['pos']),tuple(pos or b['pos']),b['walls']):e['awake']=True
 
     def battle_move(self,target):
+        """Переміщує гравця по арені й витрачає необхідні ОД."""
         b=self.battle
         if not b:return False
         blocked=set(map(tuple,b['walls']))|{tuple(e['pos']) for e in b['enemies']}
@@ -226,15 +246,18 @@ class Game(economy.Game):
         return ok
 
     def shoot(self,enemy_id):
+        """Перевіряє можливість пострілу та обробляє його наслідки."""
         b=self.battle;e=next((e for e in b['enemies'] if e['id']==enemy_id),None) if b else None
         ok=super().shoot(enemy_id)
         if ok and e:e['awake']=True
         return ok
 
     def end_turn(self):
+        """Передає хід ворогам і відновлює ОД наступного ходу."""
         self.wake_enemies();super().end_turn()
 
     def victory(self):
+        """Завершує переможний бій і нараховує його результати."""
         if self.battle and self.battle.get('dungeon'):
             if self.battle['enemies']:return
             self.battle['cleared']=True
@@ -243,6 +266,7 @@ class Game(economy.Game):
         super().victory()
 
     def flee(self):
+        """Намагається вивести гравця з бою."""
         b=self.battle
         if b and b.get('dungeon'):
             if b['pos']!=b['exit']:self.log(tr('frontier.0036'));return False
@@ -253,6 +277,7 @@ class Game(economy.Game):
 
     @classmethod
     def load(cls,path):
+        """Завантажує збереження та застосовує міграції цієї версії."""
         version=json.loads(Path(path).read_text(encoding='utf-8'))['version']
         game=super().load(path)
         if version<8:

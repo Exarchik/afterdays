@@ -13,6 +13,7 @@ import progression as p
 
 class ProgressionTests(unittest.TestCase):
     def test_drops_and_all_merchants_never_exceed_player_level(self):
+        """Перевіряє сценарій «drops and all merchants never exceed player level» та очікувані результати."""
         for level in (1,2,3,6,10,15):
             g=r.Game(level);g.xp=p.xp_for_level(level)
             generated=[g.roll_item() for _ in range(80)]
@@ -25,6 +26,7 @@ class ProgressionTests(unittest.TestCase):
         self.assertIsNone(r.Game(0).equipped['weapon2'])
 
     def test_higher_level_item_can_be_collected_but_not_equipped(self):
+        """Перевіряє сценарій «higher level item can be collected but not equipped» та очікувані результати."""
         g=r.Game(0)
         item=p.equipment('Пістолет «Попіл»',level=5)
         g.loot.append(item)
@@ -34,6 +36,7 @@ class ProgressionTests(unittest.TestCase):
         self.assertFalse(g.equip(item['id'],'weapon1'))
 
     def test_distance_controls_danger(self):
+        """Перевіряє сценарій «distance controls danger» та очікувані результати."""
         g=r.Game(1)
         g.x,g.y=5,5;a=g.region_level
         g.y=30;self.assertGreater(g.region_level,a)
@@ -47,6 +50,7 @@ class ProgressionTests(unittest.TestCase):
             self.assertGreaterEqual(e['damage'],base[2])
 
     def test_perk_choices_every_two_levels_are_persistent(self):
+        """Перевіряє сценарій «perk choices every two levels are persistent» та очікувані результати."""
         g=r.Game(2)
         self.assertEqual(g.pending_perks,0)
         g.xp=p.xp_for_level(2);self.assertEqual(g.pending_perks,1)
@@ -64,6 +68,7 @@ class ProgressionTests(unittest.TestCase):
             self.assertEqual(loaded.pending_perks,0)
 
     def test_food_med_ammo_stack_and_consume_one(self):
+        """Перевіряє сценарій «food med ammo stack and consume one» та очікувані результати."""
         g=r.Game(3)
         before=g.count('med')
         self.assertTrue(g.accept(p.supply('med',3)))
@@ -76,6 +81,7 @@ class ProgressionTests(unittest.TestCase):
         self.assertEqual(g.count('food'),food-1)
 
     def test_stack_buy_sell_is_atomic_and_quantity_based(self):
+        """Перевіряє сценарій «stack buy sell is atomic and quantity based» та очікувані результати."""
         g=r.Game(4);g.money=10000
         item=next(i for i in g.stock(0) if i['kind']=='ammo' and i['ammo_type']=='pistol')
         stockqty=item['qty'];bagqty=g.count('ammo','pistol');gold=g.money;weight=g.weight
@@ -96,6 +102,7 @@ class ProgressionTests(unittest.TestCase):
         self.assertEqual((g.money,g.bag,g.stock(0)),snapshot)
 
     def test_buy_overweight_or_insufficient_money_leaves_both_stacks(self):
+        """Перевіряє сценарій «buy overweight or insufficient money leaves both stacks» та очікувані результати."""
         g=r.Game(5)
         item=next(i for i in g.stock(0) if i['kind']=='ammo' and i['ammo_type']=='heavy')
         g.money=0;snapshot=copy.deepcopy((g.bag,g.stock(0)))
@@ -108,6 +115,7 @@ class ProgressionTests(unittest.TestCase):
         self.assertEqual((g.money,g.bag,g.stock(0)),snapshot)
 
     def test_ammunition_consumed_only_on_valid_shot(self):
+        """Перевіряє сценарій «ammunition consumed only on valid shot» та очікувані результати."""
         g=r.Game(6);g.start_battle();b=g.battle
         b['walls']=[];e=b['enemies'][0];e['pos']=[3,5];e['hp']=1000
         ammo=g.count('ammo','pistol');dur=g.weapon['durability']
@@ -122,6 +130,7 @@ class ProgressionTests(unittest.TestCase):
         self.assertEqual(b['ap'],before[0])
 
     def test_broken_weapon_and_worn_armor(self):
+        """Перевіряє сценарій «broken weapon and worn armor» та очікувані результати."""
         g=r.Game(7);g.weapon['durability']=0;g.start_battle()
         self.assertFalse(g.shoot(g.battle['enemies'][0]['id']))
         self.assertEqual(g.battle['ap'],6)
@@ -132,6 +141,7 @@ class ProgressionTests(unittest.TestCase):
         armor['durability']=0;self.assertEqual(p.stats(armor)['defense'],0)
 
     def test_dismantle_returns_mods_and_weightless_lower_value_parts(self):
+        """Перевіряє сценарій «dismantle returns mods and weightless lower value parts» та очікувані результати."""
         g=r.Game(8);weapon=g.weapon
         mod=g.bag[0];g.install(weapon['id'],mod['id'])
         g.unequip('weapon1');before=g.weight
@@ -148,6 +158,7 @@ class ProgressionTests(unittest.TestCase):
         self.assertEqual(sum(i['kind']=='parts' for i in g.bag),1)
 
     def test_low_condition_refused_and_technician_repairs(self):
+        """Перевіряє сценарій «low condition refused and technician repairs» та очікувані результати."""
         g=r.Game(9);item=g.weapon;g.unequip('weapon1');item['durability']=15
         for m in (0,1,2):self.assertFalse(g.sell(item['id'],m))
         cost=g.repair_cost(item);self.assertGreater(cost,0)
@@ -159,6 +170,7 @@ class ProgressionTests(unittest.TestCase):
         self.assertFalse(g.repair(armor['id']))
 
     def test_fence_often_has_worn_gear_and_rare_quest_rewards(self):
+        """Перевіряє сценарій «fence often has worn gear and rare quest rewards» та очікувані результати."""
         damaged=total=0
         for seed in range(15):
             g=r.Game(seed)
@@ -177,6 +189,7 @@ class ProgressionTests(unittest.TestCase):
         xp=g.xp;self.assertTrue(g.turn_in(q['id']));self.assertEqual(g.xp,xp+80)
 
     def test_progressive_prices_and_biome_arenas(self):
+        """Перевіряє сценарій «progressive prices and biome arenas» та очікувані результати."""
         prices=[p.equipment('Пістолет «Попіл»',level=lv)['value'] for lv in (1,2,3,4)]
         increments=[b-a for a,b in zip(prices,prices[1:])]
         self.assertEqual(increments,sorted(increments))
@@ -189,6 +202,7 @@ class ProgressionTests(unittest.TestCase):
             if biome=='road':self.assertTrue(all(not 4<=y<=6 for x,y in walls))
 
     def test_iso_coordinate_roundtrip(self):
+        """Перевіряє сценарій «iso coordinate roundtrip» та очікувані результати."""
         from advanced_ui import iso_cell
         app=SimpleNamespace(iso=dict(u=23,ox=350,oy=50,sprites=[]))
         for x in range(15):
@@ -198,6 +212,7 @@ class ProgressionTests(unittest.TestCase):
                 self.assertEqual(iso_cell(app,e),(x,y))
 
     def test_partial_loot_stack_pickup_fits_capacity(self):
+        """Перевіряє сценарій «partial loot stack pickup fits capacity» та очікувані результати."""
         g=r.Game(12)
         filler=p.equipment('Куртка з пластинами');filler['weight']=g.capacity-g.weight-.8;g.bag.append(filler)
         item=p.supply('med',8);g.loot.append(item)

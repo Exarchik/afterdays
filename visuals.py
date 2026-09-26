@@ -275,6 +275,7 @@ def condition_bar(canvas,item,x,y,width,height=4):
 
 class ItemGrid(tk.Frame):
     def __init__(self, parent, on_select=None, height=160, columns=5):
+        """Ініціалізує об’єкт, його початковий стан і потрібні залежності."""
         super().__init__(parent, bg=PANEL)
         self.items, self.rects, self.selection = [], {}, None
         self.on_select = on_select
@@ -292,28 +293,33 @@ class ItemGrid(tk.Frame):
         self.canvas.bind('<Button-5>', lambda e: self.canvas.yview_scroll(1, 'units'))
 
     def inspect_event(self,event):
+        """Відкриває контекстні дії предмета під курсором."""
         item=next((i for i in self.items if i['id']==self.hit(event.x,event.y)),None)
         import item_actions
         app,owner=item_actions.locate(self)
         return item_actions.show(app,item,event,owner,self)
 
     def set_items(self, items):
+        """Заповнює сітку предметами і зберігає доступний вибір."""
         self.items = sorted(items,key=item_sort_key)
         if not any(i['id'] == self.selection for i in self.items):
             self.selection = None
         self.render()
 
     def hit(self, x, y):
+        """Знаходить елемент сітки за координатами курсора."""
         x, y = self.canvas.canvasx(x), self.canvas.canvasy(y)
         return next((i for i, (a,b,d,e) in self.rects.items() if a <= x <= d and b <= y <= e), None)
 
     def select_event(self, event):
+        """Обирає предмет під час натискання миші."""
         self.selection = self.hit(event.x, event.y)
         self.render()
         if self.on_select:
             self.on_select(self.selection)
 
     def render(self):
+        """Відображає поточний кадр візуальних ефектів."""
         c = self.canvas
         c.delete('all')
         self.rects = {}
@@ -346,6 +352,7 @@ class ItemGrid(tk.Frame):
             if item.get('promotion'):
                 c.create_rectangle(x+4,y+19,x+45,y+34,fill='#28573d',outline='')
                 c.create_text(x+24,y+26,text=f"−{item['promotion']['discount']}%",fill='#b0f2a7',font=('Segoe UI',8,'bold'))
+            if item.get('upgrades'):c.create_text(x+cell/2,y+43,text='★'*min(3,item['upgrades']),fill='#ff5555',font=('Segoe UI',10,'bold'))
             short = item['name'][:10] + ('…' if len(item['name']) > 10 else '')
             c.create_text(x+cell/2, y+59, text=short, fill=color, font=('Segoe UI', 8))
             condition_bar(c,item,x+7,y+69,cell-14)
@@ -359,15 +366,18 @@ def inside(widget, xr, yr):
 
 class Drag:
     def __init__(self, owner, callback):
+        """Ініціалізує об’єкт, його початковий стан і потрібні залежності."""
         self.owner, self.callback = owner, callback
         self.payload = self.start = self.ghost = None
 
     def begin(self, event, payload):
+        """Запускає перетягування предмета."""
         self.cancel()
         self.payload = payload
         self.start = (event.x_root, event.y_root)
 
     def move(self, event):
+        """Оновлює позицію перетягуваного предмета."""
         if not self.payload or math.dist(self.start, (event.x_root, event.y_root)) < 6:
             return
         if self.ghost is None:
@@ -380,12 +390,14 @@ class Drag:
         self.ghost.geometry(f'+{event.x_root+16}+{event.y_root+16}')
 
     def end(self, event):
+        """Завершує перетягування і передає предмет цільовому обробнику."""
         payload, dragging = self.payload, self.ghost is not None
         self.cancel()
         if payload and dragging:
             self.callback(payload, event.x_root, event.y_root)
 
     def cancel(self):
+        """Скасовує перетягування без зміни предметів."""
         if self.ghost:
             self.ghost.destroy()
         self.ghost = self.payload = self.start = None
@@ -393,6 +405,7 @@ class Drag:
 
 class EquipmentPanel(tk.Frame):
     def __init__(self, parent, app):
+        """Ініціалізує об’єкт, його початковий стан і потрібні залежності."""
         super().__init__(parent, bg=PANEL)
         self.app = app
         self.selection = None
@@ -426,18 +439,21 @@ class EquipmentPanel(tk.Frame):
         self.grid.canvas.bind('<Double-Button-1>', lambda e: app.equip_selected())
 
     def select(self, item_id):
+        """Обробляє вибір елемента та оновлює його опис."""
         self.selection = item_id
         item = self.app.game.find(item_id)
         self.details.config(text=self.app.description(item))
         self.draw()
 
     def refresh(self):
+        """Оновлює віджети відповідно до поточного стану гри."""
         self.grid.set_items(self.app.game.bag)
         if not self.app.game.find(self.selection):
             self.selection = None
         self.select(self.selection)
 
     def draw(self):
+        """Перемальовує карту або арену й видимі позначення."""
         c, g = self.paper, self.app.game
         c.delete('all')
         w = max(340, c.winfo_width())
@@ -462,6 +478,7 @@ class EquipmentPanel(tk.Frame):
                 size = min(d-x-5, e-y-5)
                 icon(c, item, (x+d-size)/2, y+2, size)
                 condition_bar(c,item,x+4,e-7,d-x-8)
+                if item.get('upgrades'):c.create_text((x+d)/2,e-17,text='★'*item['upgrades'],fill='#ff5555',font=('Segoe UI',10,'bold'))
             else:
                 c.create_text((x+d)/2, (y+e)/2, text='+', fill='#708573', font=('Segoe UI', 20))
             if slot.startswith('weapon'):
@@ -469,11 +486,13 @@ class EquipmentPanel(tk.Frame):
         c.create_text(mid, 215, text=tr('visuals.0030', v0=g.defense, v1=g.weight, v2=g.capacity), fill=MUTED, font=('Segoe UI', 8))
 
     def inspect_paper(self,event):
+        """Відкриває дії спорядження на силуеті персонажа."""
         slot=next((s for s,(a,b,d,e) in self.slots.items() if a<=event.x<=d and b<=event.y<=e),None)
         import item_actions
         return item_actions.show(self.app,self.app.game.equipped.get(slot),event,self)
 
     def press_paper(self, event):
+        """Починає перетягування предмета із силуету."""
         slot = next((s for s,(a,b,d,e) in self.slots.items() if a <= event.x <= d and b <= event.y <= e), None)
         item = self.app.game.equipped.get(slot)
         self.select(item['id'] if item else None)
@@ -481,12 +500,14 @@ class EquipmentPanel(tk.Frame):
             self.drag.begin(event, dict(item=item, slot=slot))
 
     def press_bag(self, event):
+        """Починає перетягування предмета із сумки."""
         self.grid.select_event(event)
         item = self.app.game.find(self.grid.selection)
         if item:
             self.drag.begin(event, dict(item=item, slot=None))
 
     def drop(self, payload, xr, yr):
+        """Обробляє відпускання предмета над ціллю перетягування."""
         g = self.app.game
         if g.battle:
             self.app.act(lambda: g.log(tr('visuals.0031')))
@@ -517,6 +538,7 @@ class EquipmentPanel(tk.Frame):
 
 class ModificationPanel(tk.Frame):
     def __init__(self, parent, app, item_id):
+        """Ініціалізує об’єкт, його початковий стан і потрібні залежності."""
         super().__init__(parent, bg=PANEL)
         self.app, self.item_id = app, item_id
         self.slot_rects = []
@@ -548,15 +570,18 @@ class ModificationPanel(tk.Frame):
 
     @property
     def item(self):
+        """Знаходить предмет, обраний у поточній панелі."""
         return self.app.game.find(self.item_id)
 
     def refresh(self):
+        """Оновлює віджети відповідно до поточного стану гри."""
         self.grid.set_items([m for m in self.app.game.bag if rules.compatible(self.item, m)])
         self.summary.config(text=self.app.description(self.item))
         self.draw()
         self.app.refresh()
 
     def draw(self):
+        """Перемальовує карту або арену й видимі позначення."""
         c, item = self.top, self.item
         c.delete('all')
         w = max(600, c.winfo_width())
@@ -580,6 +605,7 @@ class ModificationPanel(tk.Frame):
                 c.create_text(x+49, y+65, text=tr('visuals.0035', v0=n + 1), fill=MUTED, font=('Segoe UI', 8))
 
     def select(self, item_id, sign=1):
+        """Обробляє вибір елемента та оновлює його опис."""
         self.selected_mod = item_id
         mod = self.app.game.find(item_id)
         if not mod:
@@ -594,22 +620,25 @@ class ModificationPanel(tk.Frame):
             old,new=p.stats(self.item),p.stats(candidate)
             keys=[k for k in dict.fromkeys([*old,*new]) if old.get(k,0)!=new.get(k,0)]
             rows=[f"{rules.STAT_NAMES.get(k,k)}: {old.get(k,0):g} → {new.get(k,0):g}" for k in keys]
-            rows.append(tr('modules.condition_preview',before=p.mr.max_condition(self.item),after=p.mr.max_condition(candidate)))
+            rows.append(tr('update031.wear_preview',before=100*max(.1,1-p.mr.aggregate(self.item).get('strength',0)/100),after=100*max(.1,1-p.mr.aggregate(candidate).get('strength',0)/100)))
             self.preview.config(text=mod['name']+'\n'+' · '.join(rows))
 
     def inspect_top(self,event):
+        """Відкриває контекстні дії предмета в меню модифікацій."""
         n=next((n for n,(x,y,d,f) in enumerate(self.slot_rects) if x<=event.x<=d and y<=event.y<=f),None)
         item=self.item['modules'][n] if n is not None and n<len(self.item['modules']) else self.item if n is None else None
         import item_actions
         return item_actions.show(self.app,item,event,self)
 
     def press_bag(self, e):
+        """Починає перетягування предмета із сумки."""
         self.grid.select_event(e)
         mod = self.app.game.find(self.grid.selection)
         if mod:
             self.drag.begin(e, dict(item=mod, source='bag'))
 
     def press_slot(self, e):
+        """Починає перетягування модуля зі слота."""
         idx = next((i for i,(a,b,d,f) in enumerate(self.slot_rects) if a <= e.x <= d and b <= e.y <= f), None)
         if idx is not None and idx < len(self.item['modules']):
             mod = self.item['modules'][idx]
@@ -617,16 +646,19 @@ class ModificationPanel(tk.Frame):
             self.drag.begin(e, dict(item=mod, source='slot'))
 
     def install_selected(self):
+        """Встановлює вибраний модуль у спорядження."""
         if self.selected_mod:
             self.app.game.install(self.item_id, self.selected_mod)
             self.refresh()
 
     def remove_selected(self):
+        """Знімає вибраний встановлений модуль."""
         if self.selected_mod:
             self.app.game.uninstall(self.item_id, self.selected_mod)
             self.refresh()
 
     def drop(self, payload, xr, yr):
+        """Обробляє відпускання предмета над ціллю перетягування."""
         g = self.app.game
         if payload['source'] == 'bag' and inside(self.top, xr, yr):
             x,y = xr-self.top.winfo_rootx(), yr-self.top.winfo_rooty()
@@ -640,6 +672,7 @@ class ModificationPanel(tk.Frame):
 
 class QuestPanel(tk.Frame):
     def __init__(self,parent,app):
+        """Ініціалізує об’єкт, його початковий стан і потрібні залежності."""
         super().__init__(parent,bg=PANEL)
         self.app=app
         self.tree=ttk.Treeview(self,show='tree',height=10,selectmode='browse')
@@ -655,15 +688,18 @@ class QuestPanel(tk.Frame):
         ttk.Button(self,text=tr('visuals.0037'),command=app.atlas).pack(fill='x',padx=8,pady=5)
 
     def selected(self):
+        """Повертає об’єкт поточного вибору."""
         selection=self.tree.selection()
         return next((q for q in self.app.game.quests if selection and q['id']==selection[0]),None)
 
     def click(self,event):
+        """Обробляє натискання на елемент панелі за координатами курсора."""
         if self.tree.identify_row(event.y)=='completed':
             self.tree.item('completed',open=not self.tree.item('completed','open'))
             return 'break'
 
     def refresh(self):
+        """Оновлює віджети відповідно до поточного стану гри."""
         old=self.selected()
         opened=self.tree.item('completed','open') if self.tree.exists('completed') else False
         for i in self.tree.get_children():self.tree.delete(i)
@@ -681,9 +717,11 @@ class QuestPanel(tk.Frame):
         self.describe()
 
     def describe(self):
+        """Показує характеристики вибраного предмета."""
         q=self.selected()
         self.detail.config(text=self.app.game.quest_text(q) if q else tr('visuals.0039'))
 
     def turn_in(self):
+        """Перевіряє умови здачі, видає нагороду й завершує завдання."""
         q=self.selected()
         if q:self.app.act(lambda:self.app.game.turn_in(q['id']))

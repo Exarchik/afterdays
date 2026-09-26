@@ -35,9 +35,11 @@ class Scrap:
 
     @property
     def tag(self):
+        """Повертає унікальний Canvas-тег фрагмента сміття."""
         return f'scrap{self.number}'
 
     def covers(self, x, y):
+        """Перевіряє, чи лежить точка всередині контуру фрагмента сміття."""
         return inside_polygon(x-self.x, y-self.y, self.points)
 
     def step(self, dt, destination=None):

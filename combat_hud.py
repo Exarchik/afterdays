@@ -7,6 +7,7 @@ from i18n import t as tr
 
 class CombatHUD(tk.Frame):
     def __init__(self,parent,app):
+        """Ініціалізує об’єкт, його початковий стан і потрібні залежності."""
         super().__init__(parent,bg=PANEL)
         self.app=app
         self.art=tk.Canvas(self,width=58,height=58,bg=PANEL,highlightthickness=0);self.art.pack(side='left',padx=5)
@@ -18,10 +19,12 @@ class CombatHUD(tk.Frame):
         self.points.bind('<Configure>',lambda e:self.paint_points())
 
     def context(self,event):
+        """Обробляє відкриття контекстного меню."""
         from item_actions import show
         show(self.app,self.app.game.weapon,event,self)
 
     def refresh(self):
+        """Оновлює віджети відповідно до поточного стану гри."""
         g=self.app.game
         if not g.battle:self.pack_forget();return
         if not self.winfo_manager():self.pack(before=self.app.canvas,fill='x',pady=(0,5))
@@ -36,6 +39,7 @@ class CombatHUD(tk.Frame):
         self.paint_points()
 
     def paint_points(self):
+        """Малює зелені невитрачені та сірі витрачені ОД поточного бойового ходу."""
         g=self.app.game;c=self.points;c.delete('all')
         if not g.battle:return
         total=max(g.battle.get('max_ap',g.max_ap),g.battle['ap']);left=g.battle['ap']

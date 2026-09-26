@@ -4,6 +4,7 @@ from pathlib import Path
 import afterdays as r
 class QuestLocationTests(unittest.TestCase):
  def test_all_destination_types_and_cities(self):
+  """Перевіряє сценарій «all destination types and cities» та очікувані результати."""
   for seed in range(10):
    g=r.Game(seed)
    for city in (0,2,3,7):
@@ -18,6 +19,7 @@ class QuestLocationTests(unittest.TestCase):
      self.assertIn(pos,g.reachable_world(tuple(g.cities[city])))
     self.assertEqual(len({tuple(q['pos']) for q in g.quests}),3)
  def test_save_migrates_unsafe_target_once(self):
+  """Перевіряє сценарій «save migrates unsafe target once» та очікувані результати."""
   g=r.Game(4);offer=offer_for(g,'retrieve')
   self.assertTrue(g.accept_quest(offer['id']));q=g.quests[-1];q['pos']=[46,30];reward=q['reward']
   with tempfile.TemporaryDirectory() as td:
@@ -26,6 +28,7 @@ class QuestLocationTests(unittest.TestCase):
    self.assertEqual(h.quests[-1]['reward'],reward)
    h.save(path);j=r.Game.load(path);self.assertEqual(h.quests,j.quests)
  def test_no_valid_destination_does_not_accept(self):
+  """Перевіряє сценарій «no valid destination does not accept» та очікувані результати."""
   g=r.Game(4);offer=offer_for(g,'retrieve')
   g.reachable_world=lambda start:{tuple(g.cities[0])}
   self.assertFalse(g.accept_quest(offer['id']));self.assertEqual(offer['status'],'offered');self.assertFalse(g.quests)

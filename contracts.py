@@ -15,24 +15,28 @@ economy.BASE_REWARDS.update(delivery=90,radio=100,repair_delivery=130)
 
 class Game(Guides, QuestSystem, Border, Reputation, frontier.Game):
     def __init__(self,seed=None):
+        """Ініціалізує об’єкт, його початковий стан і потрібні залежності."""
         super().__init__(seed)
         content.migrate(self)
         self.init_reputation()
 
     @classmethod
     def load(cls,path):
+        """Завантажує збереження та застосовує міграції цієї версії."""
         game=super().load(path)
         content.migrate(game)
         game.migrate_reputation_keys()
         return game
 
     def delivery_sites(self,q):
+        """Знаходить особливі локації, придатні для доставки."""
         origin=tuple(self.cities[q['city']]);reachable=self.player_reachable_world(origin)
         occupied={tuple(t['pos']) for t in self.quests if t['status']=='active' and t.get('pos')}
         return [s for s in self.special_sites if tuple(s['pos']) in reachable and tuple(s['pos'])!=origin
                 and tuple(s['pos']) not in occupied and (3 if q['level']>=3 else 1)<=self.region_at(*s['pos'])<=q['level']+1]
 
     def _raw_mayor_offers(self):
+        """Формує набір кандидатів завдань до застосування обмежень репутації."""
         offers=frontier.Game.mayor_offers(self)
         if self.city not in self.mayors or self.battle:return offers
         for kind,title in [('delivery',tr('contracts.0001')),('radio',tr('contracts.0002')),('repair_delivery',tr('quests.repair_title'))]:
@@ -55,6 +59,7 @@ class Game(Guides, QuestSystem, Border, Reputation, frontier.Game):
         return offers
 
     def accept_quest(self,quest_id):
+        """Приймає завдання і створює його цілі та необхідні квестові предмети."""
         offer=next((q for q in self.mayor_offers() if q['id']==quest_id and q['status']=='offered'),None)
         if not offer or offer['kind'] not in ('delivery','radio','repair_delivery'):return super().accept_quest(quest_id)
         if sum(q['status']=='active' for q in self.quests)>=8:
@@ -76,11 +81,13 @@ class Game(Guides, QuestSystem, Border, Reputation, frontier.Game):
         self.log(tr('contracts.0007')+q['title']);self.emit(tr('contracts.0008'),color='#c7a0f1');return True
 
     def destination_quest(self):
+        """Знаходить активне завдання для поточної точки призначення."""
         if self.battle or self.road_event:return None
         return next((q for q in self.quests if q['kind'] in ('delivery','radio') and q['status']=='active'
                      and not q['progress'] and q['pos']==[self.x,self.y]),None)
 
     def search(self):
+        """Виконує пошук на місцевості та перевіряє квестові цілі."""
         q=self.destination_quest()
         if not q:return super().search()
         if q['kind']=='delivery':
@@ -92,9 +99,11 @@ class Game(Guides, QuestSystem, Border, Reputation, frontier.Game):
         return True
 
     def radio_signal(self,q,values):
+        """Обчислює параметри поточного радіосигналу."""
         return max(0,100-round(sum(abs(a-b) for a,b in zip(q['radio_target'],values))*100/60))
 
     def tune_radio(self,quest_id,values):
+        """Застосовує налаштування радіо і перевіряє завершення завдання."""
         q=self.destination_quest()
         if not q or q['id']!=quest_id or q['kind']!='radio':return False
         if not isinstance(values,(tuple,list)) or len(values)!=3 or any(type(v)!=int or not 0<=v<=20 for v in values):return False
@@ -104,6 +113,7 @@ class Game(Guides, QuestSystem, Border, Reputation, frontier.Game):
         self.log(tr('contracts.0014'));return False
 
     def quest_text(self,q):
+        """Формує опис цілі, прогресу й винагороди завдання."""
         if q['kind']=='repair_delivery':
             item=next((i for i in self.bag if i.get('quest_id')==q['id']),q['repair_item'])
             return tr('quests.repair_text',title=q['title'],item=item['name'],condition=round(item['durability']),destination=q['destination_name'],level=q['level'],money=q['reward'],xp=q['xp_reward'])

@@ -12,6 +12,7 @@ BG,PANEL,TEXT,MUTED,GOLD=v.BG,v.PANEL,v.TEXT,v.MUTED,v.GOLD
 class Detail(tk.Frame):
     """Scrollable shared property table, also used for ordinary descriptions."""
     def __init__(self,parent,**kw):
+        """Ініціалізує об’єкт, його початковий стан і потрібні залежності."""
         bg=kw.pop('bg',PANEL)
         for key in ('fg','wraplength','justify','anchor'):kw.pop(key,None)
         height=kw.pop('height',9);kw.pop('width',None)
@@ -21,16 +22,23 @@ class Detail(tk.Frame):
         self.text.pack(side='left',fill='both',expand=True);self.text.configure(yscrollcommand=scroll.set)
         self.text.tag_configure('good',foreground='#91e6ab');self.text.tag_configure('bad',foreground='#ff9687')
         self.text.tag_configure('title',foreground=GOLD,font=('Segoe UI',10,'bold'))
+        self.text.tag_configure('stars',foreground='#ff5555')
         self.text.tag_configure('header',foreground='#b9d8e9',background='#263d39')
         self.text.bind('<Configure>',lambda e:self.text.configure(tabs=(max(105,e.width*.43),max(180,e.width*.70))))
         self.text.configure(state='disabled')
     def config(self,cnf=None,**kw):
+        """Оновлює властивості віджета та форматований текст."""
         value=kw.pop('text',None)
         if value is not None:
             self.text.configure(state='normal');self.text.delete('1.0','end')
             for n,line in enumerate(value.split('\n')):
                 tag='header' if line.startswith(tr('refinement_ui.0001')) else 'good' if '[+]' in line else 'bad' if '[-]' in line else 'title' if n==0 else ''
                 self.text.insert('end',line.replace('[+]','').replace('[-]','')+'\n',tag)
+            start='1.0'
+            while True:
+                start=self.text.search('★',start,stopindex='end')
+                if not start:break
+                end=f'{start}+1c';self.text.tag_add('stars',start,end);start=end
             self.text.configure(state='disabled')
         if cnf or kw:super().configure(cnf,**kw)
 
@@ -67,7 +75,7 @@ def description(game,item):
     values=p.stats(item);baseline=p.stats(current) if current else {}
     for key in dict.fromkeys(list(values)+list(baseline)):
         if values.get(key) or (compare and baseline.get(key)):
-            field(r.STAT_NAMES.get(key,key),values.get(key,0),baseline.get(key,0),unit='%' if key in ('accuracy','crit','evasion','damage_percent','defense_percent','max_condition_percent','weight_percent','ammo_save_percent','reflect_percent') else '')
+            field(r.STAT_NAMES.get(key,key),values.get(key,0),baseline.get(key,0),unit='%' if key in ('accuracy','crit','evasion','damage_percent','defense_percent','max_condition_percent','local_damage_percent','local_defense_percent','weight_percent','ammo_save_percent','reflect_percent') else '')
             if kind=='module':lines[-1]+=' [+]' if (values.get(key,0)<0 if key=='weight_percent' else values.get(key,0)>0) else ' [-]'
     if 'slots' in item:
         field(tr('refinement_ui.0014'),item['slots'],current['slots'] if current else None)
@@ -89,6 +97,7 @@ def description(game,item):
 QUEST_ICONS={'junkyard':'▦','field_test':'⚒','generator':'ϟ','cache':'▣','elite_hunt':'◎','repair_delivery':'⚒','permit':'⚿','thanks':'★','delivery':'✉','radio':'◉','trophies':'♜','hunt':'◎','retrieve':'▣','scout':'◈','supplies':'✚','purge':'⚑'}
 class QuestCards(tk.Frame):
     def __init__(self,parent,app,mayor=False):
+        """Ініціалізує об’єкт, його початковий стан і потрібні залежності."""
         super().__init__(parent,bg=PANEL);self.app=app;self.mayor=mayor;self.selection=None;self.open_done=False;self.entries=[];self.rects=[]
         self.rep_label=tk.Label(self,bg=PANEL,fg=GOLD);self.rep_label.pack(fill='x')
         self.canvas=tk.Canvas(self,bg='#17231e',height=424,highlightthickness=0)
@@ -106,8 +115,10 @@ class QuestCards(tk.Frame):
             import restoration_ui
             self.permission_button=ttk.Button(self,text=tr('restoration.permission'),command=lambda:restoration_ui.permission(app))
         self.refresh()
+    # Повертає об’єкт поточного вибору.
     def selected(self):return next((q for q in self.entries if q['id']==self.selection),None)
     def refresh(self):
+        """Оновлює віджети відповідно до поточного стану гри."""
         g=self.app.game
         if self.mayor:
             self.permission_button.pack(before=self.canvas,fill='x',padx=8,pady=3) if g.settlement_requests() else self.permission_button.pack_forget()
@@ -117,6 +128,7 @@ class QuestCards(tk.Frame):
         if not self.selected():self.selection=next((q['id'] for q in self.entries if q['status']!='done'),None)
         self.paint();self.describe()
     def paint(self):
+        """Малює актуальне представлення даних на Canvas."""
         c=self.canvas;c.delete('all');self.rects=[];self.turnin_rects=[];w=max(280,c.winfo_width());y=4
         # Eight compact cards in a normal-height panel; scrolling remains available.
         h=max(40,min(52,(max(328,c.winfo_height())-8)//8))
@@ -151,6 +163,7 @@ class QuestCards(tk.Frame):
             self.rects.append((y,y+h-3,q['id']));y+=h
         c.config(scrollregion=(0,0,w,y))
     def click(self,e):
+        """Обробляє натискання на елемент панелі за координатами курсора."""
         y=self.canvas.canvasy(e.y)
         for (x1,y1,x2,y2),ident in self.turnin_rects:
             if x1<=e.x<=x2 and y1<=y<=y2:
@@ -163,29 +176,36 @@ class QuestCards(tk.Frame):
             if q and q['status']=='offered':q['seen']=True
         self.paint();self.describe()
     def describe(self):
+        """Показує характеристики вибраного предмета."""
         q=self.selected();self.detail.config(text=self.app.game.quest_text(q) if q else tr('refinement_ui.0038'))
         if q and q['status']=='offered':q['seen']=True
     def accept(self):
+        """Перевіряє можливість отримання предмета і додає його до сумки."""
         from quest_dialog import confirm
         q=self.selected()
         if q:confirm(self,q,'accept')
     def turn_in(self):
+        """Перевіряє умови здачі, видає нагороду й завершує завдання."""
         from quest_dialog import confirm
         q=self.selected()
         if q:confirm(self,q,'turn_in')
     def abandon(self):
+        """Запитує підтвердження відмови від вибраного завдання."""
         from quest_dialog import confirm
         q=self.selected()
         if q:confirm(self,q,'abandon')
 
 class Technician(tk.Frame):
     def __init__(self,parent,app):
+        """Ініціалізує об’єкт, його початковий стан і потрібні залежності."""
         super().__init__(parent,bg=PANEL);self.app=app
         tk.Label(self,text=tr('refinement_ui.0039'),bg=PANEL,fg=GOLD,font=('Segoe UI',16,'bold')).pack(pady=10)
         self.resources=tk.Label(self,bg=PANEL,fg=TEXT);self.resources.pack(pady=5)
         tabs=ttk.Notebook(self);tabs.pack(fill='both',expand=True,padx=10,pady=8)
         craft=tk.Frame(tabs,bg=PANEL);repair=tk.Frame(tabs,bg=PANEL)
-        tabs.add(craft,text=tr('refinement_ui.0040'));tabs.add(repair,text=tr('refinement_ui.0041'))
+        tabs.add(repair,text=tr('refinement_ui.0041'));tabs.add(craft,text=tr('refinement_ui.0040'))
+        from upgrade_ui import UpgradePanel
+        self.upgrades=UpgradePanel(tabs,app,self.refresh);tabs.add(self.upgrades,text=tr('update031.upgrades'))
         self.material=tk.StringVar(value='parts');self.amount=tk.StringVar(value='10')
         tk.Label(craft,text=tr('refinement_ui.0042'),bg=PANEL,fg=GOLD,font=('Segoe UI',12,'bold')).pack(anchor='w',padx=12,pady=12)
         row=tk.Frame(craft,bg=PANEL);row.pack(fill='x',padx=12)
@@ -213,6 +233,7 @@ class Technician(tk.Frame):
         self.repair_status=tk.Label(repair,bg=PANEL,fg=GOLD);self.repair_status.pack(pady=5)
         self.amount.trace_add('write',lambda *a:self.chances());self.refresh()
     def chances(self):
+        """Оновлює шанси створення модуля та доступність кнопки."""
         g=self.app.game;kind=self.material.get()
         try:amount=int(self.amount.get())
         except ValueError:amount=0
@@ -220,25 +241,29 @@ class Technician(tk.Frame):
         odds=[round(n*(1-failure),1) for n in g.craft_odds(amount)] if amount>=10 else [0]*5
         for n,label in enumerate(self.chance_labels):label.config(text=f'{r.RARITIES[n][0]}\n{odds[n]}%')
         available=g.count(kind);space=g.capacity-g.weight
-        valid=10<=amount<=1000 and amount<=available and space>=.3
+        valid=10<=amount<=1000 and amount<=available and space>=0
         self.craft_button.config(state='normal' if valid else 'disabled')
         reason=tr('refinement_ui.0048') if valid else tr('refinement_ui.0049') if not 10<=amount<=1000 else tr('refinement_ui.0050') if amount>available else tr('refinement_ui.0051')
-        self.preview.config(text=tr('refinement_ui.0052', v0=available, v1=amount, v2=max(0, available - amount), v3=g.level, v4=reason)+tr('scav.craft_risk',chance=round(failure*100,1)))
+        self.preview.config(text=tr('refinement_ui.0052', v0=available, v1=amount, v2=max(0, available - amount), v3=g.region_level, v4=reason)+tr('scav.craft_risk',chance=round(failure*100,1)))
     def refresh(self):
+        """Оновлює віджети відповідно до поточного стану гри."""
         g=self.app.game;self.grid.set_items([i for i in list(g.equipped.values())+g.bag if i and 'durability' in i])
         self.resources.config(text=tr('refinement_ui.0053', v0=g.money, v1=g.count('parts'), v2=g.count('fragments')))
         if g.reputation()>=50 and g.city is not None:self.resources.config(text=self.resources.cget('text')+' · '+tr('reputation.repair_discount'))
-        self.chances();self.describe(self.grid.selection)
+        self.chances();self.describe(self.grid.selection);self.upgrades.refresh()
     def describe(self,i):
+        """Показує характеристики вибраного предмета."""
         item=self.app.game.find(i)
         for target,button in self.repair_buttons.items():
             actual=min(target,p.mr.max_condition(item)) if item else target
             button.config(text=tr('refinement_ui.0047',v0=actual),state='normal' if item and self.app.game.repair_cost(item,target)>0 else 'disabled')
         self.detail.config(text=description(self.app.game,item)+ (tr('refinement_ui.0054')+ ' · '.join(tr('refinement_ui.0055', v0=min(t,p.mr.max_condition(item)), v1=self.app.game.repair_cost(item, t)) for t in (25,50,100)) if item else ''))
     def repair(self,t):
+        """Виконує платний ремонт до вибраного рівня стану."""
         ok=self.app.game.repair(self.grid.selection,t)
         self.repair_status.config(text=self.app.game.messages[-1] if ok else tr('refinement_ui.0056'));self.refresh();self.app.refresh()
     def craft(self):
+        """Запускає створення модуля й показує результат."""
         g=self.app.game
         try:amount=int(self.amount.get())
         except ValueError:return
@@ -277,8 +302,10 @@ def perks(app,parent=None):
 
 class PerksPanel(tk.Frame):
     def __init__(self,parent,app):
+        """Ініціалізує об’єкт, його початковий стан і потрібні залежності."""
         super().__init__(parent,bg=PANEL);self.app=app;self.state=None
     def refresh(self):
+        """Оновлює віджети відповідно до поточного стану гри."""
         state=(id(self.app.game),self.app.game.pending_perks,tuple(self.app.game.rank(k) for k in p.PERKS))
         if state==self.state:return
         self.state=state

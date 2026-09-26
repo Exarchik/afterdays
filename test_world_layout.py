@@ -3,6 +3,7 @@ from pathlib import Path
 import afterdays as r
 class WorldLayoutTests(unittest.TestCase):
  def test_random_positions_roads_and_reachability(self):
+  """Перевіряє сценарій «random positions roads and reachability» та очікувані результати."""
   positions=set();networks=set()
   for seed in range(40):
    g=r.Game(seed);self.assertEqual(g.cities[0],[5,5]);self.assertEqual((g.x,g.y),(5,5))
@@ -18,6 +19,7 @@ class WorldLayoutTests(unittest.TestCase):
    positions.add(tuple(map(tuple,g.cities)));networks.add(frozenset(road_cells))
   self.assertEqual(len(positions),40);self.assertEqual(len(networks),40)
  def test_seed_and_save_preserve_layout(self):
+  """Перевіряє сценарій «seed and save preserve layout» та очікувані результати."""
   g=r.Game(55);h=r.Game(55);self.assertEqual(g.cities,h.cities);self.assertEqual(g.world,h.world)
   with tempfile.TemporaryDirectory() as td:
    path=Path(td)/'save.json';g.save(path);h=r.Game.load(path)
