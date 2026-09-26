@@ -26,7 +26,7 @@ class ReputationTests(unittest.TestCase):
         g.add_reputation(turnover=52);self.assertEqual(g.reputation(),2);self.assertEqual(g.local_record()['turnover'],1)
         g.x,g.y=g.cities[1];self.assertEqual(g.reputation(),0)
         g.add_reputation(200);self.assertEqual(g.reputation(),100)
-        site=g.special_sites[0];g.discover(site['id']);g.x,g.y=site['pos'];before=g.reputation();g.add_reputation(7);self.assertEqual(g.reputation(),min(100,before+7))
+        site=g.special_sites[0];g.discover(site['id']);g.x,g.y=site['pos'];g.xp=__import__('progression').xp_for_level(g.region_level);before=g.reputation();g.add_reputation(7);self.assertEqual(g.reputation(),min(100,before+7))
         self.assertEqual(g.reputation(0),9)
 
     def test_all_prices_no_resale_profit(self):
@@ -122,10 +122,10 @@ class ReputationTests(unittest.TestCase):
 
     def test_metro_exception_and_special_quest_giver(self):
         """Перевіряє сценарій «metro exception and special quest giver» та очікувані результати."""
-        g=self.game();g.x,g.y=g.cities[2]
+        g=self.game();g.x,g.y=g.cities[2];g.xp=__import__('progression').xp_for_level(g.region_level)
         offers=g.mayor_offers();self.assertEqual(len(offers),2)
         metro=next(q for q in offers if q.get('metro_city')==2)
         self.assertTrue(metro['unique']);self.assertTrue(g.accept_quest(metro['id']))
-        site=next(s for s in g.special_sites if s['role']=='quest');g.discover(site['id']);g.x,g.y=site['pos']
+        site=next(s for s in g.special_sites if s['role']=='quest');g.discover(site['id']);g.x,g.y=site['pos'];g.xp=__import__('progression').xp_for_level(g.region_level)
         offers=g.mayor_offers();self.assertEqual(len(offers),2);self.assertFalse(any(q['unique'] for q in offers))
         g.add_reputation(100);self.assertEqual(g.reputation(),100);self.assertEqual(g.reputation(0),100 if __import__('math').dist(site['pos'],g.cities[0])<=10 else 0)

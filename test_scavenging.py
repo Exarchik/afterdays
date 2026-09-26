@@ -69,7 +69,7 @@ class ScavengingTests(unittest.TestCase):
   self.assertTrue(g.craft_module('parts',150));self.assertEqual(g.count('parts'),840)
   p.add_to(g.bag,p.fragments(1000));self.assertTrue(g.craft_module('fragments',1000));self.assertEqual(g.count('fragments'),0)
   for n in (10,75,150,500,1000):self.assertAlmostEqual(sum(g.craft_odds(n)),100)
-  self.assertLess(g.craft_odds(150)[4],g.craft_odds(1000)[4])
+  g.xp=__import__('progression').xp_for_level(7);self.assertLess(g.craft_odds(150)[4],g.craft_odds(1000)[4])
  def test_scout_visits_nine_distinct_cells(self):
   """Перевіряє сценарій «scout visits nine distinct cells» та очікувані результати."""
   g,q=self.quest('scout');x,y,xx,yy=q['area'];self.assertEqual(q['goal'],9)

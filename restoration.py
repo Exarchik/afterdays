@@ -84,7 +84,7 @@ class Game(cache_events.Game):
     def eligible_settlements(self,role,exclude=None):
         """Знаходить міста без потрібного фахівця, виключаючи зарезервовані."""
         reserved={n['city'] for n in self.settlers() if n['role']==role and n.get('city') is not None and n['state'] in ('permission','travelling') and n['id']!=exclude}
-        return [i for i in range(min(12,len(self.cities))) if i not in reserved and
+        return [i for i in range(self.main_city_count) if i not in reserved and
                 (0 not in self.city_merchants[i] if role=='smith' else i not in self.mayors if role=='mayor' else i not in self.technicians)]
 
     def local_settlers(self):
@@ -95,7 +95,7 @@ class Game(cache_events.Game):
     def create_settler(self,role):
         """Створює мандрівного кандидата на поселення та його завдання."""
         if role not in ('smith','tech','mayor') or not self.eligible_settlements(role) or any(n['role']==role and n['state']!='settled' for n in self.settlers()):return None
-        city=min(range(12),key=lambda i:math.dist(self.cities[i],(self.x,self.y)))
+        city=min(range(self.main_city_count),key=lambda i:math.dist(self.cities[i],(self.x,self.y)))
         q=self.new_restoration_quest('recruit_'+role,city);q['pos']=[self.x,self.y];q['goal']=1
         n=dict(id=r.uid(),role=role,pos=[self.x,self.y],state='offered',city=None,quest=q)
         self.settlers().append(n)

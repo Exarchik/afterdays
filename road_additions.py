@@ -23,6 +23,10 @@ EVENTS=[
 ('cemetery','waste',tr('road_additions.0055'),tr('road_additions.0056'),tr('road_additions.0057'),None,1,[('xp',15),('reveal',1)],[]),
 ('roof_cache','ruin',tr('road_additions.0058'),tr('road_additions.0059'),tr('road_additions.0060'),None,.65,[('money',45),('med',1)],[('damage',6)]),
 ]
+import content
+for row in content.read('road_events032.json'):
+    for index in (2,3,4):row[index]=tr(row[index])
+    EVENTS.append(row)
 BY_KEY={e[0]:e for e in EVENTS}
 
 def resolve(game,choice):

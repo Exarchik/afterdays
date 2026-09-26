@@ -1,0 +1,6 @@
+Afterdays v0.32 validation
+324 unittest cases checked: final full run passed 322; two obsolete expectations (world edge and rarity unlock) updated and both rerun successfully.
+Content validator: 0 errors.
+20 new events: 40 success/failure outcome checks passed.
+Known map context-menu construction: passed.
+No interactive GUI/display available in this environment.

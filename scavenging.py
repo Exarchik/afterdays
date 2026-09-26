@@ -65,6 +65,8 @@ class Game(expeditions.Game):
         """Перевіряє ресурси, розігрує результат і створює модуль у техніка."""
         self._craft_failed=False
         if self.battle or self.city not in self.technicians or kind not in ('parts','fragments') or type(amount)!=int or not 10<=amount<=1000 or self.count(kind)<amount:return False
+        if self.weight>self.capacity:
+            self.log(tr('update031.no_space'));return False
         state=self.rng.getstate()
         if self.rng.random()<self.craft_failure(amount):
             self.consume(kind,amount);self._craft_failed=True;self.log(tr('scav.craft_failed',amount=amount));return False

@@ -7,7 +7,7 @@ class WorldLayoutTests(unittest.TestCase):
   positions=set();networks=set()
   for seed in range(40):
    g=r.Game(seed);self.assertEqual(g.cities[0],[5,5]);self.assertEqual((g.x,g.y),(5,5))
-   self.assertEqual(len(set(map(tuple,g.cities))),12)
+   self.assertEqual(len(set(map(tuple,g.cities))),15)
    reachable=g.reachable_world((5,5))
    for x,y in g.cities:self.assertEqual(g.world[y][x],'city');self.assertIn((x,y),reachable)
    road_cells={(x,y) for y,row in enumerate(g.world) for x,k in enumerate(row) if k in ('road','city')}

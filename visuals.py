@@ -419,14 +419,6 @@ class EquipmentPanel(tk.Frame):
         from refinement_ui import Detail
         self.details = Detail(self,height=7)
         self.details.pack(fill='x', padx=8, pady=3)
-        bar = tk.Frame(self, bg=PANEL)
-        bar.pack(fill='x', padx=4, pady=4)
-        for n, (label, fn) in enumerate([(tr('visuals.0024'), app.equip_selected), (tr('visuals.0025'), app.modify),
-                                       (tr('visuals.0026'), app.use_selected), (tr('visuals.0027'), app.drop_selected),
-                                       (tr('visuals.0028'), app.dismantle_selected),
-                                       (tr('scav.repair_menu'), lambda: __import__('maintenance_ui').show(app))]):
-            ttk.Button(bar, text=label, command=fn).grid(row=n//3, column=n%3, sticky='ew', padx=2, pady=2)
-        bar.columnconfigure((0, 1, 2), weight=1)
         self.drag = Drag(self, self.drop)
         self.paper.bind('<Button-1>', self.press_paper)
         self.paper.bind('<Button-3>',self.inspect_paper)

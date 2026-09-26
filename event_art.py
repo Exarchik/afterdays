@@ -17,3 +17,7 @@ GROUPS={
 'meteor':'meteor bunker_light',
 'water':'water_filter clean_spring'}
 EVENT_ART={event:'event_theme:'+theme for theme,events in GROUPS.items() for event in events.split()}
+
+# New road events reuse the closest existing narrative illustration.
+EVENT_ART.update({event:"event_theme:"+theme for theme,events in {
+"water":"rain_collector leaking_roof", "signal":"signal_kites sun_mirror", "provisions":"mushroom_bed cloth_bundle broken_cart", "terminal":"frozen_terminal civic_archive", "mines":"cracked_bridge thorn_patch collapsed_stairs", "pharmacy":"medicine_exchange", "wreck":"sand_cable workshop_press", "courier":"courier_tip", "camp":"old_trapper quiet_clearing", "storm":"ash_whirl rad_markers"}.items() for event in events.split()})

@@ -11,7 +11,7 @@ from frontier_ui import draw_metro
 class MetroTests(unittest.TestCase):
  def repair(self,g,city):
   """Виконує платний ремонт до вибраного рівня стану."""
-  g.x,g.y=g.cities[city];offers=g.mayor_offers();q=next(q for q in offers if q.get('metro_city')==city)
+  g.x,g.y=g.cities[city];g.xp=__import__('progression').xp_for_level(g.region_level);offers=g.mayor_offers();q=next(q for q in offers if q.get('metro_city')==city)
   self.assertTrue(q['unique']);self.assertIsNone(q['pos']);self.assertTrue(g.accept_quest(q['id']))
   q=g.quests[-1];self.assertNotIn(city,g.metro_unlocked);self.assertIn('генератора метро',g.quest_text(q))
   self.assertFalse(g.turn_in(q['id']));g.x,g.y=q['pos'];self.assertTrue(g.search())
@@ -41,7 +41,7 @@ class MetroTests(unittest.TestCase):
   self.assertFalse(g.metro_travel(0));self.assertFalse(g.metro_travel(3))
  def test_active_contract_and_unlocked_save(self):
   """Перевіряє сценарій «active contract and unlocked save» та очікувані результати."""
-  g=r.Game(27);self.repair(g,2);g.x,g.y=g.cities[3];q=next(q for q in g.mayor_offers() if 'metro_city' in q);g.accept_quest(q['id'])
+  g=r.Game(27);self.repair(g,2);g.x,g.y=g.cities[3];g.xp=__import__('progression').xp_for_level(g.region_level);q=next(q for q in g.mayor_offers() if 'metro_city' in q);g.accept_quest(q['id'])
   g.turn+=100;self.assertFalse(any(q.get('metro_city')==3 for q in g.mayor_offers()))
   with tempfile.TemporaryDirectory() as td:
    path=Path(td)/'save.json';g.save(path);other=r.Game.load(path)

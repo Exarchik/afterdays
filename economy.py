@@ -88,6 +88,7 @@ class Game(a.Game):
   chance,rolls,cap=loot_rules(kills)
   self.battle=None;qid=self.quest_battle;self.quest_battle=None
   credits=round(self.rng.randint(40,65)*(1+.35*(b.get('region_level',1)-1))*(1+.15*self.rank('scavenger')));self.money+=credits
+  before_loot={i['id']:i.get('qty',1) for i in self.loot}
   drops=0
   for _ in range(rolls):
    if self.rng.random()<chance:
@@ -103,6 +104,10 @@ class Game(a.Game):
    if self.rng.random()<.35:p.add_to(self.loot,fn(self.rng.randint(2,8)))
   for e in kills:
    if self.rng.random()<.65:p.add_to(self.loot,trophy(e['kind']))
+  if getattr(self,'coward_turns',0):
+   from loot032 import halve_new_loot
+   halve_new_loot(self,before_loot)
+   penalty=credits-credits//2;self.money-=penalty;credits-=penalty
   if qid:
    q=next((q for q in self.quests if q['id']==qid and q['status']=='active'),None)
    if q:q['progress']=1;self.emit(tr('economy.0004'),color='#c7a0f1')

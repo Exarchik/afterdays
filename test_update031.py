@@ -10,7 +10,7 @@ import content,world_layout,frontier,expedition_ui,item_actions
 class Update031Tests(unittest.TestCase):
     def test_upgrade_cost_limit_and_save(self):
         """Upgrades preserve identity/modules/condition and cannot be bought a fourth time."""
-        g=r.Game(1);g.money=999999;w=g.weapon;w['durability']=43
+        g=r.Game(1);g.xp=p.xp_for_level(4);g.money=999999;w=g.weapon;w['durability']=43
         mod=p.module(index=0);w['modules']=[mod];uid=w['id'];before=copy.deepcopy(w)
         for n in range(1,4):
             old=w['value'];cash=g.money;self.assertTrue(g.upgrade_item(uid))
@@ -25,7 +25,7 @@ class Update031Tests(unittest.TestCase):
             self.assertEqual(h.weapon,w)
     def test_upgrade_restrictions_and_module_bonus(self):
         """Invalid purchases are atomic; a module retains its rarity and tradeoff."""
-        g=r.Game(2);m=p.module(2,index=0,level=4);g.bag.append(m)
+        g=r.Game(2);g.xp=p.xp_for_level(5);m=p.module(2,index=0,level=4);g.bag.append(m)
         g.money=0;before=copy.deepcopy(m);self.assertFalse(g.upgrade_item(m['id']));self.assertEqual(m,before)
         g.money=100000;self.assertTrue(g.upgrade_item(m['id']))
         self.assertEqual(m['stats'],mr.module_stats(m['type_id'],2,5,m['tradeoff']))
@@ -89,9 +89,9 @@ class Update031Tests(unittest.TestCase):
         for seed in range(10):
             g=r.Game(seed);xs=sorted(g.cities[i][0] for i in frontier.METRO_CITIES)
             self.assertEqual(len(xs),5);self.assertLessEqual(xs[0],5)
-            self.assertGreaterEqual(xs[-1],world_layout.WIDTH-15)
-            self.assertLessEqual(max(b-a for a,b in zip(xs,xs[1:])),24)
-        g.reputation_state['border_open']=True
+            self.assertGreaterEqual(xs[-1],world_layout.WIDTH*.8)
+            self.assertLessEqual(max(b-a for a,b in zip(xs,xs[1:])),world_layout.WIDTH*.4)
+        g.reputation_state['border_open']=True;g.known_cities=list(range(g.main_city_count))
         for city in range(12):
             g.x,g.y=g.cities[city]
             if g.city_guide:break

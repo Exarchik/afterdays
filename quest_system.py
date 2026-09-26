@@ -46,7 +46,7 @@ class QuestSystem:
     def trading_city(self,merchant):
         """Визначає місто, на репутацію якого впливає поточна торгівля."""
         if merchant in (3,4) and self.traveler and self.traveler['pos']==[self.x,self.y] and (merchant==3 or self.traveler.get('hunter')):
-            return min(range(12),key=lambda n:math.dist((self.x,self.y),self.cities[n]))
+            return min(range(self.main_city_count),key=lambda n:math.dist((self.x,self.y),self.cities[n]))
         return self.city
 
     def change_reputation(self,amount,city):

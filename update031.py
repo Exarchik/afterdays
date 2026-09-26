@@ -29,7 +29,7 @@ class Game(update030.Game):
     def upgrade_quote(self,ident):
         """Return the next item and base-price difference; only owned nonquest gear qualifies."""
         item=self.find(ident)
-        if self.battle or self.road_event or self.city not in self.technicians or not item or item.get('kind') not in GEAR_KINDS or item.get('quest_id') or item.get('upgrades',0)>=3:return None
+        if self.battle or self.road_event or self.city not in self.technicians or not item or item.get('kind') not in GEAR_KINDS or item.get('quest_id') or item.get('upgrades',0)>=3 or item.get('level',1)>=self.level:return None
         if not any(i and i['id']==ident for i in self.bag+list(self.equipped.values())):return None
         result=upgraded(item)
         return result,max(0,result['value']-item['value'])
@@ -70,8 +70,8 @@ class Game(update030.Game):
         """Offer five nearest reachable towns from a town guide; travelling guides retain three known towns."""
         if not self.city_guide:return super().guide_destinations()
         choices=[]
-        for city,pos in enumerate(self.cities[:12]):
-            if city==self.city:continue
+        for city,pos in enumerate(self.cities[:self.main_city_count]):
+            if city==self.city or city not in self.known_cities:continue
             route=world_route(self,pos)
             if not route:continue
             distance=route_distance((self.x,self.y),route)

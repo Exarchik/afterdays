@@ -217,7 +217,7 @@ class Reputation:
     def schedule_thanks(self):
         """Планує одноразові подяки міст із достатньою репутацією."""
         self.init_reputation()
-        eligible = [i for i in range(12) if self.reputation(i)>=75 and not self.local_record(i).get('thanks_issued') and not any(q['kind']=='thanks' and q['city']==i for q in self.quests)]
+        eligible = [i for i in range(self.main_city_count) if self.reputation(i)>=75 and not self.local_record(i).get('thanks_issued') and not any(q['kind']=='thanks' and q['city']==i for q in self.quests)]
         if eligible and self.reputation_state['thanks_due'] is None:
             self.reputation_state['thanks_due'] = self.turn+self.rng.randint(60,100)
         return eligible

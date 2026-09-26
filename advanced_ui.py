@@ -74,8 +74,6 @@ def draw_battle(app):
         c.create_polygon(*hexgrid.polygon(px,py,u),fill=color,outline=color,width=1)
         if (x*13+y*7)%9==0 and (x,y) not in walls:
             c.create_line(px-u*.3,py,px+u*.14,py+u*.1,fill='#a69e78' if kind!='forest' else '#698663')
-        if x==0 and not b.get('dungeon'):
-            c.create_line(px-u*.5,py,px+u*.5,py,fill='#79d5b1',width=3)
     for a,bp in rim:
         c.create_line(ox+a[0]*u,oy+a[1]*u,ox+bp[0]*u,oy+bp[1]*u,fill='#8c9479',width=1)
     hovered=getattr(app,'battle_hover',None)

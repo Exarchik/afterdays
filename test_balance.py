@@ -45,7 +45,7 @@ class BalanceTests(unittest.TestCase):
   for i in awarded:self.assertTrue(all(m['level']==1 for m in i.get('modules',[])))
  def test_high_level_contract(self):
   """Перевіряє сценарій «high level contract» та очікувані результати."""
-  g=r.Game(2);g.x,g.y=g.cities[2];q=g.mayor_offers()[0]
+  g=r.Game(2);g.x,g.y=g.cities[2];g.xp=__import__('progression').xp_for_level(g.region_level);q=g.mayor_offers()[0]
   self.assertEqual(q['level'],g.region_level);self.assertEqual(q['xp_reward'],(40+5*(q['level']-1))*(2 if q['unique'] else 1))
   for _ in range(10):self.assertEqual(g.reward_item(4,1,level=q['level'])['level'],q['level'])
  def test_traveler_distribution(self):

@@ -57,7 +57,7 @@ class Guides:
     def guide_destinations(self):
         """Повертає доступні міста, маршрути й ціни провідника."""
         choices=[]
-        for city in range(min(12,len(self.cities))):
+        for city in range(self.main_city_count):
             if city not in self.known_cities or self.cities[city]==[self.x,self.y]:continue
             route=world_route(self,self.cities[city])
             if route:

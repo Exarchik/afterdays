@@ -200,8 +200,11 @@ class Game(r.ExpansionGame):
 
     @staticmethod
     def region_at(x,y=5):
-        """Обчислює рівень локації за відстанню від старту."""
-        return min(15,1+max(0,int((math.hypot(x-5,y-5)-3)//3)))
+        """Розподіляє рівні від старту: захід до 5, схід до 15."""
+        from world_layout import WIDTH,HEIGHT
+        east=min(1,max(0,x-5)/(WIDTH-6))
+        south=min(1,max(0,y-5)/(HEIGHT-6))
+        return min(15,1+int(10*east+4*south))
 
     def count(self,kind,ammo_type=None):
         """Рахує доступні одиниці предметів потрібного типу."""
@@ -626,7 +629,7 @@ class Game(r.ExpansionGame):
             self.consume('med',q.get('med_need',3 if q.get('unique') else 2))
         elif q['kind']=='retrieve':
             self.bag[:]=[i for i in self.bag if i.get('quest_id')!=q['id']]
-        q['status']='done'; self.money+=q['reward']; self.xp+=q.get('xp_reward',80 if q.get('unique') else 40)
+        q['status']='done'; self.money+=q['reward']; self.xp+=q.get('xp_reward',80 if q.get('unique') else 40)//(2 if getattr(self,'coward_turns',0) else 1)
         self.log(tr('progression.0067', v0=q['title'], v1=q['reward']))
         return True
 

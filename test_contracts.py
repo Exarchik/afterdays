@@ -57,7 +57,7 @@ class NewContractTests(unittest.TestCase):
   keys=content.read('city_names.json');self.assertEqual(len(set(keys)),1000)
   bank=[content.t(key) for key in keys]
   g=r.Game();h=r.Game();self.assertNotEqual(g.world,h.world);self.assertNotEqual(g.city_names,h.city_names)
-  self.assertEqual(len(set(g.city_names)),12);self.assertTrue(set(g.city_names)<=set(bank))
+  self.assertEqual(len(set(g.city_names)),15);self.assertTrue(set(g.city_names)<=set(bank))
   with tempfile.TemporaryDirectory() as td:
    path=Path(td)/'save.json';g.save(path);loaded=r.Game.load(path)
    self.assertEqual(g.city_names,loaded.city_names);self.assertEqual(g.world,loaded.world)

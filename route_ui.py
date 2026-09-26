@@ -79,6 +79,7 @@ class RouteController:
         if not hasattr(a,'tile') or a.game.battle:return
         x,y=self.position();t=a.tile
         px=a.ox+(x-a.vx+.5)*t;py=a.oy+(y-a.vy+.5)*t
+        a.canvas.coords('coward_icon',px,py-t*.55)
         a.canvas.coords('world_player_ring',px-t*.31,py-t*.31,px+t*.31,py+t*.31)
         a.canvas.coords('world_player_arrow',px,py-t*.22,px+t*.16,py+t*.17,px,py+t*.09,px-t*.16,py+t*.17)
 

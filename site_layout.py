@@ -4,7 +4,7 @@ from collections import deque
 
 def place(game,count):
     reachable=game.reachable_world((5,5))
-    pool=[p for p in sorted(reachable) if game.world[p[1]][p[0]] not in ('road','city','site') and all(math.dist(p,c)>2 for c in game.cities)]
+    pool=[p for p in sorted(reachable) if 1<=p[0]<len(game.world[0])-1 and 1<=p[1]<len(game.world)-1 and game.world[p[1]][p[0]] not in ('road','city','site') and all(math.dist(p,c)>2 for c in game.cities)]
     starts=[p for p in pool if 3<=math.dist(p,(5,5))<=6]
     best=[]
     for attempt in range(24):
@@ -23,7 +23,7 @@ def place(game,count):
     layouts=[]
     for ox in range(7):
         for oy in range(7):
-            pts=[(x,y) for y in range(oy,32,7) for x in range(ox,len(game.world[0]),7) if all(math.dist((x,y),c)>1.5 for c in game.cities)]
+            pts=[(x,y) for y in range(oy,32,7) for x in range(ox,len(game.world[0]),7) if 1<=x<len(game.world[0])-1 and 1<=y<len(game.world)-1 and all(math.dist((x,y),c)>1.5 for c in game.cities)]
             if len(pts)>=count:layouts.append(pts)
     pts=max(layouts,key=lambda ps:sum(p in reachable for p in ps))
     start=min(pts,key=lambda p:abs(math.dist(p,(5,5))-4))

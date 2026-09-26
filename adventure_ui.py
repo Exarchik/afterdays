@@ -143,6 +143,7 @@ class Services(tk.Frame):
         app=self.app;g=app.game;items=[]
         if not g.battle:
             import restoration_ui
+            if g.scribe:items.append(('cartographer',tr('update032.scribe'),lambda:__import__('interface032').scribe(app)))
             if g.local_settlers():items.append(('settlers',tr('restoration.settlers'),lambda:restoration_ui.settlers(app)))
             if any(q['kind']=='torn_map' and q['status']=='active' and not q['map_solved'] for q in g.quests):items.append(('torn_map',tr('restoration.assemble'),lambda:restoration_ui.maps(app)))
             for m,key in enumerate(('smith','food','fence')):
@@ -164,7 +165,7 @@ class Services(tk.Frame):
                 q=g.destination_quest();items.append(('action_delivery' if q['kind']=='delivery' else 'action_radio',tr('adventure_ui.0019') if q['kind']=='delivery' else tr('adventure_ui.0020'),lambda:app.act(g.search)))
             if getattr(g,'local_expedition',lambda:None)() and g.city is not None:items.append(('search',tr('adventure_ui.0018'),lambda:app.act(g.search)))
             if g.road_event:items.append(('traveler',tr('adventure_ui.0021'),app.road_dialog))
-        items.extend([('perks',tr('adventure_ui.0022', v0=g.pending_perks),app.perks),('atlas',tr('debug.atlas_button') if TEST_MODE else tr('adventure_ui.0023'),app.atlas)])
+        items.extend([('atlas',tr('debug.atlas_button') if TEST_MODE else tr('adventure_ui.0023'),app.atlas)])
         self.entries=items;self.paint()
 
     def paint(self):

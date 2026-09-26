@@ -73,7 +73,7 @@ class Border:
         """Перевіряє умови видачі квесту на відкриття блокпостів."""
         if self.turn<self.reputation_state.get('permit_retry',0):return
         if self.border_open or any(q['kind']=='permit' for q in self.quests):return
-        eligible=[i for i in range(12) if self.reputation(i)>=75]
+        eligible=[i for i in range(self.main_city_count) if self.reputation(i)>=75]
         if not eligible:return
         city=self.city if self.city in eligible else min(eligible,key=lambda i:(i not in self.known_cities,abs(self.cities[i][0]-self.x)+abs(self.cities[i][1]-self.y)))
         if len(self.active_for(city))>=self.quest_capacity(city):return

@@ -19,7 +19,7 @@ class ExpansionTests(unittest.TestCase):
         """Перевіряє сценарій «content and guaranteed city supplies» та очікувані результати."""
         self.assertEqual((len(GEAR), len(MODULES), len(MONSTERS)), (30, 29, 12))
         g = Game(0)
-        self.assertEqual(len(g.cities), 12)
+        self.assertEqual(len(g.cities), 15)
         profiles = set()
         for n, p in enumerate(g.cities):
             g.x,g.y=p

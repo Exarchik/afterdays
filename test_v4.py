@@ -125,19 +125,19 @@ class AdventureTests(unittest.TestCase):
 
     def test_special_sites_only_appear_when_discovered_and_paths_avoid_blocks(self):
         """Перевіряє сценарій «special sites only appear when discovered and paths avoid blocks» та очікувані результати."""
-        g=r.Game(9);self.assertEqual(len(g.cities),12);self.assertFalse(g.trails)
+        g=r.Game(9);self.assertEqual(len(g.cities),15);self.assertFalse(g.trails)
         for site in g.special_sites:
             self.assertNotEqual(g.world[site['pos'][1]][site['pos'][0]],'site')
         site=g.special_sites[0];self.assertTrue(g.discover(site['id']));self.assertFalse(g.discover(site['id']))
-        self.assertEqual(len(g.cities),13);self.assertTrue(g.trails)
+        self.assertEqual(len(g.cities),16);self.assertTrue(g.trails)
         self.assertTrue(all(g.passable(*p) for p in g.trails))
-        self.assertEqual(g.city_name(12),site['name'])
+        self.assertEqual(g.city_name(g.main_city_count),site['name'])
         g.x,g.y=site['pos'];self.assertEqual(g.current_site['npc'],site['npc'])
         if site['role']=='quest':
             offers=g.mayor_offers();self.assertTrue(offers);self.assertIn(site['name'],g.quest_text(offers[0]))
         merchant=next(s for s in g.special_sites if s['role']=='merchant')
         g.discover(merchant['id']);g.x,g.y=merchant['pos']
-        stock=g.stock(0);self.assertTrue(any(i['rarity']>=3 for i in stock));self.assertFalse(g.available_merchant(1))
+        g.xp=p.xp_for_level(7);stock=g.stock(0);self.assertTrue(any(i['rarity']>=3 for i in stock));self.assertFalse(g.available_merchant(1))
 
     def test_world_obstacles_do_not_disconnect_cities_or_quest_targets(self):
         """Перевіряє сценарій «world obstacles do not disconnect cities or quest targets» та очікувані результати."""

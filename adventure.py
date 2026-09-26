@@ -103,6 +103,10 @@ class Game(p.Game):
         self._last_battle=None
         from world_layout import build
         self.cities,self.world=build(self.rng.getstate())
+        self.city_names=r.random.Random(repr(self.rng.getstate())).sample([content.t(key) for key in content.read('city_names.json')],len(self.cities))
+        self.city_merchants=[[0,1,2] if i==0 else [1]+([0] if i%3!=1 else [])+([2] if i%2==0 else []) for i in range(len(self.cities))]
+        self.mayors.extend(i for i in range(12,len(self.cities)) if i%2==0)
+        self.technicians.extend(i for i in range(12,len(self.cities)) if i%3==0)
         self._build_world()
         self.explored=[]
         self.known_cities=[0]
@@ -110,12 +114,18 @@ class Game(p.Game):
         self.rad_turns=0
         self.reveal(self.x,self.y,2)
 
+    @property
+    def main_city_count(self):
+        """Кількість основних міст; старі індекси особливих локацій зберігаються."""
+        ids=[s['city_id'] for s in getattr(self,'special_sites',[]) if s.get('city_id') is not None]
+        return min(ids) if ids else len(self.cities)
+
     # Повертає назву міста з відповідними статусними позначками.
     def city_name(self,index):return self.city_names[index]
 
     # Перевіряє, чи перебуває гравець у звичайному місті.
     @property
-    def regular_city(self):return self.city is not None and self.city<12
+    def regular_city(self):return self.city is not None and self.city<self.main_city_count
 
     @property
     def current_site(self):
@@ -188,7 +198,7 @@ class Game(p.Game):
             cy=self.rng.choices(range(2,30),weights=[y**2 for y in range(2,30)])[0];radius=self.rng.randint(1,5)
             for y in range(max(0,cy-radius),min(32,cy+radius+1)):
                 for x in range(max(0,cx-radius),min(len(self.world[0]),cx+radius+1)):
-                    if not (x<24 and y<16) and math.dist((x,y),(cx,cy))<=radius and self.passable(x,y) and [x,y] not in self.cities and math.dist((x,y),(5,5))>2:
+                    if not (x<len(self.world[0])//2 and y<16) and math.dist((x,y),(cx,cy))<=radius and self.passable(x,y) and [x,y] not in self.cities and math.dist((x,y),(5,5))>2:
                         self.radiation[f'{x},{y}']=self.rng.randint(2,4)
 
     def add_sites(self):
@@ -197,7 +207,7 @@ class Game(p.Game):
             reachable=self.reachable_world((5,5));existing={s['name'] for s in self.special_sites}
             for name,npc,role in SITES[:16]:
                 if name in existing:continue
-                pool=[p for p in sorted(reachable) if self.world[p[1]][p[0]] not in ('city','road','site') and all(math.dist(p,c)>2 for c in self.cities) and all(math.dist(p,s['pos'])>=7 for s in self.special_sites)]
+                pool=[p for p in sorted(reachable) if 1<=p[0]<len(self.world[0])-1 and 1<=p[1]<len(self.world)-1 and self.world[p[1]][p[0]] not in ('city','road','site') and all(math.dist(p,c)>2 for c in self.cities) and all(math.dist(p,s['pos'])>=7 for s in self.special_sites)]
                 if not pool:break
                 pos=self.rng.choice(pool)
                 self.special_sites.append(dict(id=r.uid(),name=name,npc=npc,role=role,pos=list(pos),found=False,city_id=None))
@@ -320,6 +330,7 @@ class Game(p.Game):
 
     def gain_xp(self,amount):
         """Нараховує досвід і обробляє наслідки підвищення рівня."""
+        if getattr(self,'coward_turns',0):amount=max(0,amount//2)
         self.xp+=amount;self.emit(f'+{amount} XP',color='#99c9ff')
 
     def make_road_event(self,key=None):
@@ -475,8 +486,8 @@ class Game(p.Game):
         if ok:
             self.emit(tr('adventure.0202'),color='#c7a0f1');self.emit(f'+{self.xp-xp} XP',color='#99c9ff')
             city=self.city
-            if city is not None and city<12 and city not in self.map_rewards and sum(q['status']=='done' and q['city']==city for q in self.quests)>=3:
-                nearby=sorted((n for n in range(12) if n not in self.known_cities),key=lambda n:math.dist(self.cities[n],self.cities[city]))[:1]
+            if city is not None and city<self.main_city_count and city not in self.map_rewards and sum(q['status']=='done' and q['city']==city for q in self.quests)>=3:
+                nearby=sorted((n for n in range(self.main_city_count) if n not in self.known_cities),key=lambda n:math.dist(self.cities[n],self.cities[city]))[:1]
                 if nearby:
                     self.map_rewards.append(city)
                     self.reveal(*self.cities[nearby[0]],0)
@@ -652,7 +663,7 @@ class Game(p.Game):
                 if not game.passable(*pos):game.world[pos[1]][pos[0]]='waste'
                 # Carve a short connector only if the old position is isolated by new obstacles.
                 if tuple(pos) not in game.reachable_world(tuple(game.cities[0])):
-                    x,y=pos;cx,cy=min(game.cities[:12],key=lambda c:math.dist(c,pos))
+                    x,y=pos;cx,cy=min(game.cities[:game.main_city_count],key=lambda c:math.dist(c,pos))
                     while x!=cx:
                         x+=1 if cx>x else -1
                         if not game.passable(x,y):game.world[y][x]='waste'

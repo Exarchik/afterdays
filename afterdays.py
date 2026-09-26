@@ -417,7 +417,7 @@ class LegacyGame:
             self.log(tr('afterdays.0053', v0=e['name'], v1=damage, v2=chance))
             if e['hp'] <= 0:
                 b['enemies'].remove(e)
-                self.xp += 20
+                self.xp += 20//(2 if getattr(self,'coward_turns',0) else 1)
                 self.log(tr('afterdays.0054', v0=e['name']))
             if not b['enemies']:
                 self.victory()
@@ -496,7 +496,7 @@ class LegacyGame:
         """Відновлює гравця під час відпочинку в поселенні."""
         if self.city is None or self.battle:
             return False
-        if self.hp == self.max_hp:
+        if self.hp == self.max_hp and not getattr(self,'coward_turns',0):
             self.log(tr('afterdays.0064'))
             return False
         if self.money < 15:
@@ -823,7 +823,7 @@ class ExpansionGame(LegacyGame):
             self.log(f"{tr('afterdays.0099') if critical else ''}{e['name']}: −{damage} HP.")
             if e['hp'] <= 0:
                 b['enemies'].remove(e)
-                self.xp += 20
+                self.xp += 20//(2 if getattr(self,'coward_turns',0) else 1)
                 self._kill_objectives(e['kind'])
                 self.log(tr('afterdays.0100', v0=e['name']))
             if not b['enemies']:
@@ -982,7 +982,7 @@ class ExpansionGame(LegacyGame):
                     self.bag.remove(next(i for i in self.bag if i['kind'] == kind))
         q['status'] = 'done'
         self.money += q['reward']
-        self.xp += 40
+        self.xp += 40//(2 if getattr(self,'coward_turns',0) else 1)
         self.log(tr('afterdays.0123', v0=q['title'], v1=q['reward']))
         return True
 
@@ -1049,7 +1049,7 @@ class ExpansionGame(LegacyGame):
 
 
 from progression import equipment, module, supply, stats, item_weight, item_value
-from update031 import Game
+from update032 import Game
 from reputation import buy_factor, sell_factor
 
 # GUI imports are delayed so the model and tests work without a display.
@@ -1105,7 +1105,8 @@ def launch(test_hook=None):
             tk.Label(header, text=tr('afterdays.0132'), bg=BG, fg=MUTED, font=('Segoe UI', 10)).pack(side='left')
             for title, fn in [(tr('afterdays.0133'),lambda:sprites.gallery(self)),('?', self.help), (tr('afterdays.0134'), self.new), (tr('afterdays.0135'), self.load), (tr('afterdays.0136'), self.save)]:
                 ttk.Button(header, text=title, command=fn).pack(side='right', padx=3)
-            self.status = tk.Label(root, bg=PANEL, fg=TEXT, anchor='w', padx=16, pady=10, font=('Segoe UI', 11))
+            from interface032 import StatusBar
+            self.status = StatusBar(root)
             self.status.pack(fill='x', padx=18)
             body = tk.Frame(root, bg=BG)
             body.pack(fill='both', expand=True, padx=18, pady=10)
@@ -1126,7 +1127,7 @@ def launch(test_hook=None):
             self.canvas.bind('<Motion>', self.map_hover)
             self.canvas.bind('<Leave>',self.clear_battle_hover)
             import inspection_ui
-            self.canvas.bind('<Button-3>',lambda e:inspection_ui.inspect_monster(self,e))
+            self.canvas.bind('<Button-3>',lambda e:__import__('interface032').map_context(self,e))
             self.hint = tk.Label(left, bg=BG, fg=MUTED, anchor='w', justify='left', wraplength=680, height=4)
             self.hint.pack(fill='x', pady=5)
             controls = tk.Frame(left, bg=BG)
@@ -1282,11 +1283,12 @@ def launch(test_hook=None):
                     root.after_idle(show_notice)
             weapon = g.weapon
             ws = stats(weapon) if weapon else {}
-            self.status.config(text=tr('afterdays.0151', v0=g.hp, v1=g.max_hp, v2=g.defense, v3=g.weight, v4=g.capacity, v5=g.money, v6=g.level, v7=g.xp, v8=progression.xp_for_level(g.level + 1), v9=g.turn,v10=progression.xp_for_level(g.level+1)-g.xp))
+            self.status.refresh(g)
             self.combat_hud.refresh()
             combat = g.battle is not None
             self.end_button.config(state='normal' if combat else 'disabled')
-            self.flee_button.config(state='normal' if combat else 'disabled')
+            dungeon=combat and g.battle.get('dungeon')
+            self.flee_button.config(text=tr('update032.leave') if dungeon else tr('afterdays.0140'),state='normal' if combat and (not dungeon or g.battle['pos']==g.battle['exit']) else 'disabled')
             self.tabs.tab(self.loot_tab, text=tr('afterdays.0152', v0=len(g.loot)))
             self.services.refresh()
             self.perks_panel.refresh()
@@ -1625,6 +1627,7 @@ def launch(test_hook=None):
             px, py = center(b['pos'] if b else self.route.position())
             c.create_oval(px-t*.31, py-t*.31, px+t*.31, py+t*.31, fill='#cce4d0', outline='#ffffff', width=2,tags='world_player_ring')
             c.create_polygon(px, py-t*.22, px+t*.16, py+t*.17, px, py+t*.09, px-t*.16, py+t*.17, fill='#233a31',tags='world_player_arrow')
+            if not b and g.coward_turns:c.create_text(px,py-t*.55,text='⚑',fill='#ed795c',font=('Segoe UI',12,'bold'),tags='coward_icon')
             if not b:
                 for idx, pos in enumerate(g.cities):
                     if not self.map_city_known(idx):continue

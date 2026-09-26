@@ -13,13 +13,13 @@ class Update030Tests(unittest.TestCase):
         """Перевіряє сценарій «world size cap and east reachability» та очікувані результати."""
         for seed in range(6):
             g=r.Game(seed)
-            self.assertEqual(len(g.world),32);self.assertEqual({len(row) for row in g.world},{62})
+            self.assertEqual(len(g.world),32);self.assertEqual({len(row) for row in g.world},{112})
             self.assertEqual(g.cities[0],[5,5]);self.assertTrue(any(x>=48 for x,y in g.cities[:12]))
-            self.assertEqual(max(g.region_at(x,y) for y in range(32) for x in range(62)),15)
+            self.assertEqual(max(g.region_at(x,y) for y in range(32) for x in range(112)),15)
             reachable=g.reachable_world((5,5))
             self.assertTrue(set(map(tuple,g.cities))<=reachable)
             self.assertTrue(any(x==61 for x,y in reachable))
-            self.assertFalse(g.passable(62,10));self.assertFalse(g.passable(-1,10))
+            self.assertFalse(g.passable(112,10));self.assertFalse(g.passable(-1,10))
 
     def test_old_save_extends_once_without_moving_cities_or_consuming_rng(self):
         """Перевіряє сценарій «old save extends once without moving cities or consuming rng» та очікувані результати."""
@@ -34,7 +34,7 @@ class Update030Tests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             save=Path(tmp)/'save.json';g.save(save);h=r.Game.load(save)
         self.assertEqual(g.world,h.world);self.assertEqual(g.rng.getstate(),h.rng.getstate())
-        self.assertEqual(len(h.world[0]),62)
+        self.assertEqual(len(h.world[0]),112)
 
     def test_exploration_and_path_to_far_east(self):
         """Перевіряє сценарій «exploration and path to far east» та очікувані результати."""
@@ -42,7 +42,7 @@ class Update030Tests(unittest.TestCase):
         from site_layout import road_path
         g=r.Game(4);g.reputation_state['border_open']=True
         g.reveal(61,15,2);self.assertTrue(g.revealed(61,15))
-        pos=max(g.reachable_world((5,5)),key=lambda q:q[0]);self.assertEqual(pos[0],61)
+        pos=max(g.reachable_world((5,5)),key=lambda q:q[0]);self.assertEqual(pos[0],111)
         self.assertTrue(world_route(g,pos))
         self.assertTrue(road_path(g,pos))
 

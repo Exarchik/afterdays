@@ -10,7 +10,7 @@ class Game(scavenging.Game):
 
     def clear_city_edges(self):
         """Прибирає гори й радіацію поблизу основних міст."""
-        for cx,cy in self.cities[:12]:
+        for cx,cy in self.cities[:self.main_city_count]:
             for y in range(max(0,cy-1),min(32,cy+2)):
                 for x in range(max(0,cx-1),min(len(self.world[0]),cx+2)):
                     if self.world[y][x]=='cliff':self.world[y][x]='waste'
@@ -29,20 +29,22 @@ class Game(scavenging.Game):
     def stock(self,merchant):
         """Повертає або оновлює асортимент торговця."""
         items=super().stock(merchant)
-        if self.city is None or merchant==3 or self.reputation()<60:return items
-        entry=next((v for v in self.shops.values() if v['items'] is items),None)
+        city=self.trading_city(merchant)
+        if city is None or self.reputation(city)<60:return items
+        entry=self.traveler if merchant==3 or merchant==4 and self.traveler and self.traveler.get('hunter') else next((v for v in self.shops.values() if v['items'] is items),None)
         if entry is None or entry.get('special_checked'):return items
         entry['special_checked']=True
         pool=list(items)
-        if pool and self.rng.random()<.08:
+        if pool and self.rng.random()<.25:
             item=self.rng.choice(pool)
-            item['promotion']=dict(discount=self.rng.choices([30,50,75],[70,25,5])[0],city=self.city,merchant=merchant)
+            item['promotion']=dict(discount=self.rng.choices([30,50,75],[70,25,5])[0],city=city,merchant=merchant)
         return items
 
     def promotion(self,item,merchant):
         """Повертає діючу акційну знижку на товар."""
         sale=item.get('promotion',{})
-        return sale.get('discount',0) if self.city is not None and self.reputation()>=60 and sale.get('city')==self.city and sale.get('merchant')==merchant else 0
+        city=self.trading_city(merchant)
+        return sale.get('discount',0) if city is not None and self.reputation(city)>=60 and sale.get('city')==city and sale.get('merchant')==merchant else 0
 
     def price(self,item,merchant,buying=True):
         """Обчислює ціну купівлі або продажу предмета."""

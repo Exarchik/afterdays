@@ -31,7 +31,7 @@ class Game(restoration.Game):
         """Зберігає факт фізичного відвідування основного міста."""
         if not hasattr(self,'reputation_state'):return
         visits=self.reputation_state.setdefault('visited_cities',[0])
-        if self.city is not None and self.city<12 and self.city not in visits:visits.append(self.city)
+        if self.city is not None and self.city<self.main_city_count and self.city not in visits:visits.append(self.city)
 
     def _visit_objectives(self):
         """Оновлює завдання, пов’язані з відвідуванням поточної клітинки."""

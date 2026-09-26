@@ -182,11 +182,15 @@ class Game(economy.Game):
             if not b['cleared']:self.log(tr('frontier.0029'));return False
             if hexgrid.distance(b['pos'],b['chest'])<=1:
                 if b['chest_open']:self.log(tr('frontier.0030'));return False
+                before_loot={i['id']:i.get('qty',1) for i in self.loot}
                 b['chest_open']=True
                 cap=economy.loot_rules(b['kills'])[2]
                 for _ in range(2):p.add_to(self.loot,self.reward_item(cap,level=self.monster_loot_level(b.get('kills',[]),b.get('region_level',1))))
                 for _ in range(2):p.add_to(self.loot,p.ammunition(self.rng.choice(list(p.AMMO)),self.rng.randint(8,20)))
                 p.add_to(self.loot,p.supply('med',2));p.add_to(self.loot,p.supply('food',2))
+                if getattr(self,'coward_turns',0):
+                    from loot032 import halve_new_loot
+                    halve_new_loot(self,before_loot)
                 self.log(tr('frontier.0031'));return True
             if b['pos']==b['exit']:super().victory();return True
             self.log(tr('frontier.0032'));return False
