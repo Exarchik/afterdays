@@ -33,7 +33,7 @@ def personal_actions(g,item):
         actions.append(('modify',()))
         if item.get('modules'):actions.append(('remove_modules',()))
     if (kind in ('weapon','armor','helmet') or item.get('quest_repair')) and p.mr.condition(item)<p.mr.max_condition(item):
-        if g.count('repairkit'):actions.append(('repair_kit',()))
+        if g.can_repair_with_kit(item):actions.append(('repair_kit',()))
         if g.city in g.technicians:
             for target in (25,50,100):
                 cost=g.repair_cost(item,target)

@@ -64,7 +64,7 @@ class Game(update031.Game):
         city=min(range(self.main_city_count),key=lambda n:math.dist(self.cities[n],(self.x,self.y)))
         level=self.region_at(*self.cities[city]);offers=[]
         for kind in self.rng.sample(['hunt','supplies','scout'],self.rng.randint(1,3)):
-            q=dict(id=r.uid(),kind=kind,city=city,status='offered',title=r.QUEST_LABELS[kind],progress=0,goal=self.rng.randint(2,5) if kind=='hunt' else 1,target_kind=None,pos=None,unique=False,level=level,zone=level,scribe=True,food_need=2,med_need=1,scaled=True,distance_scaled=True,cycle_named=True)
+            q=dict(id=r.uid(),kind=kind,city=city,status='offered',title=r.QUEST_LABELS[kind],progress=0,goal=self.rng.randint(2,5) if kind=='hunt' else 1,target_kind=None,pos=None,unique=False,level=level,zone=level,scribe=True,issuer_pos=[self.x,self.y],food_need=2,med_need=1,scaled=True,distance_scaled=True,cycle_named=True)
             self.price_quest(q);offers.append(q)
         self.traveler=dict(scribe=True,pos=[self.x,self.y],items=[],offers=offers)
         self.last_traveler_turn=self.turn

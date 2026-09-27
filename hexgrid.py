@@ -36,25 +36,28 @@ def visible(a,b,walls):
     # A tiny consistent nudge resolves exact hex-edge ties symmetrically.
     return all(rounded(a[0]+(b[0]-a[0])*i/n+1e-7,a[1]+(b[1]-a[1])*i/n+1e-7) not in blocked for i in range(1,n))
 
-# Diamond footprint with clockwise-sloping q axis. The common affine
-# projection also transforms tile vertices, so adjacent edges meet exactly.
+# Flat-top hexes, compressed vertically, with the original cell area.
+# Both centers and vertices use the same axial projection.
 HEIGHT_SCALE=.9
-VERTICAL=1.125*HEIGHT_SCALE
+HALF_WIDTH=math.sqrt(3)
+HALF_HEIGHT=.75*HEIGHT_SCALE
 
 def center(pos,u,ox=0,oy=0):
-    return ox+math.sqrt(3)*u*(pos[0]-pos[1]),oy+VERTICAL*u*(pos[0]+pos[1])
+    """Project axial coordinates to centers of flattened flat-top hexes."""
+    q,r=pos
+    return ox+1.5*HALF_WIDTH*u*q,oy+HALF_HEIGHT*u*(q+2*r)
 
 def cell(px,py,u,ox=0,oy=0):
-    diff=(px-ox)/(math.sqrt(3)*u);total=(py-oy)/(VERTICAL*u)
-    return rounded((total+diff)/2,(total-diff)/2)
+    """Invert the projection and select the hex under the mouse."""
+    q=(px-ox)/(1.5*HALF_WIDTH*u)
+    r=((py-oy)/(HALF_HEIGHT*u)-q)/2
+    return rounded(q,r)
 
 def polygon(px,py,u):
-    points=[]
-    for i in range(6):
-        angle=math.radians(30+60*i);x,y=math.cos(angle),math.sin(angle)
-        q=x/math.sqrt(3)-y/3;r=2*y/3
-        points.extend(center((q,r),u,px,py))
-    return points
+    """Return six vertices with horizontal top and bottom edges."""
+    w,h=HALF_WIDTH*u,HALF_HEIGHT*u
+    return [px+w,py,px+w/2,py+h,px-w/2,py+h,
+            px-w,py,px-w/2,py-h,px+w/2,py-h]
 
 def bounds(w,h):
     points=[]

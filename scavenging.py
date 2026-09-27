@@ -99,7 +99,7 @@ class Game(expeditions.Game):
         reachable=self.player_reachable_world(self.cities[q['city']]);minimum=3 if q['level']>=3 else 1
         def valid(pos):
             x,y=pos
-            return all((xx,yy) in reachable and [xx,yy] not in self.cities and minimum<=self.region_at(xx,yy)<=q['level']+1 for yy in range(y-1,y+2) for xx in range(x-1,x+2))
+            return all(__import__('quest_limits').nearby(self,q,(xx,yy)) and (xx,yy) in reachable and [xx,yy] not in self.cities and minimum<=self.region_at(xx,yy)<=q['level']+1 for yy in range(y-1,y+2) for xx in range(x-1,x+2))
         nearby=[pos for pos in self.quest_locations(q) if valid(pos)]
         if nearby:return nearby
         occupied={tuple(t['pos']) for t in self.quests if t.get('pos') and t['status']=='active' and t['id']!=q['id']}

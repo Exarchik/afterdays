@@ -14,9 +14,9 @@ def show(app):
     info=tk.Label(win,bg=PANEL,fg=GOLD,wraplength=560);info.pack(pady=12,padx=10)
     def select(ident):
         item=g.find(ident);detail.config(text=description(g,item))
-        usable=bool(item and mr.condition(item)<mr.max_condition(item) and g.count('repairkit'))
+        usable=bool(item and g.can_repair_with_kit(item))
         button.config(state='normal' if usable else 'disabled')
-        preview.config(text=tr('scav.repair_preview',before=round(mr.condition(item)),after=round(min(mr.max_condition(item),mr.condition(item)+35))) if item else '')
+        preview.config(text=tr('scav.repair_preview',before=round(mr.condition(item)),after=round(min(mr.max_condition(item),mr.condition(item)+35))) if item and g.can_repair_with_kit(item) else tr('update033.kit_limit') if item and item['kind']=='weapon' and mr.condition(item)<=20 else '')
     win.app=app
     grid=ItemGrid(win,select,height=220,columns=6);grid.pack(fill='both',expand=True,padx=12)
     detail=Detail(win,height=8);detail.pack(fill='both',expand=True,padx=12)

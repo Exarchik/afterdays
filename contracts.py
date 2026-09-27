@@ -33,7 +33,7 @@ class Game(Guides, QuestSystem, Border, Reputation, frontier.Game):
         origin=tuple(self.cities[q['city']]);reachable=self.player_reachable_world(origin)
         occupied={tuple(t['pos']) for t in self.quests if t['status']=='active' and t.get('pos')}
         return [s for s in self.special_sites if tuple(s['pos']) in reachable and tuple(s['pos'])!=origin
-                and tuple(s['pos']) not in occupied and (3 if q['level']>=3 else 1)<=self.region_at(*s['pos'])<=q['level']+1]
+                and __import__('quest_limits').nearby(self,q,s['pos']) and tuple(s['pos']) not in occupied and (3 if q['level']>=3 else 1)<=self.region_at(*s['pos'])<=q['level']+1]
 
     def _raw_mayor_offers(self):
         """Формує набір кандидатів завдань до застосування обмежень репутації."""

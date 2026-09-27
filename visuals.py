@@ -261,7 +261,8 @@ TYPE_ORDER.insert(TYPE_ORDER.index('parts'),'repairkit')
 TYPE_COLORS['repairkit']='#4d4935'
 TYPE_COLORS['trophy']='#503e32'
 def item_sort_key(item):
-    kind=item['kind'];return (0 if item.get('promotion') else 1,TYPE_ORDER.index(kind) if kind in TYPE_ORDER else 99,-item.get('rarity',0),-item.get('level',1),item['name'],item['id'])
+    kind=item['kind'];category=('pistol','rifle','shotgun','automatic','sniper').index(__import__('combat033').category(item)) if kind=='weapon' else 0
+    return (0 if item.get('promotion') else 1,TYPE_ORDER.index(kind) if kind in TYPE_ORDER else 99,category,-item.get('rarity',0),-item.get('level',1),item['name'],item['id'])
 
 def condition_color(value):
     return '#75ce83' if value>=70 else '#e3c159' if value>25 else '#e66d63'
@@ -346,7 +347,7 @@ class ItemGrid(tk.Frame):
                 c.create_text(x+14,y+10,text='?' if broken else '✓',fill='#f2cb62' if broken else '#76e89a',font=('Segoe UI',11,'bold'))
             if item['kind']=='weapon' or item.get('qty',1)>1:
                 c.create_rectangle(x+cell-36,y+3,x+cell-4,y+17,fill='#17201c',outline='')
-            if item['kind']=='weapon':c.create_text(x+cell-6,y+9,text=tr('visuals.0022', v0=item.get('ap', 2)),fill=TEXT,font=('Segoe UI',8,'bold'),anchor='e')
+            if item['kind']=='weapon':c.create_text(x+cell-6,y+9,text=tr('visuals.0022', v0=__import__('combat033').shot_cost(item)),fill=TEXT,font=('Segoe UI',8,'bold'),anchor='e')
             elif item.get('qty',1)>1:c.create_text(x+cell-6,y+9,text=f'×{item["qty"]}',fill=TEXT,font=('Segoe UI',8,'bold'),anchor='e')
             if item['id']==self.selection:c.create_rectangle(x+5,y+16,x+9,y+20,fill='#ffffff',outline='')
             if item.get('promotion'):
@@ -567,7 +568,7 @@ class ModificationPanel(tk.Frame):
 
     def refresh(self):
         """Оновлює віджети відповідно до поточного стану гри."""
-        self.grid.set_items([m for m in self.app.game.bag if rules.compatible(self.item, m)])
+        self.grid.set_items(self.app.game.available_modules(self.item))
         self.summary.config(text=self.app.description(self.item))
         self.draw()
         self.app.refresh()
@@ -599,7 +600,7 @@ class ModificationPanel(tk.Frame):
     def select(self, item_id, sign=1):
         """Обробляє вибір елемента та оновлює його опис."""
         self.selected_mod = item_id
-        mod = self.app.game.find(item_id)
+        mod = self.app.game.module_source_item(item_id)
         if not mod:
             mod = next((m for m in self.item['modules'] if m['id'] == item_id), None)
         if mod:
@@ -613,7 +614,7 @@ class ModificationPanel(tk.Frame):
             keys=[k for k in dict.fromkeys([*old,*new]) if old.get(k,0)!=new.get(k,0)]
             rows=[f"{rules.STAT_NAMES.get(k,k)}: {old.get(k,0):g} → {new.get(k,0):g}" for k in keys]
             rows.append(tr('update031.wear_preview',before=100*max(.1,1-p.mr.aggregate(self.item).get('strength',0)/100),after=100*max(.1,1-p.mr.aggregate(candidate).get('strength',0)/100)))
-            self.preview.config(text=mod['name']+'\n'+' · '.join(rows))
+            self.preview.config(text=mod['name']+(' · '+tr('update033.from_stash') if mod in self.app.game.stash else '')+'\n'+' · '.join(rows))
 
     def inspect_top(self,event):
         """Відкриває контекстні дії предмета в меню модифікацій."""
@@ -625,7 +626,7 @@ class ModificationPanel(tk.Frame):
     def press_bag(self, e):
         """Починає перетягування предмета із сумки."""
         self.grid.select_event(e)
-        mod = self.app.game.find(self.grid.selection)
+        mod = self.app.game.module_source_item(self.grid.selection)
         if mod:
             self.drag.begin(e, dict(item=mod, source='bag'))
 

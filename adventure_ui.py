@@ -23,7 +23,7 @@ class Effects:
     def blocked(self):
         """Перевіряє, чи дозволяє поточний стан продовжувати рух."""
         now=time.monotonic()
-        return (self.snapshot is not None and now<self.until) or any(e['kind']=='move' and now<e['start']+e['duration'] for e in self.active)
+        return (self.snapshot is not None and now<self.until) or any(e['kind'] in ('move','reveal') and now<e['start']+e['duration'] for e in self.active)
 
     def ingest(self):
         """Приймає нові ігрові події для показу анімацій."""
@@ -33,15 +33,23 @@ class Effects:
         now=time.monotonic();timeline=0;texts=0
         for event in g.pop_events():
             event=dict(event);kind=event['kind']
-            duration=min(.55,max(.12,.07*(len(event.get('path',[]))-1))) if kind=='move' else .4 if kind in ('attack','slash') else 1.0
+            duration=min(.55,max(.12,.07*(len(event.get('path',[]))-1))) if kind=='move' else .65 if event.get('fire_mode')=='aimed' else .4 if kind in ('attack','slash') else 1.4 if kind=='reveal' else 1.0
             if kind in ('move','attack','slash'):
-                delay=timeline;timeline+=duration if kind=='move' else .15
+                delay=timeline;timeline+=duration if kind=='move' else .02 if event.get('fire_mode')=='pellet' else .09 if event.get('fire_mode')=='burst' else .15
             else:
                 delay=max(0,timeline-.15);event['offset']=(texts%3)*16;texts+=1
             event.update(start=now+delay,duration=duration);self.active.append(event)
         if g._last_battle is not None:
             self.snapshot=g._last_battle;g._last_battle=None
             self.until=now+max(1.15,timeline+1.0)
+
+    def reveal_focus(self):
+        """Focus briefly on a newly revealed patch even when it is outside the player's viewport."""
+        now=time.monotonic()
+        event=next((e for e in reversed(self.active) if e['kind']=='reveal' and e['start']<=now<e['start']+e['duration']),None)
+        if event and event.get('cells'):
+            return tuple(round(sum(c[n] for c in event['cells'])/len(event['cells'])) for n in (0,1))
+        return self.app.game.x,self.app.game.y
 
     def position(self,entity,fallback):
         """Повертає проміжну позицію для плавної анімації."""
@@ -71,19 +79,34 @@ class Effects:
     def render(self):
         """Відображає поточний кадр візуальних ефектів."""
         c=self.app.canvas;c.delete('fx')
-        now=time.monotonic();battle=bool(self.app.game.battle or self.blocked)
+        now=time.monotonic();battle=bool(self.app.game.battle or (self.snapshot is not None and now<self.until))
         for e in self.active:
             if e['kind']=='move':continue
             dt=now-e['start']
             if not 0<=dt<e['duration']:continue
             # Player notices follow the player when entering/leaving combat in the same action.
             if (e['scene']=='battle')!=battle and e.get('entity')!='player':continue
+            if e['kind']=='reveal':
+                a=self.app;t=a.tile
+                for x,y in e['cells']:
+                    if a.vx<=x<a.vx+23 and a.vy<=y<a.vy+17:
+                        px=a.ox+(x-a.vx)*t;py=a.oy+(y-a.vy)*t
+                        c.create_rectangle(px+1,py+1,px+t-1,py+t-1,outline=e['color'],width=2 if int(dt*7)%2 else 4,fill=e['color'],stipple='gray75',tags='fx')
+                continue
             px,py=self.point(e['pos'],e.get('entity'))
             if e['kind'] in ('attack','slash'):
                 sx,sy=self.point(e['source']);t=dt/e['duration']
                 if e['kind']=='slash':
                     c.create_line(px-14+t*20,py-12,px+14-t*10,py+10,fill=e['color'],width=4,tags='fx')
                 else:
+                    mode=e.get('fire_mode')
+                    if mode=='aimed':
+                        c.create_oval(px-12,py-12,px+12,py+12,outline=e['color'],width=2,tags='fx')
+                        c.create_line(px-18,py,px+18,py,fill=e['color'],tags='fx')
+                        if t<.4:continue
+                        t=(t-.4)/.6
+                    if mode=='pellet':
+                        offset=(e.get('projectile',0)-2.5)*3;px+=offset;py+=offset*.4
                     tx,ty=sx+(px-sx)*min(1,t*1.8),sy+(py-sy)*min(1,t*1.8)
                     c.create_line(sx,sy,tx,ty,fill=e['color'],width=2,tags='fx')
                     c.create_oval(tx-3,ty-3,tx+3,ty+3,fill=e['color'],outline='',tags='fx')
@@ -95,7 +118,7 @@ class Effects:
     def tick(self):
         """Виконує черговий кадр оновлення та планує наступний."""
         now=time.monotonic()
-        had_motion=any(e['kind']=='move' for e in self.active)
+        had_motion=any(e['kind'] in ('move','reveal') for e in self.active)
         self.active=[e for e in self.active if now<e['start']+e['duration']]
         if self.snapshot is not None and now>=self.until:
             self.snapshot=None;self.app.refresh()
@@ -222,7 +245,7 @@ class Storage(tk.Frame):
         """Обробляє вибір елемента та оновлює його опис."""
         self.selection,self.direction=item_id,direction
         item=self.item()
-        if item:self.detail.config(text=self.app.description(item).replace('\n',' · '))
+        if item:self.detail.config(text=self.app.description(item))
 
     def all(self):
         """Застосовує операцію до всіх доступних предметів."""

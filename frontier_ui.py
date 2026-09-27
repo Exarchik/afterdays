@@ -17,11 +17,11 @@ def player_text(g):
     if w:
         lines += [tr('frontier_ui.0010', v0=max(1,p.mr.shot_damage(w,g.level,-2)), v1=p.mr.shot_damage(w,g.level,2)),
                   tr('frontier_ui.0011', v0=a.DAMAGE_TYPES[a.damage_type(w)][0]),
-                  tr('frontier_ui.0012', v0=min(65, 5 + s.get('crit', 0))),
+                  tr('frontier_ui.0012', v0=min(65, 5 + s.get('crit', 0))+(15 if g.fire_mode()=='aimed' else 0)),
                   tr('frontier_ui.0013', v0=s.get('accuracy', 0), v1=4 * g.rank('marksman')),
                   tr('frontier_ui.0014'),
                   tr('frontier_ui.0015', v0=s.get('range', 0), v1=s.get('attack', 0)),
-                  tr('frontier_ui.0016', v0=w['ap'], v1=p.mr.condition(w)),
+                  tr('frontier_ui.0016', v0=g.shot_ap(w), v1=p.mr.condition(w)),
                   f'{p.AMMO[w.get("ammo_type","pistol")][0]}: {g.count("ammo",w.get("ammo_type","pistol"))}']
     if w:
         for kind,amount in p.mr.shot_components(w,g.level,0,a.damage_type(w)).items():

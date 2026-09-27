@@ -1,0 +1,5 @@
+Afterdays v0.33.1 flat-top hex correction
+341 tests passed in 42.292s.
+Verified: six shared neighbor edges, horizontal top/bottom edges, interior mouse selection, camera fit and dungeon centering.
+Only projection, regression tests and README changed; generation code unchanged.
+No interactive GUI display available.

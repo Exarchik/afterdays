@@ -94,9 +94,9 @@ class Game(cache_events.Game):
 
     def create_settler(self,role):
         """Створює мандрівного кандидата на поселення та його завдання."""
-        if role not in ('smith','tech','mayor') or not self.eligible_settlements(role) or any(n['role']==role and n['state']!='settled' for n in self.settlers()):return None
+        if role not in ('smith','tech','mayor') or not any(math.dist((self.x,self.y),self.cities[i])<=25 for i in self.eligible_settlements(role)) or any(n['role']==role and n['state']!='settled' for n in self.settlers()):return None
         city=min(range(self.main_city_count),key=lambda i:math.dist(self.cities[i],(self.x,self.y)))
-        q=self.new_restoration_quest('recruit_'+role,city);q['pos']=[self.x,self.y];q['goal']=1
+        q=self.new_restoration_quest('recruit_'+role,city);q['pos']=[self.x,self.y];q['issuer_pos']=[self.x,self.y];q['goal']=1
         n=dict(id=r.uid(),role=role,pos=[self.x,self.y],state='offered',city=None,quest=q)
         self.settlers().append(n)
         self._settler_notice=tr('restoration.encounter',name=tr('restoration.roamer_'+role),x=self.x,y=self.y)
@@ -121,7 +121,7 @@ class Game(cache_events.Game):
         """Повертає завдання, для яких тут можна отримати дозвіл."""
         if self.battle or self.road_event or not self.regular_city:return []
         return [q for q in self.quests if q['kind'] in KINDS[1:] and q['status']=='active' and not q.get('settlement') and
-                self.city in self.eligible_settlements(q['kind'][8:],q['settler_id'])]
+                self.city in self.eligible_settlements(q['kind'][8:],q['settler_id']) and ('issuer_pos' not in q or __import__('quest_limits').nearby(self,q,self.cities[self.city]))]
 
     def authorize_settlement(self,ident):
         """Видає дозвіл і резервує місце фахівця у місті."""

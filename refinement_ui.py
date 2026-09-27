@@ -68,8 +68,12 @@ def description(game,item):
         field(tr('refinement_ui.0009'),p.mr.condition(item),p.mr.condition(current) if current else None,unit='%')
         field(tr('modules.max_condition'),p.mr.max_condition(item),p.mr.max_condition(current) if current else None,unit='%')
     if kind=='weapon':
-        import adventure
-        field(tr('refinement_ui.0010'),item['ap'],current['ap'] if current else None,True,tr('refinement_ui.0011'))
+        import adventure,combat033
+        lines.append(tr('update033.category')+tr('update033.category_'+combat033.category(item)))
+        lines.append(tr('update033.modes')+' / '.join(tr('update033.mode_'+m) for m in combat033.modes(item)))
+        field(tr('refinement_ui.0010'),game.shot_ap(item),game.shot_ap(current) if current else None,True,tr('refinement_ui.0011'))
+        if combat033.category(item) in ('automatic','sniper','shotgun'):lines.append(tr('update033.'+{'automatic':'burst_help','sniper':'aimed_help','shotgun':'shotgun_help'}[combat033.category(item)]))
+        lines.append(tr('update033.condition_help'))
         lines.append(tr('refinement_ui.0012')+adventure.DAMAGE_TYPES[adventure.damage_type(item)][0])
         lines.append(tr('refinement_ui.0013')+p.AMMO[item.get('ammo_type','pistol')][0])
     values=p.stats(item);baseline=p.stats(current) if current else {}
@@ -204,6 +208,8 @@ class Technician(tk.Frame):
         tabs=ttk.Notebook(self);tabs.pack(fill='both',expand=True,padx=10,pady=8)
         craft=tk.Frame(tabs,bg=PANEL);repair=tk.Frame(tabs,bg=PANEL)
         tabs.add(repair,text=tr('refinement_ui.0041'));tabs.add(craft,text=tr('refinement_ui.0040'))
+        from workshop033 import DismantlePanel
+        self.dismantling=DismantlePanel(tabs,app,self.refresh);tabs.add(self.dismantling,text=tr('update033.dismantle'))
         from upgrade_ui import UpgradePanel
         self.upgrades=UpgradePanel(tabs,app,self.refresh);tabs.add(self.upgrades,text=tr('update031.upgrades'))
         self.material=tk.StringVar(value='parts');self.amount=tk.StringVar(value='10')
@@ -250,7 +256,7 @@ class Technician(tk.Frame):
         g=self.app.game;self.grid.set_items([i for i in list(g.equipped.values())+g.bag if i and 'durability' in i])
         self.resources.config(text=tr('refinement_ui.0053', v0=g.money, v1=g.count('parts'), v2=g.count('fragments')))
         if g.reputation()>=50 and g.city is not None:self.resources.config(text=self.resources.cget('text')+' · '+tr('reputation.repair_discount'))
-        self.chances();self.describe(self.grid.selection);self.upgrades.refresh()
+        self.chances();self.describe(self.grid.selection);self.upgrades.refresh();self.dismantling.refresh()
     def describe(self,i):
         """Показує характеристики вибраного предмета."""
         item=self.app.game.find(i)

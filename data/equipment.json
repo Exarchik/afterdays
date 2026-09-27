@@ -11,7 +11,8 @@
     "attack": 10,
     "ammo_type": "pistol",
     "damage_type": "kinetic",
-    "sprite_id": "weapon_ash_pistol"
+    "sprite_id": "weapon_ash_pistol",
+    "category": "pistol"
   },
   "weapon_watch_rifle": {
     "kind": "weapon",
@@ -25,7 +26,8 @@
     "attack": 13,
     "ammo_type": "rifle",
     "damage_type": "kinetic",
-    "sprite_id": "weapon_watch_rifle"
+    "sprite_id": "weapon_watch_rifle",
+    "category": "rifle"
   },
   "weapon_rust_assault": {
     "kind": "weapon",
@@ -39,7 +41,8 @@
     "attack": 10,
     "ammo_type": "rifle",
     "damage_type": "kinetic",
-    "sprite_id": "weapon_rust_assault"
+    "sprite_id": "weapon_rust_assault",
+    "category": "automatic"
   },
   "weapon_thunder_shotgun": {
     "kind": "weapon",
@@ -53,7 +56,8 @@
     "attack": 6,
     "ammo_type": "shell",
     "damage_type": "kinetic",
-    "sprite_id": "weapon_thunder_shotgun"
+    "sprite_id": "weapon_thunder_shotgun",
+    "category": "shotgun"
   },
   "weapon_ray_laser": {
     "kind": "weapon",
@@ -67,7 +71,8 @@
     "attack": 14,
     "ammo_type": "energy",
     "damage_type": "energy",
-    "sprite_id": "weapon_ray_laser"
+    "sprite_id": "weapon_ray_laser",
+    "category": "rifle"
   },
   "armor_plated_jacket": {
     "kind": "armor",
@@ -123,7 +128,8 @@
     "attack": 12,
     "ammo_type": "pistol",
     "damage_type": "kinetic",
-    "sprite_id": "weapon_raven_revolver"
+    "sprite_id": "weapon_raven_revolver",
+    "category": "pistol"
   },
   "weapon_hornet_smg": {
     "kind": "weapon",
@@ -137,7 +143,8 @@
     "attack": 8,
     "ammo_type": "pistol",
     "damage_type": "kinetic",
-    "sprite_id": "weapon_hornet_smg"
+    "sprite_id": "weapon_hornet_smg",
+    "category": "automatic"
   },
   "weapon_pilgrim_carbine": {
     "kind": "weapon",
@@ -151,7 +158,8 @@
     "attack": 12,
     "ammo_type": "rifle",
     "damage_type": "kinetic",
-    "sprite_id": "weapon_pilgrim_carbine"
+    "sprite_id": "weapon_pilgrim_carbine",
+    "category": "sniper"
   },
   "weapon_horizon_sniper": {
     "kind": "weapon",
@@ -165,7 +173,8 @@
     "attack": 16,
     "ammo_type": "rifle",
     "damage_type": "piercing",
-    "sprite_id": "weapon_horizon_sniper"
+    "sprite_id": "weapon_horizon_sniper",
+    "category": "sniper"
   },
   "weapon_hammer_lmg": {
     "kind": "weapon",
@@ -179,7 +188,8 @@
     "attack": 9,
     "ammo_type": "heavy",
     "damage_type": "kinetic",
-    "sprite_id": "weapon_hammer_lmg"
+    "sprite_id": "weapon_hammer_lmg",
+    "category": "automatic"
   },
   "weapon_sun_plasma": {
     "kind": "weapon",
@@ -193,7 +203,8 @@
     "attack": 12,
     "ammo_type": "energy",
     "damage_type": "thermal",
-    "sprite_id": "weapon_sun_plasma"
+    "sprite_id": "weapon_sun_plasma",
+    "category": "rifle"
   },
   "weapon_impulse_gauss": {
     "kind": "weapon",
@@ -207,7 +218,8 @@
     "attack": 18,
     "ammo_type": "energy",
     "damage_type": "electric",
-    "sprite_id": "weapon_impulse_gauss"
+    "sprite_id": "weapon_impulse_gauss",
+    "category": "sniper"
   },
   "weapon_spark_ion": {
     "kind": "weapon",
@@ -221,7 +233,8 @@
     "attack": 13,
     "ammo_type": "energy",
     "damage_type": "electric",
-    "sprite_id": "weapon_spark_ion"
+    "sprite_id": "weapon_spark_ion",
+    "category": "pistol"
   },
   "weapon_silence_crossbow": {
     "kind": "weapon",
@@ -235,7 +248,8 @@
     "attack": 11,
     "ammo_type": "bolt",
     "damage_type": "piercing",
-    "sprite_id": "weapon_silence_crossbow"
+    "sprite_id": "weapon_silence_crossbow",
+    "category": "sniper"
   },
   "armor_scout_cloak": {
     "kind": "armor",

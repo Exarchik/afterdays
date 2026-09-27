@@ -12,6 +12,7 @@ class CombatHUD(tk.Frame):
         self.app=app
         self.art=tk.Canvas(self,width=58,height=58,bg=PANEL,highlightthickness=0);self.art.pack(side='left',padx=5)
         self.art.bind('<Button-3>',self.context)
+        self.mode=ttk.Button(self,command=lambda:app.act(app.game.cycle_fire_mode));self.mode.pack(side='right',padx=4)
         self.swap=ttk.Button(self,command=lambda:app.act(app.game.switch));self.swap.pack(side='right',padx=6)
         middle=tk.Frame(self,bg=PANEL);middle.pack(fill='both',expand=True)
         self.title=tk.Label(middle,bg=PANEL,fg=GOLD,anchor='w');self.title.pack(fill='x')
@@ -30,7 +31,8 @@ class CombatHUD(tk.Frame):
         if not self.winfo_manager():self.pack(before=self.app.canvas,fill='x',pady=(0,5))
         weapon=g.weapon;self.art.delete('all')
         if weapon:icon(self.art,weapon,3,3,52)
-        self.title.config(text=tr('update030.weapon',name=weapon['name'],ap=weapon['ap']) if weapon else tr('update030.no_weapon'))
+        self.title.config(text=tr('update030.weapon',name=weapon['name'],ap=g.shot_ap(weapon)) if weapon else tr('update030.no_weapon'))
+        self.mode.config(text=tr('update033.mode_'+g.fire_mode()),state='normal' if len(g.fire_modes())>1 else 'disabled')
         other=g.equipped.get('weapon2' if g.active=='weapon1' else 'weapon1')
         if other:
             self.swap.config(text=tr('update030.swap',name=other['name']))

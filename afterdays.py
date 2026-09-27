@@ -1049,7 +1049,7 @@ class ExpansionGame(LegacyGame):
 
 
 from progression import equipment, module, supply, stats, item_weight, item_value
-from update032 import Game
+from update033 import Game
 from reputation import buy_factor, sell_factor
 
 # GUI imports are delayed so the model and tests work without a display.
@@ -1418,7 +1418,7 @@ def launch(test_hook=None):
                 self.act(lambda:self.game.log(tr('afterdays.0171')))
                 return
             count=self.game.salvage_yield(item)
-            if messagebox.askyesno(tr('afterdays.0172'),tr('afterdays.0175', v0=item['name'], v1=count, v2=tr('afterdays.0173') if item['kind'] == 'weapon' else tr('afterdays.0174')),parent=self.root):
+            if messagebox.askyesno(tr('afterdays.0172'),tr('afterdays.0175', v0=item['name'], v1=count, v2=tr('afterdays.0173') if item['kind'] == 'weapon' else tr('afterdays.0174'))+'\n'+tr('update033.salvage_kit'),parent=self.root):
                 self.act(lambda:self.game.dismantle(item['id']))
 
         def popup(self, title, geometry):
@@ -1495,6 +1495,7 @@ def launch(test_hook=None):
                 from border_ui import draw_border
                 draw_border(c,self.game,t,ox,oy,self.map_revealed)
                 frontier_ui.draw_metro(c,self.game,t,ox,oy,self.map_revealed)
+                __import__('map033').draw_storm(c,self.game,t,ox,oy,self.map_revealed)
                 from expedition_ui import draw_search_areas
                 draw_search_areas(c,self.game,t,ox,oy)
                 for n,(x,y) in enumerate(self.game.cities):
@@ -1572,7 +1573,8 @@ def launch(test_hook=None):
             self.tile = max(8, min(width/cols, height/rows))
             t = self.tile
             self.ox, self.oy = (width-cols*t)/2, (height-rows*t)/2
-            self.vx, self.vy = (0, 0) if b else (max(0, min(len(g.world[0])-cols, g.x-cols//2)), max(0, min(32-rows, g.y-rows//2)))
+            focus_x,focus_y=self.fx.reveal_focus()
+            self.vx, self.vy = (0, 0) if b else (max(0, min(len(g.world[0])-cols, focus_x-cols//2)), max(0, min(32-rows, focus_y-rows//2)))
             walls = set(map(tuple, b['walls'])) if b else set()
             reachable = {}
             if b:
@@ -1612,6 +1614,7 @@ def launch(test_hook=None):
             draw_search_areas(c,g,t,self.ox-self.vx*t,self.oy-self.vy*t,(self.vx,self.vy,cols,rows))
             from border_ui import draw_border
             draw_border(c,g,t,self.ox-self.vx*t,self.oy-self.vy*t,self.map_revealed,(self.vx,self.vy,cols,rows))
+            __import__('map033').draw_storm(c,g,t,self.ox-self.vx*t,self.oy-self.vy*t,self.map_revealed)
             def center(pos):
                 return self.ox+(pos[0]-self.vx+.5)*t, self.oy+(pos[1]-self.vy+.5)*t
             if b:

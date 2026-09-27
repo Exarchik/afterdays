@@ -17,7 +17,7 @@ class RefinementTests(unittest.TestCase):
 
     def test_salvage_types_and_modules_return(self):
         """Перевіряє сценарій «salvage types and modules return» та очікувані результати."""
-        g=r.Game(5)
+        g=r.Game(5);p.add_to(g.bag,p.supply('repairkit',3))
         for name in ['Пістолет «Попіл»','Куртка з пластинами','Шолом «Шукач»']:
             item=p.equipment(name);mod=p.module(index=0 if item['kind']=='weapon' else 3);item['modules']=[mod];g.bag.append(item)
             kind='parts' if item['kind']=='weapon' else 'fragments';before=g.count(kind);expected=g.salvage_yield(item)
@@ -78,11 +78,11 @@ class RefinementTests(unittest.TestCase):
 
     def test_mayor_map_reward_once(self):
         """Перевіряє сценарій «mayor map reward once» та очікувані результати."""
-        g=r.Game(1)
-        for n in range(3):
+        g=r.Game(1);g.local_record()['value']=51
+        for n in range(6):
             q=dict(id=f'q{n}',kind='hunt',city=0,status='active',title='Test',progress=1,goal=1,target_kind=None,reward=10,pos=None)
             g.quests.append(q);self.assertTrue(g.turn_in(q['id']))
-            if n<2:self.assertEqual(g.known_cities,[0])
+            if n<5:self.assertEqual(g.known_cities,[0])
         self.assertEqual(len(g.known_cities),2);self.assertEqual(g.map_rewards,[0])
         self.assertFalse(g.turn_in('q2'));self.assertEqual(len(g.known_cities),2)
 

@@ -81,9 +81,9 @@ class BorderTests(unittest.TestCase):
 
     def test_mayor_reveals_exactly_one_with_notice(self):
         """Перевіряє сценарій «mayor reveals exactly one with notice» та очікувані результати."""
-        g=r.Game(2)
+        g=r.Game(2);g.local_record()['value']=51
         before=set(g.known_cities)
-        for i in range(3):
+        for i in range(6):
             q=dict(id=str(i),kind='hunt',city=0,status='active',title='test',progress=1,goal=1,target_kind=None,reward=1,xp_reward=0,unique=False)
             g.quests.append(q);self.assertTrue(g.turn_in(q['id']))
         self.assertEqual(len(set(g.known_cities)-before),1)

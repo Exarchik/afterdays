@@ -25,7 +25,7 @@ class ScavengingTests(unittest.TestCase):
   self.assertTrue(g.repair_with_kit(w['id']));self.assertEqual(w['durability'],100)
   self.assertFalse(g.repair_with_kit(w['id']));self.assertEqual(g.count('repairkit'),3)
   w['durability']=0;g.start_battle();self.assertFalse(g.repair_with_kit(w['id']));self.assertEqual(g.count('repairkit'),3)
-  g.battle=None;self.assertTrue(g.repair_with_kit(w['id']));self.assertEqual(w['durability'],35)
+  g.battle=None;self.assertFalse(g.repair_with_kit(w['id']));self.assertEqual(w['durability'],0);self.assertEqual(g.count('repairkit'),3)
  def test_kits_all_equipment_and_save(self):
   """Перевіряє сценарій «kits all equipment and save» та очікувані результати."""
   g=r.Game(2);p.add_to(g.bag,p.supply('repairkit',3))
@@ -52,12 +52,12 @@ class ScavengingTests(unittest.TestCase):
    self.assertEqual(g.stock(3),items)
  def test_salvage_price_rarity_modules_do_not_change_yield(self):
   """Перевіряє сценарій «salvage price rarity modules do not change yield» та очікувані результати."""
-  g=r.Game(4);item=p.equipment('weapon_ash_pistol',level=10);self.assertEqual(g.salvage_yield(item),50)
+  g=r.Game(4);item=p.equipment('weapon_ash_pistol',level=10);self.assertEqual(g.salvage_yield(item),100)
   other=copy.deepcopy(item);other.update(value=999999,rarity=4,modules=[p.module(4,index=0)])
   self.assertEqual(g.salvage_yield(item),g.salvage_yield(other))
-  item['durability']=50;self.assertEqual(g.salvage_yield(item),30)
-  item['durability']=0;self.assertEqual(g.salvage_yield(item),10)
-  item.update(level=100,durability=100);self.assertEqual(g.salvage_yield(item),100)
+  item['durability']=50;self.assertEqual(g.salvage_yield(item),60)
+  item['durability']=0;self.assertEqual(g.salvage_yield(item),20)
+  item.update(level=100,durability=100);self.assertEqual(g.salvage_yield(item),200)
  def test_craft_failure_interpolation_and_consumption(self):
   """Перевіряє сценарій «craft failure interpolation and consumption» та очікувані результати."""
   g=r.Game(1)

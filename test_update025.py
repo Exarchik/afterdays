@@ -13,8 +13,8 @@ class Update025Tests(unittest.TestCase):
   a,b,c,d=[hexgrid.center(pos,1) for pos in ((0,0),(12,0),(12,8),(0,8))]
   for axis in (0,1):self.assertAlmostEqual(b[axis]-a[axis],c[axis]-d[axis])
   for axis in (0,1):self.assertAlmostEqual(d[axis]-a[axis],c[axis]-b[axis])
-  points=hexgrid.polygon(0,0,10);self.assertAlmostEqual(max(points[1::2])-min(points[1::2]),15*.9)
-  self.assertTrue(25<math.degrees(math.atan2(b[1],b[0]))<35)
+  points=hexgrid.polygon(0,0,10);ys=points[1::2];self.assertAlmostEqual(max(ys)-min(ys),15*.9)
+  self.assertAlmostEqual(b[1]/b[0],hexgrid.HALF_HEIGHT/(1.5*hexgrid.HALF_WIDTH))
  def test_projected_hexes_share_edges(self):
   """Перевіряє сценарій «projected hexes share edges» та очікувані результати."""
   def vertices(pos):

@@ -54,16 +54,21 @@ def gear_stats(item):
     if 'durability' in item:
         value=condition(item)/100
         for key in ('damage','defense','damage_electric','damage_piercing'):
-            if result.get(key):result[key]=max(1,round(result[key]*(.5+.5*value))) if value else 0
+            if result.get(key):
+                result[key]=degraded_damage(result[key],item) if item.get('kind')=='weapon' and key!='defense' else max(1,round(result[key]*(.5+.5*value))) if value else 0
     return result
 
+def degraded_damage(value,item):
+    """Keep full weapon damage at 50%+, then interpolate down to one at 1%."""
+    state=condition(item)
+    if state<=0:return 0
+    if state>=50:return max(0,round(value))
+    return max(1,round(1+(max(1,value)-1)*max(0,state-1)/49))
+
 def shot_damage(item,level,variation=0):
-    # Apply percentage modifiers once to the full pre-defense damage, including level bonus.
-    base=aggregate(item).get('damage',0)
-    value=condition(item)/100
-    base=max(1,round(base*(.5+.5*value))) if value else 0
-    base=round(base*max(0,1+aggregate(item).get('local_damage_percent',0)/100))
-    return max(0,round((base+2*(level-1)+variation)*damage_factor(item)))
+    raw=aggregate(item)
+    base=round(raw.get('damage',0)*max(0,1+raw.get('local_damage_percent',0)/100))
+    return degraded_damage((base+2*(level-1)+variation)*damage_factor(item),item)
 
 def item_weight(item):
     weight=item.get('weight',0)*item.get('qty',1)+sum(item_weight(m) for m in item.get('modules',[]))
@@ -76,13 +81,17 @@ def chance(value):return max(0,min(100,value))
 
 
 def shot_components(item,level,variation,element):
-    components={element:shot_damage(item,level,variation)}
+    """Apply condition to total shot damage once, including elemental modules and level."""
+    raw=aggregate(item);local=max(0,1+raw.get('local_damage_percent',0)/100)
+    components={element:max(0,round((round(raw.get('damage',0)*local)+2*(level-1)+variation)*damage_factor(item)))}
     for kind,key in (('electric','damage_electric'),('piercing','damage_piercing')):
-        value=aggregate(item).get(key,0)
-        if value>0 and condition(item)>0:
-            raw=max(0,round(round(value*(.5+.5*condition(item)/100))*damage_factor(item)*max(0,1+aggregate(item).get('local_damage_percent',0)/100)))
-            if raw:components[kind]=components.get(kind,0)+raw
-    return components
+        value=max(0,round(raw.get(key,0)*damage_factor(item)*local))
+        if value:components[kind]=components.get(kind,0)+value
+    total=sum(components.values());target=degraded_damage(total,item)
+    if not total:return {element:0}
+    scaled={kind:int(value*target/total) for kind,value in components.items()}
+    for kind in sorted(components,key=lambda k:components[k]*target/total-scaled[k],reverse=True)[:target-sum(scaled.values())]:scaled[kind]+=1
+    return {k:v for k,v in scaled.items() if v} or {element:0}
 
 
 def migrate_game(game):

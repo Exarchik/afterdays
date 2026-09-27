@@ -142,7 +142,7 @@ class ProgressionTests(unittest.TestCase):
 
     def test_dismantle_returns_mods_and_weightless_lower_value_parts(self):
         """Перевіряє сценарій «dismantle returns mods and weightless lower value parts» та очікувані результати."""
-        g=r.Game(8);weapon=g.weapon
+        g=r.Game(8);p.add_to(g.bag,p.supply('repairkit',2));weapon=g.weapon
         mod=g.bag[0];g.install(weapon['id'],mod['id'])
         g.unequip('weapon1');before=g.weight
         qty=g.salvage_yield(weapon)
@@ -186,7 +186,7 @@ class ProgressionTests(unittest.TestCase):
         self.assertGreater(unique['reward'],normal['reward'])
         self.assertTrue(g.accept_quest(unique['id']))
         q=g.quests[-1];g.x,g.y=q['relic_pos'];g.search();g.x,g.y=g.cities[0]
-        xp=g.xp;self.assertTrue(g.turn_in(q['id']));self.assertEqual(g.xp,xp+80)
+        xp=g.xp;self.assertTrue(g.turn_in(q['id']));self.assertEqual(g.xp,xp+50)
 
     def test_progressive_prices_and_biome_arenas(self):
         """Перевіряє сценарій «progressive prices and biome arenas» та очікувані результати."""

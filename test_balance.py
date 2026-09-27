@@ -41,12 +41,12 @@ class BalanceTests(unittest.TestCase):
   reward=q['reward'];g.xp=p.xp_for_level(7);g.x,g.y=q['relic_pos'];g.search();g.x,g.y=g.cities[0]
   before={i['id'] for i in g.bag+g.stash};xp=g.xp;self.assertTrue(g.turn_in(q['id']))
   awarded=[i for i in g.bag+g.stash if i['id'] not in before];self.assertTrue(awarded)
-  self.assertTrue(all(i['level']==1 for i in awarded));self.assertEqual(g.xp-xp,80);self.assertEqual(q['reward'],reward)
+  self.assertTrue(all(i['level']==1 for i in awarded));self.assertEqual(g.xp-xp,50);self.assertEqual(q['reward'],reward)
   for i in awarded:self.assertTrue(all(m['level']==1 for m in i.get('modules',[])))
  def test_high_level_contract(self):
   """Перевіряє сценарій «high level contract» та очікувані результати."""
   g=r.Game(2);g.x,g.y=g.cities[2];g.xp=__import__('progression').xp_for_level(g.region_level);q=g.mayor_offers()[0]
-  self.assertEqual(q['level'],g.region_level);self.assertEqual(q['xp_reward'],(40+5*(q['level']-1))*(2 if q['unique'] else 1))
+  self.assertEqual(q['level'],g.region_level);self.assertEqual(q['xp_reward'],(25+5*(q['level']-1))*(2 if q['unique'] else 1))
   for _ in range(10):self.assertEqual(g.reward_item(4,1,level=q['level'])['level'],q['level'])
  def test_traveler_distribution(self):
   """Перевіряє сценарій «traveler distribution» та очікувані результати."""

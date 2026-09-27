@@ -455,7 +455,7 @@ class Game(p.Game):
         ceiling=q.get('level',q.get('zone',self.region_at(*origin)))+1
         occupied={tuple(t['pos']) for t in self.quests if t.get('pos') and t['status']=='active' and t['id']!=q['id']}
         pool=[pos for pos in sorted(self.reachable_world(origin))
-              if pos not in occupied and list(pos) not in self.cities and self.region_at(*pos)<=ceiling]
+              if pos not in occupied and list(pos) not in self.cities and self.region_at(*pos)<=ceiling and __import__('quest_limits').nearby(self,q,pos)]
         nearby=[pos for pos in pool if 4<=abs(pos[0]-origin[0])+abs(pos[1]-origin[1])<=12]
         return nearby or pool
 
@@ -485,15 +485,6 @@ class Game(p.Game):
         ok=super().turn_in(quest_id)
         if ok:
             self.emit(tr('adventure.0202'),color='#c7a0f1');self.emit(f'+{self.xp-xp} XP',color='#99c9ff')
-            city=self.city
-            if city is not None and city<self.main_city_count and city not in self.map_rewards and sum(q['status']=='done' and q['city']==city for q in self.quests)>=3:
-                nearby=sorted((n for n in range(self.main_city_count) if n not in self.known_cities),key=lambda n:math.dist(self.cities[n],self.cities[city]))[:1]
-                if nearby:
-                    self.map_rewards.append(city)
-                    self.reveal(*self.cities[nearby[0]],0)
-                    self._mayor_notice=tr('border.city_reveal',city=self.city_name(city),destination=self.city_name(nearby[0]))
-                    self.log(self._mayor_notice)
-                    self.emit(tr('adventure.0204'),color='#a5dabc')
         return ok
 
     def search(self):
