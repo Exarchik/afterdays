@@ -1,0 +1,6 @@
+Afterdays v0.34
+341 existing tests passed in 57.448s.
+4 new terminal tests passed (data, progression, effects/AP, hit regions and rendering branches at 1044/1224/1884 px).
+Python compilation passed.
+Interactive Tk screenshot not verified: no display server available.
+Game rules, save schema and hex projection unchanged.

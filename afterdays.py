@@ -1101,12 +1101,11 @@ def launch(test_hook=None):
             style.map('TNotebook.Tab', background=[('selected', '#516044')])
             header = tk.Frame(root, bg=BG)
             header.pack(fill='x', padx=18, pady=(12, 6))
-            tk.Label(header, text='A F T E R D A Y S', bg=BG, fg=GOLD, font=('Segoe UI', 23, 'bold')).pack(side='left')
+            tk.Label(header, text='A F T E R D A Y S', bg=BG, fg=GOLD, font=('Segoe UI', 18, 'bold')).pack(side='left')
             tk.Label(header, text=tr('afterdays.0132'), bg=BG, fg=MUTED, font=('Segoe UI', 10)).pack(side='left')
-            for title, fn in [(tr('afterdays.0133'),lambda:sprites.gallery(self)),('?', self.help), (tr('afterdays.0134'), self.new), (tr('afterdays.0135'), self.load), (tr('afterdays.0136'), self.save)]:
-                ttk.Button(header, text=title, command=fn).pack(side='right', padx=3)
-            from interface032 import StatusBar
-            self.status = StatusBar(root)
+            from terminal034 import StatusBar,system_menu
+            system_menu(header,self)
+            self.status = StatusBar(root,self)
             self.status.pack(fill='x', padx=18)
             body = tk.Frame(root, bg=BG)
             body.pack(fill='both', expand=True, padx=18, pady=10)
@@ -1118,8 +1117,6 @@ def launch(test_hook=None):
             left.pack_propagate(False)
             self.map_title = tk.Label(left, bg=BG, fg=GOLD, anchor='w', font=('Segoe UI', 12, 'bold'))
             self.map_title.pack(fill='x', pady=(0, 6))
-            from combat_hud import CombatHUD
-            self.combat_hud=CombatHUD(left,self)
             self.canvas = tk.Canvas(left, bg='#17201c', highlightthickness=1, highlightbackground='#475244')
             self.canvas.pack(fill='both', expand=True)
             self.canvas.bind('<Configure>', lambda e: self.draw())
@@ -1284,7 +1281,6 @@ def launch(test_hook=None):
             weapon = g.weapon
             ws = stats(weapon) if weapon else {}
             self.status.refresh(g)
-            self.combat_hud.refresh()
             combat = g.battle is not None
             self.end_button.config(state='normal' if combat else 'disabled')
             dungeon=combat and g.battle.get('dungeon')
