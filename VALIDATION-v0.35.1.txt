@@ -1,0 +1,6 @@
+Hotfix: App.popup exposes close_dialog.
+Regression reproduces AttributeError on unpatched code.
+python3 -m unittest test_metro035_ui test_metro035 test_metro: 12 tests passed.
+Tk widgets mocked for button regression; actual popup and button callbacks executed.
+Interactive GUI not tested (no display server).
+Save format unchanged.

@@ -1439,6 +1439,7 @@ def launch(test_hook=None):
                 self.dialog = None
                 win.destroy()
                 self.refresh()
+            win.close_dialog = close
             win.protocol('WM_DELETE_WINDOW', close)
             win.bind('<Escape>', lambda e: close())
             return win
