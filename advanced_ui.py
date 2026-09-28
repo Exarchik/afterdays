@@ -107,10 +107,10 @@ def draw_battle(app):
                     c.create_line(px+u*.2,py-z*.45,px+u*.6,py-z*.62,fill='#263b32',width=3)
         if b.get('dungeon') and list(pos) in (b['exit'],b['chest']):
             is_exit=list(pos)==b['exit']
-            sprites.draw(c,'dungeon_exit' if is_exit else 'dungeon_chest',px-u,py-u*1.7,u*2)
+            sprites.draw(c,'dungeon_exit' if is_exit else 'metro' if b.get('metro_station') else 'dungeon_chest',px-u,py-u*1.7,u*2)
             color='#80e3b4' if is_exit else '#94876b' if b['chest_open'] else '#f4c86b'
             c.create_oval(px-u*.7,py-u*.35,px+u*.7,py+u*.35,outline=color,width=3)
-            c.create_text(px,py-u*.65,text=tr('advanced_ui.0001') if is_exit else tr('advanced_ui.0002'),fill=color,font=('Segoe UI',8,'bold'))
+            c.create_text(px,py-u*.65,text=tr('advanced_ui.0001') if is_exit else tr('metro035.trolley') if b.get('metro_station') else tr('advanced_ui.0002'),fill=color,font=('Segoe UI',8,'bold'))
         if list(pos)==b['pos']:
             if hasattr(getattr(app,'fx',None),'position'):px,py=center(app.fx.position('player',b['pos']))
             c.create_oval(px-u*.45,py-u*.1,px+u*.45,py+u*.3,fill='#253d33',outline='#c8efce',width=2)

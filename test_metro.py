@@ -13,11 +13,18 @@ class MetroTests(unittest.TestCase):
   """Виконує платний ремонт до вибраного рівня стану."""
   g.x,g.y=g.cities[city];g.xp=__import__('progression').xp_for_level(g.region_level);offers=g.mayor_offers();q=next(q for q in offers if q.get('metro_city')==city)
   self.assertTrue(q['unique']);self.assertIsNone(q['pos']);self.assertTrue(g.accept_quest(q['id']))
-  q=g.quests[-1];self.assertNotIn(city,g.metro_unlocked);self.assertIn('генератора метро',g.quest_text(q))
-  self.assertFalse(g.turn_in(q['id']));g.x,g.y=q['pos'];self.assertTrue(g.search())
-  item=next(i for i in g.bag if i.get('quest_id')==q['id']);self.assertEqual(item['name'],q['part_name'])
-  self.assertTrue(g.quest_ready(q));self.assertFalse(g.turn_in(q['id']))
-  g.x,g.y=g.cities[city];self.assertTrue(g.turn_in(q['id']));self.assertIn(city,g.metro_unlocked)
+  q=g.quests[-1];self.assertNotIn(city,g.metro_unlocked)
+  self.assertFalse(g.turn_in(q['id']))
+  from test_metro035 import MetroTests as ChainTests
+  case=ChainTests()
+  while q['metro_chain']['index']<len(q['metro_chain']['steps']):case.solve(g,q)
+  item=g.metro_part(q);self.assertEqual(item['name'],q['part_name'])
+  import progression as p
+  p.add_to(g.bag,p.supply('repairkit',3))
+  while item['durability']<100:self.assertTrue(g.repair_with_kit(item['id']))
+  self.assertFalse(g.quest_ready(q));g.x,g.y=g.cities[city]
+  q['metro_chain']['infested']=False;self.assertTrue(g.metro_action(q['id']))
+  self.assertTrue(g.turn_in(q['id']));self.assertIn(city,g.metro_unlocked)
   self.assertFalse(any(i.get('quest_id')==q['id'] for i in g.bag));return q
  def test_unlock_contracts_and_refresh(self):
   """Перевіряє сценарій «unlock contracts and refresh» та очікувані результати."""

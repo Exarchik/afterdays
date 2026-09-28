@@ -157,6 +157,9 @@ class QuestCards(tk.Frame):
             if len(title)>limit:title=title[:limit-1]+'…'
             c.create_text(title_x,y+5,text=title,anchor='nw',fill=title_color,font=('Segoe UI',9,'bold'))
             state=tr('refinement_ui.0033') if q['status']=='offered' else tr('refinement_ui.0034') if q['status']=='done' else tr('refinement_ui.0035') if self.app.game.quest_ready(q) else tr('refinement_ui.0036', v0=q['progress'], v1=q['goal'])
+            if q.get('metro_chain') and q['status']=='active' and not self.app.game.quest_ready(q):
+                chain=q['metro_chain']
+                state=tr('metro035.short_progress',number=chain['index']+1,total=len(chain['steps'])) if chain['index']<len(chain['steps']) else tr('metro035.stage_station')
             reward=tr('refinement_ui.0037',v0=q.get('reward',0),v1=q.get('xp_reward',0))
             c.create_text(48,y+23,text=state+' · '+reward,anchor='nw',fill=MUTED,font=('Segoe UI',8))
             if immediate:

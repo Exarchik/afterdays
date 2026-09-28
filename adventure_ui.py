@@ -166,6 +166,8 @@ class Services(tk.Frame):
         app=self.app;g=app.game;items=[]
         if not g.battle:
             import restoration_ui
+            for mq in g.metro_local():
+                items.append(('metro',tr('metro035.service'),lambda ident=mq['id']:__import__('metro035_ui').show(app,ident)))
             if g.scribe:items.append(('cartographer',tr('update032.scribe'),lambda:__import__('interface032').scribe(app)))
             if g.local_settlers():items.append(('settlers',tr('restoration.settlers'),lambda:restoration_ui.settlers(app)))
             if any(q['kind']=='torn_map' and q['status']=='active' and not q['map_solved'] for q in g.quests):items.append(('torn_map',tr('restoration.assemble'),lambda:restoration_ui.maps(app)))

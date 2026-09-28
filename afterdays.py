@@ -1049,7 +1049,7 @@ class ExpansionGame(LegacyGame):
 
 
 from progression import equipment, module, supply, stats, item_weight, item_value
-from update033 import Game
+from metro035 import Game
 from reputation import buy_factor, sell_factor
 
 # GUI imports are delayed so the model and tests work without a display.
@@ -1239,6 +1239,10 @@ def launch(test_hook=None):
             before_battle = self.game.battle is not None
             fn()
             self.refresh()
+            map_request=getattr(self.game,'_metro_map_request',None)
+            if map_request:
+                self.game._metro_map_request=None
+                __import__('restoration_ui').puzzle(self,map_request)
             request=getattr(self.game,'_radio_request',None)
             if request:
                 self.game._radio_request=None

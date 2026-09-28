@@ -1,0 +1,9 @@
+----------------------------------------------------------------------
+Ran 349 tests in 53.688s
+
+OK
+
+Content validation: 0 errors.
+Mid-dungeon save/reload: passed.
+All six stage types completed using game methods; legacy quest migration, repair and final installation, save/reload between stages, abandonment, target bounds and reward replay checked.
+Interactive Tk GUI not verified (no display server).
