@@ -37,7 +37,7 @@ class RevisionTests(unittest.TestCase):
    g=r.Game(4);g.make_road_event(key);before=g.money
    self.assertTrue(g.resolve_event('leave'));self.assertFalse(g.resolve_event('leave'))
    if effect=='money':self.assertEqual(g.money,max(0,before+value))
-  self.assertEqual(len(a.ROAD_EVENTS),71)
+  self.assertEqual(len(a.ROAD_EVENTS),len(__import__('event_catalog').EVENTS))
  def test_sort_preserves_ids(self):
   """Перевіряє сценарій «sort preserves ids» та очікувані результати."""
   items=[p.supply('food',3),p.module(),p.equipment('Пістолет «Попіл»'),p.supply('med')]

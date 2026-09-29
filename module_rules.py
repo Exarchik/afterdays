@@ -10,14 +10,18 @@ DRAWBACKS = {'weight_percent':('strength',-10), 'ammo_save_percent':('accuracy',
     'capacity':('defense',-1), 'evasion':('vitality',-4), 'regen':('capacity',-2)}
 
 def module_stats(ident, tier, level, tradeoff=False):
-    data=content.MODULE_DATA[ident]
+    return definition_stats(content.MODULE_DATA[ident],tier,level,tradeoff)
+
+def definition_stats(data, tier, level, tradeoff=False):
+    """Calculate an unsaved model with the same rules used by generated modules."""
     curves=data.get('rarity_stats') or {data['stat']:[data['base']*(n+1) for n in range(5)]}
     result={key:(values[tier] if key in PERCENT_STATS or key=='attack' else
                  max(1,round(values[tier]*(1+.06*(level-1))))) for key,values in curves.items()}
     if tradeoff:
         key=next(iter(result));result[key]=round(result[key]*1.7)
         result[key]=min(-1,result[key]) if curves[key][tier]<0 else max(1,result[key])
-        bad,amount=DRAWBACKS[key];result[bad]=result.get(bad,0)+amount*(1+tier//2)
+        bad,amount=DRAWBACKS.get(key,('accuracy',-5) if data['target']=='weapon' else ('evasion',-3))
+        result[bad]=result.get(bad,0)+amount*(1+tier//2)
     for key,value in data.get('fixed_penalties',{}).items():result[key]=result.get(key,0)+value
     return result
 

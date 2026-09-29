@@ -1,0 +1,3671 @@
+{
+  "version": 1,
+  "events": [
+    {
+      "id": "camp",
+      "category": "help",
+      "terrain": "any",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Вогонь серед пустки",
+      "description": "Мандрівники запрошують до вогнища. Поділіться вечерею.",
+      "art": "art_custom_004",
+      "choices": [
+        {
+          "id": "rest",
+          "text": "Витратити консерви",
+          "costs": [
+            {
+              "kind": "food",
+              "amount": 1
+            }
+          ],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "heal",
+                  "amount": 25
+                },
+                {
+                  "kind": "xp",
+                  "amount": 10
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Продовжити шлях",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "basic"
+    },
+    {
+      "id": "pilgrims",
+      "category": "help",
+      "terrain": "any",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Голодні пілігрими",
+      "description": "Двоє мандрівників пропонують оплатити вашу їжу.",
+      "art": "event_theme:pilgrims",
+      "choices": [
+        {
+          "id": "share",
+          "text": "Віддати консерву",
+          "costs": [
+            {
+              "kind": "food",
+              "amount": 1
+            }
+          ],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "money",
+                  "amount": 70
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "talk",
+          "text": "Поговорити",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "xp",
+                  "amount": 5
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "basic"
+    },
+    {
+      "id": "wounded",
+      "category": "help",
+      "terrain": "any",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Поранений біля дороги",
+      "description": "Під уламком дорожнього знака сидить поранений розвідник.",
+      "art": "event_theme:wounded",
+      "choices": [
+        {
+          "id": "help",
+          "text": "Дати аптечку",
+          "costs": [
+            {
+              "kind": "med",
+              "amount": 1
+            }
+          ],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "xp",
+                  "amount": 20
+                },
+                {
+                  "kind": "money",
+                  "amount": 60
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "alt_help",
+          "text": "Зробити бинт з 2х фрагментів",
+          "costs": [
+            {
+              "kind": "fragments",
+              "amount": 2
+            }
+          ],
+          "outcomes": [
+            {
+              "chance": 1.0,
+              "effects": [
+                {
+                  "kind": "xp",
+                  "amount": 12,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "money",
+                  "amount": 35,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Побажати удачі й піти",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "basic"
+    },
+    {
+      "id": "snare",
+      "category": "help",
+      "terrain": "forest",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Звір у пастці",
+      "description": "Невеликий звір б’ється в старому дроті.",
+      "art": "art_custom_017",
+      "choices": [
+        {
+          "id": "free",
+          "text": "Звільнити",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "xp",
+                  "amount": 15
+                },
+                {
+                  "kind": "damage",
+                  "amount": 3,
+                  "chance": 0.25
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "terrain"
+    },
+    {
+      "id": "hermit",
+      "category": "help",
+      "terrain": "forest",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Лісовий самітник",
+      "description": "Самітник обмінює знання про місцевість на вечерю.",
+      "art": "event_theme:camp",
+      "choices": [
+        {
+          "id": "meal",
+          "text": "Консерва",
+          "costs": [
+            {
+              "kind": "food",
+              "amount": 1
+            }
+          ],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "reveal",
+                  "amount": 6
+                },
+                {
+                  "kind": "xp",
+                  "amount": 15
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Попрощатись",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "terrain"
+    },
+    {
+      "id": "lost_dog",
+      "category": "help",
+      "terrain": "forest",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Собака з жетоном",
+      "description": "Пес несе порожню сумку й просить їжі.",
+      "art": "event_theme:snare",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Дати їжу",
+          "costs": [
+            {
+              "kind": "food",
+              "amount": 1
+            }
+          ],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "parts",
+                  "amount": 5
+                },
+                {
+                  "kind": "xp",
+                  "amount": 10
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "additional"
+    },
+    {
+      "id": "old_trapper",
+      "category": "help",
+      "terrain": "forest",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Старий мисливець",
+      "description": "Мисливець просить допомогти розібрати зіпсовану пастку.",
+      "art": "npc_locksmith",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Допомогти з пасткою",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "parts",
+                  "amount": 5
+                },
+                {
+                  "kind": "xp",
+                  "amount": 10
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "additional",
+      "legacy_release": "0.32"
+    },
+    {
+      "id": "courier",
+      "category": "help",
+      "terrain": "road",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Велосипед кур’єра",
+      "description": "Кур’єр просить допомогти відремонтувати колесо.",
+      "art": "event_theme:courier",
+      "choices": [
+        {
+          "id": "fix",
+          "text": "Віддати йому 5 запчастин",
+          "costs": [
+            {
+              "kind": "parts",
+              "amount": 5
+            }
+          ],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "money",
+                  "amount": 45
+                },
+                {
+                  "kind": "xp",
+                  "amount": 10
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Відмовитись",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "terrain"
+    },
+    {
+      "id": "event_001",
+      "category": "help",
+      "terrain": "road",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Старий автобус на узбіччі",
+      "description": "Ви бачити якийсь ящичок що випав із старого автобуса, що заглох тут років 50 назад. Спробуєте відчинити?",
+      "art": "art_custom_006",
+      "choices": [
+        {
+          "id": "fix",
+          "text": "Використати 2 фрагменти, щоб полагодити замок",
+          "costs": [
+            {
+              "kind": "fragments",
+              "amount": 2
+            }
+          ],
+          "outcomes": [
+            {
+              "chance": 1.0,
+              "effects": [
+                {
+                  "kind": "money",
+                  "amount": 45,
+                  "per_level": 10,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "xp",
+                  "amount": 5,
+                  "per_level": 2,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Відмовитись",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "cache": [
+        {
+          "kind": "ammo",
+          "amount": 5,
+          "maximum": 7,
+          "per_level": 5,
+          "step": 0,
+          "step_cap": 0,
+          "chance": 1.0,
+          "ammo": "random",
+          "destination": "loot"
+        },
+        {
+          "kind": "repairkit",
+          "amount": 1,
+          "maximum": 2,
+          "per_level": 0,
+          "step": 2,
+          "step_cap": 0,
+          "chance": 1.0,
+          "destination": "loot"
+        }
+      ]
+    },
+    {
+      "id": "event_005",
+      "category": "trade",
+      "terrain": "any",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Лахмітник продає аптечку і тушонку",
+      "description": "Лахмітник віддасть аптечку і тушонку за 30 Кр.",
+      "art": "npc:fence",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Заплатити 30 кредитів",
+          "costs": [
+            {
+              "kind": "money",
+              "amount": 30
+            }
+          ],
+          "outcomes": [
+            {
+              "chance": 1.0,
+              "effects": [
+                {
+                  "kind": "food",
+                  "amount": 1,
+                  "maximum": 1,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "med",
+                  "amount": 1,
+                  "maximum": 1,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "event_003",
+      "category": "trade",
+      "terrain": "any",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Лахмітник продає набої",
+      "description": "Лахмітник віддасть коробку набоїв за 20 Кр.",
+      "art": "npc:fence",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Заплатити 20 кредитів",
+          "costs": [
+            {
+              "kind": "money",
+              "amount": 20
+            }
+          ],
+          "outcomes": [
+            {
+              "chance": 1.0,
+              "effects": [
+                {
+                  "kind": "ammo",
+                  "amount": 25,
+                  "maximum": 35,
+                  "per_level": 0,
+                  "step": 2,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "ammo": "random",
+                  "destination": "loot"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "event_004",
+      "category": "trade",
+      "terrain": "any",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Лахмітник продає радіопротектор",
+      "description": "Лахмітник віддасть радіопротектор за 20 Кр.",
+      "art": "npc:fence",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Заплатити 20 кредитів",
+          "costs": [
+            {
+              "kind": "money",
+              "amount": 20
+            }
+          ],
+          "outcomes": [
+            {
+              "chance": 1.0,
+              "effects": [
+                {
+                  "kind": "rad",
+                  "amount": 1,
+                  "maximum": 1,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "scrap_buyer",
+      "category": "trade",
+      "terrain": "road",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Збирач брухту",
+      "description": "Мандрівник шукає запчастини для печі.",
+      "art": "event_theme:pilgrims",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Віддати 8 запчастин",
+          "costs": [
+            {
+              "kind": "parts",
+              "amount": 8
+            }
+          ],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "money",
+                  "amount": 30
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "additional"
+    },
+    {
+      "id": "plate_buyer",
+      "category": "trade",
+      "terrain": "road",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Латки для каравану",
+      "description": "Візник ремонтує захист фургона.",
+      "art": "event_theme:pilgrims",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Віддати 6 фрагментів",
+          "costs": [
+            {
+              "kind": "fragments",
+              "amount": 6
+            }
+          ],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "money",
+                  "amount": 28
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "additional"
+    },
+    {
+      "id": "medicine_exchange",
+      "category": "trade",
+      "terrain": "road",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Обмін у фельдшера",
+      "description": "Мандрівний фельдшер шукає їжу для своєї групи.",
+      "art": "event_theme:pharmacy",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Обміняти 1 банку тушонки",
+          "costs": [
+            {
+              "kind": "food",
+              "amount": 1
+            }
+          ],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "med",
+                  "amount": 1
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "additional",
+      "legacy_release": "0.32"
+    },
+    {
+      "id": "lesson",
+      "category": "exploration",
+      "terrain": "any",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Порада розвідника",
+      "description": "Корисна розмова: +20 XP.",
+      "art": "art_custom_014",
+      "choices": [
+        {
+          "id": "leave",
+          "text": "Продовжити",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "xp",
+                  "amount": 20
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "legacy_group": "simple"
+    },
+    {
+      "id": "signal",
+      "category": "exploration",
+      "terrain": "any",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Сигнал невідомої станції",
+      "description": "Радіоприймач упіймав координати забутого об’єкта.",
+      "art": "event_theme:signal",
+      "choices": [
+        {
+          "id": "follow",
+          "text": "Розшифрувати координати",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "discover",
+                  "amount": 10
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Не реагувати",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "basic"
+    },
+    {
+      "id": "broken_radio",
+      "category": "exploration",
+      "terrain": "road",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Голос у рації",
+      "description": "Оператор просить полагодити передавач.",
+      "art": "event_theme:signal",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Витратити 4 запчастини",
+          "costs": [
+            {
+              "kind": "parts",
+              "amount": 4
+            }
+          ],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "money",
+                  "amount": 25
+                },
+                {
+                  "kind": "reveal",
+                  "amount": 2
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "additional"
+    },
+    {
+      "id": "old_survey",
+      "category": "exploration",
+      "terrain": "road",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Межовий стовп",
+      "description": "Під фарбою збереглася схема місцевості.",
+      "art": "event_theme:terminal",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Прочитати",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "reveal",
+                  "amount": 2
+                },
+                {
+                  "kind": "xp",
+                  "amount": 10
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "additional"
+    },
+    {
+      "id": "signal_kites",
+      "category": "exploration",
+      "terrain": "road",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Повітряні сигнали",
+      "description": "Над дорогою висять старі сигнальні змії. На мотузці зав’язана записка з координатами.",
+      "art": "event_theme:signal",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Прочитати записку",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "reveal",
+                  "amount": 2
+                },
+                {
+                  "kind": "xp",
+                  "amount": 5
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "additional",
+      "legacy_release": "0.32"
+    },
+    {
+      "id": "courier_tip",
+      "category": "exploration",
+      "terrain": "road",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Порада кур’єра",
+      "description": "Кур’єр готовий показати безпечну стежку в обмін на невелику плату.",
+      "art": "event_theme:courier",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Заплатити 12 кредитів",
+          "costs": [
+            {
+              "kind": "money",
+              "amount": 12
+            }
+          ],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "reveal",
+                  "amount": 3
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "additional",
+      "legacy_release": "0.32"
+    },
+    {
+      "id": "frozen_terminal",
+      "category": "exploration",
+      "terrain": "ruin",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Завислий термінал",
+      "description": "На екрані без кінця повторюється запит технічного обслуговування.",
+      "art": "event_theme:terminal",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Замінити запобіжник",
+          "costs": [
+            {
+              "kind": "parts",
+              "amount": 2
+            }
+          ],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "xp",
+                  "amount": 15
+                },
+                {
+                  "kind": "reveal",
+                  "amount": 1
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "additional",
+      "legacy_release": "0.32"
+    },
+    {
+      "id": "civic_archive",
+      "category": "exploration",
+      "terrain": "ruin",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Міський архів",
+      "description": "У захищеній шафі лежать записи про евакуацію та старі маршрути.",
+      "art": "event_theme:terminal",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Вивчити записи",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "xp",
+                  "amount": 20
+                },
+                {
+                  "kind": "reveal",
+                  "amount": 2
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "additional",
+      "legacy_release": "0.32"
+    },
+    {
+      "id": "dust_archive",
+      "category": "exploration",
+      "terrain": "ruin",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Польовий щоденник",
+      "description": "На сторінках описані місцеві мутанти.",
+      "art": "journal",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Прочитати",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "xp",
+                  "amount": 15
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "additional"
+    },
+    {
+      "id": "terminal",
+      "category": "exploration",
+      "terrain": "ruin",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Термінал архіву",
+      "description": "На екрані блимає карта довоєнного району.",
+      "art": "event_theme:terminal",
+      "choices": [
+        {
+          "id": "read",
+          "text": "Прочитати",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "reveal",
+                  "amount": 6
+                },
+                {
+                  "kind": "xp",
+                  "amount": 20
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Відійти",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "terrain"
+    },
+    {
+      "id": "cemetery",
+      "category": "exploration",
+      "terrain": "waste",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Безіменна могила",
+      "description": "На металевій табличці вказані координати старого маршруту.",
+      "art": "art_custom_003",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Занотувати",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "xp",
+                  "amount": 10
+                },
+                {
+                  "kind": "reveal",
+                  "amount": 1
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "additional"
+    },
+    {
+      "id": "warning_flags",
+      "category": "exploration",
+      "terrain": "waste",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Жовті прапорці",
+      "description": "Хтось позначив небезпечну ділянку й залишив інструкцію.",
+      "art": "event_theme:mines",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Вивчити",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "rad",
+                  "amount": 1
+                },
+                {
+                  "kind": "xp",
+                  "amount": 5
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "additional"
+    },
+    {
+      "id": "pantry",
+      "category": "supplies",
+      "terrain": "any",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Запаси під каменем",
+      "description": "У схованці лежать три консерви.",
+      "art": "event_theme:provisions",
+      "choices": [
+        {
+          "id": "leave",
+          "text": "Продовжити",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "food",
+                  "amount": 3
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "legacy_group": "simple"
+    },
+    {
+      "id": "clean_cache",
+      "category": "supplies",
+      "terrain": "any",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Захищений контейнер",
+      "description": "Знайдено дві пігулки від радіації.",
+      "art": "event_theme:safe",
+      "choices": [
+        {
+          "id": "leave",
+          "text": "Продовжити",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "rad",
+                  "amount": 2
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "legacy_group": "simple"
+    },
+    {
+      "id": "aidbox",
+      "category": "supplies",
+      "terrain": "any",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Пакунок допомоги",
+      "description": "Ви знайшли дві запечатані аптечки.",
+      "art": "event_theme:provisions",
+      "choices": [
+        {
+          "id": "leave",
+          "text": "Продовжити",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "med",
+                  "amount": 2
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "legacy_group": "simple"
+    },
+    {
+      "id": "donation",
+      "category": "supplies",
+      "terrain": "any",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Подарунок каравану",
+      "description": "Караванники залишили вам 60 кредитів.",
+      "art": "event_theme:pilgrims",
+      "choices": [
+        {
+          "id": "leave",
+          "text": "Продовжити",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "money",
+                  "amount": 60
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "legacy_group": "simple"
+    },
+    {
+      "id": "mushroom_bed",
+      "category": "supplies",
+      "terrain": "forest",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Грибна грядка",
+      "description": "У затінку хтось вирощував їстівні гриби. Частина врожаю вже потемніла.",
+      "art": "event_theme:provisions",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Зібрати світлі гриби",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 0.7,
+              "effects": [
+                {
+                  "kind": "food",
+                  "amount": 2
+                }
+              ]
+            },
+            {
+              "chance": 0.3,
+              "effects": [
+                {
+                  "kind": "damage",
+                  "amount": 5
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "additional",
+      "legacy_release": "0.32"
+    },
+    {
+      "id": "beehive",
+      "category": "supplies",
+      "terrain": "forest",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Дикий вулик",
+      "description": "Комахи оселились у коробці з консервами.",
+      "art": "event_theme:provisions",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Ризикнути",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 0.65,
+              "effects": [
+                {
+                  "kind": "food",
+                  "amount": 2
+                }
+              ]
+            },
+            {
+              "chance": 0.35,
+              "effects": [
+                {
+                  "kind": "damage",
+                  "amount": 4
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "additional"
+    },
+    {
+      "id": "berries",
+      "category": "supplies",
+      "terrain": "forest",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Схованка в чагарнику",
+      "description": "Між колючими отруйними кущами видніється ящик консервів.",
+      "art": "event_theme:provisions",
+      "choices": [
+        {
+          "id": "gather",
+          "text": "Дістати",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 0.75,
+              "effects": [
+                {
+                  "kind": "food",
+                  "amount": 2
+                }
+              ]
+            },
+            {
+              "chance": 0.25,
+              "effects": [
+                {
+                  "kind": "damage",
+                  "amount": 4
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Не чіпати",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "terrain"
+    },
+    {
+      "id": "quiet_clearing",
+      "category": "supplies",
+      "terrain": "forest",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Тиха галявина",
+      "description": "Тут немає слідів мутантів. Можна перепочити та обробити подряпини.",
+      "art": "event_theme:camp",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Зробити короткий перепочинок",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "heal",
+                  "amount": 6
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "additional",
+      "legacy_release": "0.32"
+    },
+    {
+      "id": "clean_spring",
+      "category": "supplies",
+      "terrain": "forest",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Чисте джерело",
+      "description": "Вода пройшла крізь товстий шар вапняку.",
+      "art": "terrain:water",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Відпочити",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "heal",
+                  "amount": 10
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "additional"
+    },
+    {
+      "id": "broken_cart",
+      "category": "supplies",
+      "terrain": "road",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Зламаний візок",
+      "description": "Торговець застряг із поламаною віссю та обіцяє оплатити допомогу.",
+      "art": "quest:supplies",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Віддати 4 запчастини",
+          "costs": [
+            {
+              "kind": "parts",
+              "amount": 4
+            }
+          ],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "money",
+                  "amount": 35
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "additional",
+      "legacy_release": "0.32"
+    },
+    {
+      "id": "bunker_light",
+      "category": "supplies",
+      "terrain": "ruin",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Аварійний ліхтар",
+      "description": "Під сходами мигає акумулятор.",
+      "art": "event_theme:meteor",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Витратити 2 запчастини",
+          "costs": [
+            {
+              "kind": "parts",
+              "amount": 2
+            }
+          ],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "ammo",
+                  "amount": 8,
+                  "ammo": "energy"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "additional"
+    },
+    {
+      "id": "locked_locker",
+      "category": "supplies",
+      "terrain": "ruin",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Медична шафка",
+      "description": "Замок цілий, зате петля проіржавіла.",
+      "art": "event_theme:pharmacy",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Витратити 5 запчастин",
+          "costs": [
+            {
+              "kind": "parts",
+              "amount": 5
+            }
+          ],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "med",
+                  "amount": 1
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "additional"
+    },
+    {
+      "id": "collapsed_stairs",
+      "category": "supplies",
+      "terrain": "ruin",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Обвалені сходи",
+      "description": "На майданчику поверхом вище стоїть аптечна шафка. Сходи ледве тримаються.",
+      "art": "dungeon_exit",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Піднятися за ліками",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 0.6,
+              "effects": [
+                {
+                  "kind": "med",
+                  "amount": 1
+                }
+              ]
+            },
+            {
+              "chance": 0.4,
+              "effects": [
+                {
+                  "kind": "damage",
+                  "amount": 7
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "additional",
+      "legacy_release": "0.32"
+    },
+    {
+      "id": "pharmacy",
+      "category": "supplies",
+      "terrain": "ruin",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Рештки аптеки",
+      "description": "У шафах можуть бути ліки, але стеля ненадійна.",
+      "art": "event_theme:pharmacy",
+      "choices": [
+        {
+          "id": "search",
+          "text": "Обшукати",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 0.4,
+              "effects": [
+                {
+                  "kind": "med",
+                  "amount": 2
+                }
+              ]
+            },
+            {
+              "chance": 0.4,
+              "effects": [
+                {
+                  "kind": "rad",
+                  "amount": 2
+                }
+              ]
+            },
+            {
+              "chance": 0.2,
+              "effects": [
+                {
+                  "kind": "damage",
+                  "amount": 5
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Не ризикувати",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "terrain"
+    },
+    {
+      "id": "rain_collector",
+      "category": "supplies",
+      "terrain": "waste",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Збирач роси",
+      "description": "Під тентом стоїть цілий конденсатор. У баку ще залишилася чиста вода.",
+      "art": "event_theme:water",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Перевірити бак",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "heal",
+                  "amount": 8
+                },
+                {
+                  "kind": "food",
+                  "amount": 1
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "additional",
+      "legacy_release": "0.32"
+    },
+    {
+      "id": "rad_markers",
+      "category": "supplies",
+      "terrain": "waste",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Свіжі позначки",
+      "description": "Хтось залишив попередження про радіацію та одну запасну пігулку.",
+      "art": "art_custom_011",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Забрати пігулку",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "rad",
+                  "amount": 1
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "additional",
+      "legacy_release": "0.32"
+    },
+    {
+      "id": "water_filter",
+      "category": "supplies",
+      "terrain": "waste",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Сухий насос",
+      "description": "У колодязі вцілів фільтр. Насос потребує кількох деталей.",
+      "art": "event_theme:water",
+      "choices": [
+        {
+          "id": "act",
+          "text": "3 запчастини",
+          "costs": [
+            {
+              "kind": "parts",
+              "amount": 3
+            }
+          ],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "heal",
+                  "amount": 12
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "additional"
+    },
+    {
+      "id": "wreck",
+      "category": "salvage",
+      "terrain": "any",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Перекинутий караван",
+      "description": "У кузові чути скрегіт. Усередині могли залишитись запчастини.",
+      "art": "event_theme:wreck",
+      "choices": [
+        {
+          "id": "search",
+          "text": "Обшукати",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 0.7,
+              "effects": [
+                {
+                  "kind": "parts",
+                  "amount": 12,
+                  "maximum": 35,
+                  "destination": "bag"
+                }
+              ]
+            },
+            {
+              "chance": 0.3,
+              "effects": [
+                {
+                  "kind": "damage",
+                  "amount": 8
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Обійти караван",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "basic"
+    },
+    {
+      "id": "fallen_tree",
+      "category": "salvage",
+      "terrain": "forest",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Дерево на стежці",
+      "description": "Під стовбуром застрягли речі колишнього табору.",
+      "art": "obstacle:forest",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Витягти",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 0.7,
+              "effects": [
+                {
+                  "kind": "food",
+                  "amount": 1
+                },
+                {
+                  "kind": "parts",
+                  "amount": 4
+                }
+              ]
+            },
+            {
+              "chance": 0.3,
+              "effects": [
+                {
+                  "kind": "damage",
+                  "amount": 3
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "additional"
+    },
+    {
+      "id": "cloth_bundle",
+      "category": "salvage",
+      "terrain": "forest",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Згорток у гілках",
+      "description": "На високій гілці зачепився згорток із тканиною та сухарями.",
+      "art": "event_theme:provisions",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Зняти згорток",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "food",
+                  "amount": 1
+                },
+                {
+                  "kind": "fragments",
+                  "amount": 4
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "additional",
+      "legacy_release": "0.32"
+    },
+    {
+      "id": "cracked_bridge",
+      "category": "salvage",
+      "terrain": "road",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Тріщина в мосту",
+      "description": "Настил під ногами починає розходитись. Поряд залишився ящик ремонтників.",
+      "art": "event_theme:mines",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Дістати ящик",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 0.55,
+              "effects": [
+                {
+                  "kind": "parts",
+                  "amount": 7
+                }
+              ]
+            },
+            {
+              "chance": 0.45,
+              "effects": [
+                {
+                  "kind": "damage",
+                  "amount": 6
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "additional",
+      "legacy_release": "0.32"
+    },
+    {
+      "id": "safe",
+      "category": "salvage",
+      "terrain": "ruin",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Забутий сейф",
+      "description": "Під завалами зберігся старий сейф.",
+      "art": "event_theme:safe",
+      "choices": [
+        {
+          "id": "open",
+          "text": "10 запчастин",
+          "costs": [
+            {
+              "kind": "parts",
+              "amount": 10
+            }
+          ],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "money",
+                  "amount": 60,
+                  "maximum": 120
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Залишити",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "terrain"
+    },
+    {
+      "id": "copper_wire",
+      "category": "salvage",
+      "terrain": "ruin",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Мідна проводка",
+      "description": "У підвалі звисає пучок старих кабелів.",
+      "art": "event_theme:provisions",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Зняти",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 0.75,
+              "effects": [
+                {
+                  "kind": "parts",
+                  "amount": 8
+                }
+              ]
+            },
+            {
+              "chance": 0.25,
+              "effects": [
+                {
+                  "kind": "damage",
+                  "amount": 5
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "additional"
+    },
+    {
+      "id": "roof_cache",
+      "category": "salvage",
+      "terrain": "ruin",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Пакунок на даху",
+      "description": "Сходи хитаються, але нагорі видно сумку.",
+      "art": "quest:cache",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Піднятись",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 0.65,
+              "effects": [
+                {
+                  "kind": "money",
+                  "amount": 45
+                },
+                {
+                  "kind": "med",
+                  "amount": 1
+                }
+              ]
+            },
+            {
+              "chance": 0.35,
+              "effects": [
+                {
+                  "kind": "damage",
+                  "amount": 6
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "additional"
+    },
+    {
+      "id": "buried_battery",
+      "category": "salvage",
+      "terrain": "waste",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Заритий акумулятор",
+      "description": "З піску стирчать клеми. Корпус може бути під напругою.",
+      "art": "event_theme:provisions",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Відкрити",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 0.6,
+              "effects": [
+                {
+                  "kind": "ammo",
+                  "amount": 12,
+                  "ammo": "energy"
+                }
+              ]
+            },
+            {
+              "chance": 0.4,
+              "effects": [
+                {
+                  "kind": "damage",
+                  "amount": 6
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "additional"
+    },
+    {
+      "id": "sand_cable",
+      "category": "salvage",
+      "terrain": "waste",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Кабель у піску",
+      "description": "З-під дюни стирчить товстий кабель. На ньому ще блимає індикатор.",
+      "art": "event_theme:wreck",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Обережно витягнути",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 0.65,
+              "effects": [
+                {
+                  "kind": "ammo",
+                  "amount": 5,
+                  "ammo": "energy"
+                },
+                {
+                  "kind": "parts",
+                  "amount": 3
+                }
+              ]
+            },
+            {
+              "chance": 0.35,
+              "effects": [
+                {
+                  "kind": "damage",
+                  "amount": 4
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "additional",
+      "legacy_release": "0.32"
+    },
+    {
+      "id": "glass_dune",
+      "category": "salvage",
+      "terrain": "waste",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Скляна дюна",
+      "description": "Пісок спікся в гострі пластини.",
+      "art": "event_theme:mines",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Зібрати",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 0.7,
+              "effects": [
+                {
+                  "kind": "fragments",
+                  "amount": 10
+                }
+              ]
+            },
+            {
+              "chance": 0.3,
+              "effects": [
+                {
+                  "kind": "damage",
+                  "amount": 4
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "additional"
+    },
+    {
+      "id": "sun_mirror",
+      "category": "salvage",
+      "terrain": "waste",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Сонячне дзеркало",
+      "description": "Поворотне дзеркало може зарядити забутий елемент живлення.",
+      "art": "event_theme:signal",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Налаштувати відбивач",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 0.8,
+              "effects": [
+                {
+                  "kind": "ammo",
+                  "amount": 6,
+                  "ammo": "energy"
+                }
+              ]
+            },
+            {
+              "chance": 0.2,
+              "effects": [
+                {
+                  "kind": "damage",
+                  "amount": 2
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "additional",
+      "legacy_release": "0.32"
+    },
+    {
+      "id": "meteor",
+      "category": "salvage",
+      "terrain": "waste",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Уламок із неба",
+      "description": "Серед випаленої землі лежить гарячий метал.",
+      "art": "event_theme:meteor",
+      "choices": [
+        {
+          "id": "collect",
+          "text": "Дістати 15 фрагментів",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "fragments",
+                  "amount": 15,
+                  "destination": "bag"
+                },
+                {
+                  "kind": "damage",
+                  "amount": 3
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "study",
+          "text": "Оглянути здалеку",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "xp",
+                  "amount": 15
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Оминути",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "terrain"
+    },
+    {
+      "id": "gun_oil",
+      "category": "repair",
+      "terrain": "road",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Майстер із мастилом",
+      "description": "У механіка залишилось трохи чистого мастила.",
+      "art": "event_theme:camp",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Заплатити 12 кр.",
+          "costs": [
+            {
+              "kind": "money",
+              "amount": 12
+            }
+          ],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "repair_weapon",
+                  "amount": 12
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "additional"
+    },
+    {
+      "id": "field_tailor",
+      "category": "repair",
+      "terrain": "road",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Мандрівна швачка",
+      "description": "Майстриня пропонує залатати броню.",
+      "art": "event_theme:camp",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Заплатити 15 кр.",
+          "costs": [
+            {
+              "kind": "money",
+              "amount": 15
+            }
+          ],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "repair_armor",
+                  "amount": 15
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "additional"
+    },
+    {
+      "id": "leaking_roof",
+      "category": "repair",
+      "terrain": "ruin",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Протікання",
+      "description": "Зі стелі крапає їдка рідина. Під нею лежить ціла каністра мастила.",
+      "art": "event_theme:water",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Дістати мастило",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 0.7,
+              "effects": [
+                {
+                  "kind": "repair_weapon",
+                  "amount": 10
+                }
+              ]
+            },
+            {
+              "chance": 0.3,
+              "effects": [
+                {
+                  "kind": "damage",
+                  "amount": 4
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "additional",
+      "legacy_release": "0.32"
+    },
+    {
+      "id": "workshop_press",
+      "category": "repair",
+      "terrain": "ruin",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Ручний прес",
+      "description": "Прес ще працює. Ним можна вирівняти пластини спорядження.",
+      "art": "event_theme:wreck",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Попрацювати з пресом",
+          "costs": [
+            {
+              "kind": "fragments",
+              "amount": 3
+            }
+          ],
+          "outcomes": [
+            {
+              "chance": 0.85,
+              "effects": [
+                {
+                  "kind": "repair_armor",
+                  "amount": 15
+                }
+              ]
+            },
+            {
+              "chance": 0.15,
+              "effects": [
+                {
+                  "kind": "damage",
+                  "amount": 2
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "additional",
+      "legacy_release": "0.32"
+    },
+    {
+      "id": "sharp_wire",
+      "category": "hazards",
+      "terrain": "any",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Дріт у траві",
+      "description": "Подряпина від іржавого дроту: −3 HP.",
+      "art": "event_theme:wounded",
+      "choices": [
+        {
+          "id": "leave",
+          "text": "Продовжити",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "damage",
+                  "amount": 3
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "legacy_group": "simple"
+    },
+    {
+      "id": "torn_pocket",
+      "category": "hazards",
+      "terrain": "any",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Дірка в кишені",
+      "description": "Загублено до 30 кредитів.",
+      "art": "event_theme:provisions",
+      "choices": [
+        {
+          "id": "leave",
+          "text": "Продовжити",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "money",
+                  "amount": -30
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "legacy_group": "simple"
+    },
+    {
+      "id": "spoiled_can",
+      "category": "hazards",
+      "terrain": "any",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Зіпсована консерва",
+      "description": "Довелося викинути одну консерву, якщо вона була.",
+      "art": "food",
+      "choices": [
+        {
+          "id": "leave",
+          "text": "Продовжити",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "food",
+                  "amount": -1
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "legacy_group": "simple"
+    },
+    {
+      "id": "toxic_air",
+      "category": "hazards",
+      "terrain": "any",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Отруйний пил",
+      "description": "Вдихнули токсичний пил: −4 HP.",
+      "art": "event_theme:storm",
+      "choices": [
+        {
+          "id": "leave",
+          "text": "Продовжити",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "damage",
+                  "amount": 4
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "legacy_group": "simple"
+    },
+    {
+      "id": "sand_lock",
+      "category": "hazards",
+      "terrain": "any",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Пісок у механізмі",
+      "description": "Активна зброя втратила 8 пунктів стану.",
+      "art": "event_theme:storm",
+      "choices": [
+        {
+          "id": "leave",
+          "text": "Продовжити",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "wear",
+                  "amount": 8
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "legacy_group": "simple"
+    },
+    {
+      "id": "mines",
+      "category": "hazards",
+      "terrain": "any",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Старе мінне поле",
+      "description": "Ви помітили дріт під пилом. Можна обійти або ризикнути.",
+      "art": "event_theme:mines",
+      "choices": [
+        {
+          "id": "careful",
+          "text": "Обережно обійти",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "xp",
+                  "amount": 10
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "rush",
+          "text": "Ризикнути заради припасів",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 0.5,
+              "effects": [
+                {
+                  "kind": "damage",
+                  "amount": 6,
+                  "maximum": 14
+                }
+              ]
+            },
+            {
+              "chance": 0.5,
+              "effects": [
+                {
+                  "kind": "med",
+                  "amount": 2
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Відступити від небезпечного місця",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "basic"
+    },
+    {
+      "id": "event_002",
+      "title": "Яма з радіоактивними відходами",
+      "description": "Ви випадково впали у яму з радіоактивними відходами, прийміть радіопротектор",
+      "category": "hazards",
+      "terrain": "any",
+      "enabled": true,
+      "weight": 1.0,
+      "art": "terrain:radiation",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Прийняти радіопротектор",
+          "costs": [
+            {
+              "kind": "rad",
+              "amount": 1
+            }
+          ],
+          "outcomes": [
+            {
+              "chance": 1.0,
+              "effects": [
+                {
+                  "kind": "xp",
+                  "amount": 12,
+                  "maximum": 20,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "damage",
+                  "amount": 1,
+                  "maximum": 2,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Проігнорувати і піти далі",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1.0,
+              "effects": [
+                {
+                  "kind": "damage",
+                  "amount": 8,
+                  "maximum": 15,
+                  "per_level": 2,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "thorn_patch",
+      "category": "hazards",
+      "terrain": "forest",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Колючий прохід",
+      "description": "Під заростями помітна металева коробка. Колючки мають гострі крихкі кінці.",
+      "art": "event_theme:mines",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Пролізти до коробки",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 0.6,
+              "effects": [
+                {
+                  "kind": "fragments",
+                  "amount": 6
+                }
+              ]
+            },
+            {
+              "chance": 0.4,
+              "effects": [
+                {
+                  "kind": "damage",
+                  "amount": 3
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "additional",
+      "legacy_release": "0.32"
+    },
+    {
+      "id": "toll",
+      "category": "hazards",
+      "terrain": "road",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Самозвані митники",
+      "description": "Озброєні люди вимагають 20 кредитів.",
+      "art": "event_theme:toll",
+      "choices": [
+        {
+          "id": "pay",
+          "text": "Заплатити 20 кредитів",
+          "costs": [
+            {
+              "kind": "money",
+              "amount": 20
+            }
+          ],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "xp",
+                  "amount": 10
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "detour",
+          "text": "Обійти через колючки",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "xp",
+                  "amount": 10
+                },
+                {
+                  "kind": "damage",
+                  "amount": 3
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Відступити",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "terrain"
+    },
+    {
+      "id": "storm",
+      "category": "hazards",
+      "terrain": "waste",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Пилова стіна",
+      "description": "Піщана буря насувається на ваш маршрут.",
+      "art": "event_theme:storm",
+      "choices": [
+        {
+          "id": "shelter",
+          "text": "Сховатись",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "xp",
+                  "amount": 10
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "rush",
+          "text": "Рушити крізь бурю",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "xp",
+                  "amount": 15
+                },
+                {
+                  "kind": "damage",
+                  "amount": 4
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Зачекати осторонь",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "terrain"
+    },
+    {
+      "id": "ash_whirl",
+      "category": "hazards",
+      "terrain": "waste",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Попелястий вихор",
+      "description": "У центрі вихору блищать металеві уламки. Пил обпікає шкіру.",
+      "art": "event_theme:storm",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Зібрати уламки",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "damage",
+                  "amount": 3
+                },
+                {
+                  "kind": "fragments",
+                  "amount": 8
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "additional",
+      "legacy_release": "0.32"
+    },
+    {
+      "id": "locked_provisions",
+      "category": "caches",
+      "terrain": "forest",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Сховок лісового каравану",
+      "description": "Між корінням заховано замкнену скриню з припасами колишнього каравану.",
+      "art": "event_theme:safe",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Спробувати відкрити замок",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "cache",
+                  "amount": 1
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "cache",
+      "cache": [
+        {
+          "kind": "food",
+          "amount": 3,
+          "step": 4,
+          "step_cap": 3
+        },
+        {
+          "kind": "med",
+          "amount": 1,
+          "step": 4,
+          "step_cap": 3
+        },
+        {
+          "kind": "ammo",
+          "amount": 6,
+          "per_level": 2,
+          "ammo": "random"
+        },
+        {
+          "kind": "gear",
+          "amount": 1,
+          "chance": 0.25
+        }
+      ]
+    },
+    {
+      "id": "locked_armory",
+      "category": "caches",
+      "terrain": "road",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Зброярська скриня",
+      "description": "У розбитій вантажівці вціліла сталева скриня. Крізь щілину видно коробки набоїв.",
+      "art": "event_theme:safe",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Спробувати відкрити замок",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "cache",
+                  "amount": 1
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "cache",
+      "cache": [
+        {
+          "kind": "ammo",
+          "amount": 12,
+          "per_level": 4,
+          "ammo": "random"
+        },
+        {
+          "kind": "repairkit",
+          "amount": 1
+        },
+        {
+          "kind": "gear",
+          "amount": 1,
+          "chance": 0.25
+        }
+      ]
+    },
+    {
+      "id": "locked_medical",
+      "category": "caches",
+      "terrain": "ruin",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Опломбований медичний контейнер",
+      "description": "Під уламками санітарного фургона лежить замкнений контейнер із медикаментами.",
+      "art": "event_theme:pharmacy",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Спробувати відкрити замок",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "cache",
+                  "amount": 1
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "cache",
+      "cache": [
+        {
+          "kind": "med",
+          "amount": 2,
+          "step": 4,
+          "step_cap": 3
+        },
+        {
+          "kind": "rad",
+          "amount": 1,
+          "step": 4,
+          "step_cap": 3
+        },
+        {
+          "kind": "gear",
+          "amount": 1,
+          "chance": 0.25
+        }
+      ]
+    },
+    {
+      "id": "locked_workshop",
+      "category": "caches",
+      "terrain": "ruin",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Сейф польової майстерні",
+      "description": "На місці покинутого ремонту залишився сейф із деталями й технічним приладдям.",
+      "art": "event_theme:safe",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Спробувати відкрити замок",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "cache",
+                  "amount": 1
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "cache",
+      "cache": [
+        {
+          "kind": "parts",
+          "amount": 5,
+          "per_level": 3
+        },
+        {
+          "kind": "fragments",
+          "amount": 5,
+          "per_level": 2
+        },
+        {
+          "kind": "repairkit",
+          "amount": 1
+        },
+        {
+          "kind": "gear",
+          "amount": 1,
+          "chance": 0.25
+        }
+      ]
+    },
+    {
+      "id": "locked_research",
+      "category": "caches",
+      "terrain": "waste",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Капсула експедиції",
+      "description": "У піску знайдено герметичну капсулу дослідників. Механічний замок ще працює.",
+      "art": "art_custom_013",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Спробувати відкрити замок",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "cache",
+                  "amount": 1
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "cache",
+      "cache": [
+        {
+          "kind": "rad",
+          "amount": 1,
+          "step": 4,
+          "step_cap": 3
+        },
+        {
+          "kind": "ammo",
+          "amount": 6,
+          "per_level": 2,
+          "ammo": "energy"
+        },
+        {
+          "kind": "fragments",
+          "amount": 5,
+          "per_level": 2
+        },
+        {
+          "kind": "gear",
+          "amount": 1,
+          "chance": 0.25
+        }
+      ]
+    }
+  ]
+}

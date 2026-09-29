@@ -6,6 +6,10 @@ import content,i18n
 
 def validate():
     errors=[]
+    import event_catalog
+    errors.extend(event_catalog.validate(event_catalog.DOCUMENT))
+    import entity_catalog
+    errors.extend(entity_catalog.Store().validate())
     for title,data in [('equipment',content.EQUIPMENT),('modules',content.MODULE_DATA),('monsters',content.MONSTER_DATA),('consumables',content.CONSUMABLES)]:
         for ident,definition in data.items():
             if not re.fullmatch('[a-z][a-z0-9_]*',ident):errors.append(f'Invalid ID: {ident}')
@@ -13,7 +17,7 @@ def validate():
             if ident+'.description' not in i18n.FALLBACK:errors.append(f'Missing description: {ident}')
     for path in ROOT.glob('*.py'):
         if path.name.startswith('test_'):continue
-        for node in ast.walk(ast.parse(path.read_text())):
+        for node in ast.walk(ast.parse(path.read_text(encoding='utf-8'))):
             if isinstance(node,ast.Call) and isinstance(node.func,ast.Name) and node.func.id=='tr' and node.args and isinstance(node.args[0],ast.Constant):
                 key=node.args[0].value
                 if key not in i18n.FALLBACK:errors.append(f'{path.name}: missing {key}')

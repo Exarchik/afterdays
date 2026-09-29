@@ -432,5 +432,20 @@
     "ammo_type": null,
     "damage_type": "kinetic",
     "sprite_id": "helmet_horizon"
+  },
+  "weapon_custom_001": {
+    "kind": "weapon",
+    "damage": 10,
+    "range": 6,
+    "defense": 0,
+    "accuracy": 82,
+    "weight": 1.4,
+    "ap": 2,
+    "min_level": 2,
+    "attack": 9,
+    "ammo_type": "energy",
+    "damage_type": "thermal",
+    "sprite_id": "art_custom_001",
+    "category": "pistol"
   }
 }

@@ -50,7 +50,7 @@ class Update030Tests(unittest.TestCase):
         """Перевіряє сценарій «xp buckets and actual event rewards» та очікувані результати."""
         self.assertEqual([event_xp(n) for n in (0,10,15,20,25,30,35,40,100)],[0,5,10,10,15,15,20,20,20])
         g=r.Game(4);before=g.xp;g.make_road_event('wounded')
-        self.assertIn('20 XP',str(g.road_event['choices']))
+        self.assertEqual(g.road_event['choices'][0][1],'Дати аптечку')
         self.assertTrue(g.resolve_event('help'));self.assertEqual(g.xp-before,20)
         before=g.xp;g.gain_xp(40);self.assertEqual(g.xp-before,40)
         g.make_road_event('dust_archive');before=g.xp

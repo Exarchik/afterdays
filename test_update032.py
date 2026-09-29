@@ -85,9 +85,9 @@ class Update032Tests(unittest.TestCase):
             self.assertEqual([g.region_at(x,20) for x in range(112)],sorted(g.region_at(x,20) for x in range(112)))
     def test_twenty_events_and_promotion(self):
         """All twenty new events register; travellers can receive stable discounted stock."""
-        g=r.Game(4);rows=json.loads(Path('data/road_events032.json').read_text());self.assertEqual(len(rows),20)
+        g=r.Game(4);rows=[e for e in __import__('event_catalog').EVENTS if e.get('legacy_release')=='0.32'];self.assertEqual(len(rows),20)
         for row in rows:
-            self.assertIn(row[0],road_additions.BY_KEY);g.road_event=None;self.assertTrue(g.make_road_event(row[0]));self.assertTrue(g.resolve_event('leave'))
+            self.assertIn(row['id'],road_additions.BY_KEY);g.road_event=None;self.assertTrue(g.make_road_event(row['id']));self.assertTrue(g.resolve_event('leave'))
         g.road_event=None;g.x,g.y=6,5;g.record_at(g.cities[0])['value']=100
         g.traveler=dict(pos=[6,5],items=[p.equipment('weapon_ash_pistol')],rep_reserve=[],rep_total=0,rep_released=0)
         with patch.object(g.rng,'random',return_value=.1):items=g.stock(3)

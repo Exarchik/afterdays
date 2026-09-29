@@ -1,0 +1,109 @@
+"""Apply catalog choices using existing game inventory, map and lock mechanics."""
+import copy
+import event_catalog as catalog
+
+def make(game, key=None):
+    if game.battle or game.road_event: return False
+    if key is not None:
+        spec = catalog.BY_ID.get(key)
+    else:
+        pool = [e for e in catalog.EVENTS if e['enabled'] and e['terrain'] in ('any', game.world[game.y][game.x])]
+        if not pool: return False
+        spec = game.rng.choices(pool, weights=[e['weight'] for e in pool])[0]
+    if not spec or not spec['enabled']: return False
+    # Snapshot rules as well as text: editing the catalog cannot alter an active save's choice.
+    game.road_event = dict(kind=spec['id'], title=spec['title'], body=spec['description'], art=spec['art'],
+                           choices=[[c['id'], c['text']] for c in spec['choices']],
+                           pos=[game.x, game.y], definition=copy.deepcopy(spec))
+    game.last_event_turn = game.turn; game.log(spec['title'])
+    return True
+
+def display_choices(event):
+    """Use authored labels, including saves made with generated effect summaries."""
+    spec = event.get('definition') or catalog.BY_ID.get(event['kind'], {})
+    labels = {choice['id']: choice['text'] for choice in spec.get('choices', [])}
+    return [(key, labels.get(key, label)) for key, label in event['choices']]
+
+def item(game, effect, level):
+    import progression as p
+    kind = effect['kind']
+    if kind == 'gear':
+        gear = game.reward_item(cap=min(3, 1+level//4), level=game.rng.randint(max(1, level-2), level))
+        if 'durability' in gear: gear['durability'] = float(game.rng.randint(30, 90))
+        return gear
+    n = catalog.amount(effect, level, game.rng)
+    if kind == 'ammo':
+        ammo = effect.get('ammo', 'random')
+        if ammo == 'random': ammo = game.rng.choice(list(p.AMMO))
+        return p.ammunition(ammo, n)
+    return p.parts(n) if kind == 'parts' else p.fragments(n) if kind == 'fragments' else p.supply(kind, n)
+
+def cache_contents(game, effects, level):
+    return [item(game, e, level) for e in effects if e.get('chance', 1) >= 1 or game.rng.random() < e['chance']]
+
+def apply(game, effect, spec):
+    import progression as p
+    import module_rules
+    kind = effect['kind']; level = game.region_level
+    if effect.get('chance', 1) < 1 and game.rng.random() >= effect['chance']: return
+    if kind == 'cache':
+        game.begin_event_cache(spec); return
+    if kind == 'gear':
+        p.add_to(getattr(game, effect.get('destination', 'loot')), item(game, effect, level)); return
+    n = catalog.amount(effect, level, game.rng)
+    if kind in catalog.ITEM_KINDS:
+        if n < 0:
+            ammo = effect.get('ammo', 'random')
+            if kind == 'ammo' and ammo == 'random': ammo = game.rng.choice(list(p.AMMO))
+            if kind == 'ammo': game.consume('ammo', min(game.count('ammo', ammo), -n), ammo)
+            else: game.consume(kind, min(game.count(kind), -n))
+        elif n:
+            resolved = dict(effect, amount=n, per_level=0, step=0); resolved.pop('maximum', None)
+            p.add_to(getattr(game, effect.get('destination', 'loot')), item(game, resolved, level))
+        return
+    if kind == 'money': game.money = max(0, game.money+n)
+    elif kind == 'xp': game.gain_xp(n)
+    elif kind == 'heal': game.hp = min(game.max_hp, game.hp+n)
+    elif kind == 'damage': return game.hurt_world(n, spec['title'])
+    elif kind == 'wear':
+        if game.weapon: game.wear(game.weapon, n)
+    elif kind == 'reveal': game.reveal(game.x, game.y, n)
+    elif kind == 'discover':
+        if not game.discover(): game.gain_xp(n)
+    elif kind.startswith('repair_'):
+        gear = game.weapon if kind == 'repair_weapon' else game.equipped.get('armor')
+        if gear: gear['durability'] = min(module_rules.max_condition(gear), module_rules.condition(gear)+n)
+
+def resolve(game, choice_id):
+    event = game.road_event
+    if not event: return False
+    spec = event.get('definition') or catalog.BY_ID.get(event['kind'])
+    if not spec: game.log('Ця подія відсутня в каталозі.'); return False
+    choice = next((c for c in spec['choices'] if c['id'] == choice_id), None)
+    if not choice: return False
+    # Sum repeated costs before checking to prevent partial payment.
+    costs = {}
+    for cost in choice.get('costs', []): costs[cost['kind']] = costs.get(cost['kind'], 0)+cost['amount']
+    for kind, n in costs.items():
+        if (game.money if kind == 'money' else game.count(kind)) < n:
+            game.log('Недостатньо ресурсів для цієї дії.'); return False
+    kinds = {e['kind'] for o in choice['outcomes'] if o['chance'] > 0 for e in o['effects']}
+    if 'repair_weapon' in kinds and not game.weapon:
+        game.log('Спочатку екіпіруйте зброю.'); return False
+    if 'repair_armor' in kinds and not game.equipped.get('armor'):
+        game.log('Спочатку вдягніть броню.'); return False
+    for kind, n in costs.items():
+        if kind == 'money': game.money -= n
+        else: game.consume(kind, n)
+    outcomes = choice['outcomes']; selected = outcomes[0]
+    if len(outcomes) > 1:
+        roll = game.rng.random(); cumulative = 0
+        for outcome in outcomes:
+            cumulative += outcome['chance']
+            if roll < cumulative: selected = outcome; break
+    game.road_event = None
+    for effect in selected['effects']:
+        # defeat() restores HP, so use hurt_world's result to stop after lethal damage.
+        if apply(game, effect, spec) is False: break
+    game.log('Подія завершена: '+spec['title']+'.')
+    return True

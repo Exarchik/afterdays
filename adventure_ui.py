@@ -287,13 +287,31 @@ class Storage(tk.Frame):
 def road_window(app):
     event=app.game.road_event
     if not event:return
-    win=app.popup(event['title'],'660x410')
-    picture=tk.Canvas(win,height=90,bg=PANEL,highlightthickness=0);picture.pack(fill='x')
+    win=app.popup(event['title'],'760x620')
+    scroll=tk.Canvas(win,bg=PANEL,highlightthickness=0)
+    bar=ttk.Scrollbar(win,orient='vertical',command=scroll.yview);bar.pack(side='right',fill='y')
+    scroll.pack(fill='both',expand=True);scroll.configure(yscrollcommand=bar.set)
+    body=tk.Frame(scroll,bg=PANEL);body_id=scroll.create_window(0,0,window=body,anchor='nw')
+    body.bind('<Configure>',lambda e:scroll.configure(scrollregion=scroll.bbox('all')))
+    scroll.bind('<Configure>',lambda e:scroll.itemconfigure(body_id,width=e.width))
+    win.bind('<MouseWheel>',lambda e:scroll.yview_scroll(-1 if e.delta>0 else 1,'units'))
+    introduction=tk.Frame(body,bg=PANEL);introduction.pack(fill='x',padx=22,pady=16)
+    introduction.columnconfigure(1,weight=1)
+    art_size=max(sprites.SIZES)
+    picture=tk.Canvas(introduction,width=art_size,height=art_size,bg=PANEL,highlightthickness=0)
+    picture.grid(row=0,column=0,sticky='nw')
     from event_art import EVENT_ART
-    sprites.draw(picture,EVENT_ART.get(event['kind'],'event_theme:camp'),285,8,80)
-    tk.Label(win,text=event['title'],bg=PANEL,fg=GOLD,font=('Segoe UI',15,'bold')).pack(pady=8)
-    tk.Label(win,text=event['body'],bg=PANEL,fg=TEXT,wraplength=600).pack(padx=20,pady=8)
-    result=tk.Label(win,bg=PANEL,fg='#eaa58c');result.pack()
+    sprites.draw(picture,event.get('art',EVENT_ART.get(event['kind'],'event_theme:camp')),0,0,art_size)
+    narrative=tk.Frame(introduction,bg=PANEL);narrative.grid(row=0,column=1,sticky='new',padx=(20,0))
+    title=tk.Label(narrative,text=event['title'],bg=PANEL,fg=GOLD,font=('Segoe UI',15,'bold'),wraplength=460,anchor='w',justify='left')
+    title.pack(fill='x',pady=(0,12))
+    description=tk.Label(narrative,text=event['body'],bg=PANEL,fg=TEXT,wraplength=460,anchor='w',justify='left')
+    description.pack(fill='x')
+    def wrap_narrative(event):
+        width=max(1,event.width)
+        title.configure(wraplength=width);description.configure(wraplength=width)
+    narrative.bind('<Configure>',wrap_narrative)
+    result=tk.Label(body,bg=PANEL,fg='#eaa58c',wraplength=690);result.pack()
     def choose(key):
         if app.game.resolve_event(key):
             app.dialog=None;win.destroy();app.refresh()
@@ -303,8 +321,11 @@ def road_window(app):
                 import lock_ui
                 lock_ui.show(app,ident)
         else:result.config(text=app.game.messages[-1])
-    for key,label in event['choices']:
-        ttk.Button(win,text=label,command=lambda key=key:choose(key)).pack(fill='x',padx=22,pady=4)
+    from event_runtime import display_choices
+    for key,label in display_choices(event):
+        tk.Button(body,text=label,command=lambda key=key:choose(key),wraplength=660,
+                  justify='left',anchor='w',bg=PANEL,fg=TEXT,activebackground=PANEL,
+                  activeforeground=GOLD,padx=12,pady=8).pack(fill='x',padx=22,pady=4)
 
 
 def paint_world_extras(app):

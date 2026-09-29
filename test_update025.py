@@ -39,7 +39,7 @@ class Update025Tests(unittest.TestCase):
   self.assertTrue(g.make_road_event('locked_'+theme));self.assertTrue(g.resolve_event('act'));return g,g.road_cache()
  def test_five_events_persist_and_rewards_once(self):
   """Перевіряє сценарій «five events persist and rewards once» та очікувані результати."""
-  self.assertEqual(len(adventure.ROAD_EVENTS),71)
+  self.assertEqual(len(adventure.ROAD_EVENTS),len(__import__('event_catalog').EVENTS))
   for theme in CACHE_TYPES:
    g,c=self.make_cache(theme);self.assertEqual(c['level'],g.region_level);self.assertTrue(c['contents']);self.assertFalse(g.loot)
    content=copy.deepcopy(c['contents']);angle=c['lock_target'];ident=c['id']

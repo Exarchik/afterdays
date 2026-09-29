@@ -176,5 +176,7 @@
   "module_synthetic_fiber.name": "Синтетичне волокно",
   "module_synthetic_fiber.description": "Зменшує вагу спорядження та підвищує шанс ухилення. Маса модуля — 0,05 кг.",
   "module_lead_fibers.name": "Свинцеві волокна",
-  "module_lead_fibers.description": "Підвищує захист броні або шолома. Маса модуля — 1,5 кг."
+  "module_lead_fibers.description": "Підвищує захист броні або шолома. Маса модуля — 1,5 кг.",
+  "weapon_custom_001.name": "Пістолет «Firestarter»",
+  "weapon_custom_001.description": "Незабути нікому спопіляючий погляд цієї зброї"
 }

@@ -26,57 +26,16 @@ BLOCKED={'water','cliff'}
 SITES=[(tr('adventure.0013'),tr('adventure.0014'),'quest'),(tr('adventure.0015'),tr('adventure.0016'),'merchant'),
        (tr('adventure.0017'),tr('adventure.0018'),'quest'),(tr('adventure.0019'),tr('adventure.0020'),'merchant'),
        (tr('adventure.0021'),tr('adventure.0022'),'quest'),(tr('adventure.0023'),tr('adventure.0024'),'merchant')]
-ROAD_EVENTS=[
-    ('wounded',tr('adventure.0025'),tr('adventure.0026'),
-     [('help',tr('adventure.0027')),('leave',tr('adventure.0028'))]),
-    ('wreck',tr('adventure.0029'),tr('adventure.0030'),
-     [('search',tr('adventure.0031')),('leave',tr('adventure.0032'))]),
-    ('camp',tr('adventure.0033'),tr('adventure.0034'),
-     [('rest',tr('adventure.0035')),('leave',tr('adventure.0036'))]),
-    ('mines',tr('adventure.0037'),tr('adventure.0038'),
-     [('careful',tr('adventure.0039')),('rush',tr('adventure.0040')),('leave',tr('adventure.0041'))]),
-    ('signal',tr('adventure.0042'),tr('adventure.0043'),
-     [('follow',tr('adventure.0044')),('leave',tr('adventure.0045'))]),
-    ('pilgrims',tr('adventure.0046'),tr('adventure.0047'),
-     [('share',tr('adventure.0048')),('talk',tr('adventure.0049')),('leave',tr('adventure.0050'))]),
-]
-
-
 SITES.extend([(tr('adventure.0051'),tr('adventure.0052'),'quest'),(tr('adventure.0053'),tr('adventure.0054'),'merchant'),(tr('adventure.0055'),tr('adventure.0056'),'quest'),(tr('adventure.0057'),tr('adventure.0058'),'merchant'),(tr('adventure.0059'),tr('adventure.0060'),'quest'),(tr('adventure.0061'),tr('adventure.0062'),'quest'),(tr('adventure.0063'),tr('adventure.0064'),'merchant'),(tr('adventure.0065'),tr('adventure.0066'),'merchant'),(tr('adventure.0067'),tr('adventure.0068'),'quest'),(tr('adventure.0069'),tr('adventure.0070'),'merchant')])
 
 SITES.extend((tr('update024.site_'+str(n)),tr('update024.npc_'+str(n)), 'quest' if n%2==0 else 'merchant') for n in range(8))
 
-# Location filters are applied before the event is selected.
-EXTRA_EVENTS={
- 'berries':('forest',tr('adventure.0071'),tr('adventure.0072'), [('gather',tr('adventure.0073')),('leave',tr('adventure.0074'))]),
- 'snare':('forest',tr('adventure.0075'),tr('adventure.0076'), [('free',tr('adventure.0077')),('leave',tr('adventure.0078'))]),
- 'hermit':('forest',tr('adventure.0079'),tr('adventure.0080'), [('meal',tr('adventure.0081')),('leave',tr('adventure.0082'))]),
- 'safe':('ruin',tr('adventure.0083'),tr('adventure.0084'), [('open',tr('adventure.0085')),('leave',tr('adventure.0086'))]),
- 'pharmacy':('ruin',tr('adventure.0087'),tr('adventure.0088'), [('search',tr('adventure.0089')),('leave',tr('adventure.0090'))]),
- 'terminal':('ruin',tr('adventure.0091'),tr('adventure.0092'), [('read',tr('adventure.0093')),('leave',tr('adventure.0094'))]),
- 'courier':('road',tr('adventure.0095'),tr('adventure.0096'), [('fix',tr('adventure.0097')),('leave',tr('adventure.0098'))]),
- 'toll':('road',tr('adventure.0099'),tr('adventure.0100'), [('pay',tr('adventure.0101')),('detour',tr('adventure.0102')),('leave',tr('adventure.0103'))]),
- 'storm':('waste',tr('adventure.0104'),tr('adventure.0105'), [('shelter',tr('adventure.0106')),('rush',tr('adventure.0107')),('leave',tr('adventure.0108'))]),
- 'meteor':('waste',tr('adventure.0109'),tr('adventure.0110'), [('collect',tr('adventure.0111')),('study',tr('adventure.0112')),('leave',tr('adventure.0113'))]),
-}
-ROAD_EVENTS.extend((key,title,body,choices) for key,(_,title,body,choices) in EXTRA_EVENTS.items())
-
-
-SIMPLE_EVENTS={
- 'donation':(tr('adventure.0114'),tr('adventure.0115'),'money',60),
- 'aidbox':(tr('adventure.0116'),tr('adventure.0117'),'med',2),
- 'pantry':(tr('adventure.0118'),tr('adventure.0119'),'food',3),
- 'lesson':(tr('adventure.0120'),tr('adventure.0121'),'xp',35),
- 'clean_cache':(tr('adventure.0122'),tr('adventure.0123'),'rad',2),
- 'toxic_air':(tr('adventure.0124'),tr('adventure.0125'),'damage',4),
- 'torn_pocket':(tr('adventure.0126'),tr('adventure.0127'),'money',-30),
- 'sand_lock':(tr('adventure.0128'),tr('adventure.0129'),'wear',8),
- 'spoiled_can':(tr('adventure.0130'),tr('adventure.0131'),'food',-1),
- 'sharp_wire':(tr('adventure.0132'),tr('adventure.0133'),'damage',3),
-}
-ROAD_EVENTS.extend((k,title,body,[('leave',tr('adventure.0134'))]) for k,(title,body,_,_) in SIMPLE_EVENTS.items())
-
-ROAD_EVENTS.extend((key,title,story,[('act',action),('leave',tr('adventure.0135'))]) for key,terrain,title,story,action,*rest in road_additions.EVENTS)
+# Compatibility views; all definitions and gameplay now come from one catalog.
+import event_catalog
+import event_runtime
+ROAD_EVENTS=[(e['id'],e['title'],e['description'],[(c['id'],c['text']) for c in e['choices']]) for e in event_catalog.EVENTS]
+EXTRA_EVENTS={e['id']:(e['terrain'],e['title'],e['description'],[(c['id'],c['text']) for c in e['choices']]) for e in event_catalog.EVENTS if e.get('legacy_group') in ('terrain','cache')}
+SIMPLE_EVENTS={e['id']:(e['title'],e['description'],e['choices'][0]['outcomes'][0]['effects'][0]['kind'],e['choices'][0]['outcomes'][0]['effects'][0]['amount']) for e in event_catalog.EVENTS if e.get('legacy_group')=='simple'}
 
 def damage_type(item):return WEAPON_DAMAGE.get(item.get('type_id',item['name']),'kinetic')
 
@@ -334,53 +293,12 @@ class Game(p.Game):
         self.xp+=amount;self.emit(f'+{amount} XP',color='#99c9ff')
 
     def make_road_event(self,key=None):
-        """Створює дорожню подію та доступні варіанти відповіді."""
-        if self.battle or self.road_event:return False
-        data=next((e for e in ROAD_EVENTS if e[0]==key),None) if key else self.rng.choice([e for e in ROAD_EVENTS if (e[0] not in EXTRA_EVENTS or EXTRA_EVENTS[e[0]][0]==self.world[self.y][self.x]) and (e[0] not in road_additions.BY_KEY or road_additions.BY_KEY[e[0]][1]==self.world[self.y][self.x])])
-        if not data:return False
-        name,title,body,choices=data
-        self.road_event=dict(kind=name,title=title,body=body,choices=[list(c) for c in choices],pos=[self.x,self.y])
-        self.last_event_turn=self.turn;self.log(title);return True
+        """Create a terrain-filtered event from the shared catalog."""
+        return event_runtime.make(self,key)
 
     def resolve_event(self,choice):
-        """Застосовує вибраний результат дорожньої події."""
-        event=self.road_event
-        if not event or choice not in [c[0] for c in event['choices']]:return False
-        kind=event['kind']
-        if kind in road_additions.BY_KEY:return road_additions.resolve(self,choice)
-        if kind in SIMPLE_EVENTS:
-            self.road_event=None
-            _,_,effect,value=SIMPLE_EVENTS[kind]
-            if effect=='money':self.money=max(0,self.money+value);self.emit(tr('adventure.0157', v0=value))
-            elif effect=='xp':self.gain_xp(value)
-            elif effect=='damage':self.hurt_world(value,event['title'])
-            elif effect=='wear':
-                if self.weapon:self.wear(self.weapon,value)
-            elif value<0:self.consume(effect,min(self.count(effect),-value))
-            else:p.add_to(self.loot,p.supply(effect,value));self.emit(tr('adventure.0158'))
-            return True
-        if kind in EXTRA_EVENTS:return self.resolve_extra_event(kind,choice)
-        required='med' if choice=='help' else 'food' if choice in ('rest','share') else None
-        if required and not self.count(required):self.log(tr('adventure.0159'));return False
-        if required:self.consume(required)
-        self.road_event=None
-        if choice=='leave':self.emit(tr('adventure.0160'));return True
-        if kind=='wounded':self.gain_xp(40);self.money+=60;self.emit(tr('adventure.0161'))
-        elif kind=='wreck':
-            if self.rng.random()<.7:p.add_to(self.bag,p.parts(self.rng.randint(12,35)));self.emit(tr('adventure.0162'),color='#d2cb9b')
-            else:self.hurt_world(8,tr('adventure.0163'))
-        elif kind=='camp':
-            old=self.hp;self.hp=min(self.max_hp,self.hp+25);self.emit(f'+{self.hp-old} HP',color='#9cdda8');self.gain_xp(15)
-        elif kind=='mines':
-            if choice=='careful':self.gain_xp(15)
-            elif self.rng.random()<.5:self.hurt_world(self.rng.randint(6,14),tr('adventure.0164'))
-            else:p.add_to(self.loot,p.supply('med',2));self.emit(tr('adventure.0165'))
-        elif kind=='signal':
-            if not self.discover():self.gain_xp(20)
-        elif kind=='pilgrims':
-            if choice=='share':self.money+=70;self.emit(tr('adventure.0166'))
-            else:self.gain_xp(10)
-        return True
+        """Apply the catalog's final rewards and penalties."""
+        return event_runtime.resolve(self,choice)
 
     def stock(self,merchant):
         """Повертає або оновлює асортимент торговця."""
@@ -741,39 +659,6 @@ class Game(p.Game):
         if self.weight+p.item_weight(item)>self.capacity:return False
         self.consume(kind,amount);p.add_to(self.bag,item)
         self.log(tr('adventure.0229')+item['name']+' · '+r.RARITIES[tier][0]);return True
-
-    def resolve_extra_event(self,kind,choice):
-        """Застосовує наслідки додаткового типу дорожньої події."""
-        cost={'meal':('food',1),'open':('parts',10),'fix':('parts',5)}.get(choice)
-        if cost and self.count(cost[0])<cost[1]:self.log(tr('adventure.0230'));return False
-        if choice=='pay' and self.money<20:self.log(tr('adventure.0231'));return False
-        if cost:self.consume(*cost)
-        self.road_event=None
-        if choice=='leave':return True
-        if kind=='berries':
-            if self.rng.random()<.75:p.add_to(self.loot,p.supply('food',2));self.emit(tr('adventure.0232'))
-            else:self.hurt_world(4,tr('adventure.0233'))
-        elif kind=='snare':
-            self.gain_xp(25)
-            if self.rng.random()<.25:self.hurt_world(3,tr('adventure.0234'))
-        elif kind in ('hermit','terminal'):
-            self.reveal(self.x,self.y,6);self.gain_xp(30 if kind=='hermit' else 35);self.emit(tr('adventure.0235'))
-        elif kind=='safe':
-            amount=self.rng.randint(60,120);self.money+=amount;self.emit(tr('adventure.0236', v0=amount))
-        elif kind=='pharmacy':
-            if self.rng.random()<.8:p.add_to(self.loot,p.supply(self.rng.choice(['med','rad']),2));self.emit(tr('adventure.0237'))
-            else:self.hurt_world(5,tr('adventure.0238'))
-        elif kind=='courier':self.money+=45;self.gain_xp(20);self.emit(tr('adventure.0239'))
-        elif kind=='toll':
-            if choice=='pay':self.money-=20;self.gain_xp(15)
-            else:self.gain_xp(20);self.hurt_world(3,tr('adventure.0240'))
-        elif kind=='storm':
-            self.gain_xp(20 if choice=='shelter' else 30)
-            if choice=='rush':self.hurt_world(4,tr('adventure.0241'))
-        elif kind=='meteor':
-            if choice=='collect':p.add_to(self.bag,p.fragments(15));self.emit(tr('adventure.0242'));self.hurt_world(3,tr('adventure.0243'))
-            else:self.gain_xp(25)
-        return True
 
     def price(self,item,merchant,buying=True):
         """Обчислює ціну купівлі або продажу предмета."""

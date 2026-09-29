@@ -37,8 +37,13 @@ def npc_key(name):
 
 def photo(widget,key,size=48):
     if key and key.startswith('npc:'):key=npc_key(key[4:])
-    if key not in MANIFEST or not hasattr(widget,'tk'):return None
+    if not hasattr(widget,'tk'):return None
     root=widget._root()
+    library=getattr(root,'_editor_art_library',None)
+    if library is not None:
+        image=library.photo(widget,key,size)
+        if image is not None:return image
+    if key not in MANIFEST:return None
     if not hasattr(root,'_sprite_cache'):root._sprite_cache={};root._sprite_sheets={}
     size=max(16,min(192,int(size)))
     size=max(s for s in SIZES if s<=size)

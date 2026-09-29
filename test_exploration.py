@@ -65,7 +65,7 @@ class ExplorationTests(unittest.TestCase):
   self.assertGreaterEqual(len(counts),4);self.assertEqual(len(layouts),60)
  def test_twenty_events_resolve_once(self):
   """Перевіряє сценарій «twenty events resolve once» та очікувані результати."""
-  self.assertEqual(len(road_additions.EVENTS),40);self.assertEqual(len({e[0] for e in a.ROAD_EVENTS}),71)
+  self.assertEqual(len(road_additions.EVENTS),40);self.assertEqual(len({e[0] for e in a.ROAD_EVENTS}),len(__import__('event_catalog').EVENTS))
   for spec in road_additions.EVENTS:
    g=r.Game(2);g.bag.extend([p.parts(100),p.fragments(100),p.supply('food',10)]);g.money=1000
    self.assertTrue(g.make_road_event(spec[0]));self.assertTrue(g.resolve_event('act'))

@@ -1596,5 +1596,401 @@
     "sheet": "expansion029",
     "columns": 8,
     "inventory_sheet": "inventory_expansion029"
+  },
+  "art_custom_001": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/929e22a5df764dfa858e71a1b6091200/sprite",
+    "inventory_sheet": "custom/929e22a5df764dfa858e71a1b6091200/inventory",
+    "art_label": "weapon_plasm_flamer",
+    "art_category": "weapons",
+    "editor_source": "custom/929e22a5df764dfa858e71a1b6091200/source.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        20,
+        24,
+        322,
+        344
+      ]
+    }
+  },
+  "art_custom_002": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/ff61ed6e81c348af987480758c332e19/sprite",
+    "inventory_sheet": "custom/ff61ed6e81c348af987480758c332e19/inventory",
+    "art_label": "weapon_handgun_energy",
+    "art_category": "weapons",
+    "editor_source": "custom/929e22a5df764dfa858e71a1b6091200/source.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        12,
+        915,
+        319,
+        1209
+      ]
+    }
+  },
+  "weapon_custom_001": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/929e22a5df764dfa858e71a1b6091200/sprite",
+    "inventory_sheet": "custom/929e22a5df764dfa858e71a1b6091200/inventory",
+    "art_label": "weapon_plasm_flamer",
+    "art_category": "weapons",
+    "editor_source": "custom/929e22a5df764dfa858e71a1b6091200/source.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        20,
+        24,
+        322,
+        344
+      ]
+    }
+  },
+  "art_custom_003": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/722229e3b3ac44d3afad4df832cd8f26/sprite",
+    "inventory_sheet": "custom/722229e3b3ac44d3afad4df832cd8f26/inventory",
+    "art_label": "event_theme:tomb",
+    "art_category": "events",
+    "editor_source": "custom/024c438f8b2c451a8c5e54eb9770acc1/source.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        0,
+        631,
+        318,
+        924
+      ]
+    }
+  },
+  "art_custom_004": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/0c9ace9f760b40539f2fa9a1f69920f8/sprite",
+    "inventory_sheet": "custom/0c9ace9f760b40539f2fa9a1f69920f8/inventory",
+    "art_label": "event_theme:bonfire",
+    "art_category": "events",
+    "editor_source": "custom/024c438f8b2c451a8c5e54eb9770acc1/source.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        0,
+        0,
+        329,
+        314
+      ]
+    }
+  },
+  "art_custom_005": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/cd50527607374e23b66f242c886c8892/sprite",
+    "inventory_sheet": "custom/cd50527607374e23b66f242c886c8892/inventory",
+    "art_label": "event_theme:ruined_house",
+    "art_category": "events",
+    "editor_source": "custom/024c438f8b2c451a8c5e54eb9770acc1/source.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        326,
+        0,
+        624,
+        317
+      ]
+    }
+  },
+  "art_custom_006": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/453991a2c39c445a86bde99f435494fd/sprite",
+    "inventory_sheet": "custom/453991a2c39c445a86bde99f435494fd/inventory",
+    "art_label": "event_theme:old_bus",
+    "art_category": "events",
+    "editor_source": "custom/024c438f8b2c451a8c5e54eb9770acc1/source.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        321,
+        626,
+        638,
+        929
+      ]
+    }
+  },
+  "art_custom_007": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/1d44670ca0d444f380dffd44f815de80/sprite",
+    "inventory_sheet": "custom/1d44670ca0d444f380dffd44f815de80/inventory",
+    "art_label": "event_theme:thunderstorm",
+    "art_category": "events",
+    "editor_source": "custom/024c438f8b2c451a8c5e54eb9770acc1/source.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        646,
+        932,
+        968,
+        1243
+      ]
+    }
+  },
+  "art_custom_008": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/b136f3a2890f4970b014974509b886b7/sprite",
+    "inventory_sheet": "custom/b136f3a2890f4970b014974509b886b7/inventory",
+    "art_label": "event_theme:red_camp",
+    "art_category": "events",
+    "editor_source": "custom/024c438f8b2c451a8c5e54eb9770acc1/source.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        7,
+        929,
+        318,
+        1238
+      ]
+    }
+  },
+  "art_custom_009": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/024c438f8b2c451a8c5e54eb9770acc1/sprite",
+    "inventory_sheet": "custom/024c438f8b2c451a8c5e54eb9770acc1/inventory",
+    "art_label": "event_theme:hazard",
+    "art_category": "events",
+    "editor_source": "custom/024c438f8b2c451a8c5e54eb9770acc1/source.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        324,
+        934,
+        638,
+        1243
+      ]
+    }
+  },
+  "art_custom_010": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/cf6921bfc9784ce38f13aad04450e5d4/sprite",
+    "inventory_sheet": "custom/cf6921bfc9784ce38f13aad04450e5d4/inventory",
+    "art_label": "event_theme:helicopter",
+    "art_category": "events",
+    "editor_source": "custom/024c438f8b2c451a8c5e54eb9770acc1/source.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        640,
+        0,
+        973,
+        322
+      ]
+    }
+  },
+  "art_custom_011": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/1e42c413a9d747cf90a0cc52f0989359/sprite",
+    "inventory_sheet": "custom/1e42c413a9d747cf90a0cc52f0989359/inventory",
+    "art_label": "event_theme:rads",
+    "art_category": "events",
+    "editor_source": "custom/024c438f8b2c451a8c5e54eb9770acc1/source.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        976,
+        0,
+        1254,
+        330
+      ]
+    }
+  },
+  "art_custom_012": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/1826578f1bdd47039cdd0ba5d8d11692/sprite",
+    "inventory_sheet": "custom/1826578f1bdd47039cdd0ba5d8d11692/inventory",
+    "art_label": "event_theme:hideout",
+    "art_category": "events",
+    "editor_source": "custom/024c438f8b2c451a8c5e54eb9770acc1/source.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        955,
+        333,
+        1254,
+        612
+      ]
+    }
+  },
+  "art_custom_013": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/954bb34247ca417ea6f3fd98ed2e6a6b/sprite",
+    "inventory_sheet": "custom/954bb34247ca417ea6f3fd98ed2e6a6b/inventory",
+    "art_label": "event_theme:drop",
+    "art_category": "events",
+    "editor_source": "custom/024c438f8b2c451a8c5e54eb9770acc1/source.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        965,
+        615,
+        1254,
+        934
+      ]
+    }
+  },
+  "art_custom_014": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/5e637a623fe34661bbf81989213cb9b0/sprite",
+    "inventory_sheet": "custom/5e637a623fe34661bbf81989213cb9b0/inventory",
+    "art_label": "event_theme:footprint",
+    "art_category": "events",
+    "editor_source": "custom/024c438f8b2c451a8c5e54eb9770acc1/source.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        965,
+        937,
+        1254,
+        1235
+      ]
+    }
+  },
+  "art_custom_015": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/03c115b5e854454ba7a686ec85632ce8/sprite",
+    "inventory_sheet": "custom/03c115b5e854454ba7a686ec85632ce8/inventory",
+    "art_label": "event_theme:megaloot",
+    "art_category": "events",
+    "editor_source": "custom/024c438f8b2c451a8c5e54eb9770acc1/source.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        0,
+        325,
+        302,
+        623
+      ]
+    }
+  },
+  "art_custom_016": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/a9222f96c7ac4b5090bd3b8cbf675b6c/sprite",
+    "inventory_sheet": "custom/a9222f96c7ac4b5090bd3b8cbf675b6c/inventory",
+    "art_label": "event_theme:come_with_me",
+    "art_category": "events",
+    "editor_source": "custom/024c438f8b2c451a8c5e54eb9770acc1/source.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        651,
+        328,
+        952,
+        626
+      ]
+    }
+  },
+  "art_custom_017": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/3a4cf2680827d3bcec7333b964122ddf0b758514e383c0a3d42cc0699e1a8cd2/sprite",
+    "inventory_sheet": "custom/variants/3a4cf2680827d3bcec7333b964122ddf0b758514e383c0a3d42cc0699e1a8cd2/inventory",
+    "art_label": "event_theme:caged_monster",
+    "art_category": "events",
+    "editor_source": "custom/024c438f8b2c451a8c5e54eb9770acc1/source.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        318,
+        320,
+        643,
+        626
+      ]
+    }
   }
 }

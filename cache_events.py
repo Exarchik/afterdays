@@ -5,11 +5,9 @@ import adventure,settlements
 import progression as p
 from i18n import t as tr
 
-CACHE_TYPES={'medical':'ruin','armory':'road','workshop':'ruin','provisions':'forest','research':'waste'}
-for name,terrain in CACHE_TYPES.items():
-    key='locked_'+name
-    adventure.EXTRA_EVENTS[key]=(terrain,tr('cache_events.'+name+'.title'),tr('cache_events.'+name+'.story'),[('act',tr('cache_events.open')),('leave',tr('adventure.0135'))])
-    adventure.ROAD_EVENTS.append((key,*adventure.EXTRA_EVENTS[key][1:]))
+import event_catalog
+import event_runtime
+CACHE_TYPES={e['id'][7:]:e['terrain'] for e in event_catalog.EVENTS if e.get('legacy_group')=='cache'}
 
 class Game(settlements.Game):
     @classmethod
@@ -39,33 +37,20 @@ class Game(settlements.Game):
         return q if q and q['id']==ident and q['kind']=='cache' and q.get('cache_pos')==[self.x,self.y] else None
 
     def cache_contents(self,theme,level):
-        """Генерує вміст сховку за його темою та рівнем."""
-        amount=1+min(3,(level-1)//4);ammo=6+2*level
-        if theme=='medical':items=[p.supply('med',amount+1),p.supply('rad',amount)]
-        elif theme=='armory':items=[p.ammunition(self.rng.choice(list(p.AMMO)),ammo*2),p.supply('repairkit')]
-        elif theme=='workshop':items=[p.parts(5+level*3),p.fragments(5+level*2),p.supply('repairkit')]
-        elif theme=='provisions':items=[p.supply('food',amount+2),p.supply('med',amount),p.ammunition(self.rng.choice(list(p.AMMO)),ammo)]
-        else:items=[p.supply('rad',amount),p.ammunition('energy',ammo),p.fragments(5+level*2)]
-        if self.rng.random()<.25:
-            gear=self.reward_item(cap=min(3,1+level//4),level=self.rng.randint(max(1,level-2),level))
-            if 'durability' in gear:gear['durability']=float(self.rng.randint(30,90))
-            items.append(gear)
-        return items
+        """Compatibility entry point for the five original cache themes."""
+        return event_runtime.cache_contents(self,event_catalog.BY_ID['locked_'+theme]['cache'],level)
 
-    def resolve_event(self,choice):
-        """Застосовує вибраний результат дорожньої події."""
-        event=self.road_event
-        if not event or event['kind'] not in {'locked_'+k for k in CACHE_TYPES}:return super().resolve_event(choice)
-        if choice not in ('act','leave'):return False
-        if choice=='leave':self.road_event=None;return True
-        self.road_event=None
+    def begin_event_cache(self,spec):
+        """Persist a snapshot of rolled loot; repeated attempts cannot reroll it."""
         cache=self.road_cache()
         if cache is None:
-            theme=event['kind'][7:];level=self.region_level
-            cache=dict(id=r.uid(),kind='road_cache',title=event['title'],theme=theme,pos=[self.x,self.y],level=level,
-                       lock_target=self.rng.randint(15,165),opened=False,contents=self.cache_contents(theme,level))
+            level=self.region_level
+            cache=dict(id=r.uid(),kind='road_cache',title=spec['title'],theme=spec['id'].removeprefix('locked_'),pos=[self.x,self.y],level=level,
+                       lock_target=self.rng.randint(15,165),opened=False,
+                       contents=event_runtime.cache_contents(self,spec['cache'],level))
             self.reputation_state.setdefault('road_caches',[]).append(cache)
-        self._lock_request=cache['id'];self.log(tr('cache_events.found'));return True
+        self._lock_request=cache['id'];self.log(tr('cache_events.found'))
+        return True
 
     def search(self):
         """Виконує пошук на місцевості та перевіряє квестові цілі."""

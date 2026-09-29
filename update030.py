@@ -70,7 +70,7 @@ class Game(restoration.Game):
     def resolve_event(self,choice):
         """Застосовує вибраний результат дорожньої події."""
         previous=getattr(self,'_event_xp_context',False)
-        self._event_xp_context=bool(self.road_event)
+        self._event_xp_context=False  # Catalog XP is already the final balanced amount.
         try:return super().resolve_event(choice)
         finally:self._event_xp_context=previous
 

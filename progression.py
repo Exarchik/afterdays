@@ -5,6 +5,7 @@ import content
 import copy
 import balance
 import module_rules as mr
+import equipment_rules
 import json
 import math
 import os
@@ -45,16 +46,7 @@ def equipment(name=None, tier=0, rng=None, level=1):
         pool=[n for n in eligible if kind is None or r.GEAR[n][0] == kind]
         name=rng.choice(pool or eligible)
     item=_base_equipment(name,tier,rng)
-    item.update(level=level,durability=100.0)
-    if item['kind']=='weapon':
-        base=r.GEAR[name][1]
-        item['stats']['damage']=round(base*(1+.13*(level-1)))+tier*2
-        item['stats']['attack']=balance.attack_for(name,level)
-        item['ammo_type']=AMMO_BY_WEAPON.get(name,'rifle')
-    else:
-        item['stats']['defense']=r.GEAR[name][3]+(level-1)+tier
-    base=70+r.GEAR[name][5]*15
-    item['value']=round(base*level**1.3*[1,1.8,3.5,7,14][tier])
+    item.update(equipment_rules.values(content.EQUIPMENT[name],tier,level))
     return item
 
 
