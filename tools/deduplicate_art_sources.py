@@ -1,7 +1,7 @@
 """Share byte-identical originals, preserving current catalogs and JSON backups.
 
 Run with the editor closed. Defaults to a dry run; --apply performs the migration.
-Rendered sprites and unique originals are never removed.
+Originals are collected in assets/custom/sources; rendered sprites stay in place.
 """
 import argparse
 import hashlib
@@ -19,12 +19,17 @@ def compact(root, apply=False):
             raise ValueError('Unsafe source path: '+str(path))
         blob=path.read_bytes();digest=hashlib.sha256(blob).hexdigest()
         groups.setdefault(digest,[]).append((path,blob))
-    duplicates={};saved=0
-    for group in groups.values():
-        canonical,blob=group[0]
-        for path,other in group[1:]:
+    duplicates={};saved=0;duplicate_count=0;created={}
+    for digest,group in groups.items():
+        canonical=custom/'sources'/f'{digest}.png';blob=group[0][1]
+        if canonical.is_symlink() or not canonical.resolve().is_relative_to(custom):
+            raise ValueError('Unsafe source path: '+str(canonical))
+        if canonical.exists() and canonical.read_bytes()!=blob:raise ValueError('Source hash collision')
+        if not canonical.exists():created[canonical]=blob
+        duplicate_count+=len(group)-1;saved+=(len(group)-1)*len(blob)
+        for path,other in group:
             if other!=blob:raise ValueError('Source hash collision')
-            duplicates[path]=canonical;saved+=len(other)
+            if path!=canonical:duplicates[path]=canonical
     replacements={old.relative_to(assets).as_posix():new.relative_to(assets).as_posix() for old,new in duplicates.items()}
     changes={}
     # Include .json.bak: restoring the previous catalog must still work.
@@ -38,10 +43,13 @@ def compact(root, apply=False):
         if after!=text:
             json.loads(after)
             changes[path]=(before,after.encode('utf-8'))
-    report=dict(duplicate_sources=len(duplicates),bytes_saved=saved,catalogs_changed=len(changes),applied=apply)
+    report=dict(duplicate_sources=duplicate_count,sources_relocated=len(duplicates),bytes_saved=saved,catalogs_changed=len(changes),applied=apply)
     if not apply:return report
     staged={};replaced=[]
     try:
+        for path,blob in created.items():
+            path.parent.mkdir(parents=True,exist_ok=True)
+            with path.open('xb') as stream:stream.write(blob)
         for path,(before,after) in changes.items():
             fd,name=tempfile.mkstemp(dir=path.parent,suffix='.tmp');staged[path]=Path(name)
             with os.fdopen(fd,'wb') as stream:stream.write(after)

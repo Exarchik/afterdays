@@ -15,7 +15,7 @@
   "armor_bastion.description": "",
   "helmet_seeker.name": "Шолом «Шукач»",
   "helmet_seeker.description": "",
-  "weapon_raven_revolver.name": "Револьвер «Ворон»",
+  "weapon_raven_revolver.name": "Револьвер «Крук»",
   "weapon_raven_revolver.description": "",
   "weapon_hornet_smg.name": "ПП «Шершень»",
   "weapon_hornet_smg.description": "",
@@ -178,5 +178,9 @@
   "module_lead_fibers.name": "Свинцеві волокна",
   "module_lead_fibers.description": "Підвищує захист броні або шолома. Маса модуля — 1,5 кг.",
   "weapon_custom_001.name": "Пістолет «Firestarter»",
-  "weapon_custom_001.description": "Незабути нікому спопіляючий погляд цієї зброї"
+  "weapon_custom_001.description": "Незабути нікому спопіляючий погляд цієї зброї",
+  "weapon_custom_002.name": "Автомат «Випалювач»",
+  "weapon_custom_002.description": "",
+  "weapon_custom_003.name": "Револьвер «Жартівник»",
+  "weapon_custom_003.description": ""
 }

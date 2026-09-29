@@ -887,7 +887,7 @@
       "weight": 1.0,
       "title": "Голос у рації",
       "description": "Оператор просить полагодити передавач.",
-      "art": "event_theme:signal",
+      "art": "action_radio",
       "choices": [
         {
           "id": "act",
@@ -3262,9 +3262,9 @@
       "terrain": "waste",
       "enabled": true,
       "weight": 1.0,
-      "title": "Пилова стіна",
-      "description": "Піщана буря насувається на ваш маршрут.",
-      "art": "event_theme:storm",
+      "title": "Буря насувається",
+      "description": "Буря насувається на ваш маршрут.",
+      "art": "art_custom_007",
       "choices": [
         {
           "id": "shelter",
@@ -3491,7 +3491,7 @@
       "weight": 1.0,
       "title": "Опломбований медичний контейнер",
       "description": "Під уламками санітарного фургона лежить замкнений контейнер із медикаментами.",
-      "art": "event_theme:pharmacy",
+      "art": "art_custom_015",
       "choices": [
         {
           "id": "act",

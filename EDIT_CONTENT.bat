@@ -1,14 +1,14 @@
 @echo off
 setlocal
 cd /d "%~dp0"
-where py >nul 2>nul
-if not errorlevel 1 (
-    py -3 event_editor.py
-    goto done
-)
 where python >nul 2>nul
 if not errorlevel 1 (
     python event_editor.py
+    goto done
+)
+where py >nul 2>nul
+if not errorlevel 1 (
+    py -3 event_editor.py
     goto done
 )
 if exist "%USERPROFILE%\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" (

@@ -4,6 +4,7 @@ import io
 from pathlib import Path
 import re
 import hashlib
+import sys
 
 SIZES=(16,24,32,48,64,96,144,192)
 WIDTHS=(48,56,64,80,96,128)
@@ -15,7 +16,13 @@ def pillow():
     try:
         from PIL import Image,ImageOps
     except ImportError as exc:
-        raise ValueError('Для імпорту й обробки артів потрібен Pillow. Встановіть його для Python редактора: python -m pip install Pillow') from exc
+        raise ValueError(
+            'Не вдалося завантажити Pillow для імпорту й обробки артів.\n'
+            f'Python редактора: {sys.executable}\n'
+            f'Встановіть Pillow для цього Python (команда для PowerShell):\n'
+            f'& "{sys.executable}" -m pip install Pillow\n\n'
+            f'Причина: {exc}'
+        ) from exc
     return Image,ImageOps
 
 def decode(source):
@@ -106,9 +113,6 @@ class Library:
         original=encode(source)
         source_path='custom/sources/'+hashlib.sha256(original).hexdigest()+'.png'
         custom=self.store.root/'assets/custom'
-        for candidate in sorted(custom.glob('*/source.png')):
-            if candidate.stat().st_size==len(original) and candidate.read_bytes()==original:
-                source_path=candidate.relative_to(self.store.root/'assets').as_posix();break
         rendered={f'sprite_{size}.png':encode(tile(source,settings,size)) for size in SIZES}
         rendered.update({f'inventory_{width}.png':encode(inventory(source,settings,width)) for width in WIDTHS})
         digest=hashlib.sha256()

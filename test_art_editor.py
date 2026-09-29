@@ -62,7 +62,10 @@ class ArtTests(unittest.TestCase):
                 data=json.loads(p.read_text(encoding='utf-8'))
                 entry=data if p==catalog else data['art_test']
                 self.assertEqual((root/'assets'/entry['editor_source']).read_bytes(),art.encode(fixture()))
-            self.assertTrue(unique.exists());self.assertEqual(compact(root)['duplicate_sources'],0)
+            self.assertFalse(unique.exists())
+            self.assertIn(art.encode(Image.new('RGBA',(12,12),'blue')),
+                          [p.read_bytes() for p in (root/'assets/custom/sources').glob('*.png')])
+            self.assertEqual(compact(root)['sources_relocated'],0)
             loaded=Store(root);lib=art.Library(loaded)
             lib.stage('art_test','Edited','events',fixture(),art.DEFAULTS)
             self.assertFalse(loaded.pending_assets)
