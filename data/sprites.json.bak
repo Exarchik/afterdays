@@ -2036,5 +2036,643 @@
         323
       ]
     }
+  },
+  "weapon_custom_003": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/76df830102442cb0959bbd48de5e0d751d68034e8994e5decb82c0ed9c453369/sprite",
+    "inventory_sheet": "custom/variants/76df830102442cb0959bbd48de5e0d751d68034e8994e5decb82c0ed9c453369/inventory",
+    "art_label": "weapon_happy_man",
+    "art_category": "weapons",
+    "editor_source": "custom/sources/bf9a156c41b30c1de5b8ed3690e32db11a7198947d78e44aa7ec407cc890a4aa.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        932,
+        11,
+        1261,
+        323
+      ]
+    }
+  },
+  "art_custom_020": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/bc9d8251750262c2bc007e9b223e350fe462edc29e4d9e896389627e4c076a53/sprite",
+    "inventory_sheet": "custom/variants/bc9d8251750262c2bc007e9b223e350fe462edc29e4d9e896389627e4c076a53/inventory",
+    "art_label": "event_theme:hungry_pilgrims",
+    "art_category": "events",
+    "editor_source": "custom/sources/793885c5f11d21c45fe4084a563450335928001f80b6fbc2468aebaa9775f75c.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        52,
+        11,
+        447,
+        430
+      ]
+    }
+  },
+  "art_custom_021": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/eb53b515d04402f849de5a887a433dae4b2be025683df0bde2c4999eab42ca31/sprite",
+    "inventory_sheet": "custom/variants/eb53b515d04402f849de5a887a433dae4b2be025683df0bde2c4999eab42ca31/inventory",
+    "art_label": "event_theme:caged_beast",
+    "art_category": "events",
+    "editor_source": "custom/sources/793885c5f11d21c45fe4084a563450335928001f80b6fbc2468aebaa9775f75c.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        439,
+        11,
+        853,
+        411
+      ]
+    }
+  },
+  "art_custom_022": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/7646e8cda66334884958a15e6044dabe320d671fac81679cd16ba1df3d5d7f70/sprite",
+    "inventory_sheet": "custom/variants/7646e8cda66334884958a15e6044dabe320d671fac81679cd16ba1df3d5d7f70/inventory",
+    "art_label": "event_theme:doggy",
+    "art_category": "events",
+    "editor_source": "custom/sources/793885c5f11d21c45fe4084a563450335928001f80b6fbc2468aebaa9775f75c.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        861,
+        8,
+        1218,
+        432
+      ]
+    }
+  },
+  "art_custom_023": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/0e138a4b9fa62d1d0b0cafa40e03389343a6dd6151265e14f3ff448dac81dcdf/sprite",
+    "inventory_sheet": "custom/variants/0e138a4b9fa62d1d0b0cafa40e03389343a6dd6151265e14f3ff448dac81dcdf/inventory",
+    "art_label": "event_theme:old_hunter",
+    "art_category": "events",
+    "editor_source": "custom/sources/793885c5f11d21c45fe4084a563450335928001f80b6fbc2468aebaa9775f75c.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        12,
+        419,
+        444,
+        822
+      ]
+    }
+  },
+  "art_custom_024": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/6d3dedc7436d3b261539ab97a28fd6f9c0a1d06239cf9bba6eb0a0bdc90ba5ea/sprite",
+    "inventory_sheet": "custom/variants/6d3dedc7436d3b261539ab97a28fd6f9c0a1d06239cf9bba6eb0a0bdc90ba5ea/inventory",
+    "art_label": "event_theme:scavenger",
+    "art_category": "events",
+    "editor_source": "custom/sources/793885c5f11d21c45fe4084a563450335928001f80b6fbc2468aebaa9775f75c.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        444,
+        432,
+        807,
+        806
+      ]
+    }
+  },
+  "art_custom_025": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/fe33d416feffe3013c12a6c413e338a8b35d93ea104eda3fbaa314e87e1393c4/sprite",
+    "inventory_sheet": "custom/variants/fe33d416feffe3013c12a6c413e338a8b35d93ea104eda3fbaa314e87e1393c4/inventory",
+    "art_label": "event_theme:unknown_signal",
+    "art_category": "events",
+    "editor_source": "custom/sources/793885c5f11d21c45fe4084a563450335928001f80b6fbc2468aebaa9775f75c.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        820,
+        422,
+        1250,
+        824
+      ]
+    }
+  },
+  "art_custom_026": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/998f901a0f87243325385fc2a372633d820ff1e97f71d261f9580d7f458fd42f/sprite",
+    "inventory_sheet": "custom/variants/998f901a0f87243325385fc2a372633d820ff1e97f71d261f9580d7f458fd42f/inventory",
+    "art_label": "event_theme:cordon_mark",
+    "art_category": "events",
+    "editor_source": "custom/sources/793885c5f11d21c45fe4084a563450335928001f80b6fbc2468aebaa9775f75c.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        17,
+        824,
+        409,
+        1241
+      ]
+    }
+  },
+  "art_custom_027": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/6d437f0f75e8bb55f80c177fd3fec3d3933bbc0492cd8d24e0681ceb492c2116/sprite",
+    "inventory_sheet": "custom/variants/6d437f0f75e8bb55f80c177fd3fec3d3933bbc0492cd8d24e0681ceb492c2116/inventory",
+    "art_label": "event_theme:kites",
+    "art_category": "events",
+    "editor_source": "custom/sources/793885c5f11d21c45fe4084a563450335928001f80b6fbc2468aebaa9775f75c.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        409,
+        816,
+        853,
+        1238
+      ]
+    }
+  },
+  "art_custom_028": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/69be4291c7c0dc39565db2f0fa4bf66fb46b8e4b3ce64112e053c3a88e6473b4/sprite",
+    "inventory_sheet": "custom/variants/69be4291c7c0dc39565db2f0fa4bf66fb46b8e4b3ce64112e053c3a88e6473b4/inventory",
+    "art_label": "event_theme:papers",
+    "art_category": "events",
+    "editor_source": "custom/sources/793885c5f11d21c45fe4084a563450335928001f80b6fbc2468aebaa9775f75c.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        847,
+        827,
+        1254,
+        1224
+      ]
+    }
+  },
+  "art_custom_029": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/8505983df21175d1dfb44e4c5999a5660d3b5ba092ceaeb683ee7028da08ed01/sprite",
+    "inventory_sheet": "custom/variants/8505983df21175d1dfb44e4c5999a5660d3b5ba092ceaeb683ee7028da08ed01/inventory",
+    "art_label": "event_theme:magnetic_data",
+    "art_category": "events",
+    "editor_source": "custom/sources/9e52af325322cf2f292139b146432a7bd08b3a5ee12e9b8858e52ee8bb705874.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        1,
+        24,
+        434,
+        435
+      ]
+    }
+  },
+  "art_custom_030": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/1ebdbb244c9ad64c625bc13fc2f175e4bde40001937bb1ba6d5276b418f7a9c9/sprite",
+    "inventory_sheet": "custom/variants/1ebdbb244c9ad64c625bc13fc2f175e4bde40001937bb1ba6d5276b418f7a9c9/inventory",
+    "art_label": "event_theme:notebook",
+    "art_category": "events",
+    "editor_source": "custom/sources/9e52af325322cf2f292139b146432a7bd08b3a5ee12e9b8858e52ee8bb705874.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        426,
+        0,
+        842,
+        440
+      ]
+    }
+  },
+  "art_custom_031": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/2c10fa48f743e7352036068f9194fba383c4547f08326b70372672e5c9c2d1b3/sprite",
+    "inventory_sheet": "custom/variants/2c10fa48f743e7352036068f9194fba383c4547f08326b70372672e5c9c2d1b3/inventory",
+    "art_label": "event_theme:yellow_ribbon",
+    "art_category": "events",
+    "editor_source": "custom/sources/9e52af325322cf2f292139b146432a7bd08b3a5ee12e9b8858e52ee8bb705874.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        834,
+        0,
+        1254,
+        430
+      ]
+    }
+  },
+  "art_custom_032": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/c5a316e198b68ff9064e9789fd2d24a1a94075d797dc531d678c6c0435d54c5b/sprite",
+    "inventory_sheet": "custom/variants/c5a316e198b68ff9064e9789fd2d24a1a94075d797dc531d678c6c0435d54c5b/inventory",
+    "art_label": "event_theme:stash_rock",
+    "art_category": "events",
+    "editor_source": "custom/sources/9e52af325322cf2f292139b146432a7bd08b3a5ee12e9b8858e52ee8bb705874.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        0,
+        430,
+        426,
+        827
+      ]
+    }
+  },
+  "art_custom_033": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/f0035ea46c5cd45111e466117b93552d772fb06fc52f5207b30a7807d3de3d82/sprite",
+    "inventory_sheet": "custom/variants/f0035ea46c5cd45111e466117b93552d772fb06fc52f5207b30a7807d3de3d82/inventory",
+    "art_label": "event_theme:food_stash",
+    "art_category": "events",
+    "editor_source": "custom/sources/9e52af325322cf2f292139b146432a7bd08b3a5ee12e9b8858e52ee8bb705874.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        431,
+        448,
+        828,
+        787
+      ]
+    }
+  },
+  "art_custom_034": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/6b64a63f6d343cb33e5dcbf7d67c0a7c5b53f51497210d91a9b94fcaab8d68ea/sprite",
+    "inventory_sheet": "custom/variants/6b64a63f6d343cb33e5dcbf7d67c0a7c5b53f51497210d91a9b94fcaab8d68ea/inventory",
+    "art_label": "event_theme:caravan_gift",
+    "art_category": "events",
+    "editor_source": "custom/sources/9e52af325322cf2f292139b146432a7bd08b3a5ee12e9b8858e52ee8bb705874.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        836,
+        451,
+        1254,
+        827
+      ]
+    }
+  },
+  "art_custom_035": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/1d4aa9176ca1488286c3da143e6a367dbc0393e85618c00cd1976f63ba6fa036/sprite",
+    "inventory_sheet": "custom/variants/1d4aa9176ca1488286c3da143e6a367dbc0393e85618c00cd1976f63ba6fa036/inventory",
+    "art_label": "event_theme:mushrooms",
+    "art_category": "events",
+    "editor_source": "custom/sources/9e52af325322cf2f292139b146432a7bd08b3a5ee12e9b8858e52ee8bb705874.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        1,
+        838,
+        428,
+        1233
+      ]
+    }
+  },
+  "art_custom_036": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/41decbd17de988ae0863db9946d0d8282ea101e0b1b6e97dee28548bd5dbb206/sprite",
+    "inventory_sheet": "custom/variants/41decbd17de988ae0863db9946d0d8282ea101e0b1b6e97dee28548bd5dbb206/inventory",
+    "art_label": "event_theme:wild_honey",
+    "art_category": "events",
+    "editor_source": "custom/sources/9e52af325322cf2f292139b146432a7bd08b3a5ee12e9b8858e52ee8bb705874.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        426,
+        795,
+        820,
+        1233
+      ]
+    }
+  },
+  "art_custom_037": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/420c804d63827c6b134116884a0e54a32b34a73ed35e85179cb04eb43322f86e/sprite",
+    "inventory_sheet": "custom/variants/420c804d63827c6b134116884a0e54a32b34a73ed35e85179cb04eb43322f86e/inventory",
+    "art_label": "event_theme:bush_stash",
+    "art_category": "events",
+    "editor_source": "custom/sources/9e52af325322cf2f292139b146432a7bd08b3a5ee12e9b8858e52ee8bb705874.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        831,
+        819,
+        1254,
+        1238
+      ]
+    }
+  },
+  "art_custom_038": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/da91c8edac1e402236d7e10394dc1399dd0e23377127f93f2321b81eb4b3150a/sprite",
+    "inventory_sheet": "custom/variants/da91c8edac1e402236d7e10394dc1399dd0e23377127f93f2321b81eb4b3150a/inventory",
+    "art_label": "event_theme:green_hill",
+    "art_category": "other",
+    "editor_source": "custom/sources/cab0c3e021b02e0e4d2a94f8bc4f7b377d6d6b52f9725815190331fb16061ff2.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        34,
+        169,
+        420,
+        620
+      ]
+    }
+  },
+  "art_custom_039": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/389e5498611c196c7cb2012ab57b1baa98a2bb8b47988312f248c40c253bbc01/sprite",
+    "inventory_sheet": "custom/variants/389e5498611c196c7cb2012ab57b1baa98a2bb8b47988312f248c40c253bbc01/inventory",
+    "art_label": "event_theme:trader_in_trouble",
+    "art_category": "other",
+    "editor_source": "custom/sources/cab0c3e021b02e0e4d2a94f8bc4f7b377d6d6b52f9725815190331fb16061ff2.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        434,
+        142,
+        863,
+        647
+      ]
+    }
+  },
+  "art_custom_040": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/bec9f4fd1f187428beb77e3b969a8307b7d562b9e9041e0a769daf7404aabfa5/sprite",
+    "inventory_sheet": "custom/variants/bec9f4fd1f187428beb77e3b969a8307b7d562b9e9041e0a769daf7404aabfa5/inventory",
+    "art_label": "event_theme:under_ladder",
+    "art_category": "other",
+    "editor_source": "custom/sources/cab0c3e021b02e0e4d2a94f8bc4f7b377d6d6b52f9725815190331fb16061ff2.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        871,
+        107,
+        1237,
+        663
+      ]
+    }
+  },
+  "art_custom_041": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/b471825a917dfb278f085a11a116021f884316158a079b63f595077f26fd7826/sprite",
+    "inventory_sheet": "custom/variants/b471825a917dfb278f085a11a116021f884316158a079b63f595077f26fd7826/inventory",
+    "art_label": "event_theme:apthek",
+    "art_category": "other",
+    "editor_source": "custom/sources/cab0c3e021b02e0e4d2a94f8bc4f7b377d6d6b52f9725815190331fb16061ff2.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        23,
+        655,
+        705,
+        1195
+      ]
+    }
+  },
+  "art_custom_042": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/6a4d3bd249079c9fa38169d0277a4ed7995aaa9adcb1427443aa303536170efd/sprite",
+    "inventory_sheet": "custom/variants/6a4d3bd249079c9fa38169d0277a4ed7995aaa9adcb1427443aa303536170efd/inventory",
+    "art_label": "event_theme:radio_sign",
+    "art_category": "other",
+    "editor_source": "custom/sources/cab0c3e021b02e0e4d2a94f8bc4f7b377d6d6b52f9725815190331fb16061ff2.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        702,
+        682,
+        1220,
+        1187
+      ]
+    }
+  },
+  "art_custom_043": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/83c5de6582140d2bf78093311304bd7a7126b6ccc5050468517ef93a0b1bc005/sprite",
+    "inventory_sheet": "custom/variants/83c5de6582140d2bf78093311304bd7a7126b6ccc5050468517ef93a0b1bc005/inventory",
+    "art_label": "event_theme:water_off",
+    "art_category": "other",
+    "editor_source": "custom/sources/1a02a2bf0189ca6d7d6dffd7ad04fc59a9315288544585ee565d504c21382a5c.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        0,
+        11,
+        401,
+        607
+      ]
+    }
+  },
+  "art_custom_044": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/913325a13fbd552a96d93d522dbe33f71b9c4ef21d2c29f56af0ccf90627bc35/sprite",
+    "inventory_sheet": "custom/variants/913325a13fbd552a96d93d522dbe33f71b9c4ef21d2c29f56af0ccf90627bc35/inventory",
+    "art_label": "event_theme:stash_under_tree",
+    "art_category": "other",
+    "editor_source": "custom/sources/1a02a2bf0189ca6d7d6dffd7ad04fc59a9315288544585ee565d504c21382a5c.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        399,
+        56,
+        836,
+        639
+      ]
+    }
+  },
+  "art_custom_045": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/6a66706ba5b5b390d37374b1a55b6226add82685b9b1de0a53aae86f9c11b7b0/sprite",
+    "inventory_sheet": "custom/variants/6a66706ba5b5b390d37374b1a55b6226add82685b9b1de0a53aae86f9c11b7b0/inventory",
+    "art_label": "event_theme:broken_bridge",
+    "art_category": "other",
+    "editor_source": "custom/sources/1a02a2bf0189ca6d7d6dffd7ad04fc59a9315288544585ee565d504c21382a5c.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        839,
+        86,
+        1254,
+        642
+      ]
+    }
+  },
+  "art_custom_046": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/e96ab67655c927f88916791ff215f7ed366f43fdaf401c538b8616a8df1342c2/sprite",
+    "inventory_sheet": "custom/variants/e96ab67655c927f88916791ff215f7ed366f43fdaf401c538b8616a8df1342c2/inventory",
+    "art_label": "event_theme:wires",
+    "art_category": "other",
+    "editor_source": "custom/sources/1a02a2bf0189ca6d7d6dffd7ad04fc59a9315288544585ee565d504c21382a5c.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        0,
+        623,
+        616,
+        1222
+      ]
+    }
+  },
+  "art_custom_047": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/eba6c9f7528bd6a44ee41fe483054121fdc01d5ef4f56f893609327c7397a391/sprite",
+    "inventory_sheet": "custom/variants/eba6c9f7528bd6a44ee41fe483054121fdc01d5ef4f56f893609327c7397a391/inventory",
+    "art_label": "event_theme:dune_wires",
+    "art_category": "other",
+    "editor_source": "custom/sources/1a02a2bf0189ca6d7d6dffd7ad04fc59a9315288544585ee565d504c21382a5c.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        619,
+        709,
+        1254,
+        1227
+      ]
+    }
   }
 }

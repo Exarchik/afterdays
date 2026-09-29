@@ -58,7 +58,7 @@
       "weight": 1.0,
       "title": "Голодні пілігрими",
       "description": "Двоє мандрівників пропонують оплатити вашу їжу.",
-      "art": "event_theme:pilgrims",
+      "art": "art_custom_020",
       "choices": [
         {
           "id": "share",
@@ -203,7 +203,7 @@
       "weight": 1.0,
       "title": "Звір у пастці",
       "description": "Невеликий звір б’ється в старому дроті.",
-      "art": "art_custom_017",
+      "art": "art_custom_021",
       "choices": [
         {
           "id": "free",
@@ -297,7 +297,7 @@
       "weight": 1.0,
       "title": "Собака з жетоном",
       "description": "Пес несе порожню сумку й просить їжі.",
-      "art": "event_theme:snare",
+      "art": "art_custom_022",
       "choices": [
         {
           "id": "act",
@@ -346,7 +346,7 @@
       "weight": 1.0,
       "title": "Старий мисливець",
       "description": "Мисливець просить допомогти розібрати зіпсовану пастку.",
-      "art": "npc_locksmith",
+      "art": "art_custom_023",
       "choices": [
         {
           "id": "act",
@@ -682,7 +682,7 @@
       "weight": 1.0,
       "title": "Збирач брухту",
       "description": "Мандрівник шукає запчастини для печі.",
-      "art": "event_theme:pilgrims",
+      "art": "art_custom_024",
       "choices": [
         {
           "id": "act",
@@ -847,7 +847,7 @@
       "weight": 1.0,
       "title": "Сигнал невідомої станції",
       "description": "Радіоприймач упіймав координати забутого об’єкта.",
-      "art": "event_theme:signal",
+      "art": "art_custom_025",
       "choices": [
         {
           "id": "follow",
@@ -936,7 +936,7 @@
       "weight": 1.0,
       "title": "Межовий стовп",
       "description": "Під фарбою збереглася схема місцевості.",
-      "art": "event_theme:terminal",
+      "art": "art_custom_026",
       "choices": [
         {
           "id": "act",
@@ -980,7 +980,7 @@
       "weight": 1.0,
       "title": "Повітряні сигнали",
       "description": "Над дорогою висять старі сигнальні змії. На мотузці зав’язана записка з координатами.",
-      "art": "event_theme:signal",
+      "art": "art_custom_027",
       "choices": [
         {
           "id": "act",
@@ -1121,7 +1121,7 @@
       "weight": 1.0,
       "title": "Міський архів",
       "description": "У захищеній шафі лежать записи про евакуацію та старі маршрути.",
-      "art": "event_theme:terminal",
+      "art": "art_custom_028",
       "choices": [
         {
           "id": "act",
@@ -1206,7 +1206,7 @@
       "weight": 1.0,
       "title": "Термінал архіву",
       "description": "На екрані блимає карта довоєнного району.",
-      "art": "event_theme:terminal",
+      "art": "art_custom_030",
       "choices": [
         {
           "id": "read",
@@ -1294,7 +1294,7 @@
       "weight": 1.0,
       "title": "Жовті прапорці",
       "description": "Хтось позначив небезпечну ділянку й залишив інструкцію.",
-      "art": "event_theme:mines",
+      "art": "art_custom_031",
       "choices": [
         {
           "id": "act",
@@ -1338,7 +1338,7 @@
       "weight": 1.0,
       "title": "Запаси під каменем",
       "description": "У схованці лежать три консерви.",
-      "art": "event_theme:provisions",
+      "art": "art_custom_032",
       "choices": [
         {
           "id": "leave",
@@ -1367,7 +1367,7 @@
       "weight": 1.0,
       "title": "Захищений контейнер",
       "description": "Знайдено дві пігулки від радіації.",
-      "art": "event_theme:safe",
+      "art": "art_custom_033",
       "choices": [
         {
           "id": "leave",
@@ -1425,7 +1425,7 @@
       "weight": 1.0,
       "title": "Подарунок каравану",
       "description": "Караванники залишили вам 60 кредитів.",
-      "art": "event_theme:pilgrims",
+      "art": "art_custom_034",
       "choices": [
         {
           "id": "leave",
@@ -1454,7 +1454,7 @@
       "weight": 1.0,
       "title": "Грибна грядка",
       "description": "У затінку хтось вирощував їстівні гриби. Частина врожаю вже потемніла.",
-      "art": "event_theme:provisions",
+      "art": "art_custom_035",
       "choices": [
         {
           "id": "act",
@@ -1504,7 +1504,7 @@
       "weight": 1.0,
       "title": "Дикий вулик",
       "description": "Комахи оселились у коробці з консервами.",
-      "art": "event_theme:provisions",
+      "art": "art_custom_036",
       "choices": [
         {
           "id": "act",
@@ -1553,7 +1553,7 @@
       "weight": 1.0,
       "title": "Схованка в чагарнику",
       "description": "Між колючими отруйними кущами видніється ящик консервів.",
-      "art": "event_theme:provisions",
+      "art": "art_custom_037",
       "choices": [
         {
           "id": "gather",
@@ -1602,7 +1602,7 @@
       "weight": 1.0,
       "title": "Тиха галявина",
       "description": "Тут немає слідів мутантів. Можна перепочити та обробити подряпини.",
-      "art": "event_theme:camp",
+      "art": "art_custom_038",
       "choices": [
         {
           "id": "act",
@@ -1682,8 +1682,8 @@
       "enabled": true,
       "weight": 1.0,
       "title": "Зламаний візок",
-      "description": "Торговець застряг із поламаною віссю та обіцяє оплатити допомогу.",
-      "art": "quest:supplies",
+      "description": "Торговець застряг із поламаним візком та обіцяє оплатити допомогу.",
+      "art": "art_custom_039",
       "choices": [
         {
           "id": "act",
@@ -1729,7 +1729,7 @@
       "weight": 1.0,
       "title": "Аварійний ліхтар",
       "description": "Під сходами мигає акумулятор.",
-      "art": "event_theme:meteor",
+      "art": "art_custom_040",
       "choices": [
         {
           "id": "act",
@@ -1870,7 +1870,7 @@
       "weight": 1.0,
       "title": "Рештки аптеки",
       "description": "У шафах можуть бути ліки, але стеля ненадійна.",
-      "art": "event_theme:pharmacy",
+      "art": "art_custom_041",
       "choices": [
         {
           "id": "search",
@@ -1973,7 +1973,7 @@
       "weight": 1.0,
       "title": "Свіжі позначки",
       "description": "Хтось залишив попередження про радіацію та одну запасну пігулку.",
-      "art": "art_custom_011",
+      "art": "art_custom_042",
       "choices": [
         {
           "id": "act",
@@ -2014,7 +2014,7 @@
       "weight": 1.0,
       "title": "Сухий насос",
       "description": "У колодязі вцілів фільтр. Насос потребує кількох деталей.",
-      "art": "event_theme:water",
+      "art": "art_custom_043",
       "choices": [
         {
           "id": "act",
@@ -2110,7 +2110,7 @@
       "weight": 1.0,
       "title": "Дерево на стежці",
       "description": "Під стовбуром застрягли речі колишнього табору.",
-      "art": "obstacle:forest",
+      "art": "art_custom_044",
       "choices": [
         {
           "id": "act",
@@ -2208,7 +2208,7 @@
       "weight": 1.0,
       "title": "Тріщина в мосту",
       "description": "Настил під ногами починає розходитись. Поряд залишився ящик ремонтників.",
-      "art": "event_theme:mines",
+      "art": "art_custom_045",
       "choices": [
         {
           "id": "act",
@@ -2304,7 +2304,7 @@
       "weight": 1.0,
       "title": "Мідна проводка",
       "description": "У підвалі звисає пучок старих кабелів.",
-      "art": "event_theme:provisions",
+      "art": "art_custom_046",
       "choices": [
         {
           "id": "act",
@@ -2456,7 +2456,7 @@
       "weight": 1.0,
       "title": "Кабель у піску",
       "description": "З-під дюни стирчить товстий кабель. На ньому ще блимає індикатор.",
-      "art": "event_theme:wreck",
+      "art": "art_custom_047",
       "choices": [
         {
           "id": "act",
@@ -2511,7 +2511,7 @@
       "weight": 1.0,
       "title": "Скляна дюна",
       "description": "Пісок спікся в гострі пластини.",
-      "art": "event_theme:mines",
+      "art": "art_custom_048",
       "choices": [
         {
           "id": "act",
@@ -2560,7 +2560,7 @@
       "weight": 1.0,
       "title": "Сонячне дзеркало",
       "description": "Поворотне дзеркало може зарядити забутий елемент живлення.",
-      "art": "event_theme:signal",
+      "art": "art_custom_049",
       "choices": [
         {
           "id": "act",
@@ -2672,7 +2672,7 @@
       "weight": 1.0,
       "title": "Майстер із мастилом",
       "description": "У механіка залишилось трохи чистого мастила.",
-      "art": "event_theme:camp",
+      "art": "art_custom_050",
       "choices": [
         {
           "id": "act",
@@ -2717,7 +2717,7 @@
       "weight": 1.0,
       "title": "Мандрівна швачка",
       "description": "Майстриня пропонує залатати броню.",
-      "art": "event_theme:camp",
+      "art": "art_custom_051",
       "choices": [
         {
           "id": "act",
@@ -2812,7 +2812,7 @@
       "weight": 1.0,
       "title": "Ручний прес",
       "description": "Прес ще працює. Ним можна вирівняти пластини спорядження.",
-      "art": "event_theme:wreck",
+      "art": "art_custom_052",
       "choices": [
         {
           "id": "act",
@@ -2896,7 +2896,7 @@
       "weight": 1.0,
       "title": "Дірка в кишені",
       "description": "Загублено до 30 кредитів.",
-      "art": "event_theme:provisions",
+      "art": "art_custom_053",
       "choices": [
         {
           "id": "leave",
@@ -2925,7 +2925,7 @@
       "weight": 1.0,
       "title": "Зіпсована консерва",
       "description": "Довелося викинути одну консерву, якщо вона була.",
-      "art": "food",
+      "art": "art_custom_054",
       "choices": [
         {
           "id": "leave",
