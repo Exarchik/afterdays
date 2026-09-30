@@ -41,6 +41,17 @@ def item(game, effect, level):
 def cache_contents(game, effects, level):
     return [item(game, e, level) for e in effects if e.get('chance', 1) >= 1 or game.rng.random() < e['chance']]
 
+def grant_item(game, effect, reward):
+    """Announce direct inventory rewards, including additions to an existing stack."""
+    import progression as p
+    destination=effect.get('destination','loot')
+    quantity=reward.get('qty',1)
+    name=reward['name']
+    p.add_to(getattr(game,destination),reward)
+    if destination=='bag':
+        game.emit(f'+{quantity} {name}',color='#9cdda8')
+
+
 def apply(game, effect, spec):
     import progression as p
     import module_rules
@@ -49,7 +60,7 @@ def apply(game, effect, spec):
     if kind == 'cache':
         game.begin_event_cache(spec); return
     if kind == 'gear':
-        p.add_to(getattr(game, effect.get('destination', 'loot')), item(game, effect, level)); return
+        grant_item(game, effect, item(game, effect, level)); return
     n = catalog.amount(effect, level, game.rng)
     if kind in catalog.ITEM_KINDS:
         if n < 0:
@@ -59,7 +70,7 @@ def apply(game, effect, spec):
             else: game.consume(kind, min(game.count(kind), -n))
         elif n:
             resolved = dict(effect, amount=n, per_level=0, step=0); resolved.pop('maximum', None)
-            p.add_to(getattr(game, effect.get('destination', 'loot')), item(game, resolved, level))
+            grant_item(game, effect, item(game, resolved, level))
         return
     if kind == 'money': game.money = max(0, game.money+n)
     elif kind == 'xp': game.gain_xp(n)

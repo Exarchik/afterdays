@@ -69,6 +69,8 @@ def description(game,item):
         field(tr('modules.max_condition'),p.mr.max_condition(item),p.mr.max_condition(current) if current else None,unit='%')
     if kind=='weapon':
         import adventure,combat033
+        from damage_preview import description as damage_description
+        lines.append(damage_description(game,item))
         lines.append(tr('update033.category')+tr('update033.category_'+combat033.category(item)))
         lines.append(tr('update033.modes')+' / '.join(tr('update033.mode_'+m) for m in combat033.modes(item)))
         field(tr('refinement_ui.0010'),game.shot_ap(item),game.shot_ap(current) if current else None,True,tr('refinement_ui.0011'))

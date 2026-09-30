@@ -25,6 +25,18 @@ class Effects:
         now=time.monotonic()
         return (self.snapshot is not None and now<self.until) or any(e['kind'] in ('move','reveal') and now<e['start']+e['duration'] for e in self.active)
 
+    def pause_world_notices(self,now):
+        """Keep map notices readable after a pending event or modal closes."""
+        hidden=bool(getattr(self.app.game,'road_event',None) or
+                    getattr(self.app,'dialog',None) or getattr(self.app,'_notice_open',False))
+        for event in self.active:
+            if event['kind']!='text' or event['scene']!='world':continue
+            if hidden:
+                if now<event['start']+event['duration']:
+                    event.setdefault('paused_at',now)
+            elif 'paused_at' in event:
+                event['start']+=now-event.pop('paused_at')
+
     def ingest(self):
         """Приймає нові ігрові події для показу анімацій."""
         g=self.app.game
@@ -42,6 +54,7 @@ class Effects:
         if g._last_battle is not None:
             self.snapshot=g._last_battle;g._last_battle=None
             self.until=now+max(1.15,timeline+1.0)
+        self.pause_world_notices(now)
 
     def reveal_focus(self):
         """Focus briefly on a newly revealed patch even when it is outside the player's viewport."""
@@ -80,8 +93,9 @@ class Effects:
         """Відображає поточний кадр візуальних ефектів."""
         c=self.app.canvas;c.delete('fx')
         now=time.monotonic();battle=bool(self.app.game.battle or (self.snapshot is not None and now<self.until))
+        self.pause_world_notices(now)
         for e in self.active:
-            if e['kind']=='move':continue
+            if e['kind']=='move' or 'paused_at' in e:continue
             dt=now-e['start']
             if not 0<=dt<e['duration']:continue
             # Player notices follow the player when entering/leaving combat in the same action.
@@ -118,8 +132,9 @@ class Effects:
     def tick(self):
         """Виконує черговий кадр оновлення та планує наступний."""
         now=time.monotonic()
+        self.pause_world_notices(now)
         had_motion=any(e['kind'] in ('move','reveal') for e in self.active)
-        self.active=[e for e in self.active if now<e['start']+e['duration']]
+        self.active=[e for e in self.active if 'paused_at' in e or now<e['start']+e['duration']]
         if self.snapshot is not None and now>=self.until:
             self.snapshot=None;self.app.refresh()
         if had_motion:self.app.draw()

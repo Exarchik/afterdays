@@ -16,7 +16,9 @@ def snapshot(g):
     """Read the current game into display values, including level-relative XP."""
     start=p.xp_for_level(g.level);goal=p.xp_for_level(g.level+1)
     w=g.weapon;ammo=w.get('ammo_type','pistol') if w else None
-    return dict(level=g.level,hp=g.hp,max_hp=g.max_hp,xp=g.xp-start,xp_goal=goal-start,
+    from damage_preview import estimate,format_value
+    estimate_data=estimate(g,w) if w else None
+    return dict(calculated_damage=format_value(estimate_data) if w else '',damage_reference=estimate_data,level=g.level,hp=g.hp,max_hp=g.max_hp,xp=g.xp-start,xp_goal=goal-start,
                 defense=g.defense,weight=g.weight,capacity=g.capacity,money=g.money,turn=g.turn,
                 weapon=w,ammo=p.AMMO[ammo][0] if ammo else '',rounds=g.count('ammo',ammo) if ammo else 0,
                 cost=g.shot_ap(w) if w else 0,mode=g.fire_mode(),modes=g.fire_modes(),
@@ -34,7 +36,7 @@ def sections(width):
 class StatusBar(tk.Canvas):
     def __init__(self,parent,app):
         """Create one canvas with bounded sprite caching and contextual hover targets."""
-        super().__init__(parent,height=108,bg=BG,highlightthickness=1,highlightbackground=LINE)
+        super().__init__(parent,height=132,bg=BG,highlightthickness=1,highlightbackground=LINE)
         self.app=app;self.game=None;self.regions=[];self.hover=None;self.tip_text='';self.signature=None
         self.tip=Tooltip(self,lambda:self.tip_text)
         self.unbind('<Enter>')
@@ -85,7 +87,7 @@ class StatusBar(tk.Canvas):
         if self.game is None:return
         g=self.game;d=snapshot(g);self.tip.hide();self.hover=None;self.regions=[];self.delete('all')
         width=max(1,self.winfo_width()-2);cols=sections(width);compact=width<1350
-        for a,b in cols[:-1]:self.create_line(b,12,b,96,fill=LINE)
+        for a,b in cols[:-1]:self.create_line(b,12,b,120,fill=LINE)
         a,b=cols[0];size=48 if compact else 64
         # Use the existing survivor artwork; no new image dependency at runtime.
         sprites.draw(self,'npc:traveler',a+7,20,size)
@@ -117,6 +119,11 @@ class StatusBar(tk.Canvas):
                 x=left+43+i*step
                 self.create_rectangle(x,79,x+max(1,step-3),89,fill=GREEN if i<d['ap'] else '#59615e',outline='')
         else:self.text(left,83,tr('terminal.condition',value=round(d['weapon'].get('durability',100))) if d['weapon'] else '',8,MUTED,width=right-left)
+        if d['weapon']:
+            from damage_preview import description as damage_description
+            self.text(a+10,106,'Розрахункова шкода',8,MUTED,width=b-a-20)
+            self.text(a+10,122,d['calculated_damage'],9,GOLD,width=b-a-20,bold=True)
+            self.region((a,96,b,132),damage_description(g,d['weapon']))
         self.region((a,0,b,108),name+'\n'+tr('terminal.weapon_tip'))
         a,b=cols[3];x=a+12
         self.text(x,18,tr('terminal.defense'),8,MUTED);self.glyph('shield',x+8,39);self.text(x+25,39,d['defense'],17,GOLD,bold=True)

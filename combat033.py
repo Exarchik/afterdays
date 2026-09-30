@@ -29,6 +29,21 @@ def behind(source,target,pos):
     vx,vy=c[0]-b[0],c[1]-b[1]
     return 0<(vx*dx+vy*dy)/length<=3.1 and abs(vx*dy-vy*dx)/length<=1.1
 
+def projectile_components(weapon,level,enemy,variation,critical,pellet=None):
+    """Pure damage formula shared by combat and weapon previews."""
+    from adventure import damage_type,RESISTANCES
+    stats=p.stats(weapon)
+    components=p.mr.shot_components(weapon,level,variation,damage_type(weapon))
+    dealt={}
+    for element,raw in components.items():
+        base=balance.damage(raw*(1.6 if critical else 1),stats.get('attack',0),enemy.get('defense',enemy.get('armor',0)))
+        resist=enemy.get('resists',RESISTANCES.get(enemy.get('kind'),{})).get(element,0)
+        amount=max(1,round(base*(1-resist/100))) if raw else 0
+        if pellet is not None:amount=amount//6+int(pellet<amount%6)
+        dealt[element]=amount
+    return dealt
+
+
 class Combat:
     def fire_modes(self,weapon=None):
         """Return modes available for the selected weapon category."""
@@ -64,14 +79,7 @@ class Combat:
         """Resolve one bullet or one sixth of a shotgun shell after defense/resistance."""
         from adventure import damage_type,RESISTANCES,DAMAGE_TYPES
         stats=p.stats(weapon);critical=self.rng.randrange(100)<(min(65,5+stats.get('crit',0))+(15 if mode=='aimed' else 0))
-        components=p.mr.shot_components(weapon,self.level,self.rng.randint(-2,2),damage_type(weapon))
-        dealt={}
-        for element,raw in components.items():
-            base=balance.damage(raw*(1.6 if critical else 1),stats.get('attack',0),enemy.get('defense',enemy.get('armor',0)))
-            resist=enemy.get('resists',RESISTANCES.get(enemy['kind'],{})).get(element,0)
-            amount=max(1,round(base*(1-resist/100))) if raw else 0
-            if pellet is not None:amount=amount//6+int(pellet<amount%6)
-            dealt[element]=amount
+        dealt=projectile_components(weapon,self.level,enemy,self.rng.randint(-2,2),critical,pellet)
         amount=sum(dealt.values());enemy['hp']-=amount;enemy['awake']=True
         self.emit((tr('adventure.0217') if critical else '')+f'−{amount}',pos=enemy['pos'],color='#ffbf82' if critical else '#ff9d84')
         self.log(f'{enemy["name"]}: −{amount} HP ('+', '.join(f'{DAMAGE_TYPES[k][0]}: {v}' for k,v in dealt.items())+').')
@@ -91,6 +99,8 @@ class Combat:
         elif b['ap']<self.shot_ap():reason=tr('adventure.0215')
         elif not valid:reason=why
         if reason:self.log(reason);self.emit(reason,color='#ffcb79');return False
+        from damage_preview import remember_target
+        remember_target(self,target)
         b['ap']-=self.shot_ap();saved=p.mr.chance(p.stats(w).get('ammo_save_percent',0))
         for _ in range(bullets):
             if saved and self.rng.random()*100<saved:self.emit(tr('modules.ammo_saved'),color='#9cdcd8')

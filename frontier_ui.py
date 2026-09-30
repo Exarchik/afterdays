@@ -15,6 +15,8 @@ def player_text(g):
            tr('frontier_ui.0006', v0=g.weight, v1=g.capacity),tr('frontier_ui.0007', v0=g.rad_turns),
            '', tr('frontier_ui.0008'),w['name'] if w else tr('frontier_ui.0009')]
     if w:
+        from damage_preview import description as damage_description
+        lines.append(damage_description(g,w))
         lines += [tr('frontier_ui.0010', v0=max(1,p.mr.shot_damage(w,g.level,-2)), v1=p.mr.shot_damage(w,g.level,2)),
                   tr('frontier_ui.0011', v0=a.DAMAGE_TYPES[a.damage_type(w)][0]),
                   tr('frontier_ui.0012', v0=min(65, 5 + s.get('crit', 0))+(15 if g.fire_mode()=='aimed' else 0)),
