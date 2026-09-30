@@ -136,8 +136,8 @@ class QuestCards(tk.Frame):
     def paint(self):
         """Малює актуальне представлення даних на Canvas."""
         c=self.canvas;c.delete('all');self.rects=[];self.turnin_rects=[];w=max(280,c.winfo_width());y=4
-        # Eight compact cards in a normal-height panel; scrolling remains available.
-        h=max(40,min(52,(max(328,c.winfo_height())-8)//8))
+        # Leave room for a full 64 px illustration and three lines of text.
+        h=80
         active=[q for q in self.entries if q['status']!='done'];done=[q for q in self.entries if q['status']=='done']
         for q in active+[None]+(done if self.open_done else []):
             if q is None:
@@ -146,28 +146,33 @@ class QuestCards(tk.Frame):
                 self.rects.append((y,y+30,'done'));y+=34;continue
             color='#d0a0f5' if q.get('unique') else '#8aa78e' if q['status']=='done' else GOLD
             c.create_rectangle(5,y,w-5,y+h-3,fill=('#173b60' if q['id']==self.selection else '#102c4a') if self.app.game.quest_ready(q) else '#334a3d' if q['id']==self.selection else '#22332b',outline=color)
-            if not sprites.draw(c,sprites.quest_key(q),10,y+5,30):c.create_text(25,y+20,text=QUEST_ICONS.get(q['kind'],'!'),fill=color,font=('Segoe UI',17))
+            if not sprites.draw(c,sprites.quest_key(q),12,y+6,64):c.create_text(44,y+38,text=QUEST_ICONS.get(q['kind'],'!'),fill=color,font=('Segoe UI',28))
             title=('★ ' if q.get('unique') else '')+f'L{q.get("level",q.get("zone",1))} · '+q['title']
             immediate=self.app.game.can_turn_in(q)
             unread=q['status']=='offered' and not q.get('seen',False)
-            title_x=105 if unread else 48
+            title_x=84
             title_color='#8fdda0' if q['status']=='offered' else color
             if unread:
-                c.create_rectangle(47,y+4,101,y+21,fill='#194d31',outline='#6bc78d')
-                c.create_text(74,y+12,text=tr('exp.new'),fill='#a9efba',font=('Segoe UI',8,'bold'))
-            limit=max(9,int((w-title_x-17-(126 if immediate else 0))/7))
+                c.create_rectangle(w-68,y+29,w-14,y+46,fill='#194d31',outline='#6bc78d')
+                c.create_text(w-41,y+37,text=tr('exp.new'),fill='#a9efba',font=('Segoe UI',8,'bold'))
+            limit=max(9,int((w-title_x-17)/7))
             if len(title)>limit:title=title[:limit-1]+'…'
-            c.create_text(title_x,y+5,text=title,anchor='nw',fill=title_color,font=('Segoe UI',9,'bold'))
+            c.create_text(title_x,y+7,text=title,anchor='nw',fill=title_color,font=('Segoe UI',9,'bold'))
             state=tr('refinement_ui.0033') if q['status']=='offered' else tr('refinement_ui.0034') if q['status']=='done' else tr('refinement_ui.0035') if self.app.game.quest_ready(q) else tr('refinement_ui.0036', v0=q['progress'], v1=q['goal'])
             if q.get('metro_chain') and q['status']=='active' and not self.app.game.quest_ready(q):
                 chain=q['metro_chain']
                 state=tr('metro035.short_progress',number=chain['index']+1,total=len(chain['steps'])) if chain['index']<len(chain['steps']) else tr('metro035.stage_station')
             reward=tr('refinement_ui.0037',v0=q.get('reward',0),v1=q.get('xp_reward',0))
-            c.create_text(48,y+23,text=state+' · '+reward,anchor='nw',fill=MUTED,font=('Segoe UI',8))
+            state_limit=max(8,int((w-title_x-17-(62 if unread else 0))/6))
+            if len(state)>state_limit:state=state[:state_limit-1]+'…'
+            reward_limit=max(8,int((w-title_x-17-(126 if immediate else 0))/6))
+            if len(reward)>reward_limit:reward=reward[:reward_limit-1]+'…'
+            c.create_text(title_x,y+30,text=state,anchor='nw',fill=MUTED,font=('Segoe UI',8))
+            c.create_text(title_x,y+54,text=reward,anchor='nw',fill=MUTED,font=('Segoe UI',8))
             if immediate:
-                rect=(w-130,y+5,w-10,y+h-8)
+                rect=(w-130,y+49,w-10,y+h-8)
                 c.create_rectangle(*rect,fill='#25517a',outline='#7caccb')
-                c.create_text(w-70,y+h/2-2,text=tr('refinement_ui.0030'),fill='#eef6ff',font=('Segoe UI',8,'bold'))
+                c.create_text(w-70,y+60,text=tr('refinement_ui.0030'),fill='#eef6ff',font=('Segoe UI',8,'bold'))
                 self.turnin_rects.append((rect,q['id']))
             self.rects.append((y,y+h-3,q['id']));y+=h
         c.config(scrollregion=(0,0,w,y))

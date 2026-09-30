@@ -105,8 +105,8 @@ class BorderTests(unittest.TestCase):
         self.assertEqual(len(c.lines),len(g.border_edges()));self.assertTrue(c.gates)
         self.assertTrue(all(k['fill']=='#000000' and k['dash'] for a,k in c.lines))
 
-    def test_eight_compact_quest_cards_fit(self):
-        """Перевіряє сценарій «eight compact quest cards fit» та очікувані результати."""
+    def test_large_quest_cards_keep_all_entries_scrollable(self):
+        """Великі іконки вміщаються в картках; усі квести доступні прокручуванням."""
         from types import SimpleNamespace
         from unittest.mock import patch
         from refinement_ui import QuestCards
@@ -122,10 +122,16 @@ class BorderTests(unittest.TestCase):
             # Готує або імітує операцію «create text» для перевірок Canvas.
             def create_text(self,*a,**k):pass
             # Оновлює властивості віджета та форматований текст.
-            def config(self,**k):pass
+            def config(self,**k):self.options=k
         g=r.Game(4)
         quests=[dict(id=str(i),kind='hunt',status='active',title='Quest',city=0,progress=0,goal=1,level=1,reward=10) for i in range(8)]
         panel=SimpleNamespace(canvas=Canvas(),entries=quests,open_done=False,selection=None,app=SimpleNamespace(game=g))
-        with patch('refinement_ui.sprites.draw',return_value=False):QuestCards.paint(panel)
+        with patch('refinement_ui.sprites.draw',return_value=False) as draw:QuestCards.paint(panel)
         cards=[(a,b) for a,b,key in panel.rects if key!='done']
-        self.assertEqual(len(cards),8);self.assertLessEqual(cards[-1][1],424)
+        self.assertEqual(len(cards),8)
+        self.assertGreater(cards[-1][1],424)
+        self.assertGreater(panel.canvas.options['scrollregion'][3],cards[-1][1])
+        for call,(top,bottom) in zip(draw.call_args_list,cards):
+            self.assertEqual(call.args[-1],64)
+            self.assertGreaterEqual(call.args[-2],top)
+            self.assertLessEqual(call.args[-2]+64,bottom)
