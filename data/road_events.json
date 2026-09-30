@@ -2632,7 +2632,7 @@
       "weight": 1.0,
       "title": "Заритий акумулятор",
       "description": "З піску стирчать клеми. Корпус може бути під напругою.",
-      "art": "event_theme:provisions",
+      "art": "art_custom_063",
       "choices": [
         {
           "id": "act",
@@ -2988,7 +2988,7 @@
       "weight": 1.0,
       "title": "Протікання",
       "description": "Зі стелі крапає їдка рідина. Під нею лежить ціла каністра мастила.",
-      "art": "event_theme:water",
+      "art": "art_custom_064",
       "choices": [
         {
           "id": "act",
@@ -3209,7 +3209,7 @@
       "weight": 1.0,
       "title": "Пісок у механізмі",
       "description": "Активна зброя втратила 8 пунктів стану.",
-      "art": "fog",
+      "art": "art_custom_065",
       "choices": [
         {
           "id": "leave",
@@ -3375,7 +3375,7 @@
       "weight": 1.0,
       "title": "Колючий прохід",
       "description": "Під заростями помітна металева коробка. Колючки мають гострі крихкі кінці.",
-      "art": "event_theme:mines",
+      "art": "art_custom_066",
       "choices": [
         {
           "id": "act",
@@ -3548,9 +3548,9 @@
       "terrain": "waste",
       "enabled": true,
       "weight": 1.0,
-      "title": "Попелястий вихор",
+      "title": "Вихор насувається",
       "description": "У центрі вихору блищать металеві уламки. Пил обпікає шкіру.",
-      "art": "event_theme:storm",
+      "art": "art_custom_067",
       "choices": [
         {
           "id": "act",
@@ -3595,7 +3595,7 @@
       "weight": 1.0,
       "title": "Сховок лісового каравану",
       "description": "Між корінням заховано замкнену скриню з припасами колишнього каравану.",
-      "art": "event_theme:safe",
+      "art": "art_custom_068",
       "choices": [
         {
           "id": "act",
@@ -3660,7 +3660,7 @@
       "weight": 1.0,
       "title": "Зброярська скриня",
       "description": "У розбитій вантажівці вціліла сталева скриня. Крізь щілину видно коробки набоїв.",
-      "art": "event_theme:safe",
+      "art": "art_custom_069",
       "choices": [
         {
           "id": "act",
@@ -3776,7 +3776,7 @@
       "weight": 1.0,
       "title": "Сейф польової майстерні",
       "description": "На місці покинутого ремонту залишився сейф із деталями й технічним приладдям.",
-      "art": "event_theme:safe",
+      "art": "art_custom_070",
       "choices": [
         {
           "id": "act",
@@ -3837,7 +3837,7 @@
       "weight": 1.0,
       "title": "Капсула експедиції",
       "description": "У піску знайдено герметичну капсулу дослідників. Механічний замок ще працює.",
-      "art": "art_custom_013",
+      "art": "art_custom_071",
       "choices": [
         {
           "id": "act",

@@ -2960,5 +2960,225 @@
         1130
       ]
     }
+  },
+  "art_custom_061": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/53572a1a105d500914ce8cfd1a33976e7f1f188b797b8fac81b4aff7950acd40/sprite",
+    "inventory_sheet": "custom/variants/53572a1a105d500914ce8cfd1a33976e7f1f188b797b8fac81b4aff7950acd40/inventory",
+    "art_label": "event_theme:curier_advise",
+    "art_category": "events",
+    "editor_source": "custom/sources/82e47981ac3c41d54f3ddc319a43e576cedd5209f03b72171ddd9e55a04e5a37.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        1209,
+        454,
+        1592,
+        916
+      ]
+    }
+  },
+  "art_custom_062": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/366b26512b0cdb7b6f96a34847b60e0c18594b79611cdf451d26674a89a68d67/sprite",
+    "inventory_sheet": "custom/variants/366b26512b0cdb7b6f96a34847b60e0c18594b79611cdf451d26674a89a68d67/inventory",
+    "art_label": "event_theme:lone_man",
+    "art_category": "events",
+    "editor_source": "custom/sources/82e47981ac3c41d54f3ddc319a43e576cedd5209f03b72171ddd9e55a04e5a37.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        1601,
+        427,
+        1920,
+        899
+      ]
+    }
+  },
+  "art_custom_063": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/5a5f618830c78cf18ee186c8138d1c9f519ec03b487acd50961b5af1f94c428b/sprite",
+    "inventory_sheet": "custom/variants/5a5f618830c78cf18ee186c8138d1c9f519ec03b487acd50961b5af1f94c428b/inventory",
+    "art_label": "event_theme:acum",
+    "art_category": "events",
+    "editor_source": "custom/sources/ddcbe74d011cd47a809e730afcccccb8b36f224b5aca986625a517d1946ba68c.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        0,
+        0,
+        434,
+        427
+      ]
+    }
+  },
+  "art_custom_064": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/2fba79764e09a833472754ce34d57ece70d859e18b9a34a18d8ebb995e10d2e6/sprite",
+    "inventory_sheet": "custom/variants/2fba79764e09a833472754ce34d57ece70d859e18b9a34a18d8ebb995e10d2e6/inventory",
+    "art_label": "event_theme:oil_danger",
+    "art_category": "events",
+    "editor_source": "custom/sources/ddcbe74d011cd47a809e730afcccccb8b36f224b5aca986625a517d1946ba68c.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        428,
+        0,
+        842,
+        419
+      ]
+    }
+  },
+  "art_custom_065": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/033e5e0fb3ff4d506a35779244af6eec0299351b4580309e4b4bf2b4c053810b/sprite",
+    "inventory_sheet": "custom/variants/033e5e0fb3ff4d506a35779244af6eec0299351b4580309e4b4bf2b4c053810b/inventory",
+    "art_label": "event_theme:falling_from_dune",
+    "art_category": "events",
+    "editor_source": "custom/sources/ddcbe74d011cd47a809e730afcccccb8b36f224b5aca986625a517d1946ba68c.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        828,
+        3,
+        1254,
+        424
+      ]
+    }
+  },
+  "art_custom_066": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/6a0d7469295669c5103ad1eda2468e86948422758505ff91a3f653f8eb29f060/sprite",
+    "inventory_sheet": "custom/variants/6a0d7469295669c5103ad1eda2468e86948422758505ff91a3f653f8eb29f060/inventory",
+    "art_label": "event_theme:barbed_chest",
+    "art_category": "events",
+    "editor_source": "custom/sources/ddcbe74d011cd47a809e730afcccccb8b36f224b5aca986625a517d1946ba68c.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        0,
+        416,
+        428,
+        838
+      ]
+    }
+  },
+  "art_custom_067": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/1408482b5901193d59c6d44afbea1f799fadb19a82080a4582f69e86ae9e2bb6/sprite",
+    "inventory_sheet": "custom/variants/1408482b5901193d59c6d44afbea1f799fadb19a82080a4582f69e86ae9e2bb6/inventory",
+    "art_label": "event_theme:metalstorm",
+    "art_category": "events",
+    "editor_source": "custom/sources/ddcbe74d011cd47a809e730afcccccb8b36f224b5aca986625a517d1946ba68c.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        423,
+        414,
+        831,
+        814
+      ]
+    }
+  },
+  "art_custom_068": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/0e7b8f810c28ae3d67a9ae5b15988b7c722ffbbd3deb8416d0eed89cc2badf71/sprite",
+    "inventory_sheet": "custom/variants/0e7b8f810c28ae3d67a9ae5b15988b7c722ffbbd3deb8416d0eed89cc2badf71/inventory",
+    "art_label": "event_theme:bush_safe",
+    "art_category": "events",
+    "editor_source": "custom/sources/ddcbe74d011cd47a809e730afcccccb8b36f224b5aca986625a517d1946ba68c.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        831,
+        432,
+        1254,
+        814
+      ]
+    }
+  },
+  "art_custom_069": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/726802e726f14bc727585abea2974b98a17599b32d047cd1070861682f43bafa/sprite",
+    "inventory_sheet": "custom/variants/726802e726f14bc727585abea2974b98a17599b32d047cd1070861682f43bafa/inventory",
+    "art_label": "event_theme:car_safe",
+    "art_category": "events",
+    "editor_source": "custom/sources/ddcbe74d011cd47a809e730afcccccb8b36f224b5aca986625a517d1946ba68c.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        4,
+        843,
+        407,
+        1238
+      ]
+    }
+  },
+  "art_custom_070": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/f6403cdf7540b62bcada76b17b254ee09c94992fef4958f76ee385e50591ea27/sprite",
+    "inventory_sheet": "custom/variants/f6403cdf7540b62bcada76b17b254ee09c94992fef4958f76ee385e50591ea27/inventory",
+    "art_label": "event_theme:caravan_safe",
+    "art_category": "events",
+    "editor_source": "custom/sources/ddcbe74d011cd47a809e730afcccccb8b36f224b5aca986625a517d1946ba68c.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        412,
+        822,
+        834,
+        1254
+      ]
+    }
   }
 }
