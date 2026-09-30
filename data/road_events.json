@@ -248,7 +248,7 @@
       "weight": 1.0,
       "title": "Лісовий самітник",
       "description": "Самітник обмінює знання про місцевість на вечерю.",
-      "art": "event_theme:camp",
+      "art": "art_custom_062",
       "choices": [
         {
           "id": "meal",
@@ -521,7 +521,7 @@
       "weight": 1.0,
       "title": "Лахмітник продає аптечку і тушонку",
       "description": "Лахмітник віддасть аптечку і тушонку за 30 Кр.",
-      "art": "npc:fence",
+      "art": "art_custom_056",
       "choices": [
         {
           "id": "act",
@@ -581,7 +581,7 @@
       "weight": 1.0,
       "title": "Лахмітник продає набої",
       "description": "Лахмітник віддасть коробку набоїв за 20 Кр.",
-      "art": "npc:fence",
+      "art": "art_custom_057",
       "choices": [
         {
           "id": "act",
@@ -632,7 +632,7 @@
       "weight": 1.0,
       "title": "Лахмітник продає радіопротектор",
       "description": "Лахмітник віддасть радіопротектор за 20 Кр.",
-      "art": "npc:fence",
+      "art": "art_custom_058",
       "choices": [
         {
           "id": "act",
@@ -809,6 +809,76 @@
       ],
       "legacy_group": "additional",
       "legacy_release": "0.32"
+    },
+    {
+      "id": "event_006",
+      "category": "trade",
+      "terrain": "waste",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Старий гелікоптер",
+      "description": "Місцевий барига, що живе в закинутому гелікоптері за 100 Кр. віддасть \"кота в мішку\"",
+      "art": "art_custom_010",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Заплатити 100 кредитів",
+          "costs": [
+            {
+              "kind": "money",
+              "amount": 100
+            }
+          ],
+          "outcomes": [
+            {
+              "chance": 1.0,
+              "effects": [
+                {
+                  "kind": "gear",
+                  "amount": 1,
+                  "maximum": 1,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "gear",
+                  "amount": 1,
+                  "maximum": 1,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 0.25,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "gear",
+                  "amount": 1,
+                  "maximum": 1,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 0.1,
+                  "destination": "loot"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "lesson",
@@ -1025,7 +1095,7 @@
       "weight": 1.0,
       "title": "Порада кур’єра",
       "description": "Кур’єр готовий показати безпечну стежку в обмін на невелику плату.",
-      "art": "event_theme:courier",
+      "art": "art_custom_061",
       "choices": [
         {
           "id": "act",
@@ -1331,6 +1401,50 @@
       "legacy_group": "additional"
     },
     {
+      "id": "event_008",
+      "category": "exploration",
+      "terrain": "waste",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Магнітна плівка",
+      "description": "Ви знайшли дивні коробки з магнітною стрічкою, схоже це які старі фільми.",
+      "art": "art_custom_029",
+      "choices": [
+        {
+          "id": "leave",
+          "text": "Переглянути і піти далі",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1.0,
+              "effects": [
+                {
+                  "kind": "xp",
+                  "amount": 18,
+                  "maximum": 30,
+                  "per_level": 2,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "fragments",
+                  "amount": 2,
+                  "maximum": 5,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 0.5,
+                  "destination": "loot"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
       "id": "pantry",
       "category": "supplies",
       "terrain": "any",
@@ -1366,20 +1480,66 @@
       "enabled": true,
       "weight": 1.0,
       "title": "Захищений контейнер",
-      "description": "Знайдено дві пігулки від радіації.",
+      "description": "Знайдено деякі запаси провізії",
       "art": "art_custom_033",
       "choices": [
         {
           "id": "leave",
-          "text": "Продовжити",
+          "text": "Оглянути і продовжити шлях",
           "costs": [],
           "outcomes": [
             {
-              "chance": 1,
+              "chance": 1.0,
               "effects": [
                 {
                   "kind": "rad",
-                  "amount": 2
+                  "amount": 1,
+                  "maximum": 2,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "money",
+                  "amount": 5,
+                  "maximum": 100,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 0.8,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "food",
+                  "amount": 1,
+                  "maximum": 2,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 0.8,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "med",
+                  "amount": 1,
+                  "maximum": 2,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 0.8,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "repairkit",
+                  "amount": 1,
+                  "maximum": 2,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 0.8,
+                  "destination": "loot"
                 }
               ]
             }
@@ -1729,7 +1889,7 @@
       "weight": 1.0,
       "title": "Аварійний ліхтар",
       "description": "Під сходами мигає акумулятор.",
-      "art": "art_custom_040",
+      "art": "art_custom_059",
       "choices": [
         {
           "id": "act",
@@ -1973,7 +2133,7 @@
       "weight": 1.0,
       "title": "Свіжі позначки",
       "description": "Хтось залишив попередження про радіацію та одну запасну пігулку.",
-      "art": "art_custom_042",
+      "art": "art_custom_060",
       "choices": [
         {
           "id": "act",
@@ -2050,6 +2210,72 @@
         }
       ],
       "legacy_group": "additional"
+    },
+    {
+      "id": "event_007",
+      "category": "supplies",
+      "terrain": "waste",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Табір в пустці",
+      "description": "Ви зустріли групу мандрівників, що стали табором посеред пустки. Ви відпочили, привели зброю і броню у порядок. Час йти далі.",
+      "art": "event_theme:camp",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Відпочити",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1.0,
+              "effects": [
+                {
+                  "kind": "heal",
+                  "amount": 6,
+                  "maximum": 10,
+                  "per_level": 2,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "repair_weapon",
+                  "amount": 5,
+                  "maximum": 15,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "repair_armor",
+                  "amount": 5,
+                  "maximum": 15,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_release": "0.32"
     },
     {
       "id": "wreck",
@@ -2867,7 +3093,7 @@
       "weight": 1.0,
       "title": "Дріт у траві",
       "description": "Подряпина від іржавого дроту: −3 HP.",
-      "art": "event_theme:wounded",
+      "art": "art_custom_055",
       "choices": [
         {
           "id": "leave",

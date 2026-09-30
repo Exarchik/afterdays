@@ -2461,7 +2461,7 @@
     "sheet": "custom/variants/da91c8edac1e402236d7e10394dc1399dd0e23377127f93f2321b81eb4b3150a/sprite",
     "inventory_sheet": "custom/variants/da91c8edac1e402236d7e10394dc1399dd0e23377127f93f2321b81eb4b3150a/inventory",
     "art_label": "event_theme:green_hill",
-    "art_category": "other",
+    "art_category": "events",
     "editor_source": "custom/sources/cab0c3e021b02e0e4d2a94f8bc4f7b377d6d6b52f9725815190331fb16061ff2.png",
     "editor_settings": {
       "fit": "contain",
@@ -2483,7 +2483,7 @@
     "sheet": "custom/variants/389e5498611c196c7cb2012ab57b1baa98a2bb8b47988312f248c40c253bbc01/sprite",
     "inventory_sheet": "custom/variants/389e5498611c196c7cb2012ab57b1baa98a2bb8b47988312f248c40c253bbc01/inventory",
     "art_label": "event_theme:trader_in_trouble",
-    "art_category": "other",
+    "art_category": "events",
     "editor_source": "custom/sources/cab0c3e021b02e0e4d2a94f8bc4f7b377d6d6b52f9725815190331fb16061ff2.png",
     "editor_settings": {
       "fit": "contain",
@@ -2505,7 +2505,7 @@
     "sheet": "custom/variants/bec9f4fd1f187428beb77e3b969a8307b7d562b9e9041e0a769daf7404aabfa5/sprite",
     "inventory_sheet": "custom/variants/bec9f4fd1f187428beb77e3b969a8307b7d562b9e9041e0a769daf7404aabfa5/inventory",
     "art_label": "event_theme:under_ladder",
-    "art_category": "other",
+    "art_category": "events",
     "editor_source": "custom/sources/cab0c3e021b02e0e4d2a94f8bc4f7b377d6d6b52f9725815190331fb16061ff2.png",
     "editor_settings": {
       "fit": "contain",
@@ -2527,7 +2527,7 @@
     "sheet": "custom/variants/b471825a917dfb278f085a11a116021f884316158a079b63f595077f26fd7826/sprite",
     "inventory_sheet": "custom/variants/b471825a917dfb278f085a11a116021f884316158a079b63f595077f26fd7826/inventory",
     "art_label": "event_theme:apthek",
-    "art_category": "other",
+    "art_category": "events",
     "editor_source": "custom/sources/cab0c3e021b02e0e4d2a94f8bc4f7b377d6d6b52f9725815190331fb16061ff2.png",
     "editor_settings": {
       "fit": "contain",
@@ -2549,7 +2549,7 @@
     "sheet": "custom/variants/6a4d3bd249079c9fa38169d0277a4ed7995aaa9adcb1427443aa303536170efd/sprite",
     "inventory_sheet": "custom/variants/6a4d3bd249079c9fa38169d0277a4ed7995aaa9adcb1427443aa303536170efd/inventory",
     "art_label": "event_theme:radio_sign",
-    "art_category": "other",
+    "art_category": "events",
     "editor_source": "custom/sources/cab0c3e021b02e0e4d2a94f8bc4f7b377d6d6b52f9725815190331fb16061ff2.png",
     "editor_settings": {
       "fit": "contain",
@@ -2571,7 +2571,7 @@
     "sheet": "custom/variants/83c5de6582140d2bf78093311304bd7a7126b6ccc5050468517ef93a0b1bc005/sprite",
     "inventory_sheet": "custom/variants/83c5de6582140d2bf78093311304bd7a7126b6ccc5050468517ef93a0b1bc005/inventory",
     "art_label": "event_theme:water_off",
-    "art_category": "other",
+    "art_category": "events",
     "editor_source": "custom/sources/1a02a2bf0189ca6d7d6dffd7ad04fc59a9315288544585ee565d504c21382a5c.png",
     "editor_settings": {
       "fit": "contain",
@@ -2593,7 +2593,7 @@
     "sheet": "custom/variants/913325a13fbd552a96d93d522dbe33f71b9c4ef21d2c29f56af0ccf90627bc35/sprite",
     "inventory_sheet": "custom/variants/913325a13fbd552a96d93d522dbe33f71b9c4ef21d2c29f56af0ccf90627bc35/inventory",
     "art_label": "event_theme:stash_under_tree",
-    "art_category": "other",
+    "art_category": "events",
     "editor_source": "custom/sources/1a02a2bf0189ca6d7d6dffd7ad04fc59a9315288544585ee565d504c21382a5c.png",
     "editor_settings": {
       "fit": "contain",
@@ -2615,7 +2615,7 @@
     "sheet": "custom/variants/6a66706ba5b5b390d37374b1a55b6226add82685b9b1de0a53aae86f9c11b7b0/sprite",
     "inventory_sheet": "custom/variants/6a66706ba5b5b390d37374b1a55b6226add82685b9b1de0a53aae86f9c11b7b0/inventory",
     "art_label": "event_theme:broken_bridge",
-    "art_category": "other",
+    "art_category": "events",
     "editor_source": "custom/sources/1a02a2bf0189ca6d7d6dffd7ad04fc59a9315288544585ee565d504c21382a5c.png",
     "editor_settings": {
       "fit": "contain",
@@ -2637,7 +2637,7 @@
     "sheet": "custom/variants/e96ab67655c927f88916791ff215f7ed366f43fdaf401c538b8616a8df1342c2/sprite",
     "inventory_sheet": "custom/variants/e96ab67655c927f88916791ff215f7ed366f43fdaf401c538b8616a8df1342c2/inventory",
     "art_label": "event_theme:wires",
-    "art_category": "other",
+    "art_category": "events",
     "editor_source": "custom/sources/1a02a2bf0189ca6d7d6dffd7ad04fc59a9315288544585ee565d504c21382a5c.png",
     "editor_settings": {
       "fit": "contain",
@@ -2659,7 +2659,7 @@
     "sheet": "custom/variants/eba6c9f7528bd6a44ee41fe483054121fdc01d5ef4f56f893609327c7397a391/sprite",
     "inventory_sheet": "custom/variants/eba6c9f7528bd6a44ee41fe483054121fdc01d5ef4f56f893609327c7397a391/inventory",
     "art_label": "event_theme:dune_wires",
-    "art_category": "other",
+    "art_category": "events",
     "editor_source": "custom/sources/1a02a2bf0189ca6d7d6dffd7ad04fc59a9315288544585ee565d504c21382a5c.png",
     "editor_settings": {
       "fit": "contain",
@@ -2681,7 +2681,7 @@
     "sheet": "custom/variants/9c0e64157debc37d5844b01bee3239a0d5630084a039462a66fdb8f63a8926ac/sprite",
     "inventory_sheet": "custom/variants/9c0e64157debc37d5844b01bee3239a0d5630084a039462a66fdb8f63a8926ac/inventory",
     "art_label": "event_theme:sand_glass",
-    "art_category": "other",
+    "art_category": "events",
     "editor_source": "custom/sources/24adad0cc9bb1a509f0224de8ac02f838a7d8b25435be2b90c1deaa9078f86fc.png",
     "editor_settings": {
       "fit": "contain",
@@ -2703,7 +2703,7 @@
     "sheet": "custom/variants/317f4f7d7004b2660e1362d4048c3c70eff43445011fff83bca80f031bba8b92/sprite",
     "inventory_sheet": "custom/variants/317f4f7d7004b2660e1362d4048c3c70eff43445011fff83bca80f031bba8b92/inventory",
     "art_label": "event_theme:solar_glass",
-    "art_category": "other",
+    "art_category": "events",
     "editor_source": "custom/sources/24adad0cc9bb1a509f0224de8ac02f838a7d8b25435be2b90c1deaa9078f86fc.png",
     "editor_settings": {
       "fit": "contain",
@@ -2725,7 +2725,7 @@
     "sheet": "custom/variants/c892bf9c27d66ba31804c4854898453de57df91098e1e8abd16ec280d0521b17/sprite",
     "inventory_sheet": "custom/variants/c892bf9c27d66ba31804c4854898453de57df91098e1e8abd16ec280d0521b17/inventory",
     "art_label": "event_theme:mann",
-    "art_category": "other",
+    "art_category": "events",
     "editor_source": "custom/sources/24adad0cc9bb1a509f0224de8ac02f838a7d8b25435be2b90c1deaa9078f86fc.png",
     "editor_settings": {
       "fit": "contain",
@@ -2747,7 +2747,7 @@
     "sheet": "custom/variants/62f2ae2415882c44f88eb62cd370a0c41129f2906a315f7a5eb15e32b553cbff/sprite",
     "inventory_sheet": "custom/variants/62f2ae2415882c44f88eb62cd370a0c41129f2906a315f7a5eb15e32b553cbff/inventory",
     "art_label": "event_theme:lady",
-    "art_category": "other",
+    "art_category": "events",
     "editor_source": "custom/sources/24adad0cc9bb1a509f0224de8ac02f838a7d8b25435be2b90c1deaa9078f86fc.png",
     "editor_settings": {
       "fit": "contain",
@@ -2769,7 +2769,7 @@
     "sheet": "custom/variants/fb800f3a538ded7eb7fbf79d0a3047cbc39160aeca057f83a43e12e1210f7848/sprite",
     "inventory_sheet": "custom/variants/fb800f3a538ded7eb7fbf79d0a3047cbc39160aeca057f83a43e12e1210f7848/inventory",
     "art_label": "event_theme:old_press",
-    "art_category": "other",
+    "art_category": "events",
     "editor_source": "custom/sources/24adad0cc9bb1a509f0224de8ac02f838a7d8b25435be2b90c1deaa9078f86fc.png",
     "editor_settings": {
       "fit": "contain",
@@ -2791,7 +2791,7 @@
     "sheet": "custom/variants/b420d434af553dd176d6362ff574ecf1a441db960bfec756e6d1ef2a228a2a4b/sprite",
     "inventory_sheet": "custom/variants/b420d434af553dd176d6362ff574ecf1a441db960bfec756e6d1ef2a228a2a4b/inventory",
     "art_label": "event_theme:pocket",
-    "art_category": "other",
+    "art_category": "events",
     "editor_source": "custom/sources/24adad0cc9bb1a509f0224de8ac02f838a7d8b25435be2b90c1deaa9078f86fc.png",
     "editor_settings": {
       "fit": "contain",
@@ -2813,7 +2813,7 @@
     "sheet": "custom/variants/e8011b2d8331ac03c901d9cec478aaa89800def026e26045c2c79d08f7211ee3/sprite",
     "inventory_sheet": "custom/variants/e8011b2d8331ac03c901d9cec478aaa89800def026e26045c2c79d08f7211ee3/inventory",
     "art_label": "event_theme:spoiled_food",
-    "art_category": "other",
+    "art_category": "events",
     "editor_source": "custom/sources/24adad0cc9bb1a509f0224de8ac02f838a7d8b25435be2b90c1deaa9078f86fc.png",
     "editor_settings": {
       "fit": "contain",
@@ -2826,6 +2826,182 @@
         439,
         1232,
         884
+      ]
+    }
+  },
+  "art_custom_055": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/c9197899e78b2999dd30bf152b7a8a0ad9ca4367e397593eb4d11a8ab13f73ad/sprite",
+    "inventory_sheet": "custom/variants/c9197899e78b2999dd30bf152b7a8a0ad9ca4367e397593eb4d11a8ab13f73ad/inventory",
+    "art_label": "event_theme:barbed_wires",
+    "art_category": "events",
+    "editor_source": "custom/sources/bd477e1ab4c518f74034e3a74b3e2e5cabfb48e995d53256093a8887c24efb3c.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        0,
+        204,
+        313,
+        642
+      ]
+    }
+  },
+  "art_custom_056": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/034fa390aaec3ec9081b33111a44c2e4cc87df86fb4e02e259b9ade45c8f60db/sprite",
+    "inventory_sheet": "custom/variants/034fa390aaec3ec9081b33111a44c2e4cc87df86fb4e02e259b9ade45c8f60db/inventory",
+    "art_label": "event_theme:thief_trader1",
+    "art_category": "events",
+    "editor_source": "custom/sources/bd477e1ab4c518f74034e3a74b3e2e5cabfb48e995d53256093a8887c24efb3c.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        960,
+        191,
+        1254,
+        636
+      ]
+    }
+  },
+  "art_custom_057": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/e7e18e486e0dce797b20011ec1cabc5a728e8f7fabf2fdd3f4c226b1d5af4c46/sprite",
+    "inventory_sheet": "custom/variants/e7e18e486e0dce797b20011ec1cabc5a728e8f7fabf2fdd3f4c226b1d5af4c46/inventory",
+    "art_label": "event_theme:thief_trader2",
+    "art_category": "events",
+    "editor_source": "custom/sources/bd477e1ab4c518f74034e3a74b3e2e5cabfb48e995d53256093a8887c24efb3c.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        0,
+        658,
+        334,
+        1128
+      ]
+    }
+  },
+  "art_custom_058": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/ecb1f83e6f8f394a9e3a819852a6341afdfbcb71586913969f02198a6ff471d1/sprite",
+    "inventory_sheet": "custom/variants/ecb1f83e6f8f394a9e3a819852a6341afdfbcb71586913969f02198a6ff471d1/inventory",
+    "art_label": "event_theme:thief_trader3",
+    "art_category": "events",
+    "editor_source": "custom/sources/bd477e1ab4c518f74034e3a74b3e2e5cabfb48e995d53256093a8887c24efb3c.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        326,
+        650,
+        659,
+        1147
+      ]
+    }
+  },
+  "art_custom_059": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/061db79f5cbb8301c18a7b803576c89ab1eb4fc03b5852be12a82f03772fa3d2/sprite",
+    "inventory_sheet": "custom/variants/061db79f5cbb8301c18a7b803576c89ab1eb4fc03b5852be12a82f03772fa3d2/inventory",
+    "art_label": "event_theme:industrial_light",
+    "art_category": "events",
+    "editor_source": "custom/sources/bd477e1ab4c518f74034e3a74b3e2e5cabfb48e995d53256093a8887c24efb3c.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        657,
+        650,
+        960,
+        1147
+      ]
+    }
+  },
+  "art_custom_060": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/087b459912ec5fe0c2a3999c7cce406334374c817a0f553e75f1a0764ec89dda/sprite",
+    "inventory_sheet": "custom/variants/087b459912ec5fe0c2a3999c7cce406334374c817a0f553e75f1a0764ec89dda/inventory",
+    "art_label": "event_theme:radio_sign2",
+    "art_category": "events",
+    "editor_source": "custom/sources/bd477e1ab4c518f74034e3a74b3e2e5cabfb48e995d53256093a8887c24efb3c.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        957,
+        650,
+        1253,
+        1130
+      ]
+    }
+  },
+  "art_custom_061": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/53572a1a105d500914ce8cfd1a33976e7f1f188b797b8fac81b4aff7950acd40/sprite",
+    "inventory_sheet": "custom/variants/53572a1a105d500914ce8cfd1a33976e7f1f188b797b8fac81b4aff7950acd40/inventory",
+    "art_label": "event_theme:curier_advise",
+    "art_category": "events",
+    "editor_source": "custom/sources/82e47981ac3c41d54f3ddc319a43e576cedd5209f03b72171ddd9e55a04e5a37.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        1209,
+        454,
+        1592,
+        916
+      ]
+    }
+  },
+  "art_custom_062": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/366b26512b0cdb7b6f96a34847b60e0c18594b79611cdf451d26674a89a68d67/sprite",
+    "inventory_sheet": "custom/variants/366b26512b0cdb7b6f96a34847b60e0c18594b79611cdf451d26674a89a68d67/inventory",
+    "art_label": "event_theme:lone_man",
+    "art_category": "events",
+    "editor_source": "custom/sources/82e47981ac3c41d54f3ddc319a43e576cedd5209f03b72171ddd9e55a04e5a37.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        1601,
+        427,
+        1920,
+        899
       ]
     }
   }
