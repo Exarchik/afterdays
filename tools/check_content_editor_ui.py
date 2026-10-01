@@ -16,7 +16,7 @@ def run(capture=None):
         root=tk.Tk();ttk.Style(root).theme_use('clam')
         try:
             app=ContentEditor(root,root_path/'data/road_events.json',root_path);root.update()
-            assert len(app.tabs.tabs())==7
+            assert len(app.tabs.tabs())==9
             assert app.commit() and not app.store.dirty,'Opening unchanged sections must not alter catalogs'
             app.events.fields['title'].set('Тест спільного збереження')
             for section,panel in app.panels.items():

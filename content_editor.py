@@ -8,6 +8,8 @@ from event_editor import Editor
 from entity_editor import EntityPanel
 from art_library import Library
 from art_editor import ArtPanel
+from quest_editor import QuestPanel
+from dialogue_editor import DialoguePanel
 
 
 class ContentEditor(ttk.Frame):
@@ -17,6 +19,10 @@ class ContentEditor(ttk.Frame):
         self.store=entity_catalog.Store(project_root)
         self.library=Library(self.store);root._editor_art_library=self.library
         self.tabs=ttk.Notebook(self);self.tabs.pack(fill='both',expand=True)
+        self.quests=QuestPanel(self.tabs,self.store,self.save_all)
+        self.tabs.add(self.quests,text='Квести')
+        self.dialogues=DialoguePanel(self.tabs,self.store,self.save_all)
+        self.tabs.add(self.dialogues,text='Діалоги')
         event_tab=ttk.Frame(self.tabs);self.tabs.add(event_tab,text='Випадкові події')
         self.events=Editor(event_tab,event_path,embedded=True)
         self.events.save_handler=self.save_all
@@ -31,11 +37,14 @@ class ContentEditor(ttk.Frame):
 
     def refresh_assets(self):
         self.events.refresh_art()
+        self.dialogues.show_art()
         for panel in self.panels.values():
             if panel.current:panel.open(panel.current)
 
     def commit(self):
-        if not self.events.commit():self.tabs.select(0);return False
+        if not self.quests.commit():self.tabs.select(self.quests);return False
+        if not self.dialogues.commit():self.tabs.select(self.dialogues);return False
+        if not self.events.commit():self.tabs.select(2);return False
         for section,panel in self.panels.items():
             if not panel.commit():self.tabs.select(panel);return False
         return True
@@ -60,6 +69,8 @@ class ContentEditor(ttk.Frame):
         except (ValueError,OSError) as exc:
             messagebox.showerror('Зміни не збережено',str(exc),parent=self.root);return False
         for panel in self.panels.values():panel.rebuild();panel.status.set('Збережено · Перезапустіть гру; уже створені предмети в сейві зберігають свої характеристики')
+        self.dialogues.rebuild();self.dialogues.status.set('Діалоги збережено')
+        self.quests.rebuild();self.quests.status.set('Квести збережено · Перезапустіть гру')
         self.arts.rebuild();self.arts.status.set('Арти збережено · Перезапустіть гру')
         return True
 

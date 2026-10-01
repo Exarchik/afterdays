@@ -1,0 +1,122 @@
+{
+  "version": 1,
+  "actors": {
+    "player": {
+      "name": "Головний герой",
+      "art": "npc:traveler"
+    },
+    "guide": {
+      "name": "Мандрівниця Олена",
+      "art": "npc:Радистка Ніка"
+    }
+  },
+  "variables": {
+    "helped": {
+      "type": "bool",
+      "default": false
+    },
+    "trust": {
+      "type": "int",
+      "default": 0
+    }
+  },
+  "dialogues": [
+    {
+      "id": "demo_crossroads",
+      "title": "Зустріч на роздоріжжі",
+      "conditions": [],
+      "root": "greeting",
+      "nodes": {
+        "greeting": {
+          "actor": "guide",
+          "text": "Вітаю. Допоможеш донести припаси до поселення?",
+          "next": null,
+          "replies": [
+            {
+              "id": "help",
+              "text": "Так, допоможу.",
+              "next": "thanks",
+              "actions": [
+                {
+                  "kind": "set",
+                  "variable": "helped",
+                  "value": true
+                },
+                {
+                  "kind": "add",
+                  "variable": "trust",
+                  "value": 1
+                },
+                {
+                  "kind": "reward",
+                  "reward": "parts",
+                  "amount": 12
+                }
+              ],
+              "conditions": []
+            },
+            {
+              "id": "refuse",
+              "text": "Ні, я поспішаю.",
+              "next": "farewell",
+              "actions": [],
+              "conditions": []
+            }
+          ]
+        },
+        "thanks": {
+          "actor": "guide",
+          "text": "Дякую! Ось 12 запчастин. Тепер я можу довірити тобі наш секрет.",
+          "next": null,
+          "replies": [
+            {
+              "id": "secret",
+              "text": "Розкажи про секрет.",
+              "next": "secret",
+              "actions": [],
+              "conditions": [
+                {
+                  "variable": "trust",
+                  "op": ">=",
+                  "value": 1
+                }
+              ]
+            }
+          ]
+        },
+        "secret": {
+          "actor": "guide",
+          "text": "На сході є безпечний прохід. Шукай стару водонапірну вежу.",
+          "next": null,
+          "replies": []
+        },
+        "farewell": {
+          "actor": "player",
+          "text": "Можливо, іншим разом. Бережи себе.",
+          "next": null,
+          "replies": []
+        }
+      }
+    },
+    {
+      "id": "demo_trusted",
+      "title": "Розмова після допомоги",
+      "conditions": [
+        {
+          "variable": "helped",
+          "op": "==",
+          "value": true
+        }
+      ],
+      "root": "welcome",
+      "nodes": {
+        "welcome": {
+          "actor": "guide",
+          "text": "Рада знову бачити друга нашого поселення.",
+          "next": null,
+          "replies": []
+        }
+      }
+    }
+  ]
+}

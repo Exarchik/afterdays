@@ -32,7 +32,7 @@ FIELDS = {
     'armor': [('defense','Базовий захист',int),('weight','Вага, кг',float),('min_level','Мін. рівень появи',int)],
     'helmet': [('defense','Базовий захист',int),('weight','Вага, кг',float),('min_level','Мін. рівень появи',int)],
     'module': [('target','Для спорядження',TARGETS),('stat','Основний параметр',STATS),('base','Базовий бонус',float),('weight','Вага, кг',float)],
-    'monster': [('base_level','Базовий рівень виду',int),('hp','Базове здоров’я',int),('damage','Базова шкода',int),('attack','Базова атака',int),('defense','Базовий захист',int),('range','Дальність',int),('speed','Швидкість',int),('regen','Регенерація за хід',int),('color','Колір без спрайта',str)],
+    'monster': [('trophy_value','Базова вартість трофея, кр.',int),('base_level','Базовий рівень виду',int),('hp','Базове здоров’я',int),('damage','Базова шкода',int),('attack','Базова атака',int),('defense','Базовий захист',int),('range','Дальність',int),('speed','Швидкість',int),('regen','Регенерація за хід',int),('color','Колір без спрайта',str)],
 }
 
 def read(path): return json.loads(Path(path).read_text(encoding='utf-8'))
@@ -47,7 +47,7 @@ def validate_definition(section, ident, data, texts, art):
     need(isinstance(texts.get('description'),str), 'опис має бути текстом')
     need(isinstance(data.get('sprite_id'),str) and data['sprite_id'] in art, 'невідомий асет')
     for field,label,kind in FIELDS[section]:
-        value=data.get(field, .3 if section=='module' and field=='weight' else None)
+        value=data.get(field, 2*(4+data.get('legacy_index',0)) if section=='monster' and field=='trophy_value' else .3 if section=='module' and field=='weight' else None)
         if isinstance(kind,dict): need(isinstance(value,str) and value in kind, label+': невідоме значення')
         elif kind is str: need(isinstance(value,str),label+': потрібен текст')
         else:
@@ -79,7 +79,7 @@ def validate_definition(section, ident, data, texts, art):
 class Store:
     def __init__(self, root=ROOT):
         self.root=Path(root)
-        self.paths={group:self.root/'data'/f'{group}.json' for group in ('equipment','modules','monsters','sprites')}
+        self.paths={group:self.root/'data'/f'{group}.json' for group in ('equipment','modules','monsters','sprites','quests','dialogues')}
         self.paths['texts']=self.root/'locales/uk/entities.json'
         self.data={key:read(path) for key,path in self.paths.items()}
         self.baseline=copy.deepcopy(self.data)
@@ -100,6 +100,7 @@ class Store:
         names={field:texts.get(ident+'.'+field,'') for field in ('name','description','trophy')}
         if section=='module': data.setdefault('weight',.3)
         if section=='monster':
+            data.setdefault('trophy_value',2*(4+data['legacy_index']))
             data.setdefault('corpse_sprite_id','corpse:'+ident)
             data.setdefault('trophy_sprite_id','trophy_'+ident)
         return data,names
@@ -133,7 +134,10 @@ class Store:
         return ident
 
     def validate(self):
-        errors=[]
+        import quest_catalog
+        errors=quest_catalog.validate(self.data['quests'])
+        import dialogue_system
+        errors+=dialogue_system.validate(self.data['dialogues'],self.art,{q['id']:q for q in self.data['quests']['quests']})
         for section in SECTIONS:
             for ident,_ in self.items(section):
                 data,texts=self.draft(section,ident)

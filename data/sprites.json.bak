@@ -3180,5 +3180,27 @@
         1254
       ]
     }
+  },
+  "art_custom_071": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/f1588963553f38ec548507e2a78736d0d0b4f99859fd863e6f7326a80f514fda/sprite",
+    "inventory_sheet": "custom/variants/f1588963553f38ec548507e2a78736d0d0b4f99859fd863e6f7326a80f514fda/inventory",
+    "art_label": "event_theme:expedition_safe",
+    "art_category": "events",
+    "editor_source": "custom/sources/ddcbe74d011cd47a809e730afcccccb8b36f224b5aca986625a517d1946ba68c.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        831,
+        846,
+        1254,
+        1235
+      ]
+    }
   }
 }

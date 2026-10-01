@@ -26,7 +26,7 @@ def run(capture=None):
             ImageGrab.grab(bbox=(widget.winfo_rootx(),widget.winfo_rooty(),widget.winfo_rootx()+widget.winfo_width(),widget.winfo_rooty()+widget.winfo_height())).save(Path(capture)/name)
         try:
             app=ContentEditor(root,project/'data/road_events.json',project);root.update()
-            assert len(app.tabs.tabs())==7
+            assert len(app.tabs.tabs())==9
             app.tabs.select(app.arts);root.update()
             def interact(dialog):
                 root.update();dialog.name.set('Тестовий арт');dialog.group.set('Події')

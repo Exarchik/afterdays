@@ -90,18 +90,27 @@ class EntityPanel(ttk.Frame):
         self.ident=tk.StringVar();row(self.form,'Сталий ID',self.ident,readonly=True)
         for key,label in [('name','Назва'),('description','Опис')]+([('trophy','Назва трофея')] if section=='monster' else []):
             self.texts[key]=tk.StringVar();row(self.form,label,self.texts[key])
-        self.art=tk.StringVar();self.picture=ttk.Label(self.form);self.picture.pack(pady=8)
-        ttk.Label(self.form,textvariable=self.art,wraplength=340).pack()
-        ttk.Button(self.form,text='Вибрати зображення…',command=lambda:self.choose_art('sprite_id')).pack(pady=5)
-        self.extra_art={}
+        self.art=tk.StringVar();self.extra_art={};self.pictures={};self.images={}
         if section=='monster':
-            for field,label in [('corpse_sprite_id','Зображення решток…'),('trophy_sprite_id','Зображення трофея…')]:
-                self.extra_art[field]=tk.StringVar()
-                ttk.Button(self.form,text=label,command=lambda f=field:self.choose_art(f)).pack(fill='x',pady=2)
-                ttk.Label(self.form,textvariable=self.extra_art[field],wraplength=340).pack(anchor='w')
+            art_row=ttk.Frame(self.form);art_row.pack(fill='x',pady=8)
+            for column,(field,label) in enumerate([('sprite_id','Монстр'),('corpse_sprite_id','Труп'),('trophy_sprite_id','Трофей')]):
+                art_row.columnconfigure(column,weight=1,uniform='art')
+                cell=ttk.Frame(art_row);cell.grid(row=0,column=column,sticky='nsew',padx=2)
+                ttk.Label(cell,text=label).pack()
+                self.pictures[field]=ttk.Label(cell);self.pictures[field].pack(pady=4)
+                if field!='sprite_id':self.extra_art[field]=tk.StringVar()
+                ttk.Button(cell,text='Вибрати…',command=lambda f=field:self.choose_art(f),width=11).pack()
+            self.picture=self.pictures['sprite_id']
+            self.trophy_value=tk.StringVar()
+            ttk.Label(cell,text='Базова вартість, кр.',wraplength=110,justify='center').pack(pady=(4,0))
+            ttk.Entry(cell,textvariable=self.trophy_value,width=10,justify='center').pack(pady=4)
+        else:
+            self.picture=ttk.Label(self.form);self.picture.pack(pady=8)
+            ttk.Label(self.form,textvariable=self.art,wraplength=340).pack()
+            ttk.Button(self.form,text='Вибрати зображення…',command=lambda:self.choose_art('sprite_id')).pack(pady=5)
         for field,label,kind in catalog.FIELDS[section]:
-            var=tk.StringVar();self.fields[field]=var
-            row(self.form,label,var,list(kind.values()) if isinstance(kind,dict) else None)
+            var=self.trophy_value if field=='trophy_value' else tk.StringVar();self.fields[field]=var
+            if field!='trophy_value':row(self.form,label,var,list(kind.values()) if isinstance(kind,dict) else None)
             var.trace_add('write',lambda *args,f=field:self.field_changed(f))
         self.resists={}
         if section=='monster':
@@ -143,14 +152,19 @@ class EntityPanel(ttk.Frame):
         for var in (self.level,self.tier,self.condition,self.player_level,self.grade,self.tradeoff,self.weak):var.trace_add('write',lambda *args:self.schedule_preview())
         self.status=tk.StringVar();ttk.Label(self,textvariable=self.status).pack(fill='x',pady=(8,0))
         self.rebuild()
-        items=self.store.items(section)
-        if items:self.open(items[0][0])
+        items=self.list.get_children()
+        if items:self.open(items[0])
 
     def rebuild(self):
         self.loading=True;self.list.delete(*self.list.get_children())
-        for ident,data in sorted(self.store.items(self.section),key=lambda pair:self.store.data['texts'].get(pair[0]+'.name',pair[0]).casefold()):
+        level_key='base_level' if self.section=='monster' else 'min_level' if self.section in ('weapon','armor','helmet') else None
+        def sort_key(pair):
+            ident,data=pair;name=self.store.data['texts'].get(ident+'.name',ident)
+            return (data[level_key] if level_key else 0,name.casefold(),ident)
+        for ident,data in sorted(self.store.items(self.section),key=sort_key):
             name=self.store.data['texts'].get(ident+'.name',ident)
-            if self.query.get().casefold() in (name+' '+ident).casefold():self.list.insert('','end',iid=ident,text=name)
+            label=(f"Рів. {data[level_key]} · {name}" if level_key else name)
+            if self.query.get().casefold() in (label+' '+ident).casefold():self.list.insert('','end',iid=ident,text=label)
         if self.current and self.list.exists(self.current):self.list.selection_set(self.current)
         self.loading=False
         self.status.set(f'{len(self.store.items(self.section))} записів · Зміни застосуються після перезапуску гри')
@@ -178,6 +192,11 @@ class EntityPanel(ttk.Frame):
         if self.list.exists(ident):self.list.selection_set(ident);self.list.see(ident)
     def show_art(self):
         self.image=sprites.photo(self.root,self.art.get(),96);self.picture.configure(image=self.image or '')
+        if self.section=='monster':
+            self.images['sprite_id']=self.image
+            for field,var in self.extra_art.items():
+                self.images[field]=sprites.photo(self.root,var.get(),96)
+                self.pictures[field].configure(image=self.images[field] or '')
     def choose_art(self,field):
         var=self.art if field=='sprite_id' else self.extra_art[field]
         value=ArtDialog(self.root,var.get()).show()
@@ -204,6 +223,7 @@ class EntityPanel(ttk.Frame):
             if (data,names)!=self.loaded:
                 self.store.put(self.section,self.current,data,names)
                 self.loaded=copy.deepcopy((data,names))
+                self.rebuild()
             return True
         except (ValueError,TypeError) as exc:
             messagebox.showerror('Перевірте модель',str(exc),parent=self.root);return False

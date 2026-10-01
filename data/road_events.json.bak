@@ -13,7 +13,7 @@
       "choices": [
         {
           "id": "rest",
-          "text": "Витратити консерви",
+          "text": "Поділитись їжею",
           "costs": [
             {
               "kind": "food",
@@ -22,7 +22,7 @@
           ],
           "outcomes": [
             {
-              "chance": 1,
+              "chance": 1.0,
               "effects": [
                 {
                   "kind": "heal",
@@ -31,6 +31,15 @@
                 {
                   "kind": "xp",
                   "amount": 10
+                },
+                {
+                  "kind": "gear",
+                  "amount": 1,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 0.25,
+                  "destination": "loot"
                 }
               ]
             }
@@ -38,7 +47,7 @@
         },
         {
           "id": "leave",
-          "text": "Продовжити шлях",
+          "text": "Подякувати за гостинність і продовжити шлях",
           "costs": [],
           "outcomes": [
             {
@@ -71,11 +80,25 @@
           ],
           "outcomes": [
             {
-              "chance": 1,
+              "chance": 1.0,
               "effects": [
                 {
                   "kind": "money",
-                  "amount": 70
+                  "amount": 70,
+                  "per_level": 5,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "xp",
+                  "amount": 5,
+                  "per_level": 2,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
                 }
               ]
             }
@@ -695,11 +718,16 @@
           ],
           "outcomes": [
             {
-              "chance": 1,
+              "chance": 1.0,
               "effects": [
                 {
                   "kind": "money",
-                  "amount": 30
+                  "amount": 30,
+                  "per_level": 8,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
                 }
               ]
             }
@@ -740,11 +768,16 @@
           ],
           "outcomes": [
             {
-              "chance": 1,
+              "chance": 1.0,
               "effects": [
                 {
                   "kind": "money",
-                  "amount": 28
+                  "amount": 28,
+                  "per_level": 7,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
                 }
               ]
             }
@@ -776,7 +809,7 @@
       "choices": [
         {
           "id": "act",
-          "text": "Обміняти 1 банку тушонки",
+          "text": "Обміняти 1 банку тушонки на аптечку",
           "costs": [
             {
               "kind": "food",
@@ -790,6 +823,32 @@
                 {
                   "kind": "med",
                   "amount": 1
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "act_2",
+          "text": "Обміняти 1 радіопротектор на 2 аптечки",
+          "costs": [
+            {
+              "kind": "rad",
+              "amount": 1
+            }
+          ],
+          "outcomes": [
+            {
+              "chance": 1.0,
+              "effects": [
+                {
+                  "kind": "med",
+                  "amount": 2,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
                 }
               ]
             }
@@ -3837,7 +3896,7 @@
       "weight": 1.0,
       "title": "Капсула експедиції",
       "description": "У піску знайдено герметичну капсулу дослідників. Механічний замок ще працює.",
-      "art": "art_custom_013",
+      "art": "art_custom_071",
       "choices": [
         {
           "id": "act",
