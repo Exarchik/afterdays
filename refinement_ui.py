@@ -106,6 +106,8 @@ class QuestCards(tk.Frame):
         """Ініціалізує об’єкт, його початковий стан і потрібні залежності."""
         super().__init__(parent,bg=PANEL);self.app=app;self.mayor=mayor;self.selection=None;self.open_done=False;self.entries=[];self.rects=[]
         self.rep_label=tk.Label(self,bg=PANEL,fg=GOLD);self.rep_label.pack(fill='x')
+        self.story_label=tk.Label(self,bg=PANEL,fg=GOLD,wraplength=380,justify='left')
+        self.story_label.pack(fill='x',padx=8)
         self.canvas=tk.Canvas(self,bg='#17231e',height=424,highlightthickness=0)
         scroll=ttk.Scrollbar(self,command=self.canvas.yview);scroll.pack(side='right',fill='y')
         self.canvas.pack(fill='both',expand=True,padx=6,pady=6);self.canvas.config(yscrollcommand=scroll.set)
@@ -113,6 +115,8 @@ class QuestCards(tk.Frame):
         self.canvas.bind('<MouseWheel>',lambda e:self.canvas.yview_scroll(-1 if e.delta>0 else 1,'units'))
         self.detail=Detail(self,height=5);self.detail.pack(fill='x',padx=8)
         controls=tk.Frame(self,bg=PANEL);controls.pack(fill='x',padx=8,pady=3)
+        from story_ui import show as show_story
+        ttk.Button(controls,text='Сюжет',command=lambda:show_story(self)).pack(side='left')
         if mayor:ttk.Button(controls,text=tr('refinement_ui.0029'),command=self.accept).pack(side='left',expand=True,fill='x')
         ttk.Button(controls,text=tr('refinement_ui.0030'),command=self.turn_in).pack(side='left',expand=True,fill='x')
         ttk.Button(controls,text=tr('quests.abandon'),command=self.abandon).pack(side='left',expand=True,fill='x')
@@ -126,6 +130,10 @@ class QuestCards(tk.Frame):
     def refresh(self):
         """Оновлює віджети відповідно до поточного стану гри."""
         g=self.app.game
+        if hasattr(self,'story_label'):
+            g.story_sync()
+            active=[s for s in g.story_states().values() if s['status']=='active']
+            self.story_label.config(text='\n'.join('★ '+s['definition']['title']+' · Етап '+str(s['index']+1) for s in active))
         if self.mayor:
             self.permission_button.pack(before=self.canvas,fill='x',padx=8,pady=3) if g.settlement_requests() else self.permission_button.pack_forget()
         self.rep_label.config(text=tr('reputation.short',value=g.reputation()) if self.mayor else '')

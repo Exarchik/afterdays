@@ -27,6 +27,29 @@ class DialogueTests(unittest.TestCase):
         d=copy.deepcopy(self.doc);d['dialogues'][0]['nodes']['secret']['actor']='missing';self.assertTrue(ds.validate(d))
         d=copy.deepcopy(self.doc);d['dialogues'][0]['nodes']['greeting']['actor']='player';self.assertTrue(ds.validate(d))
         d=copy.deepcopy(self.doc);d['dialogues'][0]['nodes']['greeting']['replies'][0]['actions'][0]['value']='wrong';self.assertTrue(ds.validate(d))
+    def test_shared_continuation_and_cycle_detection(self):
+        doc=copy.deepcopy(self.doc)
+        d=next(d for d in doc['dialogues'] if d['id']=='noise_in_the_wind_radio')
+        self.assertEqual(len(d['nodes']),2)
+        self.assertEqual({r['next'] for r in d['nodes']['radio_call']['replies']},{'invitation'})
+        self.assertEqual(ds.validate(doc),[])
+        for choice,amount in [('trader',5),('supplies',1),('hands',1)]:
+            session=ds.Session(doc,d['id']);session.choose(choice)
+            self.assertEqual(session.current,'invitation');self.assertEqual(session.rewards,{'xp':amount})
+            session.choose('agree');self.assertIsNone(session.block)
+        d['nodes']['invitation']['replies'][0]['next']='radio_call'
+        self.assertTrue(ds.validate(doc))
+
+    def test_pruning_keeps_shared_nodes_until_last_reference_removed(self):
+        d=dict(root='root',nodes={
+            'root':dict(ds.node('npc'),replies=[dict(next='left'),dict(next='right')]),
+            'left':dict(ds.node('npc'),next='shared'),
+            'right':dict(ds.node('npc'),next='shared'),
+            'shared':dict(ds.node('npc'),next='end'),'end':ds.node()})
+        d['nodes']['root']['replies'].pop(0);ds.prune_unreachable(d)
+        self.assertNotIn('left',d['nodes']);self.assertIn('shared',d['nodes']);self.assertIn('end',d['nodes'])
+        d['nodes']['root']['replies'].clear();ds.prune_unreachable(d)
+        self.assertEqual(set(d['nodes']),{'root'})
     def test_game_rewards_persist_and_replay_is_safe(self):
         g=r.Game(5);before=g.count('parts');s=ds.Session(self.doc,'demo_crossroads',game=g);s.choose('help')
         self.assertEqual(g.count('parts')-before,12)

@@ -16,6 +16,7 @@ class QuestPanel(ttk.Frame):
         super().__init__(parent);self.store=store;self.on_save=on_save;self.current=None;self.loading=False
         self.status=tk.StringVar(value='Авторські квести з’являються у пропозиціях мера за заданими умовами. Сюжетні типи наведені як довідка.')
         bar=ttk.Frame(self);bar.pack(fill='x',padx=8,pady=6)
+        ttk.Button(bar,text='Сюжетні лінії',command=self.stories).pack(side='left',padx=3)
         for label,command in [('Новий квест',self.add),('Дублювати',self.duplicate),('Видалити',self.delete),('Зберегти всі зміни',on_save)]:
             ttk.Button(bar,text=label,command=command).pack(side='left',padx=3)
         split=ttk.Panedwindow(self,orient='horizontal');split.pack(fill='both',expand=True)
@@ -51,6 +52,13 @@ class QuestPanel(ttk.Frame):
 
     @property
     def document(self):return self.store.data['quests']
+
+    def stories(self):
+        owner=self.master.master
+        commit=owner.commit if hasattr(owner,'commit') else self.commit
+        if commit():
+            from story_editor import StoryEditor
+            StoryEditor(self,self.store)
 
     def rebuild(self):
         self.loading=True
@@ -134,6 +142,8 @@ class QuestPanel(ttk.Frame):
 
     def delete(self):
         if not self.current:return
+        if any(s['kind']=='quest' and s['ref']==self.current for story in self.document.get('stories',[]) for s in story['stages']):
+            messagebox.showerror('Квест використовується','Спочатку приберіть його з етапів сюжетної лінії.',parent=self);return
         if any(self.current in q['requires'] for q in self.document['quests']):
             messagebox.showerror('Квест використовується','Спочатку приберіть його з умов появи інших квестів.',parent=self);return
         if not messagebox.askyesno('Видалити квест','Видалити визначення квесту? Уже прийняті квести залишаться в сейвах.',parent=self):return

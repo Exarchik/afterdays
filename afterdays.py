@@ -1074,6 +1074,7 @@ def launch(test_hook=None):
             self.root = root
             root.app=self
             self.game = Game()
+            self.game.prepare_campaign()
             self.show_full_map = False
             self.perk_prompted = -1
             self.mode = 'world'
@@ -1320,6 +1321,13 @@ def launch(test_hook=None):
         def offer_notices(self):
             """Показує нові повідомлення про доступні події й завдання."""
             if self.dialog or self.fx.blocked:
+                return
+            from campaign_intro import pending
+            story=pending(self.game)
+            if story:
+                self.route.pause()
+                from story_ui import show
+                show(self.quest_panel,story)
                 return
             if self.game.road_event:
                 self.road_dialog()
@@ -1790,6 +1798,7 @@ def launch(test_hook=None):
             self.route.pause()
             if messagebox.askyesno(tr('afterdays.0204'), tr('afterdays.0205'), parent=self.root):
                 self.game = Game()
+                self.game.prepare_campaign()
                 self.perk_prompted = -1
                 self.refresh()
 

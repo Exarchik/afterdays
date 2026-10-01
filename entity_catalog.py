@@ -136,6 +136,9 @@ class Store:
     def validate(self):
         import quest_catalog
         errors=quest_catalog.validate(self.data['quests'])
+        if not errors:
+            import story_system
+            errors+=story_system.validate(self.data['quests'],self.data['dialogues'])
         import dialogue_system
         errors+=dialogue_system.validate(self.data['dialogues'],self.art,{q['id']:q for q in self.data['quests']['quests']})
         for section in SECTIONS:

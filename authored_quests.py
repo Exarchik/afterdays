@@ -3,9 +3,10 @@ import copy
 import quest_catalog as catalog
 import afterdays as r
 from metro035 import Game as BaseGame
+from story_system import StoryMixin
 
 
-class Game(BaseGame):
+class Game(StoryMixin,BaseGame):
     def price_quest(self,q):
         if q.get('authored_definition'):
             s=q['authored_definition'];q.update(reward=s['reward'],base_reward=s['reward'],xp_reward=s['xp_reward']);return
@@ -14,7 +15,7 @@ class Game(BaseGame):
     def mayor_offers(self):
         native=super().mayor_offers()
         if self.city is None or self.battle or self.city not in self.mayors or self.road_event:return native
-        specs=[s for s in catalog.DOCUMENT['quests'] if catalog.eligible(self,s)]
+        specs=[s for s in self.authored_specs() if catalog.eligible(self,s)]
         if not specs:return native
         cache=self.reputation_state.setdefault('authored_offers',{})
         authored=[]
@@ -50,6 +51,7 @@ class Game(BaseGame):
         q=next((q for q in self.quests if q['id']==ident),None)
         ok=super().turn_in(ident)
         if ok and q and q.get('authored_id'):self.reputation_state.setdefault('authored_history',{})[q['authored_id']]=self.turn
+        if ok:self.story_sync()
         return ok
 
     def abandon_quest(self,ident):

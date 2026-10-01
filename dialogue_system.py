@@ -1,4 +1,4 @@
-"""Validated dialogue trees and transactional, isolated dialogue sessions."""
+"""Validated acyclic dialogue graphs and transactional, isolated sessions."""
 import copy,re
 TYPES={'bool':'Так / ні','int':'Ціле число','str':'Текст'}
 OPS={'==':'дорівнює','!=':'не дорівнює','>=':'не менше','<=':'не більше','>':'більше','<':'менше'}
@@ -56,6 +56,9 @@ def validate(doc,art=None,quests=None):
                 need(typed(a.get('value'),v.get('type')) and (kind!='add' or v.get('type')=='int'),'Дія: некоректна змінна або тип.')
             elif kind=='reward':need(a.get('reward') in REWARDS and type(a.get('amount')) is int and 1<=a['amount']<=1000000,'Некоректна нагорода.')
             elif kind=='quest':need(isinstance(a.get('quest'),str) and (quests is None or a['quest'] in quests),'Дія посилається на невідомий квест.')
+            elif kind in ('reveal_city','reputation'):
+                need(type(a.get('city')) is int and a['city']>=0,'Некоректний ID міста.')
+                if kind=='reputation':need(type(a.get('amount')) is int and 1<=a['amount']<=100,'Репутація: від 1 до 100.')
             else:errors.append('Невідомий тип дії.')
     ids=[]
     for d in dialogs:
@@ -80,13 +83,27 @@ def validate(doc,art=None,quests=None):
                 conditions(r.get('conditions',[]));actions(r.get('actions',[]))
                 if r.get('next'):edges[key].append(r['next'])
         if any(target not in nodes for links in edges.values() for target in links):errors.append('Перехід веде до відсутнього блоку.');continue
-        seen=set()
+        seen=set();visiting=set()
         def visit(key):
-            if key in seen:return False
-            seen.add(key)
-            return all(visit(k) for k in edges.get(key,[]))
-        need(visit(d['root']) and seen==set(nodes),'Блоки мають утворювати одне дерево без циклів і відірваних гілок.')
+            if key in visiting:return False
+            if key in seen:return True
+            visiting.add(key)
+            if not all(visit(k) for k in edges.get(key,[])):return False
+            visiting.remove(key);seen.add(key);return True
+        need(visit(d['root']) and seen==set(nodes),'Усі блоки мають бути доступні від початку; цикли заборонені. Спільні продовження дозволені.')
     return errors
+
+
+def prune_unreachable(dialogue):
+    """Remove detached continuations while retaining nodes with another incoming path."""
+    nodes=dialogue['nodes'];seen=set();pending=[dialogue['root']]
+    while pending:
+        key=pending.pop()
+        if key in seen or key not in nodes:continue
+        seen.add(key);n=nodes[key]
+        pending.extend([n['next']] if n.get('next') else [])
+        pending.extend(r['next'] for r in n['replies'] if r.get('next'))
+    for key in set(nodes)-seen:del nodes[key]
 
 class Session:
     def __init__(self,document,dialogue_id,quests=None,game=None,player_name='Головний герой',player_art=None):
@@ -113,6 +130,12 @@ class Session:
         return actor
     def replies(self):return [r for r in self.block.get('replies',[]) if conditions_met(r.get('conditions',[]),self.values)] if self.block else []
     def choose(self,reply_id=None):
+        context=getattr(self,'story_context',None)
+        if context:
+            state=self.game.story_states().get(context[0])
+            if self.game.battle or self.game.road_event or not state or state['status']!='active' or state['index']!=context[1]:
+                raise ValueError('Цей сюжетний етап уже недоступний.')
+            if (state['node'] or self.dialogue['root'])!=self.current:raise ValueError('Розмову вже продовжено в іншому вікні.')
         n=self.block
         if not n:raise ValueError('Діалог завершено.')
         r=next((r for r in self.replies() if r['id']==reply_id),None) if reply_id else None
@@ -139,9 +162,21 @@ class Session:
                             offer=next((q for q in simulated.mayor_offers() if q.get('authored_id')==a['quest']),None)
                             if not offer or not simulated.accept_quest(offer['id']):raise ValueError('Квест зараз не можна прийняти: перевірте місто, умови та ліміт квестів.')
                     if a['quest'] not in started:started.append(a['quest'])
+                elif a['kind'] in ('reveal_city','reputation') and simulated:
+                    city=a['city']
+                    if not 0<=city<len(simulated.cities):raise ValueError('Місто не існує в цьому світі.')
+                    if a['kind']=='reveal_city':simulated.reveal(*simulated.cities[city],0)
+                    else:
+                        record=simulated.local_record(city)
+                        record['value']=min(100,record['value']+a['amount'])
             claimed.add(token)
         if simulated:
             simulated.reputation_state['dialogue_state']=dict(variables=values,claimed=sorted(claimed))
+            if context:
+                state=simulated.story_states()[context[0]]
+                state['node']=r.get('next') if r else n.get('next')
+                if state['node'] is None:simulated.story_advance(state)
+                simulated.story_sync()
             self.game.__dict__.clear();self.game.__dict__.update(simulated.__dict__)
         self.values,self.rewards,self.started,self.claimed=values,rewards,started,claimed
         self.history.append((self.actor()['name'],n['text'],r['text'] if r else ''))

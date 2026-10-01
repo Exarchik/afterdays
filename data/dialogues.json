@@ -8,6 +8,10 @@
     "guide": {
       "name": "Мандрівниця Олена",
       "art": "npc:Радистка Ніка"
+    },
+    "radio_voice": {
+      "name": "Голос із рації",
+      "art": "npc:Радистка Ніка"
     }
   },
   "variables": {
@@ -115,6 +119,92 @@
           "text": "Рада знову бачити друга нашого поселення.",
           "next": null,
           "replies": []
+        }
+      }
+    },
+    {
+      "id": "noise_in_the_wind_radio",
+      "title": "Шум у Вітрі — радіоперехоплення",
+      "conditions": [],
+      "root": "radio_call",
+      "nodes": {
+        "radio_call": {
+          "actor": "radio_voice",
+          "text": "Схоже в нас гості, готуйтесь хлопці!",
+          "next": null,
+          "replies": [
+            {
+              "id": "trader",
+              "text": "Я не шукаю неприємностей, я звичайний мандрівний торговець",
+              "next": "invitation",
+              "conditions": [],
+              "actions": [
+                {
+                  "kind": "reward",
+                  "reward": "xp",
+                  "amount": 5
+                },
+                {
+                  "kind": "reveal_city",
+                  "city": 0
+                }
+              ]
+            },
+            {
+              "id": "supplies",
+              "text": "Я не потривожу нікого, мені треба лише поповнити запаси",
+              "next": "invitation",
+              "conditions": [],
+              "actions": [
+                {
+                  "kind": "reward",
+                  "reward": "xp",
+                  "amount": 1
+                },
+                {
+                  "kind": "reveal_city",
+                  "city": 0
+                }
+              ]
+            },
+            {
+              "id": "hands",
+              "text": "*Мовчки підняти руки*",
+              "next": "invitation",
+              "conditions": [],
+              "actions": [
+                {
+                  "kind": "reward",
+                  "reward": "xp",
+                  "amount": 1
+                },
+                {
+                  "kind": "reveal_city",
+                  "city": 0
+                }
+              ]
+            }
+          ]
+        },
+        "invitation": {
+          "actor": "radio_voice",
+          "text": "Я не знаю, хто ти такий, але в нас є серйозніші проблеми ніж якийсь мандрівний торгаш. Ось тобі точка. Підходь поговорим",
+          "next": null,
+          "replies": [
+            {
+              "id": "agree",
+              "text": "Добре",
+              "next": null,
+              "conditions": [],
+              "actions": [
+                {
+                  "kind": "reputation",
+                  "city": 0,
+                  "amount": 5
+                }
+              ]
+            }
+          ]
         }
       }
     }

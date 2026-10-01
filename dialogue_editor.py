@@ -41,8 +41,8 @@ class VariableDialog(Dialog):
 class RuleDialog(Dialog):
     def __init__(self,parent,doc,quests,rule=None,action=False):
         super().__init__(parent,'Дія відповіді' if action else 'Умова','680x460');self.doc=doc;self.quests=quests;self.action=action
-        rule=rule or {};self.kind=tk.StringVar(value={'set':'Задати змінну','add':'Додати до змінної','reward':'Нагорода','quest':'Почати квест'}.get(rule.get('kind'),'Задати змінну'))
-        if action:row(self.body,'Дія',self.kind,['Задати змінну','Додати до змінної','Нагорода','Почати квест'])
+        rule=rule or {};self.kind=tk.StringVar(value={'set':'Задати змінну','add':'Додати до змінної','reward':'Нагорода','quest':'Почати квест','reveal_city':'Відкрити місто','reputation':'Репутація міста'}.get(rule.get('kind'),'Задати змінну'))
+        if action:row(self.body,'Дія',self.kind,['Задати змінну','Додати до змінної','Нагорода','Почати квест','Відкрити місто','Репутація міста'])
         self.variable=tk.StringVar(value=rule.get('variable',next(iter(doc['variables']),'')));row(self.body,'Змінна',self.variable,list(doc['variables']))
         self.op=tk.StringVar(value=ds.OPS[rule.get('op','==')])
         if not action:row(self.body,'Порівняння',self.op,list(ds.OPS.values()))
@@ -50,11 +50,22 @@ class RuleDialog(Dialog):
         self.reward=tk.StringVar(value=ds.REWARDS[rule.get('reward','money')]);self.amount=tk.StringVar(value=str(rule.get('amount',1)))
         self.quest=tk.StringVar(value=rule.get('quest',next(iter(quests),'')))
         if action:
+            self.geometry('680x540')
+            self.city=tk.StringVar(value=str(rule.get('city',0)));row(self.body,'ID міста (для відкриття / репутації)',self.city)
             row(self.body,'Нагорода',self.reward,list(ds.REWARDS.values()));row(self.body,'Кількість',self.amount)
             row(self.body,'ID квесту',self.quest,list(quests))
             ttk.Label(self.body,text='Заповніть поля обраної дії. Квести беруться з вкладки «Квести». Нагороди та дії відповіді виконуються один раз за сейв.',wraplength=620).pack(pady=12)
     def read(self):
-        kind={'Задати змінну':'set','Додати до змінної':'add','Нагорода':'reward','Почати квест':'quest'}[self.kind.get()]
+        kind={'Задати змінну':'set','Додати до змінної':'add','Нагорода':'reward','Почати квест':'quest','Відкрити місто':'reveal_city','Репутація міста':'reputation'}[self.kind.get()]
+        if self.action and kind in ('reveal_city','reputation'):
+            city=int(self.city.get())
+            if city<0:raise ValueError('ID міста має бути невід’ємним.')
+            result=dict(kind=kind,city=city)
+            if kind=='reputation':
+                amount=int(self.amount.get())
+                if not 1<=amount<=100:raise ValueError('Репутація: від 1 до 100.')
+                result['amount']=amount
+            return result
         if self.action and kind=='reward':
             amount=int(self.amount.get())
             if not 1<=amount<=1000000:raise ValueError('Кількість: 1–1000000.')
@@ -74,6 +85,8 @@ class RuleDialog(Dialog):
 
 
 def rule_text(r):
+    if r.get('kind')=='reveal_city':return f"Відкрити місто {r['city']}"
+    if r.get('kind')=='reputation':return f"Місто {r['city']}: +{r['amount']} репутації"
     if 'op' in r:return f"{r['variable']} {ds.OPS[r['op']]} {r['value']}"
     if r['kind'] in ('set','add'):return f"{r['variable']} {'=' if r['kind']=='set' else '+='} {r['value']}"
     if r['kind']=='reward':return f"+{r['amount']} {ds.REWARDS[r['reward']]}"
@@ -108,16 +121,33 @@ class ConditionsDialog(Dialog):
     def read(self):return self.rules.rows
 
 class ReplyDialog(Dialog):
-    def __init__(self,parent,doc,quests,reply):
+    def __init__(self,parent,doc,quests,reply,nodes=None,new=False):
         super().__init__(parent,'Відповідь гравця','800x680');self.original=copy.deepcopy(reply)
         self.text=tk.StringVar(value=reply['text']);row(self.body,'Текст відповіді',self.text)
+        self.targets={'Завершити діалог':None}
+        if new:self.targets['Створити новий блок']='__new__'
+        self.targets.update({key+' — '+n['text'][:55]:key for key,n in (nodes or {}).items()})
+        target='__new__' if new else reply.get('next')
+        self.target=tk.StringVar(value=next((label for label,value in self.targets.items() if value==target),'Завершити діалог'))
+        row(self.body,'Після відповіді перейти до',self.target,list(self.targets))
         ttk.Label(self.body,text='Показувати відповідь, якщо виконано всі умови:').pack(anchor='w',pady=8)
         self.conditions=Rules(self.body,doc,quests,reply['conditions']);self.conditions.pack(fill='both',expand=True)
         ttk.Label(self.body,text='Дії після вибору (у зазначеному порядку):').pack(anchor='w',pady=8)
         self.actions=Rules(self.body,doc,quests,reply['actions'],True);self.actions.pack(fill='both',expand=True)
     def read(self):
         if not self.text.get().strip():raise ValueError('Вкажіть текст відповіді.')
-        return dict(self.original,text=self.text.get().strip(),conditions=self.conditions.rows,actions=self.actions.rows)
+        return dict(self.original,text=self.text.get().strip(),conditions=self.conditions.rows,actions=self.actions.rows,next=self.targets[self.target.get()])
+
+
+class LinkDialog(Dialog):
+    def __init__(self,parent,nodes,current):
+        super().__init__(parent,'Перехід до спільного блоку','720x260')
+        self.targets={'Завершити діалог':None}
+        self.targets.update({key+' — '+n['text'][:60]:key for key,n in nodes.items()})
+        self.target=tk.StringVar(value=next(label for label,value in self.targets.items() if value==current))
+        row(self.body,'Наступний блок',self.target,list(self.targets))
+        ttk.Label(self.body,text='Блок може мати кілька вхідних посилань. Циклічні переходи заборонені.',wraplength=650).pack(pady=12)
+    def read(self):return {'next':self.targets[self.target.get()]}
 
 class Tester(tk.Toplevel):
     def __init__(self,parent,document,ident,quests):
@@ -180,7 +210,7 @@ class DialoguePanel(ttk.Frame):
         self.tree.configure(yscrollcommand=sy.set,xscrollcommand=sx.set);self.tree.column('#0',width=520,minwidth=250)
         self.tree.bind('<<TreeviewSelect>>',self.select_node)
         bar=ttk.Frame(left);bar.pack(fill='x')
-        for label,command in [('+ Відповідь і блок',self.add_reply),('+ Наступна фраза',self.add_next),('Видалити гілку',self.delete_node)]:ttk.Button(bar,text=label,command=command).pack(fill='x',pady=2)
+        for label,command in [('+ Відповідь',self.add_reply),('+ Наступна фраза',self.add_next),('Перехід до наявного блоку…',self.link_next),('Видалити блок',self.delete_node)]:ttk.Button(bar,text=label,command=command).pack(fill='x',pady=2)
         right=ttk.Frame(split,padding=10);split.add(right,weight=2)
         self.actor=tk.StringVar();self.actor_box=row(right,'Актор',self.actor,[])
         self.picture=ttk.Label(right);self.picture.pack(pady=5);self.actor_box.bind('<<ComboboxSelected>>',lambda e:self.show_art())
@@ -188,7 +218,7 @@ class DialoguePanel(ttk.Frame):
         ttk.Label(right,text='Варіанти відповідей гравця (умови й дії — подвійний клік)').pack(anchor='w',pady=8)
         self.replies=tk.Listbox(right,height=8,exportselection=False);self.replies.pack(fill='both',expand=True);self.replies.bind('<Double-1>',lambda e:self.edit_reply())
         ttk.Button(right,text='Редагувати відповідь, умови та дії…',command=self.edit_reply).pack(fill='x',pady=6)
-        self.status=tk.StringVar(value='Оберіть блок дерева. Для фраз героя використовуйте «Наступна фраза», для інших акторів — відповіді гравця.')
+        self.status=tk.StringVar(value='Кілька відповідей можуть вести до одного блоку. Позначка ↪ — посилання на спільну фразу; натисніть, щоб її відкрити.')
         ttk.Label(self,textvariable=self.status,wraplength=1200).pack(fill='x',pady=6)
         self.rebuild()
         if self.doc['dialogues']:self.open(self.doc['dialogues'][0]['id'])
@@ -206,7 +236,12 @@ class DialoguePanel(ttk.Frame):
         self.actor_box.configure(values=[k+' — '+a['name'] for k,a in self.doc['actors'].items()])
         if self.current:
             self.selected.set(self.current+' — '+self.dialogue['title']);self.tree.delete(*self.tree.get_children())
+            self.links={};seen=set()
             def add(key,parent=''):
+                if key in seen:
+                    ref='link:'+str(len(self.links));self.links[ref]=key
+                    self.tree.insert(parent,'end',iid=ref,text='↪ '+key+' (спільний блок)');return
+                seen.add(key)
                 n=self.dialogue['nodes'][key];self.tree.insert(parent,'end',iid=key,text=self.doc['actors'][n['actor']]['name']+': '+n['text'][:55],open=True)
                 if n.get('next'):add(n['next'],key)
                 for r in n['replies']:
@@ -238,6 +273,9 @@ class DialoguePanel(ttk.Frame):
         selected=self.tree.selection()
         if not selected:return
         key=selected[0]
+        if key in getattr(self,'links',{}):
+            if self.commit():self.open_node(self.links[key])
+            return
         if key.startswith('reply:'):
             parent=self.tree.parent(key)
             if parent!=self.current_node:
@@ -257,9 +295,13 @@ class DialoguePanel(ttk.Frame):
         if n['actor']=='player' or n.get('next'):messagebox.showinfo('Відповіді','Відповіді доступні для фраз іншого актора без прямого переходу.',parent=self);return
         rid=fresh('answer',{r['id'] for n in self.dialogue['nodes'].values() for r in n['replies']})
         reply=dict(id=rid,text='Нова відповідь',conditions=[],actions=[],next=None)
-        value=ReplyDialog(self,self.doc,self.quests,reply).show()
+        value=ReplyDialog(self,self.doc,self.quests,reply,self.dialogue['nodes'],new=True).show()
         if value:
-            key=fresh('block',self.dialogue['nodes']);self.dialogue['nodes'][key]=ds.node(n['actor']);value['next']=key;n['replies'].append(value);self.rebuild();self.open_node(key)
+            doc=copy.deepcopy(self.doc);d=next(d for d in doc['dialogues'] if d['id']==self.current)
+            if value['next']=='__new__':
+                key=fresh('block',d['nodes']);d['nodes'][key]=ds.node(n['actor']);value['next']=key
+            d['nodes'][self.current_node]['replies'].append(value)
+            self.apply_graph(doc,value.get('next') or self.current_node)
     def add_next(self):
         if not self.current_node or not self.commit():return
         n=self.dialogue['nodes'][self.current_node]
@@ -269,21 +311,34 @@ class DialoguePanel(ttk.Frame):
         selected=self.replies.curselection()
         if not selected or not self.commit():return
         n=self.dialogue['nodes'][self.current_node];i=selected[0]
-        value=ReplyDialog(self,self.doc,self.quests,n['replies'][i]).show()
-        if value:n['replies'][i]=value;self.rebuild();self.open_node(self.current_node)
+        value=ReplyDialog(self,self.doc,self.quests,n['replies'][i],self.dialogue['nodes']).show()
+        if value:
+            doc=copy.deepcopy(self.doc);d=next(d for d in doc['dialogues'] if d['id']==self.current)
+            d['nodes'][self.current_node]['replies'][i]=value
+            self.apply_graph(doc,self.current_node)
+    def apply_graph(self,doc,selected):
+        d=next(d for d in doc['dialogues'] if d['id']==self.current);ds.prune_unreachable(d)
+        try:self.check(doc)
+        except ValueError as exc:messagebox.showerror('Перехід не застосовано',str(exc),parent=self);return False
+        self.store.data['dialogues']=doc;self.rebuild();self.open_node(selected if selected in d['nodes'] else d['root']);return True
+    def link_next(self):
+        if not self.current_node or not self.commit():return
+        n=self.dialogue['nodes'][self.current_node]
+        if n['replies']:messagebox.showinfo('Перехід відповіді','Оберіть продовження в редакторі відповідної відповіді.',parent=self);return
+        value=LinkDialog(self,self.dialogue['nodes'],n.get('next')).show()
+        if value is None:return
+        doc=copy.deepcopy(self.doc);d=next(d for d in doc['dialogues'] if d['id']==self.current)
+        d['nodes'][self.current_node]['next']=value['next'];self.apply_graph(doc,self.current_node)
     def delete_node(self):
         if not self.current_node or not self.commit():return
         if self.current_node==self.dialogue['root']:messagebox.showinfo('Початковий блок','Початковий блок не можна видалити.',parent=self);return
-        if not messagebox.askyesno('Видалити гілку','Видалити блок і всі його продовження?',parent=self):return
-        nodes=self.dialogue['nodes'];key=self.current_node
-        def remove(k):
-            n=nodes.pop(k)
-            for child in ([n['next']] if n.get('next') else [])+[r['next'] for r in n['replies'] if r.get('next')]:remove(child)
-        remove(key)
+        if not messagebox.askyesno('Видалити блок','Видалити блок і всі посилання на нього? Продовження, доступні через інші гілки, залишаться.',parent=self):return
+        doc=copy.deepcopy(self.doc);d=next(d for d in doc['dialogues'] if d['id']==self.current)
+        nodes=d['nodes'];key=self.current_node;del nodes[key]
         for n in nodes.values():
             if n.get('next')==key:n['next']=None
             n['replies'][:]=[r for r in n['replies'] if r.get('next')!=key]
-        self.current_node=None;self.rebuild();self.open_node(self.dialogue['root'])
+        self.apply_graph(doc,d['root'])
     def conditions(self):
         if not self.current or not self.commit():return
         value=ConditionsDialog(self,self.doc,self.quests,self.dialogue['conditions']).show()

@@ -65,6 +65,9 @@ def validate(doc):
         if not all(visit(n) for n in graph[ident]):return False
         visiting.remove(ident);done.add(ident);return True
     if not all(visit(n) for n in graph):errors.append('Циклічна залежність між квестами.')
+    if not errors:
+        import story_system
+        errors+=story_system.validate(doc)
     return errors
 
 
@@ -77,6 +80,7 @@ def load(path=None):
 
 
 def eligible(game,spec):
+    if hasattr(game,'story_allows') and not game.story_allows(spec['id']):return False
     if not spec['enabled'] or game.city is None:return False
     if not spec['min_level']<=game.level<=spec['max_level']:return False
     if not spec['min_reputation']<=game.reputation(game.city)<=spec['max_reputation']:return False

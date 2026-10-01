@@ -26,10 +26,18 @@ with tempfile.TemporaryDirectory() as folder:
         assert panel.doc==original
         tester.reset();tester.choose('refuse');assert not tester.session.rewards
         tester.destroy()
+        # Shared continuation appears once, with clickable references from other replies.
+        panel.open('noise_in_the_wind_radio');root.update()
+        assert len(panel.dialogue['nodes'])==2 and len(panel.links)==2
+        panel.tree.selection_set(next(iter(panel.links)));panel.select_node();root.update()
+        assert panel.current_node=='invitation'
+        reply=panel.dialogue['nodes']['radio_call']['replies'][0]
+        form=ReplyDialog(root,panel.doc,panel.quests,reply,panel.dialogue['nodes'])
+        assert form.read()['next']=='invitation';form.destroy()
         # Create an NPC response and child block with conditions and effects.
         panel.open('demo_crossroads');panel.open_node('greeting')
         def reply_result(dialog):
-            result=dict(dialog.original,text='Я повернуся пізніше.',conditions=[],actions=[dict(kind='add',variable='trust',value=2)])
+            result=dict(dialog.original,text='Я повернуся пізніше.',conditions=[],actions=[dict(kind='add',variable='trust',value=2)],next='__new__')
             dialog.destroy();return result
         with patch.object(ReplyDialog,'show',reply_result):
             panel.add_reply()

@@ -1,1 +1,22 @@
-{"version": 1, "quests": []}
+{
+  "version": 1,
+  "quests": [],
+  "stories": [
+    {
+      "id": "noise_in_the_wind",
+      "title": "Шум у Вітрі",
+      "enabled": true,
+      "start_after_moves": 2,
+      "stages": [
+        {
+          "kind": "dialogue",
+          "ref": "noise_in_the_wind_radio"
+        },
+        {
+          "kind": "visit",
+          "ref": 0
+        }
+      ]
+    }
+  ]
+}
