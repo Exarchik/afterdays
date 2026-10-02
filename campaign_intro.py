@@ -4,14 +4,15 @@ STORY_ID='noise_in_the_wind'
 
 def prepare(game):
     if 'campaign_intro' in game.reputation_state:return
-    # Keep towns and special sites intact; clear a small starting area and a connector.
+    # A safe clearing with one road through the start, turning toward the town.
     cells={(x,y) for y in range(4) for x in range(4)}
     cx,cy=game.cities[0]
-    cells.update((x,3) for x in range(1,cx+1))
-    cells.update((cx,y) for y in range(3,cy+1))
+    road={(x,1) for x in range(cx+1)}
+    road.update((cx,y) for y in range(1,cy+1))
+    cells.update(road)
     protected={tuple(p) for p in game.cities}|{tuple(s['pos']) for s in game.special_sites}
     for x,y in cells:
-        if (x,y) not in protected:game.world[y][x]='road'
+        if (x,y) not in protected:game.world[y][x]='road' if (x,y) in road else 'waste'
         game.radiation.pop(f'{x},{y}',None)
     game.x=game.y=1
     game.explored=[];game.known_cities=[];game.reveal(1,1,2)

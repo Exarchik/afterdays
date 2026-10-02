@@ -5,6 +5,18 @@ from tkinter import ttk,messagebox,simpledialog
 from event_editor import Dialog,ArtDialog,row
 import sprites
 import dialogue_system as ds
+from dialogue_text import Presentation, hero, speak_reply
+
+
+def tag_buttons(parent, target):
+    bar=ttk.Frame(parent);bar.pack(anchor='w',pady=3)
+    def insert(tag):
+        target.insert('insert',tag)
+        target.focus_set()
+        if isinstance(target,tk.Text):target.see('insert')
+    for tag in ('[space]','[time=0.5]','[pause=1.5]','[line]','[clear]'):
+        ttk.Button(bar,text=tag,takefocus=False,command=lambda tag=tag:insert(tag)).pack(side='left',padx=2)
+    return bar
 
 
 def fresh(prefix,keys):
@@ -123,7 +135,8 @@ class ConditionsDialog(Dialog):
 class ReplyDialog(Dialog):
     def __init__(self,parent,doc,quests,reply,nodes=None,new=False):
         super().__init__(parent,'Відповідь гравця','800x680');self.original=copy.deepcopy(reply)
-        self.text=tk.StringVar(value=reply['text']);row(self.body,'Текст відповіді',self.text)
+        self.text=tk.StringVar(value=reply['text']);entry=row(self.body,'Текст відповіді',self.text)
+        tag_buttons(self.body,entry)
         self.targets={'Завершити діалог':None}
         if new:self.targets['Створити новий блок']='__new__'
         self.targets.update({key+' — '+n['text'][:55]:key for key,n in (nodes or {}).items()})
@@ -153,6 +166,7 @@ class Tester(tk.Toplevel):
     def __init__(self,parent,document,ident,quests):
         super().__init__(parent);self.title('Тест діалогу — окремо від сейву');self.geometry('980x710')
         self.doc=copy.deepcopy(document);self.ident=ident;self.quests=quests
+        self.presentation=Presentation(self)
         top=ttk.Frame(self,padding=10);top.pack(fill='x')
         self.name=tk.StringVar(value='Головний герой');ttk.Label(top,text='Ім’я героя').pack(side='left');ttk.Entry(top,textvariable=self.name,width=22).pack(side='left',padx=5)
         ttk.Button(top,text='Скинути тест',command=self.reset).pack(side='right')
@@ -174,21 +188,39 @@ class Tester(tk.Toplevel):
         except ValueError as exc:
             self.dialogue.set(self.session.dialogue['id']);messagebox.showinfo('Діалог недоступний',str(exc),parent=self)
     def choose(self,ident=None):
+        if self.presentation.player.active:return
+        if ident is not None:
+            reply=next((r for r in self.session.replies() if r['id']==ident),None)
+            if reply:self.render(reply)
+            return
+        self.finish_choice()
+    def finish_choice(self,ident=None):
         try:self.session.choose(ident);self.render()
         except ValueError as exc:messagebox.showerror('Дію не виконано',str(exc),parent=self)
-    def render(self):
+    def render(self,spoken=None):
+        self.presentation.cancel()
         for w in self.content.winfo_children():w.destroy()
         s=self.session;n=s.block
         if n:
-            actor=s.actor();self.image=sprites.photo(self,actor['art'],192)
+            actor=hero(s) if spoken else s.actor();self.image=sprites.photo(self,actor['art'],192)
             if self.image:ttk.Label(self.content,image=self.image).pack(side='left',anchor='n',padx=(0,16))
             body=ttk.Frame(self.content);body.pack(fill='both',expand=True)
             ttk.Label(body,text=actor['name'],font=('Segoe UI',17,'bold')).pack(anchor='w',pady=8)
-            ttk.Label(body,text=n['text'],wraplength=670,justify='left',font=('Segoe UI',12)).pack(fill='x',pady=15)
-            for r in s.replies():
-                tk.Button(body,text=r['text'],wraplength=620,justify='left',anchor='w',command=lambda i=r['id']:self.choose(i)).pack(fill='x',pady=5)
-            if not n['replies']:ttk.Button(body,text='Далі' if n.get('next') else 'Завершити',command=self.choose).pack(fill='x',pady=8)
-            elif not s.replies():ttk.Label(body,text='Немає доступних відповідей — перевірте умови гілки.',foreground='#a0392c').pack()
+            phrase=ttk.Label(body,text='',wraplength=670,justify='left',font=('Segoe UI',12));phrase.pack(fill='x',pady=15)
+            hint=ttk.Label(body);hint.pack(fill='x')
+            replies=[];controls=[]
+            for r in ([] if spoken else s.replies()):
+                button=tk.Button(body,text='',wraplength=620,justify='left',anchor='w',command=lambda i=r['id']:self.choose(i));button.pack(fill='x',pady=5)
+                replies.append((button,r['text']));controls.append(button)
+            if not spoken and not n['replies']:
+                button=ttk.Button(body,text='Далі' if n.get('next') else 'Завершити',command=self.choose);button.pack(fill='x',pady=8);controls.append(button)
+            elif not spoken and not s.replies():ttk.Label(body,text='Немає доступних відповідей — перевірте умови гілки.',foreground='#a0392c').pack()
+            show_hint=lambda waiting: hint.configure(text='Натисніть будь-яку клавішу або кнопку миші…' if waiting else '')
+            if spoken:speak_reply(self.presentation,spoken['text'],phrase,show_hint,lambda:self.finish_choice(spoken['id']))
+            else:self.presentation.show(n['text'],phrase,replies,controls,show_hint)
+            self.presentation.bind_inputs(self.content)
+            if self.presentation.input_tag not in self.bindtags():self.bindtags((self.presentation.input_tag,)+self.bindtags())
+            self.focus_set()
         else:ttk.Label(self.content,text='Діалог завершено',font=('Segoe UI',18,'bold')).pack(pady=30)
         self.status.set('Змінні: '+', '.join(f'{k} = {v}' for k,v in s.values.items())+'\nНагороди (тест): '+(', '.join(f'{ds.REWARDS[k]} +{v}' for k,v in s.rewards.items()) or 'немає')+'\nРозпочаті квести (тест): '+(', '.join(s.started) or 'немає'))
 
@@ -214,7 +246,7 @@ class DialoguePanel(ttk.Frame):
         right=ttk.Frame(split,padding=10);split.add(right,weight=2)
         self.actor=tk.StringVar();self.actor_box=row(right,'Актор',self.actor,[])
         self.picture=ttk.Label(right);self.picture.pack(pady=5);self.actor_box.bind('<<ComboboxSelected>>',lambda e:self.show_art())
-        ttk.Label(right,text='Фраза').pack(anchor='w');self.text=tk.Text(right,height=7,wrap='word');self.text.pack(fill='x')
+        ttk.Label(right,text='Фраза').pack(anchor='w');self.text=tk.Text(right,height=7,wrap='word');self.text.pack(fill='x');tag_buttons(right,self.text)
         ttk.Label(right,text='Варіанти відповідей гравця (умови й дії — подвійний клік)').pack(anchor='w',pady=8)
         self.replies=tk.Listbox(right,height=8,exportselection=False);self.replies.pack(fill='both',expand=True);self.replies.bind('<Double-1>',lambda e:self.edit_reply())
         ttk.Button(right,text='Редагувати відповідь, умови та дії…',command=self.edit_reply).pack(fill='x',pady=6)
