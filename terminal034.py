@@ -25,7 +25,8 @@ def snapshot(g):
                 other=g.equipped.get('weapon2' if g.active=='weapon1' else 'weapon1'),
                 ap=g.battle['ap'] if g.battle else None,
                 max_ap=max(g.battle.get('max_ap',g.max_ap),g.battle['ap']) if g.battle else g.max_ap,
-                coward=g.coward_turns,rad=g.rad_turns)
+                coward=g.coward_turns,rad=g.radiation_injury,healthy_max_hp=g.healthy_max_hp,
+                hunger=g.hunger,starving=g.starving,sickness=g.radiation_sickness)
 
 def sections(width):
     """Allocate proportional header columns at both minimum and wide window sizes."""
@@ -95,12 +96,20 @@ class StatusBar(tk.Canvas):
         self.text(b-25,65,tr('terminal.level'),8,GOLD,anchor='center')
         self.region((a,0,b,108),tr('terminal.player'),lambda:self.app.tabs.select(self.app.player_tab))
         a,b=cols[1];x=a+14;right=b-14;barw=right-x
-        for label,amount,total,y,color in [(tr('terminal.hp'),d['hp'],d['max_hp'],19,'#d9655b' if d['hp']<=d['max_hp']*.25 else GREEN),(tr('terminal.xp'),d['xp'],d['xp_goal'],65,'#c9ae41')]:
+        rows=[(tr('terminal.hp'),d['hp'],d['max_hp'],15,GREEN),
+              (tr('survival040.hunger'),d['hunger'],20,51,'#dc5b56' if d['starving'] else '#4ba8df'),
+              (tr('terminal.xp'),d['xp'],d['xp_goal'],87,'#c9ae41')]
+        for index,(label,amount,total,y,color) in enumerate(rows):
             self.text(x,y,label,8,MUTED,width=barw*.43);self.text(right,y,f'{amount:g} / {total:g}',10,TEXT,width=barw*.55,anchor='e',bold=True)
             self.create_rectangle(x,y+12,right,y+20,fill='#29382d',outline='')
-            ratio=min(1,max(0,amount/max(1,total)))
-            if ratio:self.create_rectangle(x,y+12,x+barw*ratio,y+20,fill=color,outline='')
-        self.region((a,0,b,108),tr('terminal.progress',level=g.level,left=max(0,d['xp_goal']-d['xp'])))
+            ratio=min(1,max(0,abs(amount)/max(1,total)))
+            if index==0:ratio=min(1-d['rad']/100,max(0,amount/max(1,d['healthy_max_hp'])))
+            if ratio:self.create_rectangle(x,y+12,x+barw*ratio,y+20,fill=color,outline='',tags=('health_fill' if index==0 else 'hunger_fill' if index==1 else 'xp_fill'))
+            if index==0 and d['rad']:
+                self.create_rectangle(right-barw*d['rad']/100,y+12,right,y+20,fill='#dc5b56',outline='',tags='radiation_fill')
+        self.region((a,0,b,38),tr('survival040.hp_tip',hp=d['hp'],cap=d['max_hp'],base=d['healthy_max_hp'],rad=d['rad']))
+        self.region((a,39,b,75),tr('survival040.food_tip',hunger=d['hunger']))
+        self.region((a,76,b,125),tr('terminal.progress',level=g.level,left=max(0,d['xp_goal']-d['xp'])))
         a,b=cols[2];art=48 if compact else 64;left=a+art+14;right=b-10
         if d['weapon']:icon(self,d['weapon'],a+6,17,art)
         name=d['weapon']['name'] if d['weapon'] else tr('update030.no_weapon')
@@ -135,12 +144,19 @@ class StatusBar(tk.Canvas):
         self.glyph('clock',x+8,81);self.text(x+25,81,str(d['turn']),10,TEXT,width=b-x-33)
         self.region((a,0,b,108),tr('terminal.money_tip',money=d['money'],turn=d['turn']))
         a,b=cols[5];x=a+10;self.text(x,18,tr('terminal.effects'),8,GOLD)
-        effects=[]
-        if d['rad']:effects.append((tr('terminal.rad',turns=d['rad']),GREEN))
-        if d['coward']:effects.append((tr('terminal.coward',turns=d['coward']),'#e17766'))
-        for n,(label,color) in enumerate(effects):self.text(x,44+n*27,label,9,color,width=b-x-7)
+        effects=[];tips=[]
+        if d['rad']:
+            effects.append((tr('survival040.rad_effect',rad=d['rad']),'#e17766'))
+            tips.append(tr('survival040.hp_tip',hp=d['hp'],cap=d['max_hp'],base=d['healthy_max_hp'],rad=d['rad']))
+        if d['sickness']:
+            effects.append((tr('survival040.sickness'),'#e17766'));tips.append(tr('survival040.sickness_tip'))
+        if d['starving']:
+            effects.append((tr('survival040.hunger'),'#e17766'));tips.append(tr('survival040.hunger_tip'))
+        if d['coward']:
+            effects.append((tr('terminal.coward',turns=d['coward']),'#e17766'));tips.append(tr('terminal.coward_tip',turns=d['coward']))
+        for n,(label,color) in enumerate(effects):self.text(x,40+n*23,label,9,color,width=b-x-7)
         if not effects:self.text(x,56,'—',18,MUTED)
-        self.region((a,0,b,108),'\n'.join(([tr('terminal.rad_tip',turns=d['rad'])] if d['rad'] else [])+([tr('terminal.coward_tip',turns=d['coward'])] if d['coward'] else [])) or tr('terminal.no_effects'))
+        self.region((a,0,b,132),'\n'.join(tips) or tr('terminal.no_effects'))
 
     def target(self,event):
         """Find the first matching hit area, giving small controls priority."""

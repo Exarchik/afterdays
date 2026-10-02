@@ -76,8 +76,8 @@ class AdventureTests(unittest.TestCase):
 
     def test_food_xp_and_quest_world_feedback(self):
         """Перевіряє сценарій «food xp and quest world feedback» та очікувані результати."""
-        g=r.Game(4);g.hp=20;g.use('food')
-        self.assertTrue(any(n['scene']=='world' and 'HP' in n['text'] for n in g.pop_events()))
+        g=r.Game(4);g.hp=20;g.survival['hunger']=5;g.use('food')
+        self.assertTrue(any(n['scene']=='world' and 'насичення' in n['text'] for n in g.pop_events()))
         g.gain_xp(20);self.assertIn('+20 XP',[n['text'] for n in g.pop_events()])
         offer=offer_for(g,'scout');g.accept_quest(offer['id'])
         q=g.quests[-1];g.x,g.y=q['pos'];g._visit_objectives()
@@ -155,8 +155,8 @@ class AdventureTests(unittest.TestCase):
         g=r.Game(10);g.world[5][6]='water';before=(g.x,g.y,g.turn,g.hp,g.count('food'))
         self.assertFalse(g.step(1,0));self.assertEqual((g.x,g.y,g.turn,g.hp,g.count('food')),before)
         g.world[5][6]='waste';g.radiation['6,5']=3;hp=g.hp
-        self.assertTrue(g.step(1,0));self.assertEqual(g.hp,hp-3)
-        self.assertTrue(any(n['text']=='−3 HP' for n in g.pop_events()))
+        self.assertTrue(g.step(1,0));self.assertEqual(g.radiation_injury,5);self.assertEqual(g.hp,g.max_hp)
+        self.assertTrue(any(n['text']=='Радіаційне пошкодження +5%' for n in g.pop_events()))
 
     def test_save_preserves_stash_sites_paths_and_corpses_not_ephemeral_effects(self):
         """Перевіряє сценарій «save preserves stash sites paths and corpses not ephemeral effects» та очікувані результати."""

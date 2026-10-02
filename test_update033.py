@@ -83,10 +83,10 @@ class Update033Tests(unittest.TestCase):
         """Storm motion is one cell per turn, survives reload and ends beyond an edge."""
         g=r.Game(3);g.x,g.y=20,10;g.reputation_state['storm033']=dict(pos=[19,10],radius=1,direction=1,age=0);g.rad_turns=2;hp=g.hp
         with patch('storm033.random.Random.random',return_value=.2):g._world_time_tick()
-        self.assertEqual(g.storm['pos'],[20,10]);self.assertEqual(g.hp,hp)
+        self.assertEqual(g.storm['pos'],[20,10]);self.assertEqual(g.radiation_injury,5);self.assertEqual(g.hp,g.max_hp)
         g.rad_turns=0
         with patch('storm033.random.Random.random',return_value=.2):g._world_time_tick()
-        self.assertEqual(g.hp,hp-2)
+        self.assertEqual(g.radiation_injury,10);self.assertEqual(g.hp,g.max_hp)
         with tempfile.TemporaryDirectory() as td:
             path=Path(td)/'save.json';g.save(path);h=r.Game.load(path);self.assertEqual(g.storm,h.storm)
         g.storm['pos']=[112,10]

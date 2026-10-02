@@ -76,7 +76,7 @@ class ProgressionTests(unittest.TestCase):
         self.assertEqual(sum(i['kind']=='med' for i in g.bag),1)
         g.hp=1;self.assertTrue(g.use('med'))
         self.assertEqual(g.count('med'),before+2)
-        food=g.count('food');g.travel_steps=7
+        food=g.count('food');g.survival['hunger']=1
         g.step(0,1)
         self.assertEqual(g.count('food'),food-1)
 

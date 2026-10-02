@@ -4,9 +4,10 @@ import quest_catalog as catalog
 import afterdays as r
 from metro035 import Game as BaseGame
 from story_system import StoryMixin
+from survival040 import Survival
 
 
-class Game(StoryMixin,BaseGame):
+class Game(Survival,StoryMixin,BaseGame):
     def price_quest(self,q):
         if q.get('authored_definition'):
             s=q['authored_definition'];q.update(reward=s['reward'],base_reward=s['reward'],xp_reward=s['xp_reward']);return

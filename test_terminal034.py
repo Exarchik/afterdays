@@ -19,10 +19,10 @@ class TerminalTests(unittest.TestCase):
 
     def test_effects_and_combat_points(self):
         """Effects and AP display remaining values without changing game state."""
-        g=r.Game(3);g.rad_turns=8;g.reputation_state['coward_until']=g.turn+20
+        g=r.Game(3);g.survival['radiation']=50;g.reputation_state['coward_until']=g.turn+20
         g.battle={'ap':2,'max_ap':5}
         d=snapshot(g)
-        self.assertEqual((d['ap'],d['max_ap'],d['rad'],d['coward']),(2,5,8,20))
+        self.assertEqual((d['ap'],d['max_ap'],d['rad'],d['coward']),(2,5,50,20))
         self.assertEqual(g.battle,{'ap':2,'max_ap':5})
 
     def test_columns_and_control_priority(self):
@@ -50,7 +50,7 @@ class TerminalTests(unittest.TestCase):
             for width in (1044,1224,1884):
                 for combat in (False,True):
                     g.battle={'ap':2,'max_ap':5} if combat else None
-                    g.rad_turns=10 if combat else 0;g.reputation_state['coward_until']=g.turn+20 if combat else 0
+                    g.survival['radiation']=50 if combat else 0;g.survival['hunger']=-5 if combat else 20;g.reputation_state['coward_until']=g.turn+20 if combat else 0
                     bar=Header(g,width);bar.paint()
                     self.assertGreater(len(bar.regions),5)
                     texts=[call.kwargs['text'] for call in bar.create_text.call_args_list]

@@ -524,14 +524,12 @@ class Game(p.Game):
                     if e['hp']<=0:self._finish_enemy(e)
                     if not b['enemies']:self.victory();return
                     continue
+                damage=self.incoming_combat_damage(damage) if hasattr(self,'incoming_combat_damage') else damage
                 self.hp-=damage;self.emit(f'−{damage}',color='#ff8f79')
                 if hasattr(self,'test_armor_hit'):self.test_armor_hit(damage)
                 self.wear(self.equipped['armor'],.5);self.wear(self.equipped['helmet'],.25)
                 self.log(f'{e["name"]}: −{damage} HP.')
                 if self.hp<=0:self.defeat();return
-        heal=min(self.max_hp-self.hp,self.protection_stat('regen'))
-        self.hp+=heal
-        if heal:self.emit(f'+{heal} HP',color='#9cdda8')
         b['ap']=self.max_ap;b['max_ap']=self.max_ap;b['round']+=1
         self.log(tr('adventure.0222', v0=b['round']))
 

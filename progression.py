@@ -88,6 +88,7 @@ def item_value(item):
 
 
 def stack_key(item):
+    if item['kind']=='food':return ('food',item.get('type_id','item_food'),item.get('satiety',10),item.get('paid_sale_cap'))
     return (item['kind'],item.get('monster_kind') if item['kind']=='trophy' else item.get('ammo_type'),item.get('paid_sale_cap')) if item['kind'] in STACK_KINDS else None
 
 

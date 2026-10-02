@@ -1302,7 +1302,7 @@ def launch(test_hook=None):
             if weapon:
                 ammo_type=weapon.get('ammo_type','pistol')
                 self.city_info.config(text=self.city_info.cget('text')+tr('afterdays.0158', v0=progression.AMMO[ammo_type][0], v1=g.count('ammo', ammo_type), v2=weapon.get('durability', 100)))
-            self.city_info.config(text=self.city_info.cget('text')+tr('afterdays.0159', v0=g.rad_turns))
+            self.city_info.config(text=self.city_info.cget('text')+'\n'+tr('survival040.sheet',rad=g.radiation_injury,hunger=g.hunger))
             near = sorted(((n,pos) for n,pos in enumerate(g.cities) if n in g.known_cities), key=lambda entry: math.dist(entry[1], (g.x, g.y)))[:3]
             self.cities_label.config(text='\n'.join(f'◆ {self.game.city_name(n)} ({p[0]}, {p[1]})' for n,p in near))
             self.player_panel.refresh()

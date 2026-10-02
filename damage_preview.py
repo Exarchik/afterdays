@@ -21,7 +21,7 @@ def attack_range(game,weapon,target):
     pellets=range(6) if combat033.category(weapon)=='shotgun' else [None]*(5 if mode=='burst' else 1)
     low=high=0
     for pellet in pellets:
-        amounts=[sum(combat033.projectile_components(weapon,game.level,target,v,c,pellet).values())
+        amounts=[sum(combat033.projectile_components(weapon,game.level,target,v,c,pellet,getattr(game,'outgoing_damage_multiplier',1)).values())
                  for v in range(-2,3) for c in criticals]
         low+=min(amounts);high+=max(amounts)
     return low,high
@@ -56,4 +56,4 @@ def description(game,weapon):
     return ('Розрахункова шкода: '+format_value(result)+'\n'+reference+'\n'
             'За одну атаку в поточному режимі; у дужках — за повну шкалу ОД. '
             'Усі кулі/дробини влучають в одну ціль; максимум включає критичні влучання. '
-            'Враховано опори, модулі та зношення. Без промахів, осічок, руху й обмеження набоїв.')
+            'Враховано опори, модулі, зношення та променеву хворобу. Без промахів, осічок, руху й обмеження набоїв.')

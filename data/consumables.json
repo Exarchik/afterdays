@@ -7,7 +7,8 @@
   "item_food": {
     "kind": "food",
     "value": 18,
-    "weight": 0.6
+    "weight": 0.6,
+    "satiety": 10
   },
   "item_rad": {
     "kind": "rad",

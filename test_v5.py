@@ -86,14 +86,12 @@ class RefinementTests(unittest.TestCase):
         self.assertEqual(len(g.known_cities),2);self.assertEqual(g.map_rewards,[0])
         self.assertFalse(g.turn_in('q2'));self.assertEqual(len(g.known_cities),2)
 
-    def test_rad_protection_exact_duration_and_price(self):
+    def test_radiation_treatment_and_price(self):
         """Перевіряє сценарій «rad protection exact duration and price» та очікувані результати."""
-        g=r.Game(8);p.add_to(g.bag,p.supply('rad',2));self.assertTrue(g.use('rad'));self.assertEqual(g.rad_turns,10)
-        # Quiet road lets duration be measured without encounters or hunger.
-        g.world[5][6]='road';g.radiation={'6,5':3,'5,5':3};g.bag.append(p.supply('food',100))
-        with patch.object(g.rng,'random',return_value=1):
-            for n in range(10):g.step(1 if n%2==0 else -1,0);self.assertEqual(g.hp,g.max_hp)
-            self.assertEqual(g.rad_turns,0);g.step(1,0);self.assertEqual(g.hp,g.max_hp-3)
+        g=r.Game(8);p.add_to(g.bag,p.supply('rad',2));g.add_radiation(75)
+        self.assertTrue(g.use('rad'));self.assertEqual(g.radiation_injury,25);self.assertEqual(g.rad_turns,0)
+        self.assertTrue(g.use('rad'));self.assertEqual(g.radiation_injury,0)
+        self.assertFalse(g.use('rad'))
         g.x,g.y=g.cities[0]
         for rank in (0,3,7):
             g.perks['trader']=rank;self.assertEqual(g.price(p.supply('rad'),1),2*g.price(p.supply('med'),1))

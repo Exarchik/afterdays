@@ -37,9 +37,9 @@ class DiagonalTests(unittest.TestCase):
   return g
  def test_distance_ticks_survive_save_and_cardinal_steps(self):
   """Перевіряє сценарій «distance ticks survive save and cardinal steps» та очікувані результати."""
-  g=self.game();g.rad_turns=10
+  g=self.game()
   for _ in range(3):self.assertTrue(g.step(1,1))
-  self.assertEqual(g.turn,4);self.assertEqual(g.travel_steps,4);self.assertEqual(g.rad_turns,6)
+  self.assertEqual(g.turn,4);self.assertEqual(g.travel_steps,4);self.assertEqual(g.hunger,17)
   self.assertAlmostEqual(g.world_distance_remainder,3*math.sqrt(2)-4)
   with tempfile.TemporaryDirectory() as td:
    path=Path(td)/'save.json';g.save(path);h=r.Game.load(path)
@@ -61,7 +61,7 @@ class DiagonalTests(unittest.TestCase):
   g=self.game();g.travel_steps=6;g.turn=6;g.world_distance_remainder=.9
   g.radiation['6,6']=1;before=g.hp
   with patch.object(g,'consume',return_value=False):self.assertTrue(g.step(1,1))
-  self.assertEqual(g.turn,8);self.assertEqual(g.hp,before-7)
+  self.assertEqual(g.turn,8);self.assertEqual(g.radiation_injury,5);self.assertEqual(g.hp,g.max_hp);self.assertEqual(g.hunger,19)
  def test_battle_does_not_gain_world_diagonals(self):
   """Перевіряє сценарій «battle does not gain world diagonals» та очікувані результати."""
   g=self.game();g.battle={'pos':[2,2]}

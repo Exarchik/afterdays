@@ -12,8 +12,10 @@ def player_text(g):
            tr('frontier_ui.0003', v0=g.battle['ap'] if g.battle else g.max_ap, v1=g.max_ap),
            tr('frontier_ui.0004', v0=g.defense, v1=max(0,min(45, g.protection_stat('evasion')))),
            tr('frontier_ui.0005', v0=g.protection_stat('regen')),
-           tr('frontier_ui.0006', v0=g.weight, v1=g.capacity),tr('frontier_ui.0007', v0=g.rad_turns),
+           tr('frontier_ui.0006', v0=g.weight, v1=g.capacity),tr('survival040.sheet',rad=g.radiation_injury,hunger=g.hunger),
            '', tr('frontier_ui.0008'),w['name'] if w else tr('frontier_ui.0009')]
+    if g.radiation_sickness:lines.append(tr('survival040.sickness_tip'))
+    if g.starving:lines.append(tr('survival040.hunger_tip'))
     if w:
         from damage_preview import description as damage_description
         lines.append(damage_description(g,w))
