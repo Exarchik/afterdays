@@ -195,8 +195,12 @@ class LegacyGame:
         """Визначає поселення під поточною позицією гравця."""
         return self.cities.index([self.x, self.y]) if [self.x, self.y] in self.cities else None
 
-    def log(self, msg):
+    def log(self, msg, color=None):
         """Додає повідомлення до журналу гри."""
+        colors=getattr(self,'message_colors',[])
+        colors=([None]*len(self.messages)+colors)[-len(self.messages):] if self.messages else []
+        colors.append(color or getattr(self,'_event_feedback_color',None))
+        self.message_colors=colors[-80:]
         self.messages.append(msg)
         self.messages = self.messages[-80:]
 
@@ -1312,7 +1316,11 @@ def launch(test_hook=None):
             self.loot_list.set_items(g.loot)
             self.logbox.config(state='normal')
             self.logbox.delete('1.0', 'end')
-            self.logbox.insert('end', '\n'.join(g.messages[-5:]))
+            colors=([None]*len(g.messages)+getattr(g,'message_colors',[]))[-len(g.messages):] if g.messages else []
+            for message,color in zip(g.messages,colors):
+                tag=color or 'normal'
+                self.logbox.tag_configure(tag,foreground=color or TEXT)
+                self.logbox.insert('end',message+'\n',tag)
             self.logbox.see('end')
             self.logbox.config(state='disabled')
             self.draw()

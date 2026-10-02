@@ -11,6 +11,8 @@ class EventNoticeTests(unittest.TestCase):
         app=SimpleNamespace(game=game,root=Mock(),canvas=Mock(),dialog=None,
                             ox=0,oy=0,vx=0,vy=0,tile=32,refresh=Mock(),draw=Mock())
         fx=Effects(app)
+        app.canvas.winfo_width.return_value=420;app.canvas.winfo_height.return_value=320
+        app.canvas.bbox.return_value=(10,10,160,30)
         with patch('adventure_ui.time.monotonic',return_value=100):fx.ingest()
         game.pop_events.return_value=[]
         return app,fx
@@ -25,7 +27,7 @@ class EventNoticeTests(unittest.TestCase):
         with patch('adventure_ui.time.monotonic',return_value=140):fx.tick()
         self.assertEqual(fx.active[0]['start'],140)
         self.assertEqual(app.canvas.create_text.call_count,2)
-        with patch('adventure_ui.time.monotonic',return_value=141.1):fx.tick()
+        with patch('adventure_ui.time.monotonic',return_value=143.6):fx.tick()
         self.assertFalse(fx.active)
 
     def test_followup_modal_keeps_results_paused(self):
@@ -48,3 +50,22 @@ class EventNoticeTests(unittest.TestCase):
         app.game=SimpleNamespace(road_event=None,_last_battle=None,pop_events=lambda:[])
         fx.ingest()
         self.assertFalse(fx.active)
+
+    def test_world_notices_are_serial_across_batches_and_pause(self):
+        app,fx=self.setup_effects()
+        app.game.pop_events.return_value=[dict(kind='text',scene='world',text='Second',pos=[1,1],entity='player',color='green')]
+        with patch('adventure_ui.time.monotonic',return_value=120):fx.ingest()
+        app.game.pop_events.return_value=[];app.game.road_event=None
+        with patch('adventure_ui.time.monotonic',return_value=140):fx.tick()
+        first,second=fx.active
+        self.assertGreaterEqual(first['duration'],2.0)
+        self.assertLessEqual(first['duration'],4.0)
+        self.assertGreaterEqual(second['start']-first['start'],first['duration']+.34)
+        self.assertEqual(app.canvas.create_text.call_count,2)
+
+    def test_world_text_is_shifted_inside_map_edges(self):
+        app,fx=self.setup_effects();app.game.road_event=None
+        app.canvas.bbox.return_value=(-55,-35,100,-5)
+        with patch('adventure_ui.time.monotonic',return_value=100):fx.render()
+        self.assertEqual(app.canvas.move.call_args.args[1:],(63,43))
+        self.assertEqual(app.canvas.create_text.call_args.kwargs['width'],396)

@@ -118,6 +118,9 @@ class Game(p.Game):
     def emit(self,text='',kind='text',pos=None,scene=None,color='#ecd598',source=None,entity=None):
         """Ставить коротке повідомлення або ефект у чергу відображення."""
         if not hasattr(self,'_events'):self._events=[]
+        if kind=='text' and getattr(self,'_event_feedback_color',None):
+            color=self._event_feedback_color
+            self.log(text,color=color)
         scene=scene or ('battle' if self.battle else 'world')
         if pos is None:
             pos=self.battle['pos'] if self.battle else [self.x,self.y]
@@ -256,7 +259,7 @@ class Game(p.Game):
         """Наносить шкоду поза боєм і показує її причину."""
         if label==tr('adventure.0152'):damage=min(damage,max(0,self.hp-1))
         self.hp-=damage;self.emit(f'−{damage} HP',color='#ff927c')
-        self.log(f'{label}: −{damage} HP.')
+        if not getattr(self,'_event_feedback_color',None):self.log(f'{label}: −{damage} HP.')
         if self.hp<=0:self.defeat();return False
         return True
 

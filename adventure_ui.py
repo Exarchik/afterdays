@@ -43,6 +43,9 @@ class Effects:
         if g is not self.game:
             self.active=[];self.snapshot=None;self.game=g
         now=time.monotonic();timeline=0;texts=0
+        self.pause_world_notices(now)
+        world_end=max([now]+[e['start']+e['duration']+.35+(now-e['paused_at'] if 'paused_at' in e else 0)
+                            for e in self.active if e['kind']=='text' and e['scene']=='world'])
         for event in g.pop_events():
             event=dict(event);kind=event['kind']
             duration=min(.55,max(.12,.07*(len(event.get('path',[]))-1))) if kind=='move' else .65 if event.get('fire_mode')=='aimed' else .4 if kind in ('attack','slash') else 1.4 if kind=='reveal' else 1.0
@@ -50,6 +53,10 @@ class Effects:
                 delay=timeline;timeline+=duration if kind=='move' else .02 if event.get('fire_mode')=='pellet' else .09 if event.get('fire_mode')=='burst' else .15
             else:
                 delay=max(0,timeline-.15);event['offset']=(texts%3)*16;texts+=1
+            if kind=='text' and event['scene']=='world':
+                duration=max(2.0,min(4.0,len(event['text'])/22))
+                delay=max(delay,world_end-now);event['offset']=0
+                world_end=now+delay+duration+.35
             event.update(start=now+delay,duration=duration);self.active.append(event)
         if g._last_battle is not None:
             self.snapshot=g._last_battle;g._last_battle=None
@@ -125,9 +132,18 @@ class Effects:
                     c.create_line(sx,sy,tx,ty,fill=e['color'],width=2,tags='fx')
                     c.create_oval(tx-3,ty-3,tx+3,ty+3,fill=e['color'],outline='',tags='fx')
             else:
-                y=py-18-dt*28-e.get('offset',0)
-                c.create_text(px+1,y+1,text=e['text'],fill='#15251c',font=('Segoe UI',11,'bold'),tags='fx')
-                c.create_text(px,y,text=e['text'],fill=e['color'],font=('Segoe UI',11,'bold'),tags='fx')
+                world=e['scene']=='world'
+                y=py-18-dt*(4 if world else 28)-e.get('offset',0)
+                options=dict(text=e['text'],font=('Segoe UI',11,'bold'),tags='fx')
+                if world:options['width']=max(40,c.winfo_width()-24)
+                shadow=c.create_text(px+1,y+1,fill='#15251c',**options)
+                label=c.create_text(px,y,fill=e['color'],**options)
+                if world:
+                    box=c.bbox(label)
+                    if box:
+                        x1,y1,x2,y2=box;w=c.winfo_width();h=c.winfo_height()
+                        dx=max(8-x1,min(0,w-9-x2));dy=max(8-y1,min(0,h-9-y2))
+                        c.move(label,dx,dy);c.move(shadow,dx,dy)
 
     def tick(self):
         """Виконує черговий кадр оновлення та планує наступний."""

@@ -2243,15 +2243,20 @@
           "costs": [],
           "outcomes": [
             {
-              "chance": 1,
+              "chance": 1.0,
               "effects": [
                 {
                   "kind": "heal",
                   "amount": 8
                 },
                 {
-                  "kind": "food",
-                  "amount": 1
+                  "kind": "satiety_gain",
+                  "amount": 5,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
                 }
               ]
             }
@@ -2343,11 +2348,20 @@
           ],
           "outcomes": [
             {
-              "chance": 1,
+              "chance": 1.0,
               "effects": [
                 {
                   "kind": "heal",
                   "amount": 12
+                },
+                {
+                  "kind": "satiety_loss",
+                  "amount": 5,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
                 }
               ]
             }
@@ -2951,7 +2965,7 @@
       "enabled": true,
       "weight": 1.0,
       "title": "Сонячне дзеркало",
-      "description": "Поворотне дзеркало може зарядити забутий елемент живлення.",
+      "description": "Поворотне дзеркало може зарядити зробити вас тимчасово непомітним для ворогів.",
       "art": "art_custom_049",
       "choices": [
         {
@@ -2960,21 +2974,21 @@
           "costs": [],
           "outcomes": [
             {
-              "chance": 0.8,
-              "effects": [
-                {
-                  "kind": "ammo",
-                  "amount": 6,
-                  "ammo": "energy"
-                }
-              ]
-            },
-            {
-              "chance": 0.2,
+              "chance": 1.0,
               "effects": [
                 {
                   "kind": "damage",
                   "amount": 2
+                },
+                {
+                  "kind": "buff_stealth",
+                  "amount": 1,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "duration": 20,
+                  "destination": "loot"
                 }
               ]
             }
@@ -3011,12 +3025,21 @@
           "costs": [],
           "outcomes": [
             {
-              "chance": 1,
+              "chance": 1.0,
               "effects": [
                 {
                   "kind": "fragments",
                   "amount": 15,
                   "destination": "bag"
+                },
+                {
+                  "kind": "radiation",
+                  "amount": 15,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
                 },
                 {
                   "kind": "damage",
@@ -3325,11 +3348,20 @@
           "costs": [],
           "outcomes": [
             {
-              "chance": 1,
+              "chance": 1.0,
               "effects": [
                 {
                   "kind": "food",
                   "amount": -1
+                },
+                {
+                  "kind": "satiety_loss",
+                  "amount": 4,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
                 }
               ]
             }
@@ -3345,7 +3377,7 @@
       "enabled": true,
       "weight": 1.0,
       "title": "Отруйний пил",
-      "description": "Вдихнули токсичний пил: −4 HP.",
+      "description": "Вдихнули токсичний пил: −4 HP і доза радіації в комплекті.",
       "art": "event_theme:storm",
       "choices": [
         {
@@ -3383,7 +3415,7 @@
       "enabled": true,
       "weight": 1.0,
       "title": "Пісок у механізмі",
-      "description": "Активна зброя втратила 8 пунктів стану.",
+      "description": "Активна зброя і броня пошкоджені.",
       "art": "art_custom_065",
       "choices": [
         {
@@ -3392,11 +3424,20 @@
           "costs": [],
           "outcomes": [
             {
-              "chance": 1,
+              "chance": 1.0,
               "effects": [
                 {
                   "kind": "wear",
                   "amount": 8
+                },
+                {
+                  "kind": "wear_armor",
+                  "amount": 8,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
                 }
               ]
             }
@@ -3440,6 +3481,16 @@
               "chance": 0.5,
               "effects": [
                 {
+                  "kind": "wear_armor",
+                  "amount": 5,
+                  "maximum": 9,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
+                {
                   "kind": "damage",
                   "amount": 6,
                   "maximum": 14
@@ -3452,6 +3503,25 @@
                 {
                   "kind": "med",
                   "amount": 2
+                },
+                {
+                  "kind": "rad",
+                  "amount": 1,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 0.5,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "money",
+                  "amount": 10,
+                  "maximum": 30,
+                  "per_level": 5,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 0.5,
+                  "destination": "loot"
                 }
               ]
             }
@@ -3639,7 +3709,7 @@
           "costs": [],
           "outcomes": [
             {
-              "chance": 1,
+              "chance": 1.0,
               "effects": [
                 {
                   "kind": "xp",
@@ -3648,6 +3718,16 @@
                 {
                   "kind": "damage",
                   "amount": 3
+                },
+                {
+                  "kind": "wear_armor",
+                  "amount": 5,
+                  "maximum": 10,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
                 }
               ]
             }
@@ -3699,8 +3779,18 @@
           "costs": [],
           "outcomes": [
             {
-              "chance": 1,
+              "chance": 1.0,
               "effects": [
+                {
+                  "kind": "radiation",
+                  "amount": 15,
+                  "maximum": 25,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
                 {
                   "kind": "xp",
                   "amount": 15
@@ -3743,8 +3833,18 @@
           "costs": [],
           "outcomes": [
             {
-              "chance": 1,
+              "chance": 1.0,
               "effects": [
+                {
+                  "kind": "wear_armor",
+                  "amount": 5,
+                  "maximum": 15,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
                 {
                   "kind": "damage",
                   "amount": 3

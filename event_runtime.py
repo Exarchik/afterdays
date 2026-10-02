@@ -48,11 +48,19 @@ def grant_item(game, effect, reward):
     quantity=reward.get('qty',1)
     name=reward['name']
     p.add_to(getattr(game,destination),reward)
-    if destination=='bag':
-        game.emit(f'+{quantity} {name}',color='#9cdda8')
+    suffix=' (здобич)' if destination=='loot' else ' (сховище)' if destination=='stash' else ''
+    game.emit(f'+{quantity} {name}'+suffix,color='#9cdda8')
 
 
 def apply(game, effect, spec):
+    previous=getattr(game,'_event_feedback_color',None)
+    negative=effect['kind'] in ('damage','radiation','satiety_loss','wear','wear_armor') or effect.get('amount',0)<0
+    game._event_feedback_color='#e56860' if negative else '#9cdda8'
+    try:return _apply(game,effect,spec)
+    finally:game._event_feedback_color=previous
+
+
+def _apply(game, effect, spec):
     import progression as p
     import module_rules
     kind = effect['kind']; level = game.region_level
@@ -66,15 +74,21 @@ def apply(game, effect, spec):
         if n < 0:
             ammo = effect.get('ammo', 'random')
             if kind == 'ammo' and ammo == 'random': ammo = game.rng.choice(list(p.AMMO))
-            if kind == 'ammo': game.consume('ammo', min(game.count('ammo', ammo), -n), ammo)
-            else: game.consume(kind, min(game.count(kind), -n))
+            removed=min(game.count('ammo',ammo) if kind=='ammo' else game.count(kind),-n)
+            if kind == 'ammo': game.consume('ammo',removed,ammo)
+            else: game.consume(kind,removed)
+            if removed:game.emit(f'−{removed} '+(p.AMMO[ammo][0] if kind=='ammo' else catalog.EFFECTS[kind][0]))
         elif n:
             resolved = dict(effect, amount=n, per_level=0, step=0); resolved.pop('maximum', None)
             grant_item(game, effect, item(game, resolved, level))
         return
-    if kind == 'money': game.money = max(0, game.money+n)
+    if kind == 'money':
+        before=game.money;game.money=max(0,game.money+n)
+        if game.money!=before:game.emit(f'{game.money-before:+g} кредитів')
     elif kind == 'xp': game.gain_xp(n)
-    elif kind == 'heal': game.hp = min(game.max_hp, game.hp+n)
+    elif kind == 'heal':
+        before=game.hp;game.hp=min(game.max_hp,game.hp+n)
+        if game.hp!=before:game.emit(f'{game.hp-before:+g} HP')
     elif kind == 'damage': return game.hurt_world(n, spec['title'])
     elif kind == 'radiation': return game.add_radiation(n)
     elif kind == 'radiation_heal': game.cure_radiation(n)
@@ -84,15 +98,21 @@ def apply(game, effect, spec):
         armor=game.equipped.get('armor')
         if armor:
             before=module_rules.condition(armor);game.wear(armor,n)
-            game.emit(f'Стан броні −{before-module_rules.condition(armor):g}',color='#e56860')
+            if before!=module_rules.condition(armor):game.emit(f'Стан броні −{before-module_rules.condition(armor):g}',color='#e56860')
     elif kind == 'wear':
-        if game.weapon: game.wear(game.weapon, n)
-    elif kind == 'reveal': game.reveal(game.x, game.y, n)
+        if game.weapon:
+            before=module_rules.condition(game.weapon);game.wear(game.weapon,n)
+            if before!=module_rules.condition(game.weapon):game.emit(f'Стан зброї −{before-module_rules.condition(game.weapon):g}')
+    elif kind == 'reveal':
+        before=len(game.explored);game.reveal(game.x,game.y,n)
+        if len(game.explored)>before:game.emit(f'Відкрито клітинок мапи: +{len(game.explored)-before}')
     elif kind == 'discover':
         if not game.discover(): game.gain_xp(n)
     elif kind.startswith('repair_'):
         gear = game.weapon if kind == 'repair_weapon' else game.equipped.get('armor')
-        if gear: gear['durability'] = min(module_rules.max_condition(gear), module_rules.condition(gear)+n)
+        if gear:
+            before=module_rules.condition(gear);gear['durability']=min(module_rules.max_condition(gear),before+n)
+            if gear['durability']!=before:game.emit(f"Стан {'зброї' if kind=='repair_weapon' else 'броні'} +{gear['durability']-before:g}")
 
 def resolve(game, choice_id):
     event = game.road_event
@@ -115,6 +135,8 @@ def resolve(game, choice_id):
     for kind, n in costs.items():
         if kind == 'money': game.money -= n
         else: game.consume(kind, n)
+        text=f'−{n} '+catalog.EFFECTS[kind][0]
+        game.log(text,color='#e56860');game.emit(text,color='#e56860')
     outcomes = choice['outcomes']; selected = outcomes[0]
     if len(outcomes) > 1:
         roll = game.rng.random(); cumulative = 0
