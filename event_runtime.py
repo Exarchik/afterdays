@@ -76,6 +76,15 @@ def apply(game, effect, spec):
     elif kind == 'xp': game.gain_xp(n)
     elif kind == 'heal': game.hp = min(game.max_hp, game.hp+n)
     elif kind == 'damage': return game.hurt_world(n, spec['title'])
+    elif kind == 'radiation': return game.add_radiation(n)
+    elif kind == 'radiation_heal': game.cure_radiation(n)
+    elif kind in ('satiety_gain','satiety_loss'): return game.change_satiety(n if kind=='satiety_gain' else -n)
+    elif kind in catalog.TIMED_EFFECTS: game.add_buff(kind,effect['duration'],n)
+    elif kind == 'wear_armor':
+        armor=game.equipped.get('armor')
+        if armor:
+            before=module_rules.condition(armor);game.wear(armor,n)
+            game.emit(f'Стан броні −{before-module_rules.condition(armor):g}',color='#e56860')
     elif kind == 'wear':
         if game.weapon: game.wear(game.weapon, n)
     elif kind == 'reveal': game.reveal(game.x, game.y, n)

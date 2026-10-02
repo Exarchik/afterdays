@@ -26,7 +26,7 @@ def snapshot(g):
                 ap=g.battle['ap'] if g.battle else None,
                 max_ap=max(g.battle.get('max_ap',g.max_ap),g.battle['ap']) if g.battle else g.max_ap,
                 coward=g.coward_turns,rad=g.radiation_injury,healthy_max_hp=g.healthy_max_hp,
-                hunger=g.hunger,starving=g.starving,sickness=g.radiation_sickness)
+                hunger=g.hunger,starving=g.starving,sickness=g.radiation_sickness,buffs=g.buff_descriptions())
 
 def sections(width):
     """Allocate proportional header columns at both minimum and wide window sizes."""
@@ -154,7 +154,9 @@ class StatusBar(tk.Canvas):
             effects.append((tr('survival040.hunger'),'#e17766'));tips.append(tr('survival040.hunger_tip'))
         if d['coward']:
             effects.append((tr('terminal.coward',turns=d['coward']),'#e17766'));tips.append(tr('terminal.coward_tip',turns=d['coward']))
-        for n,(label,color) in enumerate(effects):self.text(x,40+n*23,label,9,color,width=b-x-7)
+        effects.extend((text,'#9cdda8') for text in d['buffs']);tips.extend(d['buffs'])
+        spacing=min(23,86/max(1,len(effects)))
+        for n,(label,color) in enumerate(effects):self.text(x,36+n*spacing,label,8 if len(effects)>4 else 9,color,width=b-x-7)
         if not effects:self.text(x,56,'—',18,MUTED)
         self.region((a,0,b,132),'\n'.join(tips) or tr('terminal.no_effects'))
 

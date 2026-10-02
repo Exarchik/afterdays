@@ -29,6 +29,15 @@
                   "amount": 25
                 },
                 {
+                  "kind": "satiety_gain",
+                  "amount": 10,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
+                {
                   "kind": "xp",
                   "amount": 10
                 },
@@ -171,7 +180,7 @@
         },
         {
           "id": "alt_help",
-          "text": "Зробити бинт з 2х фрагментів",
+          "text": "Зробити бинт з 2х фрагментів тканини",
           "costs": [
             {
               "kind": "fragments",
@@ -275,7 +284,7 @@
       "choices": [
         {
           "id": "meal",
-          "text": "Консерва",
+          "text": "Поділитись консервою",
           "costs": [
             {
               "kind": "food",
@@ -377,11 +386,27 @@
           "costs": [],
           "outcomes": [
             {
-              "chance": 1,
+              "chance": 1.0,
               "effects": [
                 {
                   "kind": "parts",
-                  "amount": 5
+                  "amount": 4,
+                  "maximum": 6,
+                  "per_level": 1,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "fragments",
+                  "amount": 4,
+                  "maximum": 6,
+                  "per_level": 1,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
                 },
                 {
                   "kind": "xp",
@@ -467,11 +492,15 @@
       "choices": [
         {
           "id": "fix",
-          "text": "Використати 2 фрагменти, щоб полагодити замок",
+          "text": "Використати різні деталі, щоб полагодити замок",
           "costs": [
             {
               "kind": "fragments",
-              "amount": 2
+              "amount": 1
+            },
+            {
+              "kind": "parts",
+              "amount": 1
             }
           ],
           "outcomes": [
@@ -724,6 +753,15 @@
                   "kind": "money",
                   "amount": 30,
                   "per_level": 8,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "xp",
+                  "amount": 10,
+                  "per_level": 5,
                   "step": 0,
                   "step_cap": 0,
                   "chance": 1.0,
@@ -1684,8 +1722,22 @@
               "chance": 0.7,
               "effects": [
                 {
-                  "kind": "food",
-                  "amount": 2
+                  "kind": "satiety_gain",
+                  "amount": 15,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "damage",
+                  "amount": 5,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
                 }
               ]
             },
@@ -1693,8 +1745,22 @@
               "chance": 0.3,
               "effects": [
                 {
+                  "kind": "satiety_gain",
+                  "amount": 8,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
+                {
                   "kind": "damage",
-                  "amount": 5
+                  "amount": 10,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
                 }
               ]
             }
@@ -1722,7 +1788,7 @@
       "enabled": true,
       "weight": 1.0,
       "title": "Дикий вулик",
-      "description": "Комахи оселились у коробці з консервами.",
+      "description": "Запашний дикий мед вабить тих, хто збився зі шляху",
       "art": "art_custom_036",
       "choices": [
         {
@@ -1731,20 +1797,26 @@
           "costs": [],
           "outcomes": [
             {
-              "chance": 0.65,
-              "effects": [
-                {
-                  "kind": "food",
-                  "amount": 2
-                }
-              ]
-            },
-            {
-              "chance": 0.35,
+              "chance": 1.0,
               "effects": [
                 {
                   "kind": "damage",
-                  "amount": 4
+                  "amount": 15,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "buff_satiety",
+                  "amount": 1,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "duration": 10,
+                  "destination": "loot"
                 }
               ]
             }
@@ -2200,11 +2272,20 @@
           "costs": [],
           "outcomes": [
             {
-              "chance": 1,
+              "chance": 1.0,
               "effects": [
                 {
                   "kind": "rad",
                   "amount": 1
+                },
+                {
+                  "kind": "radiation",
+                  "amount": 10,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
                 }
               ]
             }
@@ -2316,6 +2397,16 @@
                   "step": 0,
                   "step_cap": 0,
                   "chance": 1.0,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "buff_satiety",
+                  "amount": 1,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "duration": 10,
                   "destination": "loot"
                 }
               ]
@@ -3247,11 +3338,20 @@
           "costs": [],
           "outcomes": [
             {
-              "chance": 1,
+              "chance": 1.0,
               "effects": [
                 {
                   "kind": "damage",
                   "amount": 4
+                },
+                {
+                  "kind": "radiation",
+                  "amount": 5,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
                 }
               ]
             }
@@ -3389,9 +3489,9 @@
                   "destination": "loot"
                 },
                 {
-                  "kind": "damage",
-                  "amount": 1,
-                  "maximum": 2,
+                  "kind": "radiation",
+                  "amount": 5,
+                  "maximum": 10,
                   "per_level": 0,
                   "step": 0,
                   "step_cap": 0,
@@ -3415,6 +3515,16 @@
                   "amount": 8,
                   "maximum": 15,
                   "per_level": 2,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "radiation",
+                  "amount": 40,
+                  "maximum": 60,
+                  "per_level": 0,
                   "step": 0,
                   "step_cap": 0,
                   "chance": 1.0,

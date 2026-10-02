@@ -230,7 +230,7 @@ class Game(p.Game):
         if getattr(self,'_guided_trip',False):return True
         terrain=self.world[self.y][self.x]
         for _ in range(ticks):
-            if self.rng.random()<{'road':.06,'waste':.12,'forest':.20,'ruin':.24}.get(terrain,.1):self.start_battle()
+            if self.rng.random()<{'road':.06,'waste':.12,'forest':.20,'ruin':.24}.get(terrain,.1)*getattr(self,'encounter_multiplier',1):self.start_battle()
             elif self.turn-self.last_event_turn>=8 and self.rng.random()<.13:self.make_road_event()
             elif self.turn-self.last_traveler_turn>=7 and self.rng.random()<.09:self.spawn_traveler()
             if self.battle or self.road_event or self.traveler:break

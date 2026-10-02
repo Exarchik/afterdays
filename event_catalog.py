@@ -31,11 +31,20 @@ EFFECTS = {
     'reveal': ('Відкриття мапи', 'Кількість — радіус відкриття навколо гравця.'),
     'repair_weapon': ('Ремонт зброї', 'Додати пункти стану активній зброї; потрібна екіпірована зброя.'),
     'repair_armor': ('Ремонт броні', 'Додати пункти стану броні; потрібна екіпірована броня.'),
+    'wear_armor': ('Пошкодження броні', 'Зносити екіпіровану броню на задану кількість пунктів стану з урахуванням міцності.'),
+    'radiation': ('Доза радіації', 'Додати відсоткові пункти радіаційного пошкодження; 100% спричиняє загибель.'),
+    'radiation_heal': ('Лікування від радіації', 'Прибрати відсоткові пункти радіаційного пошкодження. Звичайні рани не лікує.'),
+    'satiety_gain': ('Збільшити насичення (шкалу голоду)', 'Додати поділки шкали голоду, максимум 20. Втамовує голод, не додає предметів їжі.'),
+    'satiety_loss': ('Зменшити насичення (шкалу голоду)', 'Забрати поділки шкали голоду, мінімум −20. Посилює голод; −20 спричиняє загибель. Обжертість блокує зменшення.'),
+    'buff_regen': ('Регенерація', 'Кількість — бонус HP після бою та поступово за 30 кроків; тривалість — кроки мапою. Повторне застосування замінює силу й час.'),
+    'buff_satiety': ('Обжертість', 'Утримує насичення на 20 протягом заданої кількості кроків мапою. Їжа не витрачається; кількість ігнорується.'),
+    'buff_stealth': ('Непомітність', 'Протягом заданих кроків мапою шанс випадкового нападу втричі менший. Квестові бої не змінюються; кількість ігнорується.'),
     'wear': ('Знос зброї', 'Зносити активну зброю на задану кількість пунктів.'),
     'discover': ('Відкрити локацію', 'Відкрити найближчу невідому локацію; кількість — XP, якщо всі вже відкриті.'),
     'gear': ('Спорядження', 'Випадковий предмет рівня місцевості (від L−2 до L), стан 30–90.'),
     'cache': ('Відкрити замок', 'Створити постійний сховок із вмістом на вкладці «Сховок» і відкрити мінігру.'),
 }
+TIMED_EFFECTS = {'buff_regen','buff_satiety','buff_stealth'}
 ITEM_KINDS = {'food', 'med', 'rad', 'repairkit', 'parts', 'fragments', 'ammo'}
 AMMO = ('random', 'pistol', 'rifle', 'shell', 'energy', 'heavy', 'bolt')
 COSTS = ('money', 'food', 'med', 'rad', 'repairkit', 'parts', 'fragments')
@@ -90,6 +99,8 @@ def validate(document, art=None):
                 chance = effect.get('chance', 1)
                 need(number(chance) and 0 <= chance <= 1, label+'шанс ефекту має бути 0–1')
                 need(effect.get('destination', 'loot') in ('loot', 'bag'), label+'невідоме місце нагороди')
+                if kind in TIMED_EFFECTS:
+                    need(integer(effect.get('duration')) and 1 <= effect['duration'] <= 1000000, label+'тривалість бафа: 1–1000000 кроків')
                 if kind == 'ammo': need(effect.get('ammo', 'random') in AMMO, label+'невідомий тип набоїв')
                 if kind not in ITEM_KINDS | {'money'}:
                     need(integer(effect.get('amount', 1)) and effect.get('amount', 1) >= 0 and integer(effect.get('per_level', 0)) and effect.get('per_level', 0) >= 0, label+'для цього ефекту кількість має бути ≥ 0')
@@ -157,6 +168,9 @@ def describe(effect):
     if effect.get('step'): n += f" + min({effect.get('step_cap', 0)}, ⌊(L−1)/{effect['step']}⌋)"
     if kind in ('cache', 'gear'): n = ''
     suffix = ' ['+effect.get('ammo', 'random')+']' if kind == 'ammo' else ''
+    if kind in TIMED_EFFECTS:
+        n = (n+' HP; ' if kind=='buff_regen' else '') + str(effect.get('duration','?'))+' кроків'
+    if kind in ('radiation','radiation_heal'): n+=' в.п.'
     chance = f" ({effect['chance']*100:g}%)" if effect.get('chance', 1) != 1 else ''
     if kind == 'xp': return f'{n} XP{chance}'
     return f'{EFFECTS[kind][0]}{suffix}: {n}{chance}'.rstrip(': ')

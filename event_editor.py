@@ -55,6 +55,7 @@ class EffectDialog(Dialog):
         box = row(self.body, 'Тип', self.kind, list(self.labels)); box.bind('<<ComboboxSelected>>', self.explain)
         self.help = ttk.Label(self.body, wraplength=660, foreground='#426547'); self.help.pack(fill='x', pady=10)
         self.values = {}
+        self.duration = tk.StringVar(value=str(self.original.get('duration',10)))
         fields = [('amount', 'Кількість / мінімум', 1)]
         if not cost: fields += [('maximum', 'Максимум (необов’язково)', ''), ('per_level', 'Додати за кожен рівень L', 0),
                                ('step', 'Додати 1 кожні N рівнів', 0), ('step_cap', 'Ліміт добавки кожні N', 0),
@@ -66,13 +67,17 @@ class EffectDialog(Dialog):
         self.ammo = tk.StringVar(value=self.original.get('ammo', 'random'))
         self.destination = tk.StringVar(value='Рюкзак' if self.original.get('destination') == 'bag' else 'Здобич')
         if not cost:
+            self.duration_field=row(self.body, 'Тривалість, кроків', self.duration)
             row(self.body, 'Тип набоїв (лише набої)', self.ammo, catalog.AMMO)
             row(self.body, 'Куди додати предмет', self.destination, ['Здобич', 'Рюкзак'])
             ttk.Label(self.body, text='L — рівень місцевості. Формула: кількість + добавка×L +\nmin(ліміт, ⌊(L−1)/N⌋). N=0 вимикає останню добавку.\nВід’ємні предмети / кредити — втрата наявного. Шкода задається додатним числом.',
                       wraplength=660).pack(fill='x', pady=12)
         self.explain()
 
-    def explain(self, event=None): self.help.configure(text=catalog.EFFECTS[self.labels[self.kind.get()]][1])
+    def explain(self, event=None):
+        kind=self.labels[self.kind.get()]
+        self.help.configure(text=catalog.EFFECTS[kind][1])
+        if hasattr(self,'duration_field'):self.duration_field.configure(state='normal' if kind in catalog.TIMED_EFFECTS else 'disabled')
 
     def read(self):
         result = {'kind': self.labels[self.kind.get()], 'amount': int(self.values['amount'].get())}
@@ -89,6 +94,9 @@ class EffectDialog(Dialog):
         if result['kind'] not in catalog.ITEM_KINDS | {'money'} and (result['amount'] < 0 or result.get('per_level', 0) < 0):
             raise ValueError('Для цього ефекту задайте додатну кількість або нуль.')
         if result['kind'] == 'ammo': result['ammo'] = self.ammo.get()
+        if result['kind'] in catalog.TIMED_EFFECTS:
+            result['duration']=int(self.duration.get())
+            if not 1<=result['duration']<=1000000:raise ValueError('Тривалість бафа: 1–1000000 кроків.')
         result['destination'] = 'bag' if self.destination.get() == 'Рюкзак' else 'loot'
         return result
 
