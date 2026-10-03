@@ -54,7 +54,7 @@ class Effects:
             else:
                 delay=max(0,timeline-.15);event['offset']=(texts%3)*16;texts+=1
             if kind=='text' and event['scene']=='world':
-                duration=max(2.0,min(4.0,len(event['text'])/22))
+                duration=max(1.0,min(2.0,len(event['text'])/30))
                 delay=max(delay,world_end-now);event['offset']=0
                 world_end=now+delay+duration+.35
             event.update(start=now+delay,duration=duration);self.active.append(event)

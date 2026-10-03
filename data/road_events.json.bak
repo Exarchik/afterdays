@@ -952,6 +952,53 @@
           ]
         },
         {
+          "id": "act_1",
+          "text": "Обміняти 1 радіопротектор на медикаменти",
+          "costs": [
+            {
+              "kind": "rad",
+              "amount": 1
+            }
+          ],
+          "outcomes": [
+            {
+              "chance": 1.0,
+              "effects": [
+                {
+                  "kind": "med",
+                  "amount": 1,
+                  "item_id": "random",
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "med",
+                  "amount": 1,
+                  "item_id": "random",
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "med",
+                  "amount": 1,
+                  "item_id": "random",
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                }
+              ]
+            }
+          ]
+        },
+        {
           "id": "leave",
           "text": "Пройти повз",
           "costs": [],
@@ -1616,6 +1663,17 @@
                   "destination": "loot"
                 },
                 {
+                  "kind": "food",
+                  "amount": 1,
+                  "item_id": "random",
+                  "maximum": 2,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 0.75,
+                  "destination": "loot"
+                },
+                {
                   "kind": "ammo",
                   "amount": 10,
                   "maximum": 15,
@@ -1817,7 +1875,7 @@
           "costs": [],
           "outcomes": [
             {
-              "chance": 1,
+              "chance": 1.0,
               "effects": [
                 {
                   "kind": "xp",
@@ -1825,7 +1883,12 @@
                 },
                 {
                   "kind": "reveal",
-                  "amount": 1
+                  "amount": 2,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
                 }
               ]
             }
@@ -1861,11 +1924,21 @@
           "costs": [],
           "outcomes": [
             {
-              "chance": 1,
+              "chance": 1.0,
               "effects": [
                 {
                   "kind": "rad",
                   "amount": 1
+                },
+                {
+                  "kind": "med",
+                  "amount": 1,
+                  "item_id": "item_custom_006",
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 0.25,
+                  "destination": "loot"
                 },
                 {
                   "kind": "xp",

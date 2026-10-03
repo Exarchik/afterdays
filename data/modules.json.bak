@@ -49,7 +49,7 @@
     "legacy_index": 4,
     "target": "weapon",
     "stat": "damage",
-    "base": 4.0,
+    "base": 4,
     "sprite_id": "module_burst_core",
     "rarity_stats": {
       "damage": [
@@ -61,15 +61,14 @@
       ]
     },
     "fixed_penalties": {
-      "strength": -15
-    },
-    "weight": 0.3
+      "strength": -30
+    }
   },
   "module_rangefinder": {
     "legacy_index": 5,
     "target": "weapon",
     "stat": "accuracy",
-    "base": 5.0,
+    "base": 5,
     "sprite_id": "module_rangefinder",
     "rarity_stats": {
       "accuracy": [
@@ -81,9 +80,8 @@
       ]
     },
     "fixed_penalties": {
-      "local_damage_percent": -10
-    },
-    "weight": 0.3
+      "local_damage_percent": -15
+    }
   },
   "module_accelerator": {
     "legacy_index": 6,
@@ -160,7 +158,7 @@
     "legacy_index": 10,
     "target": "weapon",
     "stat": "accuracy",
-    "base": 6.0,
+    "base": 6,
     "sprite_id": "module_ballistic_computer",
     "rarity_stats": {
       "accuracy": [
@@ -172,15 +170,14 @@
       ]
     },
     "fixed_penalties": {
-      "strength": -15
-    },
-    "weight": 0.3
+      "strength": -30
+    }
   },
   "module_tungsten_channel": {
     "legacy_index": 11,
     "target": "weapon",
     "stat": "pierce",
-    "base": 3.0,
+    "base": 3,
     "sprite_id": "module_tungsten_channel",
     "rarity_stats": {
       "attack": [
@@ -192,21 +189,18 @@
       ]
     },
     "fixed_penalties": {
-      "range": -1
-    },
-    "weight": 0.3
+      "range": -2
+    }
   },
   "module_ceramic_inserts": {
     "legacy_index": 12,
     "target": "protection",
     "stat": "defense",
-    "base": 2.0,
+    "base": 2,
     "sprite_id": "module_ceramic_inserts",
     "fixed_penalties": {
-      "strength": -15
-    },
-    "weight": 0.3,
-    "rarity_stats": {}
+      "strength": -20
+    }
   },
   "module_medical_lining": {
     "legacy_index": 13,
@@ -287,13 +281,11 @@
     "legacy_index": 19,
     "target": "protection",
     "stat": "defense",
-    "base": 3.0,
+    "base": 3,
     "sprite_id": "module_reactive_plates",
     "fixed_penalties": {
-      "strength": -30
-    },
-    "weight": 0.3,
-    "rarity_stats": {}
+      "strength": -40
+    }
   },
   "module_carbon_grip": {
     "legacy_index": 20,
@@ -459,7 +451,7 @@
     "legacy_index": 28,
     "target": "protection",
     "stat": "defense",
-    "base": 3.0,
+    "base": 3,
     "sprite_id": "module_lead_fibers",
     "rarity_stats": {
       "defense": [
@@ -470,7 +462,6 @@
         15
       ]
     },
-    "weight": 1.25,
-    "fixed_penalties": {}
+    "weight": 1.5
   }
 }
