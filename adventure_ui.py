@@ -23,14 +23,14 @@ class Effects:
     def blocked(self):
         """Перевіряє, чи дозволяє поточний стан продовжувати рух."""
         now=time.monotonic()
-        return (self.snapshot is not None and now<self.until) or any(e['kind'] in ('move','reveal') and now<e['start']+e['duration'] for e in self.active)
+        return (self.snapshot is not None and now<self.until) or any((e['kind']=='move' or e['kind']=='reveal' and e.get('blocking',True)) and 'paused_at' not in e and now<e['start']+e['duration'] for e in self.active)
 
     def pause_world_notices(self,now):
         """Keep map notices readable after a pending event or modal closes."""
         hidden=bool(getattr(self.app.game,'road_event',None) or
                     getattr(self.app,'dialog',None) or getattr(self.app,'_notice_open',False))
         for event in self.active:
-            if event['kind']!='text' or event['scene']!='world':continue
+            if event['kind'] not in ('text','reveal') or event['scene']!='world':continue
             if hidden:
                 if now<event['start']+event['duration']:
                     event.setdefault('paused_at',now)
@@ -48,7 +48,7 @@ class Effects:
                             for e in self.active if e['kind']=='text' and e['scene']=='world'])
         for event in g.pop_events():
             event=dict(event);kind=event['kind']
-            duration=min(.55,max(.12,.07*(len(event.get('path',[]))-1))) if kind=='move' else .65 if event.get('fire_mode')=='aimed' else .4 if kind in ('attack','slash') else 1.4 if kind=='reveal' else 1.0
+            duration=min(.55,max(.12,.07*(len(event.get('path',[]))-1))) if kind=='move' else .65 if event.get('fire_mode')=='aimed' else .4 if kind in ('attack','slash') else 2.8 if kind=='reveal' else 1.0
             if kind in ('move','attack','slash'):
                 delay=timeline;timeline+=duration if kind=='move' else .02 if event.get('fire_mode')=='pellet' else .09 if event.get('fire_mode')=='burst' else .15
             else:
@@ -66,7 +66,7 @@ class Effects:
     def reveal_focus(self):
         """Focus briefly on a newly revealed patch even when it is outside the player's viewport."""
         now=time.monotonic()
-        event=next((e for e in reversed(self.active) if e['kind']=='reveal' and e['start']<=now<e['start']+e['duration']),None)
+        event=next((e for e in reversed(self.active) if e['kind']=='reveal' and 'paused_at' not in e and e.get('blocking',True) and e['start']<=now<e['start']+e['duration']),None)
         if event and event.get('cells'):
             return tuple(round(sum(c[n] for c in event['cells'])/len(event['cells'])) for n in (0,1))
         return self.app.game.x,self.app.game.y
@@ -217,6 +217,7 @@ class Services(tk.Frame):
                 items.extend([('stash',tr('adventure_ui.0016'),app.storage),('rest',tr('adventure_ui.0017'),lambda:app.act(g.rest))])
             elif g.city is None:
                 items.append(('search',tr('adventure_ui.0018'),lambda:app.act(g.search)))
+            if not g.regular_city and g.can_access_stash:items.append(('stash',tr('adventure_ui.0016'),app.storage))
             if hasattr(g,'destination_quest') and g.destination_quest():
                 q=g.destination_quest();items.append(('action_delivery' if q['kind']=='delivery' else 'action_radio',tr('adventure_ui.0019') if q['kind']=='delivery' else tr('adventure_ui.0020'),lambda:app.act(g.search)))
             if getattr(g,'local_expedition',lambda:None)() and g.city is not None:items.append(('search',tr('adventure_ui.0018'),lambda:app.act(g.search)))

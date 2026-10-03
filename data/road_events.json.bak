@@ -293,8 +293,18 @@
           ],
           "outcomes": [
             {
-              "chance": 1,
+              "chance": 1.0,
               "effects": [
+                {
+                  "kind": "food",
+                  "amount": 1,
+                  "item_id": "item_custom_001",
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
                 {
                   "kind": "reveal",
                   "amount": 6
@@ -508,9 +518,31 @@
               "chance": 1.0,
               "effects": [
                 {
+                  "kind": "ammo",
+                  "amount": 15,
+                  "maximum": 20,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "ammo": "random",
+                  "destination": "loot"
+                },
+                {
                   "kind": "money",
-                  "amount": 45,
-                  "per_level": 10,
+                  "amount": 50,
+                  "maximum": 150,
+                  "per_level": 15,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "repairkit",
+                  "amount": 1,
+                  "maximum": 2,
+                  "per_level": 0,
                   "step": 0,
                   "step_cap": 0,
                   "chance": 1.0,
@@ -540,29 +572,6 @@
             }
           ]
         }
-      ],
-      "cache": [
-        {
-          "kind": "ammo",
-          "amount": 5,
-          "maximum": 7,
-          "per_level": 5,
-          "step": 0,
-          "step_cap": 0,
-          "chance": 1.0,
-          "ammo": "random",
-          "destination": "loot"
-        },
-        {
-          "kind": "repairkit",
-          "amount": 1,
-          "maximum": 2,
-          "per_level": 0,
-          "step": 2,
-          "step_cap": 0,
-          "chance": 1.0,
-          "destination": "loot"
-        }
       ]
     },
     {
@@ -586,7 +595,7 @@
           ],
           "outcomes": [
             {
-              "chance": 1.0,
+              "chance": 0.8,
               "effects": [
                 {
                   "kind": "food",
@@ -602,6 +611,30 @@
                   "kind": "med",
                   "amount": 1,
                   "maximum": 1,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                }
+              ]
+            },
+            {
+              "chance": 0.2,
+              "effects": [
+                {
+                  "kind": "med",
+                  "amount": 1,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "food",
+                  "amount": 1,
+                  "item_id": "item_custom_002",
                   "per_level": 0,
                   "step": 0,
                   "step_cap": 0,
@@ -697,12 +730,27 @@
           ],
           "outcomes": [
             {
-              "chance": 1.0,
+              "chance": 0.8,
               "effects": [
                 {
                   "kind": "rad",
                   "amount": 1,
                   "maximum": 1,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                }
+              ]
+            },
+            {
+              "chance": 0.2,
+              "effects": [
+                {
+                  "kind": "med",
+                  "amount": 1,
+                  "item_id": "item_custom_006",
                   "per_level": 0,
                   "step": 0,
                   "step_cap": 0,
@@ -809,6 +857,17 @@
               "chance": 1.0,
               "effects": [
                 {
+                  "kind": "food",
+                  "amount": 1,
+                  "item_id": "item_custom_001",
+                  "maximum": 3,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
+                {
                   "kind": "money",
                   "amount": 28,
                   "per_level": 7,
@@ -908,6 +967,156 @@
       "legacy_release": "0.32"
     },
     {
+      "id": "event_012",
+      "category": "trade",
+      "terrain": "waste",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Закинута церква",
+      "description": "Старий настоятель просить Вас зробити пожертву на відбудова церкви",
+      "art": "art_custom_075",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Залишити 10 кредитів",
+          "costs": [
+            {
+              "kind": "money",
+              "amount": 10
+            }
+          ],
+          "outcomes": [
+            {
+              "chance": 1.0,
+              "effects": [
+                {
+                  "kind": "radiation_heal",
+                  "amount": 10,
+                  "maximum": 20,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "act_1",
+          "text": "Залишити 50 кредитів",
+          "costs": [
+            {
+              "kind": "money",
+              "amount": 50
+            }
+          ],
+          "outcomes": [
+            {
+              "chance": 1.0,
+              "effects": [
+                {
+                  "kind": "radiation_heal",
+                  "amount": 20,
+                  "maximum": 30,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "heal",
+                  "amount": 15,
+                  "per_level": 5,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "act_2",
+          "text": "Залишити 200 кредитів",
+          "costs": [
+            {
+              "kind": "money",
+              "amount": 200
+            }
+          ],
+          "outcomes": [
+            {
+              "chance": 1.0,
+              "effects": [
+                {
+                  "kind": "xp",
+                  "amount": 15,
+                  "maximum": 25,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "radiation_heal",
+                  "amount": 100,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "heal",
+                  "amount": 25,
+                  "per_level": 5,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "satiety_gain",
+                  "amount": 20,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "repair_armor",
+                  "amount": 25,
+                  "maximum": 30,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ]
+    },
+    {
       "id": "event_006",
       "category": "trade",
       "terrain": "waste",
@@ -971,6 +1180,60 @@
           "outcomes": [
             {
               "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "event_014",
+      "category": "exploration",
+      "terrain": "any",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Закинута лінія електропередач",
+      "description": "Хтось прикріпив до неї драбину, можна спробувати оглянути територію навколо",
+      "art": "art_custom_078",
+      "choices": [
+        {
+          "id": "act_1",
+          "text": "Піднятись і оглянути землі навколо",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1.0,
+              "effects": [
+                {
+                  "kind": "reveal",
+                  "amount": 5,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "xp",
+                  "amount": 10,
+                  "maximum": 15,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Продовжити",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1.0,
               "effects": []
             }
           ]
@@ -1045,6 +1308,50 @@
         }
       ],
       "legacy_group": "basic"
+    },
+    {
+      "id": "event_015",
+      "category": "exploration",
+      "terrain": "any",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Смоляна яма",
+      "description": "Ви не помітили під ногами смоляну яму. Що ж, можна використати це проти ворогів",
+      "art": "art_custom_087",
+      "choices": [
+        {
+          "id": "leave",
+          "text": "Піднятись і продовжити шлях",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1.0,
+              "effects": [
+                {
+                  "kind": "damage",
+                  "amount": 10,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "buff_stealth",
+                  "amount": 0,
+                  "maximum": 0,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "duration": 15,
+                  "destination": "loot"
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "broken_radio",
@@ -1279,6 +1586,91 @@
       ],
       "legacy_group": "additional",
       "legacy_release": "0.32"
+    },
+    {
+      "id": "event_009",
+      "category": "exploration",
+      "terrain": "ruin",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Кратер серед руїн",
+      "description": "Схоже колись тут впала величезна бомба",
+      "art": "art_custom_074",
+      "choices": [
+        {
+          "id": "read",
+          "text": "Оглянути кратер",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1.0,
+              "effects": [
+                {
+                  "kind": "money",
+                  "amount": 10,
+                  "maximum": 15,
+                  "per_level": 10,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "ammo",
+                  "amount": 10,
+                  "maximum": 15,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 0.5,
+                  "ammo": "random",
+                  "destination": "loot"
+                },
+                {
+                  "kind": "repairkit",
+                  "amount": 1,
+                  "maximum": 2,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 0.5,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "xp",
+                  "amount": 15,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "parts",
+                  "amount": 5,
+                  "maximum": 10,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 0.5,
+                  "destination": "loot"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Відійти",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "civic_archive",
@@ -1548,7 +1940,7 @@
       "enabled": true,
       "weight": 1.0,
       "title": "Запаси під каменем",
-      "description": "У схованці лежать три консерви.",
+      "description": "У схованці лежать, якісь харчі.",
       "art": "art_custom_032",
       "choices": [
         {
@@ -1557,11 +1949,37 @@
           "costs": [],
           "outcomes": [
             {
-              "chance": 1,
+              "chance": 1.0,
               "effects": [
                 {
                   "kind": "food",
-                  "amount": 3
+                  "amount": 1,
+                  "item_id": "random",
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "food",
+                  "amount": 1,
+                  "item_id": "random",
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "food",
+                  "amount": 1,
+                  "item_id": "random",
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
                 }
               ]
             }
@@ -1599,6 +2017,17 @@
                   "destination": "loot"
                 },
                 {
+                  "kind": "food",
+                  "amount": 1,
+                  "item_id": "random",
+                  "maximum": 2,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
+                {
                   "kind": "money",
                   "amount": 5,
                   "maximum": 100,
@@ -1611,6 +2040,7 @@
                 {
                   "kind": "food",
                   "amount": 1,
+                  "item_id": "random",
                   "maximum": 2,
                   "per_level": 0,
                   "step": 0,
@@ -1661,11 +2091,22 @@
           "costs": [],
           "outcomes": [
             {
-              "chance": 1,
+              "chance": 1.0,
               "effects": [
                 {
                   "kind": "med",
                   "amount": 2
+                },
+                {
+                  "kind": "med",
+                  "amount": 1,
+                  "item_id": "item_med",
+                  "maximum": 2,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 0.75,
+                  "destination": "loot"
                 }
               ]
             }
@@ -1690,8 +2131,51 @@
           "costs": [],
           "outcomes": [
             {
-              "chance": 1,
+              "chance": 1.0,
               "effects": [
+                {
+                  "kind": "food",
+                  "amount": 5,
+                  "item_id": "item_custom_001",
+                  "maximum": 15,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 0.75,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "food",
+                  "amount": 2,
+                  "item_id": "item_custom_003",
+                  "maximum": 3,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 0.5,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "food",
+                  "amount": 1,
+                  "item_id": "item_custom_005",
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 0.33,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "med",
+                  "amount": 2,
+                  "item_id": "item_custom_007",
+                  "maximum": 5,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 0.75,
+                  "destination": "loot"
+                },
                 {
                   "kind": "money",
                   "amount": 60
@@ -1702,6 +2186,71 @@
         }
       ],
       "legacy_group": "simple"
+    },
+    {
+      "id": "event_010",
+      "category": "supplies",
+      "terrain": "any",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Розбита капсула з синьою рідиною",
+      "description": "Походження рідини невідомо, але повітря пахнем озоном",
+      "art": "art_custom_077",
+      "choices": [
+        {
+          "id": "act_1",
+          "text": "Торкнутись рідини",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1.0,
+              "effects": [
+                {
+                  "kind": "radiation_heal",
+                  "amount": 40,
+                  "maximum": 60,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "heal",
+                  "amount": 10,
+                  "maximum": 12,
+                  "per_level": 5,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "xp",
+                  "amount": 5,
+                  "maximum": 10,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Не торкатись капсули",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1.0,
+              "effects": []
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "mushroom_bed",
@@ -1721,6 +2270,16 @@
             {
               "chance": 0.7,
               "effects": [
+                {
+                  "kind": "food",
+                  "amount": 1,
+                  "item_id": "item_custom_003",
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
                 {
                   "kind": "satiety_gain",
                   "amount": 15,
@@ -1744,6 +2303,16 @@
             {
               "chance": 0.3,
               "effects": [
+                {
+                  "kind": "food",
+                  "amount": 1,
+                  "item_id": "item_custom_003",
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
                 {
                   "kind": "satiety_gain",
                   "amount": 8,
@@ -1857,6 +2426,26 @@
                 {
                   "kind": "food",
                   "amount": 2
+                },
+                {
+                  "kind": "damage",
+                  "amount": 1,
+                  "maximum": 2,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "food",
+                  "amount": 1,
+                  "item_id": "item_custom_005",
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 0.75,
+                  "destination": "loot"
                 }
               ]
             },
@@ -1865,7 +2454,13 @@
               "effects": [
                 {
                   "kind": "damage",
-                  "amount": 4
+                  "amount": 4,
+                  "maximum": 6,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
                 }
               ]
             }
@@ -2003,8 +2598,18 @@
           ],
           "outcomes": [
             {
-              "chance": 1,
+              "chance": 1.0,
               "effects": [
+                {
+                  "kind": "food",
+                  "amount": 1,
+                  "item_id": "item_custom_002",
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 0.6,
+                  "destination": "loot"
+                },
                 {
                   "kind": "money",
                   "amount": 35
@@ -2095,11 +2700,22 @@
           ],
           "outcomes": [
             {
-              "chance": 1,
+              "chance": 1.0,
               "effects": [
                 {
                   "kind": "med",
                   "amount": 1
+                },
+                {
+                  "kind": "med",
+                  "amount": 1,
+                  "item_id": "random",
+                  "maximum": 2,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 0.33,
+                  "destination": "loot"
                 }
               ]
             }
@@ -2194,7 +2810,7 @@
               ]
             },
             {
-              "chance": 0.4,
+              "chance": 0.3,
               "effects": [
                 {
                   "kind": "rad",
@@ -2208,6 +2824,22 @@
                 {
                   "kind": "damage",
                   "amount": 5
+                }
+              ]
+            },
+            {
+              "chance": 0.1,
+              "effects": [
+                {
+                  "kind": "med",
+                  "amount": 1,
+                  "item_id": "random",
+                  "maximum": 2,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
                 }
               ]
             }
@@ -2410,6 +3042,17 @@
                   "destination": "loot"
                 },
                 {
+                  "kind": "food",
+                  "amount": 5,
+                  "item_id": "item_custom_001",
+                  "maximum": 10,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
+                {
                   "kind": "repair_weapon",
                   "amount": 5,
                   "maximum": 15,
@@ -2480,12 +3123,31 @@
                   "amount": 12,
                   "maximum": 35,
                   "destination": "bag"
+                },
+                {
+                  "kind": "damage",
+                  "amount": 1,
+                  "maximum": 10,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
                 }
               ]
             },
             {
               "chance": 0.3,
               "effects": [
+                {
+                  "kind": "xp",
+                  "amount": 10,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
                 {
                   "kind": "damage",
                   "amount": 8
@@ -2614,7 +3276,7 @@
       "weight": 1.0,
       "title": "Тріщина в мосту",
       "description": "Настил під ногами починає розходитись. Поряд залишився ящик ремонтників.",
-      "art": "art_custom_045",
+      "art": "art_custom_076",
       "choices": [
         {
           "id": "act",
@@ -3447,6 +4109,124 @@
       "legacy_group": "simple"
     },
     {
+      "id": "event_013",
+      "title": "Радіаційний ангар",
+      "description": "Невідомий сказав Вам, що всередині ангару з радіоактивними відходами, точно є шось корисне, але він не ризикне власним життям заради цього",
+      "category": "hazards",
+      "terrain": "any",
+      "enabled": true,
+      "weight": 1.0,
+      "art": "art_custom_009",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Прийняти радіопротектор і залізти всередину ангару",
+          "costs": [
+            {
+              "kind": "rad",
+              "amount": 1
+            }
+          ],
+          "outcomes": [
+            {
+              "chance": 1.0,
+              "effects": [
+                {
+                  "kind": "radiation",
+                  "amount": 50,
+                  "maximum": 75,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "gear",
+                  "amount": 1,
+                  "maximum": 1,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "gear",
+                  "amount": 1,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 0.5,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "gear",
+                  "amount": 1,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 0.2,
+                  "destination": "loot"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "act_1",
+          "text": "Залізти в ангар без радіопротектора",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1.0,
+              "effects": [
+                {
+                  "kind": "radiation",
+                  "amount": 90,
+                  "maximum": 95,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "gear",
+                  "amount": 1,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "gear",
+                  "amount": 1,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 0.5,
+                  "destination": "loot"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1.0,
+              "effects": []
+            }
+          ]
+        }
+      ]
+    },
+    {
       "id": "mines",
       "category": "hazards",
       "terrain": "any",
@@ -3748,6 +4528,50 @@
       "legacy_group": "terrain"
     },
     {
+      "id": "event_016",
+      "category": "hazards",
+      "terrain": "road",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Той самий камінь",
+      "description": "Ви чули про легенду навколо каменя, який не можливо обійти не перечіпившись, добре що хтось накидав старих пластирів навколо.",
+      "art": "art_custom_086",
+      "choices": [
+        {
+          "id": "leave",
+          "text": "Піднятись і продовжити шлях",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1.0,
+              "effects": [
+                {
+                  "kind": "damage",
+                  "amount": 6,
+                  "per_level": 2,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "med",
+                  "amount": 3,
+                  "item_id": "item_custom_007",
+                  "maximum": 6,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
       "id": "storm",
       "category": "hazards",
       "terrain": "waste",
@@ -3833,8 +4657,18 @@
           "costs": [],
           "outcomes": [
             {
-              "chance": 1,
+              "chance": 1.0,
               "effects": [
+                {
+                  "kind": "wear_armor",
+                  "amount": 5,
+                  "maximum": 15,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
                 {
                   "kind": "damage",
                   "amount": 3
@@ -3861,6 +4695,57 @@
       ],
       "legacy_group": "additional",
       "legacy_release": "0.32"
+    },
+    {
+      "id": "event_011",
+      "category": "caches",
+      "terrain": "any",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Невеликий старий сейф з грошима",
+      "description": "Всередині явно сховані скарби",
+      "art": "art_custom_073",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Спробувати відкрити замок",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "cache",
+                  "amount": 1
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "cache": [
+        {
+          "kind": "money",
+          "amount": 150,
+          "maximum": 1200,
+          "per_level": 50,
+          "step": 0,
+          "step_cap": 0,
+          "chance": 1.0,
+          "destination": "loot"
+        }
+      ]
     },
     {
       "id": "locked_provisions",
@@ -3905,8 +4790,12 @@
         {
           "kind": "food",
           "amount": 3,
+          "item_id": "random",
+          "per_level": 0,
           "step": 4,
-          "step_cap": 3
+          "step_cap": 3,
+          "chance": 1.0,
+          "destination": "loot"
         },
         {
           "kind": "med",
@@ -4024,6 +4913,17 @@
       ],
       "legacy_group": "cache",
       "cache": [
+        {
+          "kind": "med",
+          "amount": 1,
+          "item_id": "random",
+          "maximum": 2,
+          "per_level": 0,
+          "step": 0,
+          "step_cap": 0,
+          "chance": 1.0,
+          "destination": "loot"
+        },
         {
           "kind": "med",
           "amount": 2,

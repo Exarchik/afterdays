@@ -488,7 +488,7 @@ class LegacyGame:
 
     def defeat(self):
         """Обробляє поразку гравця і завершує бойовий стан."""
-        loss = min(self.money, max(25, self.money // 4))
+        loss = getattr(self,'carried_money',self.money)
         self.money -= loss
         self.x, self.y = self.cities[0]
         self.hp = self.max_hp
@@ -500,7 +500,7 @@ class LegacyGame:
         """Відновлює гравця під час відпочинку в поселенні."""
         if self.city is None or self.battle:
             return False
-        if self.hp == self.max_hp and not getattr(self,'coward_turns',0):
+        if self.hp == self.max_hp and not getattr(self,'coward_turns',0) and getattr(self,'hunger',20)>=20:
             self.log(tr('afterdays.0064'))
             return False
         if self.money < 15:
@@ -1053,7 +1053,7 @@ class ExpansionGame(LegacyGame):
 
 
 from progression import equipment, module, supply, stats, item_weight, item_value
-from authored_quests import Game
+from update046 import Game
 from reputation import buy_factor, sell_factor
 
 # GUI imports are delayed so the model and tests work without a display.
@@ -1350,7 +1350,7 @@ def launch(test_hook=None):
 
         def storage(self):
             """Відкриває інтерфейс власного сховища."""
-            if self.game.regular_city and not self.game.battle:
+            if self.game.can_access_stash:
                 win=self.popup(tr('afterdays.0161'),'940x680')
                 adventure_ui.Storage(win,self).pack(fill='both',expand=True)
 
@@ -1401,7 +1401,7 @@ def launch(test_hook=None):
             item = self.game.find(self.selected_id())
             if item and item['kind']=='repairkit':
                 import maintenance_ui
-                maintenance_ui.show(self);return
+                maintenance_ui.show(self,item['id']);return
             if item and item['kind']=='sealed':
                 if self.fx.blocked:return
                 found=self.game.open_chest(item['id'])
@@ -1412,7 +1412,7 @@ def launch(test_hook=None):
                 else:self.game.log(tr('afterdays.0166'));self.refresh()
                 return
             if item and item['kind'] in ('med', 'food', 'rad'):
-                self.act(lambda: self.game.use(item['kind']))
+                self.act(lambda: self.game.use(item['id']))
 
         def drop_selected(self):
             """Викидає вибраний предмет після потрібних перевірок."""

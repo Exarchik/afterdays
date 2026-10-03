@@ -41,7 +41,7 @@ class BalanceTests(unittest.TestCase):
   reward=q['reward'];g.xp=p.xp_for_level(7);g.x,g.y=q['relic_pos'];g.search();g.x,g.y=g.cities[0]
   before={i['id'] for i in g.bag+g.stash};xp=g.xp;self.assertTrue(g.turn_in(q['id']))
   awarded=[i for i in g.bag+g.stash if i['id'] not in before];self.assertTrue(awarded)
-  self.assertTrue(all(i['level']==1 for i in awarded));self.assertEqual(g.xp-xp,50);self.assertEqual(q['reward'],reward)
+  self.assertTrue(all(i['level']==1 for i in awarded));self.assertEqual(g.xp-xp,1);self.assertEqual(q['reward'],reward)
   for i in awarded:self.assertTrue(all(m['level']==1 for m in i.get('modules',[])))
  def test_high_level_contract(self):
   """Перевіряє сценарій «high level contract» та очікувані результати."""

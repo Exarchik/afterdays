@@ -92,9 +92,13 @@ def description(game,item):
         lines.append(tr('refinement_ui.0017')+(tr('refinement_ui.0018') if item['target']=='weapon' else tr('refinement_ui.0019')))
         lines.append(tr('modules.compatibility'))
         if item.get('tradeoff'):lines.append(tr('refinement_ui.0020'))
-    elif kind=='med':lines.append(tr('refinement_ui.0021', v0=__import__('math').ceil(game.max_hp * 0.5)))
-    elif kind=='rad':lines.append(tr('refinement_ui.0022'))
-    elif kind=='food':lines.append(tr('refinement_ui.0023'))
+    elif kind in ('med','food','rad','repairkit'):
+        import consumable_rules
+        definition=consumable_rules.definition(item)
+        if definition.get('description'):lines.append(definition['description'])
+        for key,(label,_,_) in consumable_rules.FIELDS.items():
+            if key not in ('value','weight') and definition[key]:lines.append(f"{label}: {definition[key]:g}")
+    elif kind=='credits':lines.append('Кредити витрачаються спочатку із сумки, потім зі сховку. При загибелі втрачаються всі кредити в сумці.')
     elif kind=='trophy':lines.append(tr('refinement_ui.0024'))
     elif kind in ('parts','fragments'):lines.append(tr('refinement_ui.0025')+(tr('refinement_ui.0026') if kind=='parts' else tr('refinement_ui.0027'))+tr('refinement_ui.0028'))
     if item.get('quest_repair'):lines.append(tr('quests.repair_item_info',condition=round(item.get('durability',0))))
@@ -170,7 +174,7 @@ class QuestCards(tk.Frame):
             if q.get('metro_chain') and q['status']=='active' and not self.app.game.quest_ready(q):
                 chain=q['metro_chain']
                 state=tr('metro035.short_progress',number=chain['index']+1,total=len(chain['steps'])) if chain['index']<len(chain['steps']) else tr('metro035.stage_station')
-            reward=tr('refinement_ui.0037',v0=q.get('reward',0),v1=q.get('xp_reward',0))
+            reward=tr('refinement_ui.0037',v0=q.get('reward',0),v1=self.app.game.quest_xp(q))
             state_limit=max(8,int((w-title_x-17-(62 if unread else 0))/6))
             if len(state)>state_limit:state=state[:state_limit-1]+'…'
             reward_limit=max(8,int((w-title_x-17-(126 if immediate else 0))/6))

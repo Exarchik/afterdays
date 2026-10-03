@@ -6,6 +6,7 @@ import event_catalog
 import entity_catalog
 from event_editor import Editor
 from entity_editor import EntityPanel
+from consumable_editor import ConsumablePanel
 from art_library import Library
 from art_editor import ArtPanel
 from quest_editor import QuestPanel
@@ -30,18 +31,22 @@ class ContentEditor(ttk.Frame):
         for section,title in entity_catalog.SECTIONS.items():
             panel=EntityPanel(self.tabs,self.store,section,self.save_all)
             self.tabs.add(panel,text=title);self.panels[section]=panel
+            if section=='module':
+                self.items=ConsumablePanel(self.tabs,self.store,self.save_all);self.tabs.add(self.items,text='Предмети')
         self.arts=ArtPanel(self.tabs,self.library,self.commit,self.refresh_assets,self.save_all,lambda:self.events.document['events'])
         self.tabs.add(self.arts,text='Арти')
         root.bind('<Control-s>',lambda e:self.save_all())
         root.protocol('WM_DELETE_WINDOW',self.close)
 
     def refresh_assets(self):
+        self.items.refresh_preview()
         self.events.refresh_art()
         self.dialogues.show_art()
         for panel in self.panels.values():
             if panel.current:panel.open(panel.current)
 
     def commit(self):
+        if not self.items.commit():self.tabs.select(self.items);return False
         if not self.quests.commit():self.tabs.select(self.quests);return False
         if not self.dialogues.commit():self.tabs.select(self.dialogues);return False
         if not self.events.commit():self.tabs.select(2);return False
@@ -52,7 +57,7 @@ class ContentEditor(ttk.Frame):
     def save_all(self):
         if not self.commit():return False
         try:
-            errors=event_catalog.validate(self.events.document,art=self.store.art)+self.store.validate()
+            errors=event_catalog.validate(self.events.document,art=self.store.art,consumables=self.store.data['consumables'])+self.store.validate()
             if errors:raise ValueError('\n'.join(errors))
             self.store.check_disk()
             if self.events.path.read_bytes()!=self.events.disk:
@@ -69,6 +74,7 @@ class ContentEditor(ttk.Frame):
         except (ValueError,OSError) as exc:
             messagebox.showerror('Зміни не збережено',str(exc),parent=self.root);return False
         for panel in self.panels.values():panel.rebuild();panel.status.set('Збережено · Перезапустіть гру; уже створені предмети в сейві зберігають свої характеристики')
+        self.items.rebuild()
         self.dialogues.rebuild();self.dialogues.status.set('Діалоги збережено')
         self.quests.rebuild();self.quests.status.set('Квести збережено · Перезапустіть гру')
         self.arts.rebuild();self.arts.status.set('Арти збережено · Перезапустіть гру')

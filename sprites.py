@@ -11,6 +11,8 @@ NPC_TEXT_BINDINGS=content.read('sprite_text_bindings.json')
 SIZES=(16,24,32,48,64,96,144,192)
 
 def item_key(item):
+    if item.get('kind')=='credits':return content.CONSUMABLES.get('item_credits',{}).get('sprite_id') or 'credits'
+    if item.get('sprite_id') in MANIFEST:return item['sprite_id']
     if item.get('art_id') in MANIFEST:return item['art_id']
     kind=item.get('kind')
     if kind=='trophy':return 'trophy_'+content.monster_id(item.get('monster_type_id',item.get('monster_kind',0)))

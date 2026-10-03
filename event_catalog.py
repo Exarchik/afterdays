@@ -46,6 +46,7 @@ EFFECTS = {
 }
 TIMED_EFFECTS = {'buff_regen','buff_satiety','buff_stealth'}
 ITEM_KINDS = {'food', 'med', 'rad', 'repairkit', 'parts', 'fragments', 'ammo'}
+CACHE_KINDS = ITEM_KINDS | {'gear', 'money'}
 AMMO = ('random', 'pistol', 'rifle', 'shell', 'energy', 'heavy', 'bolt')
 COSTS = ('money', 'food', 'med', 'rad', 'repairkit', 'parts', 'fragments')
 
@@ -58,7 +59,10 @@ def ordered(events):
     order = list(CATEGORIES)
     return sorted(events, key=lambda e: (order.index(e['category']), e['terrain'], e['title'].casefold(), e['id']))
 
-def validate(document, art=None):
+def consumable_catalog():
+    return json.loads((ROOT/'data/consumables.json').read_text(encoding='utf-8'))
+
+def validate(document, art=None, consumables=None):
     """Reject malformed content before writing or applying any game effects."""
     errors = []
     def need(ok, label):
@@ -68,6 +72,7 @@ def validate(document, art=None):
     if not isinstance(document, dict) or document.get('version') != 1 or not isinstance(document.get('events'), list):
         return ['Потрібен каталог version=1 зі списком events.']
     if art is None:art = art_catalog()
+    if consumables is None:consumables=consumable_catalog()
     ids = set()
     for event in document['events']:
         if not isinstance(event, dict): errors.append('Подія має бути об’єктом.'); continue
@@ -89,7 +94,10 @@ def validate(document, art=None):
                 if not isinstance(effect, dict): errors.append(label+'ефект має бути об’єктом'); continue
                 kind = effect.get('kind')
                 need(kind in EFFECTS, label+'невідомий ефект '+str(kind))
-                need(not in_cache or kind in ITEM_KINDS | {'gear'}, label+'у сховку дозволені лише предмети')
+                if 'item_id' in effect:
+                    item_id=effect['item_id']
+                    need(kind in ('food','med','rad','repairkit') and isinstance(item_id,str) and (item_id=='random' or consumables.get(item_id,{}).get('kind')==kind),label+'предмет не відповідає категорії нагороди')
+                need(not in_cache or kind in CACHE_KINDS, label+'у сховку дозволені лише предмети та кредити')
                 for field, default in (('amount', 1), ('per_level', 0), ('step', 0), ('step_cap', 0)):
                     need(integer(effect.get(field, default)), label+field+' має бути цілим')
                 for field in ('step', 'step_cap'):
@@ -168,6 +176,8 @@ def describe(effect):
     if effect.get('step'): n += f" + min({effect.get('step_cap', 0)}, ⌊(L−1)/{effect['step']}⌋)"
     if kind in ('cache', 'gear'): n = ''
     suffix = ' ['+effect.get('ammo', 'random')+']' if kind == 'ammo' else ''
+    if effect.get('item_id'):
+        ident=effect['item_id'];suffix+=' ['+('Випадковий' if ident=='random' else consumable_catalog().get(ident,{}).get('name',ident))+']'
     if kind in TIMED_EFFECTS:
         n = (n+' HP; ' if kind=='buff_regen' else '') + str(effect.get('duration','?'))+' кроків'
     if kind in ('radiation','radiation_heal'): n+=' в.п.'

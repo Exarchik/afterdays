@@ -3202,5 +3202,379 @@
         1235
       ]
     }
+  },
+  "art_custom_072": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/cfd1b1302f546eedf76465397a655a9105a153f3ed452e1e6f2f6787cc7e7e9d/sprite",
+    "inventory_sheet": "custom/variants/cfd1b1302f546eedf76465397a655a9105a153f3ed452e1e6f2f6787cc7e7e9d/inventory",
+    "art_label": "money",
+    "art_category": "other",
+    "editor_source": "custom/sources/0999e006e638af382da83e30d3175c9dc18cc5d06f01c5400f6cd34da9a0d019.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        0,
+        24,
+        428,
+        408
+      ]
+    }
+  },
+  "art_custom_073": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/29729ef6d2e570bd71fa66cbd958765eec53a057079e6689e3bbd5fa16577c71/sprite",
+    "inventory_sheet": "custom/variants/29729ef6d2e570bd71fa66cbd958765eec53a057079e6689e3bbd5fa16577c71/inventory",
+    "art_label": "event_theme:find_money",
+    "art_category": "events",
+    "editor_source": "custom/sources/0999e006e638af382da83e30d3175c9dc18cc5d06f01c5400f6cd34da9a0d019.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        439,
+        3,
+        842,
+        408
+      ]
+    }
+  },
+  "art_custom_074": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/6d5a155048bbbcd5ac07756910f6b4165cc566248decf5fcd75b86e2bc2cbb66/sprite",
+    "inventory_sheet": "custom/variants/6d5a155048bbbcd5ac07756910f6b4165cc566248decf5fcd75b86e2bc2cbb66/inventory",
+    "art_label": "event_theme:crater",
+    "art_category": "events",
+    "editor_source": "custom/sources/0999e006e638af382da83e30d3175c9dc18cc5d06f01c5400f6cd34da9a0d019.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        423,
+        405,
+        836,
+        835
+      ]
+    }
+  },
+  "art_custom_075": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/00f2f584386a5d466c820320063374c40f75e5a9029983a217e8703078d57714/sprite",
+    "inventory_sheet": "custom/variants/00f2f584386a5d466c820320063374c40f75e5a9029983a217e8703078d57714/inventory",
+    "art_label": "event_theme:abandoned_church",
+    "art_category": "events",
+    "editor_source": "custom/sources/0999e006e638af382da83e30d3175c9dc18cc5d06f01c5400f6cd34da9a0d019.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        839,
+        392,
+        1254,
+        832
+      ]
+    }
+  },
+  "art_custom_076": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/18751ecd8790066c896d9865894febc9c9e0a254bc0ee34c4816268dd45617bc/sprite",
+    "inventory_sheet": "custom/variants/18751ecd8790066c896d9865894febc9c9e0a254bc0ee34c4816268dd45617bc/inventory",
+    "art_label": "event_theme:collapsed_bridge",
+    "art_category": "events",
+    "editor_source": "custom/sources/0999e006e638af382da83e30d3175c9dc18cc5d06f01c5400f6cd34da9a0d019.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        0,
+        832,
+        420,
+        1251
+      ]
+    }
+  },
+  "art_custom_077": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/8bc1c288fea1bc9ce9dc76d385396c2e9a182ea3c3eabff46553e7e77403c133/sprite",
+    "inventory_sheet": "custom/variants/8bc1c288fea1bc9ce9dc76d385396c2e9a182ea3c3eabff46553e7e77403c133/inventory",
+    "art_label": "event_theme:blue_liqiud",
+    "art_category": "events",
+    "editor_source": "custom/sources/0999e006e638af382da83e30d3175c9dc18cc5d06f01c5400f6cd34da9a0d019.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        426,
+        843,
+        842,
+        1241
+      ]
+    }
+  },
+  "art_custom_078": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/caa29981e83d407c6aae36f0905d483321ab4f45e19b1f784fb7fa9e9fb81336/sprite",
+    "inventory_sheet": "custom/variants/caa29981e83d407c6aae36f0905d483321ab4f45e19b1f784fb7fa9e9fb81336/inventory",
+    "art_label": "event_theme:leps",
+    "art_category": "events",
+    "editor_source": "custom/sources/0999e006e638af382da83e30d3175c9dc18cc5d06f01c5400f6cd34da9a0d019.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        831,
+        835,
+        1254,
+        1249
+      ]
+    }
+  },
+  "art_custom_079": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/c53cef4a033d404e1f6ad6263299175cfd9d4435e243a4a5da4d7c5324a89902/sprite",
+    "inventory_sheet": "custom/variants/c53cef4a033d404e1f6ad6263299175cfd9d4435e243a4a5da4d7c5324a89902/inventory",
+    "art_label": "antagonist",
+    "art_category": "other",
+    "editor_source": "custom/sources/0999e006e638af382da83e30d3175c9dc18cc5d06f01c5400f6cd34da9a0d019.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        4,
+        422,
+        423,
+        830
+      ]
+    }
+  },
+  "art_custom_080": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/bb7464d738678aadbe48b37ac75c9834506dbc140501e7e12fdc53a74884caf8/sprite",
+    "inventory_sheet": "custom/variants/bb7464d738678aadbe48b37ac75c9834506dbc140501e7e12fdc53a74884caf8/inventory",
+    "art_label": "food:weird_nuts",
+    "art_category": "other",
+    "editor_source": "custom/sources/07fd2cd5c6d2d006ea69c14d0b8707b3e718ae712feaf8538bad36588eadff2f.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        0,
+        3,
+        428,
+        419
+      ]
+    }
+  },
+  "art_custom_081": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/2536a2769cd9e19c221dcbea673aa28930bba6280d3a4241d086f80c797bf438/sprite",
+    "inventory_sheet": "custom/variants/2536a2769cd9e19c221dcbea673aa28930bba6280d3a4241d086f80c797bf438/inventory",
+    "art_label": "food:mushrooms",
+    "art_category": "other",
+    "editor_source": "custom/sources/07fd2cd5c6d2d006ea69c14d0b8707b3e718ae712feaf8538bad36588eadff2f.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        858,
+        8,
+        1254,
+        419
+      ]
+    }
+  },
+  "art_custom_082": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/d3ce7baf22c8609d22d113c6bdfbe6e5c8e2427dbbb7e4f8ff40477618d9882f/sprite",
+    "inventory_sheet": "custom/variants/d3ce7baf22c8609d22d113c6bdfbe6e5c8e2427dbbb7e4f8ff40477618d9882f/inventory",
+    "art_label": "food:old_meat",
+    "art_category": "other",
+    "editor_source": "custom/sources/07fd2cd5c6d2d006ea69c14d0b8707b3e718ae712feaf8538bad36588eadff2f.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": true,
+      "trim": true,
+      "crop": [
+        850,
+        427,
+        1254,
+        808
+      ]
+    }
+  },
+  "art_custom_083": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/ea99f4489c8999d52550540d22b35bd6c0ce2d524cf8fea00d049b7c6a037f14/sprite",
+    "inventory_sheet": "custom/variants/ea99f4489c8999d52550540d22b35bd6c0ce2d524cf8fea00d049b7c6a037f14/inventory",
+    "art_label": "food:mre",
+    "art_category": "other",
+    "editor_source": "custom/sources/07fd2cd5c6d2d006ea69c14d0b8707b3e718ae712feaf8538bad36588eadff2f.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        871,
+        824,
+        1254,
+        1246
+      ]
+    }
+  },
+  "art_custom_084": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/9cb4a9e845a32c00739f89570de525ae1476f9067fda118126674f1795848d18/sprite",
+    "inventory_sheet": "custom/variants/9cb4a9e845a32c00739f89570de525ae1476f9067fda118126674f1795848d18/inventory",
+    "art_label": "med:pills",
+    "art_category": "other",
+    "editor_source": "custom/sources/07fd2cd5c6d2d006ea69c14d0b8707b3e718ae712feaf8538bad36588eadff2f.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        0,
+        416,
+        431,
+        806
+      ]
+    }
+  },
+  "art_custom_085": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/cde436dd22023a7bb0b12a8ebf3c45aad989520ba29eaa5c0708f1853992e9e4/sprite",
+    "inventory_sheet": "custom/variants/cde436dd22023a7bb0b12a8ebf3c45aad989520ba29eaa5c0708f1853992e9e4/inventory",
+    "art_label": "med:plaster",
+    "art_category": "other",
+    "editor_source": "custom/sources/07fd2cd5c6d2d006ea69c14d0b8707b3e718ae712feaf8538bad36588eadff2f.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": true,
+      "trim": true,
+      "crop": [
+        431,
+        405,
+        847,
+        830
+      ]
+    }
+  },
+  "art_custom_086": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/c9315b50a6d38fb366924f8d79fb66c883842518ceb61091a997c0b3c0db62e5/sprite",
+    "inventory_sheet": "custom/variants/c9315b50a6d38fb366924f8d79fb66c883842518ceb61091a997c0b3c0db62e5/inventory",
+    "art_label": "event_theme:rock_under_feet",
+    "art_category": "events",
+    "editor_source": "custom/sources/07fd2cd5c6d2d006ea69c14d0b8707b3e718ae712feaf8538bad36588eadff2f.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        12,
+        806,
+        423,
+        1249
+      ]
+    }
+  },
+  "art_custom_087": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/976c11bcf444db0c01ebdfeedd70c582bc90df9460a0b4c04489d9ab3e8338a3/sprite",
+    "inventory_sheet": "custom/variants/976c11bcf444db0c01ebdfeedd70c582bc90df9460a0b4c04489d9ab3e8338a3/inventory",
+    "art_label": "event_theme:tar",
+    "art_category": "events",
+    "editor_source": "custom/sources/07fd2cd5c6d2d006ea69c14d0b8707b3e718ae712feaf8538bad36588eadff2f.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        439,
+        800,
+        882,
+        1230
+      ]
+    }
+  },
+  "art_custom_088": {
+    "index": 0,
+    "columns": 1,
+    "sheet": "custom/variants/7a189f5e345b30688d394f5d908aaa3e0de873c26c59aee6a0f0efa321d0d836/sprite",
+    "inventory_sheet": "custom/variants/7a189f5e345b30688d394f5d908aaa3e0de873c26c59aee6a0f0efa321d0d836/inventory",
+    "art_label": "food:surstromming",
+    "art_category": "other",
+    "editor_source": "custom/sources/07fd2cd5c6d2d006ea69c14d0b8707b3e718ae712feaf8538bad36588eadff2f.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        431,
+        0,
+        845,
+        411
+      ]
+    }
   }
 }

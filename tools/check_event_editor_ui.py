@@ -42,6 +42,23 @@ def run(capture=False):
             assert effect.read()['per_level']==2
             if capture: shot(effect,'event_effect_preview.png')
             effect.destroy()
+            effect=EffectDialog(root,dict(kind='food',item_id='item_custom_002',amount=1),cache=True);root.update()
+            assert effect.read()['item_id']=='item_custom_002'
+            effect.item_choice.set('Випадковий із категорії');assert effect.read()['item_id']=='random'
+            effect.kind.set('Аптечки');effect.explain()
+            assert 'item_custom_006' in effect.item_choices.values()
+            effect.item_choice.set(next(k for k,v in effect.item_choices.items() if v=='item_custom_006'))
+            assert effect.read()['item_id']=='item_custom_006'
+            effect.destroy()
+            effect=EffectDialog(root,cache=True);root.update()
+            assert effect.labels['Кредити']=='money'
+            effect.kind.set('Кредити');effect.explain();effect.values['amount'].set('100')
+            reward=effect.read();assert reward['kind']=='money' and reward['amount']==100 and reward['destination']=='loot'
+            effect.values['amount'].set('-1')
+            try:effect.read()
+            except ValueError:pass
+            else:raise AssertionError('Negative safe credits accepted')
+            effect.destroy()
             choice=ChoiceDialog(root,edited['choices'][0]); root.update(); assert choice.read()['id']=='help'; choice.destroy()
             outcome=OutcomeDialog(root); root.update(); assert outcome.read()['chance']==1; outcome.destroy()
             if capture:

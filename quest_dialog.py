@@ -35,7 +35,7 @@ def confirm(panel,q,action):
     if action!='abandon':
         gifts=g.prepare_quest_rewards(q)
         items_section(tr('quests.reward_items'),gifts)
-        tk.Label(win,text=tr('quests.reward_summary',money=q.get('reward',0),xp=q.get('xp_reward',0)),bg=PANEL,fg=GOLD).pack(pady=6)
+        tk.Label(win,text=tr('quests.reward_summary',money=q.get('reward',0),xp=g.quest_xp(q)),bg=PANEL,fg=GOLD).pack(pady=6)
     def commit():
         if not win.winfo_exists():return
         operation={'accept':g.accept_quest,'turn_in':g.turn_in,'abandon':g.abandon_quest}[action]

@@ -136,7 +136,7 @@ class Library:
                    art_label=name.strip(),art_category=group,editor_source=source_path,editor_settings=copy.deepcopy(settings))
         self.store.data['sprites'][key]=entry
         # Sprite aliases used by monsters and legacy callers must follow their model's art.
-        for group_name in ('equipment','modules','monsters'):
+        for group_name in ('equipment','modules','monsters','consumables'):
             for ident,data in self.store.data[group_name].items():
                 if ident==key:data['sprite_id']=key
                 if data.get('sprite_id')==key:self.store.data['sprites'][ident]=copy.deepcopy(entry)
@@ -162,7 +162,7 @@ class Library:
         uses=[]
         for e in events:
             if e.get('art')==key:uses.append('Подія: '+e['title'])
-        for group in ('equipment','modules','monsters'):
+        for group in ('equipment','modules','monsters','consumables'):
             for ident,d in self.store.data[group].items():
                 for field in ('sprite_id','corpse_sprite_id','trophy_sprite_id'):
                     if d.get(field)==key:uses.append(self.store.data['texts'].get(ident+'.name',ident)+' · '+field)

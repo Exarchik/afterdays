@@ -32,6 +32,13 @@ def item(game, effect, level):
         if 'durability' in gear: gear['durability'] = float(game.rng.randint(30, 90))
         return gear
     n = catalog.amount(effect, level, game.rng)
+    if kind == 'money':return p.supply('credits',n)
+    if kind in ('food','med','rad','repairkit'):
+        import content
+        ident=effect.get('item_id','item_'+kind)
+        if ident=='random':ident=game.rng.choice([key for key,d in content.CONSUMABLES.items() if d['kind']==kind])
+        if content.CONSUMABLES.get(ident,{}).get('kind')!=kind:raise ValueError('Невідомий предмет події: '+ident)
+        return p.supply(ident,n)
     if kind == 'ammo':
         ammo = effect.get('ammo', 'random')
         if ammo == 'random': ammo = game.rng.choice(list(p.AMMO))
@@ -72,6 +79,16 @@ def _apply(game, effect, spec):
     n = catalog.amount(effect, level, game.rng)
     if kind in catalog.ITEM_KINDS:
         if n < 0:
+            if kind in ('food','med','rad','repairkit') and effect.get('item_id'):
+                import content
+                ident=effect['item_id'];pool=[i for i in game.bag if i['kind']==kind and not i.get('quest_id') and (ident=='random' or i.get('type_id','item_'+kind)==ident)]
+                if ident=='random':game.rng.shuffle(pool)
+                remaining=-n
+                for owned in pool:
+                    count=min(remaining,owned.get('qty',1));p.extract(game.bag,owned,count);remaining-=count
+                    if count:game.emit(f"−{count} {owned['name']}")
+                    if not remaining:break
+                return
             ammo = effect.get('ammo', 'random')
             if kind == 'ammo' and ammo == 'random': ammo = game.rng.choice(list(p.AMMO))
             removed=min(game.count('ammo',ammo) if kind=='ammo' else game.count(kind),-n)
@@ -104,8 +121,7 @@ def _apply(game, effect, spec):
             before=module_rules.condition(game.weapon);game.wear(game.weapon,n)
             if before!=module_rules.condition(game.weapon):game.emit(f'Стан зброї −{before-module_rules.condition(game.weapon):g}')
     elif kind == 'reveal':
-        before=len(game.explored);game.reveal(game.x,game.y,n)
-        if len(game.explored)>before:game.emit(f'Відкрито клітинок мапи: +{len(game.explored)-before}')
+        game.reveal(game.x,game.y,n)
     elif kind == 'discover':
         if not game.discover(): game.gain_xp(n)
     elif kind.startswith('repair_'):

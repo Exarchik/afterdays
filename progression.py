@@ -27,7 +27,7 @@ PERKS = {
     'trader':(tr('progression.0019'),tr('progression.0020')),
     'scavenger':(tr('progression.0021'),tr('progression.0022')),
 }
-STACK_KINDS = {'food','med','ammo','parts','fragments','rad','repairkit'}
+STACK_KINDS = {'food','med','ammo','parts','fragments','rad','repairkit','credits'}
 TECHNICIANS = [0,2,4,7,10]
 
 
@@ -88,7 +88,9 @@ def item_value(item):
 
 
 def stack_key(item):
-    if item['kind']=='food':return ('food',item.get('type_id','item_food'),item.get('satiety',10),item.get('paid_sale_cap'))
+    if item['kind'] in ('food','med','rad','repairkit'):
+        import consumable_rules
+        return (item['kind'],item.get('type_id'),tuple(sorted(consumable_rules.definition(item).items())),item.get('paid_sale_cap'))
     return (item['kind'],item.get('monster_kind') if item['kind']=='trophy' else item.get('ammo_type'),item.get('paid_sale_cap')) if item['kind'] in STACK_KINDS else None
 
 

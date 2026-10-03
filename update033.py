@@ -80,10 +80,13 @@ class Game(combat033.Combat,storm033.Storms,update032.Game):
 
     def _reveal_notice(self,before):
         """Queue one bounded, short highlight for newly discovered cells."""
-        cells=[list(map(int,key.split(','))) for key in set(self.explored)-before]
+        queued={tuple(c) for e in getattr(self,'_events',[]) if e['kind']=='reveal' for c in e.get('cells',[])}
+        cells=[list(map(int,key.split(','))) for key in set(self.explored)-before if tuple(map(int,key.split(','))) not in queued]
         if cells:
             self.emit(kind='reveal',scene='world',pos=[self.x,self.y],color='#9de5b2')
             self._events[-1]['cells']=cells
+            self._events[-1]['blocking']=not getattr(self,'_walking_reveal',False)
+            if getattr(self,'_event_feedback_color',None):self.emit(f'Відкриття мапи: +{len(cells)} клітинок')
 
     def buy_map(self):
         """Animate newly opened map cells after a successful cartographer purchase."""

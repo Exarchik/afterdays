@@ -36,7 +36,12 @@ def icon(c, item, x, y, size=48):
         c.create_polygon(*coords(p), **kw)
     def oval(*p, **kw):
         c.create_oval(*coords(p), **kw)
-    if k == 'weapon':
+    if k == 'credits':
+        rect(8,18,56,46,fill='#796535',outline='#e7cd79',width=2)
+        oval(24,22,40,42,fill='#d7b77a',outline='#fff0bd')
+        line(13,25,20,25,fill='#e7cd79',width=2)
+        line(44,39,51,39,fill='#e7cd79',width=2)
+    elif k == 'weapon':
         laser = any(s in name for s in (tr('visuals.0001'), tr('visuals.0002'), tr('visuals.0003'), tr('visuals.0004')))
         pistol = any(s in name for s in (tr('visuals.0005'), tr('visuals.0006'), tr('visuals.0007')))
         if tr('visuals.0008') in name:
@@ -261,6 +266,7 @@ TYPE_ORDER.insert(TYPE_ORDER.index('parts'),'repairkit')
 TYPE_COLORS['repairkit']='#4d4935'
 TYPE_COLORS['trophy']='#503e32'
 def item_sort_key(item):
+    if item['kind']=='credits':return (-1,0,0,0,0,item['name'],item['id'])
     kind=item['kind'];category=('pistol','rifle','shotgun','automatic','sniper').index(__import__('combat033').category(item)) if kind=='weapon' else 0
     return (0 if item.get('promotion') else 1,TYPE_ORDER.index(kind) if kind in TYPE_ORDER else 99,category,-item.get('rarity',0),-item.get('level',1),item['name'],item['id'])
 

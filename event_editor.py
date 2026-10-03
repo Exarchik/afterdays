@@ -47,13 +47,17 @@ class Dialog(tk.Toplevel):
 
 class EffectDialog(Dialog):
     def __init__(self, parent, effect=None, cost=False, cache=False):
-        super().__init__(parent, 'Витрата' if cost else 'Нагорода / наслідок', '730x670')
-        self.original = copy.deepcopy(effect or {}); self.cost = cost
-        kinds = catalog.COSTS if cost else tuple(k for k in catalog.EFFECTS if not cache or k in catalog.ITEM_KINDS | {'gear'})
+        super().__init__(parent, 'Витрата' if cost else 'Нагорода / наслідок', '730x750')
+        self.original = copy.deepcopy(effect or {}); self.cost = cost; self.cache = cache
+        kinds = catalog.COSTS if cost else tuple(k for k in catalog.EFFECTS if not cache or k in catalog.CACHE_KINDS)
         self.labels = {catalog.EFFECTS[k][0]: k for k in kinds}
         self.kind = tk.StringVar(value=catalog.EFFECTS[self.original.get('kind', kinds[0])][0])
         box = row(self.body, 'Тип', self.kind, list(self.labels)); box.bind('<<ComboboxSelected>>', self.explain)
         self.help = ttk.Label(self.body, wraplength=660, foreground='#426547'); self.help.pack(fill='x', pady=10)
+        library=getattr(self._root(),'_editor_art_library',None)
+        self.consumables=library.store.data['consumables'] if library else catalog.consumable_catalog()
+        self.item_choice=tk.StringVar();self.item_choices={};self.item_kind=None
+        if not cost:self.item_field=row(self.body,'Їжа / препарат',self.item_choice,[])
         self.values = {}
         self.duration = tk.StringVar(value=str(self.original.get('duration',10)))
         fields = [('amount', 'Кількість / мінімум', 1)]
@@ -69,14 +73,27 @@ class EffectDialog(Dialog):
         if not cost:
             self.duration_field=row(self.body, 'Тривалість, кроків', self.duration)
             row(self.body, 'Тип набоїв (лише набої)', self.ammo, catalog.AMMO)
-            row(self.body, 'Куди додати предмет', self.destination, ['Здобич', 'Рюкзак'])
-            ttk.Label(self.body, text='L — рівень місцевості. Формула: кількість + добавка×L +\nmin(ліміт, ⌊(L−1)/N⌋). N=0 вимикає останню добавку.\nВід’ємні предмети / кредити — втрата наявного. Шкода задається додатним числом.',
+            if cache:
+                self.destination.set('Здобич')
+                ttk.Label(self.body,text='Вміст з’явиться у здобичі після успішного відкриття замка.').pack(fill='x',pady=8)
+            else:row(self.body, 'Куди додати предмет', self.destination, ['Здобич', 'Рюкзак'])
+            ttk.Label(self.body, text='L — рівень місцевості. Формула: кількість + добавка×L +\nmin(ліміт, ⌊(L−1)/N⌋). N=0 вимикає останню добавку.\n'+('Для вмісту сейфа задавайте лише додатну кількість.' if cache else 'Від’ємні предмети / кредити — втрата наявного. Шкода задається додатним числом.'),
                       wraplength=660).pack(fill='x', pady=12)
         self.explain()
 
     def explain(self, event=None):
         kind=self.labels[self.kind.get()]
-        self.help.configure(text=catalog.EFFECTS[kind][1])
+        if hasattr(self,'item_field'):
+            if kind in ('food','med','rad','repairkit'):
+                if self.item_kind!=kind:
+                    self.item_choices={'Стандартний предмет':'','Випадковий із категорії':'random'}
+                    self.item_choices.update({d.get('name',ident)+' ['+ident+']':ident for ident,d in self.consumables.items() if d['kind']==kind})
+                    ident=self.original.get('item_id','') if self.original.get('kind')==kind else ''
+                    self.item_choice.set(next((label for label,key in self.item_choices.items() if key==ident),'Стандартний предмет'))
+                self.item_field.configure(values=list(self.item_choices),state='readonly')
+            else:self.item_choice.set('Не застосовується');self.item_field.configure(state='disabled')
+            self.item_kind=kind
+        self.help.configure(text='Стос кредитів усередині сейфа. Задайте додатну кількість або діапазон; можна налаштувати шанс і добавку за рівень.' if self.cache and kind=='money' else catalog.EFFECTS[kind][1])
         if hasattr(self,'duration_field'):self.duration_field.configure(state='normal' if kind in catalog.TIMED_EFFECTS else 'disabled')
 
     def read(self):
@@ -84,6 +101,9 @@ class EffectDialog(Dialog):
         if self.cost:
             if result['amount'] <= 0: raise ValueError('Витрата має бути додатною.')
             return result
+        if result['kind'] in ('food','med','rad','repairkit'):
+            ident=self.item_choices[self.item_choice.get()]
+            if ident:result['item_id']=ident
         for field in ('maximum', 'per_level', 'step', 'step_cap'):
             text = self.values[field].get().strip()
             if text: result[field] = int(text)
@@ -91,6 +111,7 @@ class EffectDialog(Dialog):
         if not 0 <= result['chance'] <= 1: raise ValueError('Шанс має бути від 0 до 100%.')
         if result.get('maximum', result['amount']) < result['amount']: raise ValueError('Максимум менший за мінімум.')
         if result.get('step', 0) < 0 or result.get('step_cap', 0) < 0: raise ValueError('Крок і ліміт мають бути ≥ 0.')
+        if self.cache and (result['amount']<=0 or result.get('per_level',0)<0):raise ValueError('Вміст сейфа має мати додатну кількість і невід’ємну добавку за рівень.')
         if result['kind'] not in catalog.ITEM_KINDS | {'money'} and (result['amount'] < 0 or result.get('per_level', 0) < 0):
             raise ValueError('Для цього ефекту задайте додатну кількість або нуль.')
         if result['kind'] == 'ammo': result['ammo'] = self.ammo.get()
@@ -315,7 +336,7 @@ class Editor(ttk.Frame):
             if self.cache.rows: event['cache'] = copy.deepcopy(self.cache.rows)
             else: event.pop('cache', None)
             library=getattr(self.root,'_editor_art_library',None)
-            errors = catalog.validate({'version':1, 'events':[event]},art=library.entries if library else None)
+            errors = catalog.validate({'version':1, 'events':[event]},art=library.entries if library else None,consumables=library.store.data['consumables'] if library else None)
             if errors: raise ValueError('\n'.join(errors))
             self.lookup(self.current).update(event)
             if 'cache' not in event: self.lookup(self.current).pop('cache', None)

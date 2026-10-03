@@ -138,7 +138,7 @@
       "nodes": {
         "radio_call": {
           "actor": "actor_002",
-          "text": "[time=0.5]*Шум в рації*.[space][clear][time=0.5]Хлопці! Північий захід![space][line]Схоже в нас гості, готуйтесь хлопці!",
+          "text": "[time=0.5]*Шум в рації*.[space][clear][time=0.5]Хлопці! Північний захід![space][line]Схоже в нас гості, готуйтесь!",
           "next": null,
           "replies": [
             {

@@ -16,8 +16,18 @@ def run(capture=None):
         root=tk.Tk();ttk.Style(root).theme_use('clam')
         try:
             app=ContentEditor(root,root_path/'data/road_events.json',root_path);root.update()
-            assert len(app.tabs.tabs())==9
+            assert len(app.tabs.tabs())==10
             assert app.commit() and not app.store.dirty,'Opening unchanged sections must not alter catalogs'
+            app.items.open('item_credits');app.items.variables['sprite_id'].set('med');root.update()
+            assert app.items.image is not None
+            assert str(app.items.widgets['weight'].cget('state'))=='disabled'
+            assert app.items.commit()
+            app.tabs.select(app.items);root.update()
+            assert app.tabs.index(app.items)==app.tabs.index(app.panels['module'])+1
+            app.items.open('item_food');app.items.variables['satiety'].set('6');app.items.variables['heal'].set('4')
+            assert app.items.commit()
+            app.items.add();custom_item=app.items.current
+            app.items.variables['name'].set('Комбінований пайок')
             app.events.fields['title'].set('Тест спільного збереження')
             for section,panel in app.panels.items():
                 app.tabs.select(panel);root.update();initial=len(app.store.items(section))
@@ -41,6 +51,10 @@ def run(capture=None):
                     ImageGrab.grab(bbox=(root.winfo_rootx(),root.winfo_rooty(),root.winfo_rootx()+root.winfo_width(),root.winfo_rooty()+root.winfo_height())).save(target/(section+'_editor.png'))
             assert app.save_all()
             loaded=catalog.Store(root_path)
+            assert loaded.data['consumables']['item_credits']['sprite_id']=='med'
+            assert loaded.data['consumables'][custom_item]['heal']==4
+            assert loaded.data['consumables'][custom_item]['satiety']==6
+            assert loaded.data['consumables'][custom_item]['name']=='Комбінований пайок'
             assert not loaded.validate()
             import event_catalog
             saved_events=event_catalog.load(root_path/'data/road_events.json')

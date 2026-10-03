@@ -77,7 +77,7 @@ class AdventureTests(unittest.TestCase):
     def test_food_xp_and_quest_world_feedback(self):
         """Перевіряє сценарій «food xp and quest world feedback» та очікувані результати."""
         g=r.Game(4);g.hp=20;g.survival['hunger']=5;g.use('food')
-        self.assertTrue(any(n['scene']=='world' and 'насичення' in n['text'] for n in g.pop_events()))
+        self.assertTrue(any(n['scene']=='world' and 'насичення' in n['text'].lower() for n in g.pop_events()))
         g.gain_xp(20);self.assertIn('+20 XP',[n['text'] for n in g.pop_events()])
         offer=offer_for(g,'scout');g.accept_quest(offer['id'])
         q=g.quests[-1];g.x,g.y=q['pos'];g._visit_objectives()

@@ -160,7 +160,9 @@ class Survival:
         if self.radiation_injury or self.starving:
             message=tr('survival040.no_sleep_rad' if self.radiation_injury else 'survival040.no_sleep_hunger')
             self.log(message);self.emit(message,color='#e56860');return False
-        return super().rest()
+        ok=super().rest()
+        if ok:self.change_satiety(5)
+        return ok
 
     def step(self,dx,dy):
         # One survival update per entered cell, including diagonal movement.

@@ -329,7 +329,7 @@ class Game(p.Game):
 
     def stash_transfer(self,item_id,direction,qty=1):
         """Переміщує предмети між сумкою і сховищем із перевіркою обмежень."""
-        if not self.regular_city or self.battle:return False
+        if not self.can_access_stash:return False
         if direction not in ('deposit','withdraw'):return False
         source=self.bag if direction=='deposit' else self.stash
         item=next((i for i in source if i['id']==item_id),None)
@@ -587,6 +587,7 @@ class Game(p.Game):
             if version<16 and 'world_distance_remainder' not in data:expected.discard('world_distance_remainder')
             if version<13 and 'reputation_state' not in data:expected.discard('reputation_state')
             if version==4:expected-= {'explored','known_cities','map_rewards','rad_turns'}
+            if 'message_colors' not in data:data['message_colors']=[None]*len(data.get('messages',[]))
             if set(data)!=expected:raise ValueError(tr('adventure.0226'))
             game.__dict__.update(data)
             def tuples(v):return tuple(tuples(i) for i in v) if isinstance(v,list) else v

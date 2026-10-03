@@ -65,7 +65,7 @@ def identify_item(item):
         elif kind=='quest':ident='quest_parcel' if item.get('delivery') else 'quest_item'
         else:ident='item_'+str(kind)
         item['type_id']=ident
-    if ident in EQUIPMENT or ident in MODULE_DATA or ident in CONSUMABLES:item['name']=name(ident)+(' '+ '★'*min(3,item.get('upgrades',0)) if item.get('upgrades') else '')
+    if ident in EQUIPMENT or ident in MODULE_DATA or ident in CONSUMABLES:item['name']=CONSUMABLES.get(ident,{}).get('name',name(ident))+(' '+ '★'*min(3,item.get('upgrades',0)) if item.get('upgrades') else '')
     if kind=='trophy':item['monster_type_id']=monster_id(item.get('monster_kind',0));item['name']=t(item['monster_type_id']+'.trophy')
     for mod in item.get('modules',[]):identify_item(mod)
     if item.get('contents'):identify_item(item['contents'])
@@ -96,5 +96,5 @@ def migrate(game):
 
 AMMO={v['ammo_type']:(name(k),v['value'],v['weight']) for k,v in CONSUMABLES.items() if v['kind']=='ammo'}
 def consumable(kind):
-    ident='item_'+kind;v=CONSUMABLES[ident]
-    return dict(type_id=ident,name=name(ident),kind=kind,rarity=0,weight=v['weight'],value=v['value'])
+    ident=kind if kind in CONSUMABLES else 'item_'+kind;v=CONSUMABLES[ident]
+    return dict(v,type_id=ident,name=v.get('name',name(ident)),rarity=0)

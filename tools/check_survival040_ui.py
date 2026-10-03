@@ -31,7 +31,7 @@ def hook(root,app):
             g.survival.update(radiation=0,hunger=10);bar.refresh(g);root.update_idletasks()
             assert not bar.find_withtag('radiation_fill')
             assert bar.itemcget(bar.find_withtag('hunger_fill')[0],'fill')=='#4ba8df'
-            assert 'v0.40' in root.title()
+            assert 'v0.46' in root.title()
             print('Survival 0.40 UI passed: radiation HP segment, blue/red hunger, debuffs, resizing, version')
         except Exception as exc:errors.append(exc)
         finally:root.destroy()

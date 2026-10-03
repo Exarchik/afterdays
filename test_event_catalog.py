@@ -96,6 +96,30 @@ class CatalogTests(unittest.TestCase):
         g=r.Game(1)
         self.assertEqual([c.amount(effect,L,g.rng) for L in (1,4,5,9,13,99)],[3,3,4,5,6,6])
 
+    def test_safe_credits_persist_and_collect_once(self):
+        spec=custom();spec['choices'][0]['outcomes'][0]['effects']=[dict(kind='cache')]
+        spec['cache']=[dict(kind='money',amount=100,maximum=150,per_level=5)]
+        self.assertEqual(c.validate(dict(version=1,events=[spec])),[])
+        with patch.dict(c.BY_ID,{spec['id']:spec}),tempfile.TemporaryDirectory() as folder:
+            g=r.Game(1);before=g.money
+            g.make_road_event(spec['id']);g.resolve_event('act');cache=copy.deepcopy(g.road_cache())
+            coins=cache['contents'][0];self.assertEqual(coins['kind'],'credits')
+            self.assertTrue(100+5*g.region_level<=coins['qty']<=150+5*g.region_level)
+            self.assertEqual(g.money,before)
+            path=Path(folder)/'save.json';g.save(path);g=r.Game.load(path)
+            self.assertEqual(g.road_cache()['contents'],cache['contents'])
+            p.add_to(g.bag,p.parts(2))
+            wrong=0 if cache['lock_target']>90 else 180
+            self.assertFalse(g.unlock_cache(cache['id'],wrong));self.assertEqual(g.money,before)
+            self.assertTrue(g.unlock_cache(cache['id'],cache['lock_target']))
+            self.assertEqual(g.money,before);self.assertTrue(g.collect(coins['id']))
+            self.assertEqual(g.money,before+coins['qty'])
+            self.assertIsNone(g.unlock_cache(cache['id'],cache['lock_target']))
+            self.assertFalse(g.collect(coins['id']));self.assertEqual(g.money,before+coins['qty'])
+        for amount in (0,-1):
+            spec['cache'][0]['amount']=amount
+            self.assertTrue(c.validate(dict(version=1,events=[spec])))
+
     def test_atomic_save_validation_backup_and_reload(self):
         with tempfile.TemporaryDirectory() as folder:
             path=Path(folder)/'events.json'; doc=dict(version=1,events=[custom()]); c.save(doc,path)

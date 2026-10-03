@@ -20,7 +20,7 @@ def personal_actions(g,item):
     slot=next((s for s,i in g.equipped.items() if i and i['id']==ident),None)
     if not bag and slot is None:return actions
     quest=item.get('quest_id') or kind=='quest'
-    if kind in ('med','food','rad') and bag and (not g.battle or g.battle['ap']>=2) and (g.can_use_consumable(kind) if hasattr(g,'can_use_consumable') else (kind=='rad' or g.hp<g.max_hp)):actions.append(('use',()))
+    if kind in ('med','food','rad') and bag and g.can_use_consumable(ident):actions.append(('use',()))
     if g.battle:
         if slot in ('weapon1','weapon2') and slot!=g.active:actions.append(('switch',()))
         return actions
@@ -72,7 +72,7 @@ def show(app,item,event,owner=None,grid=None):
         if not g.battle or g.battle.get('cleared'):
             menu.add_command(label=tr('update030.collect'),command=lambda:run(lambda:g.collect(ident)))
     elif any(i['id']==ident for i in g.stash):
-        if g.city is not None and not g.battle and not item.get('quest_id'):
+        if g.can_access_stash and not item.get('quest_id'):
             for qty in sorted({1,item.get('qty',1)}):menu.add_command(label=tr('update030.withdraw',qty=qty),command=lambda qty=qty:run(lambda:g.stash_transfer(ident,'withdraw',qty)))
     else:
         for code,args in personal_actions(g,item):

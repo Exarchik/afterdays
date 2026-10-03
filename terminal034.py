@@ -96,9 +96,9 @@ class StatusBar(tk.Canvas):
         self.text(b-25,65,tr('terminal.level'),8,GOLD,anchor='center')
         self.region((a,0,b,108),tr('terminal.player'),lambda:self.app.tabs.select(self.app.player_tab))
         a,b=cols[1];x=a+14;right=b-14;barw=right-x
-        rows=[(tr('terminal.hp'),d['hp'],d['max_hp'],15,GREEN),
-              (tr('survival040.hunger'),d['hunger'],20,51,'#dc5b56' if d['starving'] else '#4ba8df'),
-              (tr('terminal.xp'),d['xp'],d['xp_goal'],87,'#c9ae41')]
+        rows=[('♥ '+tr('terminal.hp'),d['hp'],d['max_hp'],15,GREEN),
+              ('● '+tr('survival040.hunger'),d['hunger'],20,51,'#dc5b56' if d['starving'] else '#4ba8df'),
+              ('★ '+tr('terminal.xp'),d['xp'],d['xp_goal'],87,'#c9ae41')]
         for index,(label,amount,total,y,color) in enumerate(rows):
             self.text(x,y,label,8,MUTED,width=barw*.43);self.text(right,y,f'{amount:g} / {total:g}',10,TEXT,width=barw*.55,anchor='e',bold=True)
             self.create_rectangle(x,y+12,right,y+20,fill='#29382d',outline='')
@@ -142,7 +142,7 @@ class StatusBar(tk.Canvas):
         a,b=cols[4];x=a+12
         self.text(x,18,tr('terminal.money'),8,MUTED);self.glyph('coins',x+8,43);self.text(x+25,43,f"{d['money']:,}".replace(',',' '),17,GOLD,width=b-x-33,bold=True)
         self.glyph('clock',x+8,81);self.text(x+25,81,str(d['turn']),10,TEXT,width=b-x-33)
-        self.region((a,0,b,108),tr('terminal.money_tip',money=d['money'],turn=d['turn']))
+        self.region((a,0,b,108),tr('terminal.money_tip',money=d['money'],turn=d['turn'])+f'\nУ сумці: {g.carried_money} кр.\nУ сховку: {g.stored_money} кр.')
         a,b=cols[5];x=a+10;self.text(x,18,tr('terminal.effects'),8,GOLD)
         effects=[];tips=[]
         if d['rad']:
