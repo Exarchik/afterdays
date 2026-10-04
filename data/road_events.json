@@ -902,7 +902,7 @@
       "weight": 1.0,
       "title": "Обмін у фельдшера",
       "description": "Мандрівний фельдшер шукає провізію для своєї групи.",
-      "art": "event_theme:pharmacy",
+      "art": "art_custom_090",
       "choices": [
         {
           "id": "act",
@@ -1408,7 +1408,7 @@
       "weight": 1.0,
       "title": "Голос у рації",
       "description": "Оператор просить полагодити передавач.",
-      "art": "action_radio",
+      "art": "art_custom_093",
       "choices": [
         {
           "id": "act",
@@ -1783,7 +1783,7 @@
       "weight": 1.0,
       "title": "Польовий щоденник",
       "description": "На сторінках описані місцеві мутанти.",
-      "art": "journal",
+      "art": "art_custom_092",
       "choices": [
         {
           "id": "act",
@@ -1969,7 +1969,7 @@
       "enabled": true,
       "weight": 1.0,
       "title": "Магнітна плівка",
-      "description": "Ви знайшли дивні коробки з магнітною стрічкою, схоже це які старі фільми.",
+      "description": "Ви знайшли дивні коробки з магнітною стрічкою, схоже це якісь старі фільми.",
       "art": "art_custom_029",
       "choices": [
         {
@@ -2156,7 +2156,7 @@
       "weight": 1.0,
       "title": "Пакунок допомоги",
       "description": "Ви знайшли дві запечатані аптечки.",
-      "art": "event_theme:provisions",
+      "art": "art_custom_091",
       "choices": [
         {
           "id": "leave",
@@ -2612,7 +2612,7 @@
       "weight": 1.0,
       "title": "Чисте джерело",
       "description": "Вода пройшла крізь товстий шар вапняку.",
-      "art": "terrain:water",
+      "art": "art_custom_094",
       "choices": [
         {
           "id": "act",
@@ -2816,7 +2816,7 @@
       "weight": 1.0,
       "title": "Обвалені сходи",
       "description": "На майданчику поверхом вище стоїть аптечна шафка. Сходи ледве тримаються.",
-      "art": "dungeon_exit",
+      "art": "art_custom_095",
       "choices": [
         {
           "id": "act",
@@ -2990,7 +2990,7 @@
       "weight": 1.0,
       "title": "Свіжі позначки",
       "description": "Хтось залишив попередження про радіацію та одну запасну пігулку.",
-      "art": "art_custom_060",
+      "art": "art_custom_011",
       "choices": [
         {
           "id": "act",
