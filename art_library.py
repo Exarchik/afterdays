@@ -105,6 +105,15 @@ class Library:
         if x+size>image.width or y+size>image.height:raise ValueError('Некоректний індекс спрайта в атласі.')
         return image.crop((x,y,x+size,y+size))
     def settings(self,key):return copy.deepcopy(self.entries[key].get('editor_settings',dict(DEFAULTS,padding=0,trim=False)))
+    def imported_sources(self):
+        """One row per original, including staged imports not saved to disk yet."""
+        paths={'assets/custom/sources/'+p.name for p in (self.store.root/'assets/custom/sources').glob('*.png') if p.is_file()}
+        paths.update(p for p in self.store.pending_assets if Path(p).parent.as_posix()=='assets/custom/sources' and p.endswith('.png'))
+        result=[]
+        for path in sorted(paths):
+            names=sorted({e.get('art_label',key) for key,e in self.entries.items() if 'assets/'+e.get('editor_source','')==path})
+            result.append(dict(path=path,name=' · '.join(names) if names else Path(path).stem,names=names))
+        return sorted(result,key=lambda row:row['name'].casefold())
     def stage(self,key,name,group,source,settings):
         if key not in self.entries and not re.fullmatch(r'[a-z][a-z0-9_]*',key):raise ValueError('Некоректний ID арту.')
         if not name.strip():raise ValueError('Додайте назву арту.')
@@ -112,6 +121,12 @@ class Library:
         # Content-addressed, immutable originals and rendered bundles are shared by all arts.
         original=encode(source)
         source_path='custom/sources/'+hashlib.sha256(original).hexdigest()+'.png'
+        if not (self.store.root/'assets'/source_path).exists() and 'assets/'+source_path not in self.store.pending_assets:
+            for row in self.imported_sources():
+                try:existing=self.image_file(row['path'])
+                except (OSError,ValueError):continue
+                if existing.size==source.size and existing.tobytes()==source.tobytes():
+                    source_path=row['path'].removeprefix('assets/');original=self.file_bytes(row['path']);break
         custom=self.store.root/'assets/custom'
         rendered={f'sprite_{size}.png':encode(tile(source,settings,size)) for size in SIZES}
         rendered.update({f'inventory_{width}.png':encode(inventory(source,settings,width)) for width in WIDTHS})
@@ -119,11 +134,12 @@ class Library:
         for filename,blob in sorted(rendered.items()):
             digest.update(filename.encode());digest.update(len(blob).to_bytes(8,'big'));digest.update(blob)
         folder='custom/variants/'+digest.hexdigest()
+        shared=next((entry for entry in self.entries.values() if entry.get('editor_render_hash')==digest.hexdigest()),None)
         for candidate in sorted(custom.glob('*/sprite_192.png')):
             if all((candidate.parent/name).is_file() and (candidate.parent/name).read_bytes()==blob for name,blob in rendered.items()):
                 folder=candidate.parent.relative_to(self.store.root/'assets').as_posix();break
         files={f'assets/{source_path}':original}
-        files.update({f'assets/{folder}/{name}':blob for name,blob in rendered.items()})
+        if not shared:files.update({f'assets/{folder}/{name}':blob for name,blob in rendered.items()})
         pending={}
         for relative,blob in files.items():
             path=self.store.root/relative
@@ -133,7 +149,10 @@ class Library:
                 if existing!=blob:raise ValueError('Вміст спільного асета не відповідає його адресі: '+relative)
             else:pending[relative]=blob
         entry=dict(index=0,columns=1,sheet=folder+'/sprite',inventory_sheet=folder+'/inventory',
-                   art_label=name.strip(),art_category=group,editor_source=source_path,editor_settings=copy.deepcopy(settings))
+                   art_label=name.strip(),art_category=group,editor_source=source_path,editor_settings=copy.deepcopy(settings),editor_render_hash=digest.hexdigest())
+        if shared:
+            for field in ('index','columns','sheet','inventory_sheet','inventory_columns'):
+                if field in shared:entry[field]=shared[field]
         self.store.data['sprites'][key]=entry
         # Sprite aliases used by monsters and legacy callers must follow their model's art.
         for group_name in ('equipment','modules','monsters','consumables'):

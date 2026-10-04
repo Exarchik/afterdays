@@ -9,26 +9,36 @@ import json
 import os
 from pathlib import Path
 import tempfile
+import io
 
 
-def compact(root, apply=False):
+def pixel_digest(blob):
+    from PIL import Image,ImageOps
+    with Image.open(io.BytesIO(blob)) as image:
+        if image.width*image.height>40_000_000 or getattr(image,'n_frames',1)>1:raise ValueError('Unsupported original image')
+        image=ImageOps.exif_transpose(image).convert('RGBA')
+        return hashlib.sha256(str(image.size).encode()+image.tobytes()).hexdigest()
+
+
+def compact(root, apply=False, pixels=False):
     root=Path(root).resolve();assets=root/'assets';custom=(assets/'custom').resolve()
     groups={}
     for path in sorted(set(custom.glob('*/source.png')) | set(custom.glob('sources/*.png'))):
         if path.is_symlink() or not path.resolve().is_relative_to(custom):
             raise ValueError('Unsafe source path: '+str(path))
-        blob=path.read_bytes();digest=hashlib.sha256(blob).hexdigest()
+        blob=path.read_bytes();digest=pixel_digest(blob) if pixels else hashlib.sha256(blob).hexdigest()
         groups.setdefault(digest,[]).append((path,blob))
     duplicates={};saved=0;duplicate_count=0;created={}
     for digest,group in groups.items():
-        canonical=custom/'sources'/f'{digest}.png';blob=group[0][1]
+        group.sort(key=lambda pair:(len(pair[1]),pair[0].name))
+        blob=group[0][1];canonical=custom/'sources'/f'{hashlib.sha256(blob).hexdigest()}.png'
         if canonical.is_symlink() or not canonical.resolve().is_relative_to(custom):
             raise ValueError('Unsafe source path: '+str(canonical))
         if canonical.exists() and canonical.read_bytes()!=blob:raise ValueError('Source hash collision')
         if not canonical.exists():created[canonical]=blob
-        duplicate_count+=len(group)-1;saved+=(len(group)-1)*len(blob)
+        duplicate_count+=len(group)-1;saved+=sum(len(b) for _,b in group)-len(blob)
         for path,other in group:
-            if other!=blob:raise ValueError('Source hash collision')
+            if (pixel_digest(other)!=digest if pixels else other!=blob):raise ValueError('Source hash collision')
             if path!=canonical:duplicates[path]=canonical
     replacements={old.relative_to(assets).as_posix():new.relative_to(assets).as_posix() for old,new in duplicates.items()}
     changes={}
@@ -65,7 +75,7 @@ def compact(root, apply=False):
     # References are durable before any deletion. An interrupted cleanup is safe to rerun.
     for old,new in duplicates.items():
         if not old.resolve().is_relative_to(custom) or not new.resolve().is_relative_to(custom):raise ValueError('Unsafe cleanup path')
-        if old.read_bytes()!=new.read_bytes():raise ValueError('Source changed during migration')
+        if (pixel_digest(old.read_bytes())!=pixel_digest(new.read_bytes()) if pixels else old.read_bytes()!=new.read_bytes()):raise ValueError('Source changed during migration')
         old.unlink()
     return report
 
@@ -73,5 +83,6 @@ def compact(root, apply=False):
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--apply',action='store_true')
+    parser.add_argument('--pixels',action='store_true',help='Compare oriented RGBA pixels, ignoring PNG compression and metadata.')
     args=parser.parse_args()
-    print(json.dumps(compact(Path(__file__).resolve().parents[1],args.apply),indent=2))
+    print(json.dumps(compact(Path(__file__).resolve().parents[1],args.apply,args.pixels),indent=2))

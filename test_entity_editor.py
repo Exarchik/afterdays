@@ -24,6 +24,7 @@ def project_copy(folder, with_code=False):
         shutil.copytree(catalog.ROOT/directory,root/directory,dirs_exist_ok=True)
     (root/'assets').mkdir(exist_ok=True)
     shutil.copy2(catalog.ROOT/'assets/manifest.json',root/'assets/manifest.json')
+    if (catalog.ROOT/'assets/custom').exists():shutil.copytree(catalog.ROOT/'assets/custom',root/'assets/custom',dirs_exist_ok=True)
     if with_code:
         for path in catalog.ROOT.glob('*.py'):
             if not path.name.startswith('test_'):shutil.copy2(path,root/path.name)

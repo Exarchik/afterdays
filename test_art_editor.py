@@ -24,6 +24,7 @@ class ArtTests(unittest.TestCase):
     def test_identical_arts_and_metadata_reuse_files_but_crop_shares_only_source(self):
         with tempfile.TemporaryDirectory() as folder:
             store=Store(project_copy(folder));library=art.Library(store)
+            sources_before=len(list((Path(folder)/'assets/custom/sources').glob('*.png')))
             library.stage('art_test_a','A','events',fixture(),art.DEFAULTS)
             library.stage('art_test_b','B','monsters',fixture(),art.DEFAULTS)
             self.assertEqual(len(store.pending_assets),15)
@@ -35,7 +36,7 @@ class ArtTests(unittest.TestCase):
             self.assertEqual(len(store.pending_assets),14)
             self.assertEqual(library.entries['art_test_a']['editor_source'],library.entries['art_test_c']['editor_source'])
             store.save()
-            self.assertEqual(len(list((Path(folder)/'assets/custom/sources').glob('*.png'))),1)
+            self.assertEqual(len(list((Path(folder)/'assets/custom/sources').glob('*.png'))),sources_before+1)
 
     def test_source_compaction_preserves_backups_unique_files_and_legacy_reuse(self):
         from tools.deduplicate_art_sources import compact
@@ -90,16 +91,20 @@ class ArtTests(unittest.TestCase):
             store=Store(project_copy(folder));library=art.Library(store);key=library.next_id()
             library.stage(key,'Новий арт','events',fixture(),art.DEFAULTS)
             self.assertTrue(store.dirty);self.assertEqual(len(store.pending_assets),15)
-            self.assertFalse((Path(folder)/'assets/custom').exists())
+            self.assertFalse((Path(folder)/'assets'/library.entries[key]['editor_source']).exists())
             events=event_catalog.load();events['events'][0]['art']=key
             self.assertFalse(event_catalog.validate(events,art=store.art))
             ep=Path(folder)/'data/road_events.json';store.save((ep,events,ep.read_bytes()))
             loaded=Store(folder);other=art.Library(loaded);entry=other.entries[key]
             self.assertFalse(loaded.dirty);self.assertEqual(other.source(key).tobytes(),fixture().tobytes())
             for size in art.SIZES:
-                with Image.open(Path(folder)/'assets'/f"{entry['sheet']}_{size}.png") as img:self.assertEqual(img.size,(size,size))
+                with Image.open(Path(folder)/'assets'/f"{entry['sheet']}_{size}.png") as img:
+                    x=entry['index']%entry['columns']*size;y=entry['index']//entry['columns']*size
+                    self.assertEqual(img.crop((x,y,x+size,y+size)).tobytes(),art.tile(fixture(),art.DEFAULTS,size).tobytes())
             for width in art.WIDTHS:
-                with Image.open(Path(folder)/'assets'/f"{entry['inventory_sheet']}_{width}.png") as img:self.assertEqual(img.size,(width,72))
+                with Image.open(Path(folder)/'assets'/f"{entry['inventory_sheet']}_{width}.png") as img:
+                    columns=entry['inventory_columns'];x=entry['index']%columns*width;y=entry['index']//columns*72
+                    self.assertEqual(img.crop((x,y,x+width,y+72)).tobytes(),art.inventory(fixture(),art.DEFAULTS,width).tobytes())
             self.assertEqual(event_catalog.load(ep,art=loaded.art)['events'][0]['art'],key)
 
     def test_replacement_keeps_id_and_updates_model_aliases(self):
@@ -110,11 +115,13 @@ class ArtTests(unittest.TestCase):
             library.stage(key,'Оновлений гризун','monsters',fixture(),art.DEFAULTS)
             self.assertEqual(store.data['sprites'][copy_id]['sheet'],store.data['sprites'][key]['sheet'])
             self.assertEqual(store.base_art,original)
-            first=store.data['sprites'][key]['sheet'];store.save()
+            store.save();first=store.data['sprites'][key]['sheet']
             library.stage(key,'Інша назва','monsters',fixture(),dict(art.DEFAULTS,rotation=90))
             self.assertNotEqual(store.data['sprites'][key]['sheet'],first);store.save()
-            self.assertTrue((Path(folder)/'assets'/f'{first}_192.png').exists())
-            self.assertEqual(json.loads((Path(folder)/'data/sprites.json.bak').read_text(encoding='utf-8'))[key]['sheet'],first)
+            backup=json.loads((Path(folder)/'data/sprites.json.bak').read_text(encoding='utf-8'))[key]
+            with Image.open(Path(folder)/'assets'/f"{backup['sheet']}_192.png") as image:
+                x=backup['index']%backup['columns']*192;y=backup['index']//backup['columns']*192
+                self.assertEqual(image.crop((x,y,x+192,y+192)).tobytes(),art.tile(fixture(),art.DEFAULTS,192).tobytes())
 
     def test_failed_import_and_failed_save_do_not_leave_broken_catalogs(self):
         with tempfile.TemporaryDirectory() as folder:
@@ -122,6 +129,7 @@ class ArtTests(unittest.TestCase):
             with self.assertRaises(ValueError):library.stage('art_custom_001','Bad','events',fixture(),dict(art.DEFAULTS,padding=99))
             self.assertEqual(store.data,before);self.assertFalse(store.pending_assets)
             library.stage('art_custom_001','Good','events',fixture(),art.DEFAULTS)
+            asset_snapshot={p:p.read_bytes() for p in (Path(folder)/'assets/custom').rglob('*.png')}
             snapshot={key:path.read_bytes() for key,path in store.paths.items()};replace=os.replace
             def fail_catalog(source,target):
                 if Path(target)==store.paths['sprites']:raise OSError('simulated write failure')
@@ -129,7 +137,7 @@ class ArtTests(unittest.TestCase):
             with patch('entity_catalog.os.replace',side_effect=fail_catalog):
                 with self.assertRaises(OSError):store.save()
             self.assertEqual(snapshot,{key:path.read_bytes() for key,path in store.paths.items()})
-            self.assertFalse(list((Path(folder)/'assets/custom').rglob('*.png')))
+            self.assertEqual(asset_snapshot,{p:p.read_bytes() for p in (Path(folder)/'assets/custom').rglob('*.png')})
             self.assertTrue(store.dirty);store.save();self.assertFalse(store.dirty)
 
     def test_generated_paths_cannot_escape_assets(self):

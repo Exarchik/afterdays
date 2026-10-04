@@ -10,6 +10,61 @@ import sprites
 FILE_TYPES=[('Зображення','*.png *.jpg *.jpeg *.webp *.bmp *.gif'),('Усі файли','*.*')]
 
 
+class ImportedSourceDialog(Dialog):
+    def __init__(self,parent,library):
+        super().__init__(parent,'Вибрати з імпортованого','900x630')
+        self.library=library;self.sources={r['path']:r for r in library.imported_sources()};self.images={}
+        self.query=tk.StringVar();row(self.body,'Пошук назви / файлу',self.query)
+        split=ttk.Frame(self.body);split.pack(fill='both',expand=True,pady=8)
+        left=ttk.Frame(split);left.pack(side='left',fill='both',expand=True)
+        ttk.Style(self).configure('ImportedSource.Treeview',rowheight=58)
+        self.list=ttk.Treeview(left,show='tree',selectmode='browse',style='ImportedSource.Treeview')
+        self.list.column('#0',width=410)
+        scroll=ttk.Scrollbar(left,command=self.list.yview);scroll.pack(side='right',fill='y')
+        self.list.configure(yscrollcommand=scroll.set);self.list.pack(fill='both',expand=True)
+        right=ttk.Frame(split,width=290);right.pack(side='right',fill='y',padx=(16,0))
+        self.preview=tk.Canvas(right,width=256,height=256,bg='#26382d',highlightthickness=0);self.preview.pack()
+        self.info=tk.StringVar();ttk.Label(right,textvariable=self.info,wraplength=280).pack(fill='x',pady=12)
+        self.status=tk.StringVar();ttk.Label(self.body,textvariable=self.status).pack(anchor='w')
+        self.list.bind('<<TreeviewSelect>>',self.select)
+        self.list.bind('<Double-1>',lambda e:self.accept() if self.list.selection() else None)
+        self.query.trace_add('write',lambda *args:self.rebuild());self.rebuild()
+
+    def photo(self,path,size):
+        from PIL import Image,ImageTk
+        image=self.library.image_file(path);image.thumbnail((size,size),Image.Resampling.LANCZOS)
+        return ImageTk.PhotoImage(image,master=self)
+
+    def rebuild(self):
+        selected=self.list.selection();self.list.delete(*self.list.get_children());query=self.query.get().casefold()
+        for path,entry in self.sources.items():
+            if query not in (entry['name']+' '+path).casefold():continue
+            try:
+                if path not in self.images:self.images[path]=self.photo(path,48)
+                image=self.images[path]
+            except (OSError,ValueError):image=''
+            self.list.insert('','end',iid=path,text=entry['name'],image=image)
+        rows=self.list.get_children();self.status.set(f'Оригіналів: {len(rows)} із {len(self.sources)} · Вибір повторно використовує наявне зображення')
+        if rows:self.list.selection_set(selected[0] if selected and selected[0] in rows else rows[0]);self.select()
+        else:self.preview.delete('all');self.info.set('Немає імпортованих оригіналів.' if not self.sources else 'Нічого не знайдено.')
+
+    def select(self,event=None):
+        if not self.list.selection():return
+        path=self.list.selection()[0];self.preview.delete('all')
+        try:
+            image=self.library.image_file(path);self.preview_photo=self.photo(path,244)
+            self.preview.create_image(128,128,image=self.preview_photo)
+            self.info.set(f"{self.sources[path]['name']}\n\n{image.width} × {image.height} px\n\n{Path(path).name}")
+        except (OSError,ValueError) as exc:self.info.set('Не вдалося прочитати зображення: '+str(exc))
+
+    def read(self):
+        if not self.list.selection():raise ValueError('Виберіть початкове зображення.')
+        path=self.list.selection()[0]
+        try:self.library.image_file(path)
+        except (OSError,ValueError) as exc:raise ValueError('Не вдалося прочитати оригінал: '+str(exc)) from exc
+        return path
+
+
 class ArtEditDialog(Dialog):
     def __init__(self,parent,source,name,group='other',settings=None):
         super().__init__(parent,'Редагування арту','1020x800')
@@ -27,6 +82,7 @@ class ArtEditDialog(Dialog):
         self.source_info=tk.StringVar();ttk.Label(left,textvariable=self.source_info).pack(anchor='w',pady=5)
         bar=ttk.Frame(left);bar.pack(fill='x')
         ttk.Button(bar,text='Вибрати інший файл…',command=self.replace_source).pack(side='left',padx=3)
+        ttk.Button(bar,text='Вибрати з імпортованого',command=self.choose_imported).pack(side='left',padx=3)
         ttk.Button(bar,text='Скинути обрізання',command=self.reset_crop).pack(side='left',padx=3)
         self.crop_enabled=tk.BooleanVar(value=self.options.get('crop') is not None)
         ttk.Checkbutton(left,text='Обрізати до вказаної області',variable=self.crop_enabled,command=self.changed).pack(anchor='w',pady=8)
@@ -95,6 +151,14 @@ class ArtEditDialog(Dialog):
         try:self.source=art.decode(path)
         except (OSError,ValueError) as exc:messagebox.showerror('Не вдалося відкрити',str(exc),parent=self);return
         self.reset_crop();self.draw_source();self.changed()
+    def choose_imported(self):
+        library=getattr(self._root(),'_editor_art_library',None)
+        if library is None:return
+        path=ImportedSourceDialog(self,library).show()
+        if path is None:return
+        try:self.source=library.image_file(path)
+        except (OSError,ValueError) as exc:messagebox.showerror('Не вдалося відкрити',str(exc),parent=self);return
+        self.drag=None;self.reset_crop();self.draw_source();self.changed()
     def changed(self):
         if self.pending:self.after_cancel(self.pending)
         self.pending=self.after(100,self.render)
@@ -124,7 +188,7 @@ class ArtPanel(ttk.Frame):
         self.root=self.winfo_toplevel();self.current=None
         bar=ttk.Frame(self);bar.pack(fill='x',pady=(0,10))
         ttk.Label(bar,text='Арти',font=('Segoe UI',18,'bold')).pack(side='left')
-        for label,command in [('Зберегти всі зміни',on_save),('Дублювати',self.duplicate),('Редагувати / замінити',self.edit),('Імпортувати файл…',self.import_file)]:
+        for label,command in [('Зберегти всі зміни',on_save),('Дублювати',self.duplicate),('Редагувати / замінити',self.edit),('Вибрати з імпортованого',self.import_existing),('Імпортувати файл…',self.import_file)]:
             ttk.Button(bar,text=label,command=command).pack(side='right',padx=4)
         panes=ttk.Panedwindow(self,orient='horizontal');panes.pack(fill='both',expand=True)
         left=ttk.Frame(panes,width=460);right=ttk.Frame(panes,padding=20);panes.add(left,weight=2);panes.add(right,weight=3)
@@ -187,6 +251,15 @@ class ArtPanel(ttk.Frame):
             value=ArtEditDialog(self.root,self.library.source(key),entry.get('art_label',key),art.category(key,entry),self.library.settings(key)).show()
             self.apply(key,value)
         except (OSError,ValueError) as exc:messagebox.showerror('Не вдалося відкрити арт',str(exc),parent=self.root)
+    def import_existing(self):
+        if not self.before():return
+        path=ImportedSourceDialog(self.root,self.library).show()
+        if path is None:return
+        try:
+            name=next(r['name'] for r in self.library.imported_sources() if r['path']==path)
+            value=ArtEditDialog(self.root,self.library.image_file(path),name).show()
+            self.apply(self.library.next_id(),value)
+        except (OSError,ValueError) as exc:messagebox.showerror('Не вдалося відкрити оригінал',str(exc),parent=self.root)
     def duplicate(self):
         if not self.current or not self.before():return
         entry=self.library.entries[self.current]

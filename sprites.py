@@ -107,7 +107,8 @@ def inventory_photo(widget,item,width):
             sheet_key=(sheet,width)
             if sheet_key not in root._inventory_sheets:root._inventory_sheets[sheet_key]=tk.PhotoImage(master=root,file=str(ROOT/f'{sheet}_{width}.png'))
             image=tk.PhotoImage(master=root,width=width,height=72)
-            x,y=index%16*width,index//16*72
+            columns=entry.get('inventory_columns',16)
+            x,y=index%columns*width,index//columns*72
             image.tk.call(str(image),'copy',str(root._inventory_sheets[sheet_key]),'-from',x,y,x+width,y+72,'-to',0,0)
             root._inventory_images[cache]=image
         except (OSError,tk.TclError):return None

@@ -1,531 +1,795 @@
 {
   "weapon_ash_pistol": {
-    "index": 0,
-    "source": 1,
-    "source_box": [
-      0,
-      0,
-      222,
-      222
-    ],
-    "trim": [
-      31,
-      67,
-      204,
-      207
-    ]
+    "index": 40,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
+    "art_label": "weapon_ash_pistol",
+    "art_category": "weapons",
+    "editor_source": "custom/sources/1ab70e96e17c9cee5eefaf0abd4efdcf9ac2f264b9804caafe3058d98c57c8e4.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        0,
+        0,
+        308,
+        305
+      ]
+    },
+    "editor_render_hash": "173fe4419bb5ab875f338f2d276845ffa7eab1753ab7f13de628b3c96ef25899",
+    "inventory_columns": 8
   },
   "weapon_watch_rifle": {
-    "index": 1,
-    "source": 1,
-    "source_box": [
-      222,
-      0,
-      444,
-      222
-    ],
-    "trim": [
-      5,
-      76,
-      220,
-      194
-    ]
+    "index": 61,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
+    "art_label": "weapon_watch_rifle",
+    "art_category": "weapons",
+    "editor_source": "custom/sources/1ab70e96e17c9cee5eefaf0abd4efdcf9ac2f264b9804caafe3058d98c57c8e4.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        322,
+        641,
+        651,
+        898
+      ]
+    },
+    "editor_render_hash": "6072b65841f4b6d6f8251240f950fd44c534e691b9ac7bd666610b6d634c9d66",
+    "inventory_columns": 8
   },
   "weapon_rust_assault": {
-    "index": 2,
-    "source": 1,
-    "source_box": [
-      444,
-      0,
-      665,
-      222
-    ],
-    "trim": [
-      7,
-      61,
-      221,
-      204
-    ]
+    "index": 25,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
+    "art_label": "weapon_rust_assault",
+    "art_category": "weapons",
+    "editor_source": "custom/sources/1ab70e96e17c9cee5eefaf0abd4efdcf9ac2f264b9804caafe3058d98c57c8e4.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        0,
+        339,
+        336,
+        572
+      ]
+    },
+    "editor_render_hash": "3b8545fcfff7588a0f368cd355fc839d6b44a434b76428b54deb0b89e3103cb2",
+    "inventory_columns": 8
   },
   "weapon_thunder_shotgun": {
-    "index": 3,
-    "source": 1,
-    "source_box": [
-      665,
-      0,
-      887,
-      222
-    ],
-    "trim": [
-      6,
-      74,
-      221,
-      194
-    ]
+    "index": 55,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
+    "art_label": "weapon_thunder_shotgun",
+    "art_category": "weapons",
+    "editor_source": "custom/sources/1ab70e96e17c9cee5eefaf0abd4efdcf9ac2f264b9804caafe3058d98c57c8e4.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        641,
+        1196,
+        939,
+        1487
+      ]
+    },
+    "editor_render_hash": "d623f3664fc9251d2dfc46ecc83e980f5e1fc12209b83f186dc0ccc0b237f2eb",
+    "inventory_columns": 8
   },
   "weapon_ray_laser": {
-    "index": 4,
-    "source": 1,
-    "source_box": [
-      887,
-      0,
-      1109,
-      222
-    ],
-    "trim": [
-      7,
-      71,
-      213,
-      190
-    ]
+    "index": 33,
+    "columns": 8,
+    "sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/sprite",
+    "inventory_sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/inventory",
+    "art_label": "weapon_ray_laser",
+    "art_category": "weapons",
+    "editor_source": "custom/sources/1ab70e96e17c9cee5eefaf0abd4efdcf9ac2f264b9804caafe3058d98c57c8e4.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        0,
+        1199,
+        315,
+        1418
+      ]
+    },
+    "editor_render_hash": "ab1b99908bb76f24f1251e0e0df53172886cf6bf131a0c8bb128464a970367d1",
+    "inventory_columns": 8
   },
   "armor_plated_jacket": {
-    "index": 14,
-    "source": 1,
-    "source_box": [
-      1330,
-      222,
-      1552,
-      444
-    ],
-    "trim": [
-      8,
-      19,
-      211,
-      215
-    ]
+    "index": 20,
+    "columns": 8,
+    "sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/sprite",
+    "inventory_sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/inventory",
+    "art_label": "armor_plated_jacket",
+    "art_category": "armor",
+    "editor_source": "custom/sources/aef26dd4be31f9ea6acae29a212054cc24fea954a9a15a5f504c5ede7821ac72.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        302,
+        0,
+        619,
+        320
+      ]
+    },
+    "editor_render_hash": "308172e3537b651d0da7cc43dea1c147e87eb2faec2f472ac71cd8fbf8e4877b",
+    "inventory_columns": 8
   },
   "armor_bastion": {
-    "index": 15,
-    "source": 1,
-    "source_box": [
-      1552,
-      222,
-      1774,
-      444
-    ],
-    "trim": [
-      3,
-      19,
-      213,
-      218
-    ]
+    "index": 10,
+    "columns": 8,
+    "sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/sprite",
+    "inventory_sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/inventory",
+    "art_label": "armor_bastion",
+    "art_category": "armor",
+    "editor_source": "custom/sources/aef26dd4be31f9ea6acae29a212054cc24fea954a9a15a5f504c5ede7821ac72.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        0,
+        330,
+        310,
+        626
+      ]
+    },
+    "editor_render_hash": "8aec73a66939ee0f4c977b619e25b7342a9f317fa1bed209e1d71b4698d706d4",
+    "inventory_columns": 8
   },
   "helmet_seeker": {
-    "index": 23,
-    "source": 1,
-    "source_box": [
-      1552,
-      444,
-      1774,
-      665
-    ],
-    "trim": [
-      30,
-      32,
-      183,
-      198
-    ]
+    "index": 31,
+    "columns": 8,
+    "sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/sprite",
+    "inventory_sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/inventory",
+    "art_label": "helmet_seeker",
+    "art_category": "armor",
+    "editor_source": "custom/sources/67af3ee0f2bf29f0c925c11d3f32f3b666e64907b073e17eadaa0380fd71cbdd.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        332,
+        8,
+        622,
+        322
+      ]
+    },
+    "editor_render_hash": "21d972faa6fa0a6541fd33328db5a25c6369d2a813ac2e2cfefed10f1a01da0c",
+    "inventory_columns": 8
   },
   "weapon_raven_revolver": {
-    "index": 5,
-    "source": 1,
-    "source_box": [
-      1109,
-      0,
-      1330,
-      222
-    ],
-    "trim": [
-      8,
-      65,
-      205,
-      207
-    ]
+    "index": 55,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
+    "art_label": "weapon_raven_revolver",
+    "art_category": "weapons",
+    "editor_source": "custom/sources/1ab70e96e17c9cee5eefaf0abd4efdcf9ac2f264b9804caafe3058d98c57c8e4.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        939,
+        41,
+        1251,
+        288
+      ]
+    },
+    "editor_render_hash": "9dea46f08da0f1d926710210a2e303960900c4c9d575cbbef30cefd07f3c22a1",
+    "inventory_columns": 8
   },
   "weapon_hornet_smg": {
-    "index": 6,
-    "source": 1,
-    "source_box": [
-      1330,
-      0,
-      1552,
-      222
-    ],
-    "trim": [
-      5,
-      67,
-      219,
-      207
-    ]
+    "index": 22,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
+    "art_label": "weapon_hornet_smg",
+    "art_category": "weapons",
+    "editor_source": "custom/sources/1ab70e96e17c9cee5eefaf0abd4efdcf9ac2f264b9804caafe3058d98c57c8e4.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        315,
+        0,
+        651,
+        301
+      ]
+    },
+    "editor_render_hash": "8d4287b9f5d0d316515a79b1c377359776a96d7f475f24e80b67da50940f1ce8",
+    "inventory_columns": 8
   },
   "weapon_pilgrim_carbine": {
-    "index": 7,
-    "source": 1,
-    "source_box": [
-      1552,
-      0,
-      1774,
-      222
-    ],
-    "trim": [
-      3,
-      76,
-      213,
-      197
-    ]
+    "index": 16,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
+    "art_label": "weapon_pilgrim_carbine",
+    "art_category": "weapons",
+    "editor_source": "custom/sources/1ab70e96e17c9cee5eefaf0abd4efdcf9ac2f264b9804caafe3058d98c57c8e4.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        641,
+        332,
+        956,
+        589
+      ]
+    },
+    "editor_render_hash": "fa4ec6000d14e1ad030921779501f10cadb8cfd7d2eb3e0eb6b8e249c181a37f",
+    "inventory_columns": 8
   },
   "weapon_horizon_sniper": {
-    "index": 8,
-    "source": 1,
-    "source_box": [
-      0,
-      222,
-      222,
-      444
-    ],
-    "trim": [
-      7,
-      68,
-      222,
-      191
-    ]
+    "index": 6,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
+    "art_label": "weapon_horizon_sniper",
+    "art_category": "weapons",
+    "editor_source": "custom/sources/1ab70e96e17c9cee5eefaf0abd4efdcf9ac2f264b9804caafe3058d98c57c8e4.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        0,
+        904,
+        319,
+        1189
+      ]
+    },
+    "editor_render_hash": "94b867853158d1341280b4d33d05d95463ea503b83c7d3d2ea3006e4ab966288",
+    "inventory_columns": 8
   },
   "weapon_hammer_lmg": {
-    "index": 9,
-    "source": 1,
-    "source_box": [
-      222,
-      222,
-      444,
-      444
-    ],
-    "trim": [
-      4,
-      58,
-      222,
-      184
-    ]
+    "index": 21,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
+    "art_label": "weapon_hammer_lmg",
+    "art_category": "weapons",
+    "editor_source": "custom/sources/1ab70e96e17c9cee5eefaf0abd4efdcf9ac2f264b9804caafe3058d98c57c8e4.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        315,
+        925,
+        627,
+        1209
+      ]
+    },
+    "editor_render_hash": "9b1f8feae9dda62d90ce5cfc8d18a991de130675deb33081a902327c0cf24327",
+    "inventory_columns": 8
   },
   "weapon_sun_plasma": {
-    "index": 10,
-    "source": 1,
-    "source_box": [
-      444,
-      222,
-      665,
-      444
-    ],
-    "trim": [
-      6,
-      57,
-      217,
-      196
-    ]
+    "index": 8,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
+    "art_label": "weapon_sun_plasma",
+    "art_category": "weapons",
+    "editor_source": "custom/sources/1ab70e96e17c9cee5eefaf0abd4efdcf9ac2f264b9804caafe3058d98c57c8e4.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        627,
+        939,
+        939,
+        1223
+      ]
+    },
+    "editor_render_hash": "ff04d6470f6a7bc30883feb5489d61413b638ecf364f002737434a8aaf3c9e88",
+    "inventory_columns": 8
   },
   "weapon_impulse_gauss": {
-    "index": 11,
-    "source": 1,
-    "source_box": [
-      665,
-      222,
-      887,
-      444
-    ],
-    "trim": [
-      6,
-      58,
-      220,
-      180
-    ]
+    "index": 14,
+    "columns": 8,
+    "sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/sprite",
+    "inventory_sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/inventory",
+    "art_label": "weapon_impulse_gauss",
+    "art_category": "weapons",
+    "editor_source": "custom/sources/1ab70e96e17c9cee5eefaf0abd4efdcf9ac2f264b9804caafe3058d98c57c8e4.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        939,
+        904,
+        1254,
+        1203
+      ]
+    },
+    "editor_render_hash": "87d4c83326d9a121d9699987e206d11a63208bf4201054b5fe66b69b74ccac4e",
+    "inventory_columns": 8
   },
   "weapon_spark_ion": {
     "index": 12,
-    "source": 1,
-    "source_box": [
-      887,
-      222,
-      1109,
-      444
-    ],
-    "trim": [
-      41,
-      66,
-      194,
-      190
-    ]
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
+    "art_label": "weapon_spark_ion",
+    "art_category": "weapons",
+    "editor_source": "custom/sources/1ab70e96e17c9cee5eefaf0abd4efdcf9ac2f264b9804caafe3058d98c57c8e4.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        651,
+        620,
+        932,
+        884
+      ]
+    },
+    "editor_render_hash": "d4ef197e20da8078c6a52e48bbd53ce908d18925e1a7e83640bf73824bfc9279",
+    "inventory_columns": 8
   },
   "weapon_silence_crossbow": {
-    "index": 13,
-    "source": 1,
-    "source_box": [
-      1109,
-      222,
-      1330,
-      444
-    ],
-    "trim": [
-      2,
-      53,
-      213,
-      194
-    ]
+    "index": 15,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
+    "art_label": "weapon_silence_crossbow",
+    "art_category": "weapons",
+    "editor_source": "custom/sources/1ab70e96e17c9cee5eefaf0abd4efdcf9ac2f264b9804caafe3058d98c57c8e4.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        332,
+        367,
+        637,
+        569
+      ]
+    },
+    "editor_render_hash": "e8fde84fa762b0ee1fefebfcfe73c58b86fb949da0044c7b746d65ada76ccb68",
+    "inventory_columns": 8
   },
   "armor_scout_cloak": {
-    "index": 16,
-    "source": 1,
-    "source_box": [
-      0,
-      444,
-      222,
-      665
-    ],
-    "trim": [
-      17,
-      5,
-      205,
-      220
-    ]
+    "index": 26,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
+    "art_label": "armor_scout_cloak",
+    "art_category": "armor",
+    "editor_source": "custom/sources/aef26dd4be31f9ea6acae29a212054cc24fea954a9a15a5f504c5ede7821ac72.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        9,
+        0,
+        299,
+        311
+      ]
+    },
+    "editor_render_hash": "5bc1880f609d3d9c20210d7568440d21c5bce5101a274a2ee3db39c22e360548",
+    "inventory_columns": 8
   },
   "armor_kevlar": {
-    "index": 17,
-    "source": 1,
-    "source_box": [
-      222,
-      444,
-      444,
-      665
-    ],
-    "trim": [
-      23,
-      9,
-      201,
-      196
-    ]
+    "index": 32,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
+    "art_label": "armor_kevlar",
+    "art_category": "armor",
+    "editor_source": "custom/sources/aef26dd4be31f9ea6acae29a212054cc24fea954a9a15a5f504c5ede7821ac72.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        630,
+        0,
+        904,
+        320
+      ]
+    },
+    "editor_render_hash": "ee2beac2af347362a49fd86d9d83c80c027556f4857fb536bbcc1b3eb07fa19b",
+    "inventory_columns": 8
   },
   "armor_stalker": {
-    "index": 18,
-    "source": 1,
-    "source_box": [
-      444,
-      444,
-      665,
-      665
-    ],
-    "trim": [
-      7,
-      0,
-      217,
-      205
-    ]
+    "index": 56,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
+    "art_label": "armor_stalker",
+    "art_category": "armor",
+    "editor_source": "custom/sources/aef26dd4be31f9ea6acae29a212054cc24fea954a9a15a5f504c5ede7821ac72.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        914,
+        0,
+        1239,
+        336
+      ]
+    },
+    "editor_render_hash": "830d98aa693432b6e9ca7817568c7099043a588a9e561446651536d559a76140",
+    "inventory_columns": 8
   },
   "armor_turtle": {
-    "index": 19,
-    "source": 1,
-    "source_box": [
-      665,
-      444,
-      887,
-      665
-    ],
-    "trim": [
-      14,
-      5,
-      209,
-      199
-    ]
+    "index": 34,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
+    "art_label": "armor_turtle",
+    "art_category": "armor",
+    "editor_source": "custom/sources/aef26dd4be31f9ea6acae29a212054cc24fea954a9a15a5f504c5ede7821ac72.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        611,
+        341,
+        928,
+        655
+      ]
+    },
+    "editor_render_hash": "9701a20c12648238a6230ca717a27ac44ebca6a61d5dc242e40228ae0740d183",
+    "inventory_columns": 8
   },
   "armor_atlas": {
-    "index": 20,
-    "source": 1,
-    "source_box": [
-      887,
-      444,
-      1109,
-      665
-    ],
-    "trim": [
-      3,
-      5,
-      219,
-      205
-    ]
+    "index": 21,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
+    "art_label": "armor_atlas",
+    "art_category": "armor",
+    "editor_source": "custom/sources/aef26dd4be31f9ea6acae29a212054cc24fea954a9a15a5f504c5ede7821ac72.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        0,
+        653,
+        318,
+        991
+      ]
+    },
+    "editor_render_hash": "ab9901075106f1f31121a70367526c6047a4ff6f6fcff9912f2f5c75d8006ab3",
+    "inventory_columns": 8
   },
   "armor_phantom": {
-    "index": 21,
-    "source": 1,
-    "source_box": [
-      1109,
-      444,
-      1330,
-      665
-    ],
-    "trim": [
-      12,
-      6,
-      208,
-      205
-    ]
+    "index": 16,
+    "columns": 8,
+    "sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/sprite",
+    "inventory_sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/inventory",
+    "art_label": "armor_phantom",
+    "art_category": "armor",
+    "editor_source": "custom/sources/aef26dd4be31f9ea6acae29a212054cc24fea954a9a15a5f504c5ede7821ac72.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        318,
+        333,
+        619,
+        650
+      ]
+    },
+    "editor_render_hash": "124a3951afcd11f3cc5c5f4777658bd033156c32f742c8d68e69b617da008a48",
+    "inventory_columns": 8
   },
   "armor_dawn": {
-    "index": 22,
-    "source": 1,
-    "source_box": [
-      1330,
-      444,
-      1552,
-      665
-    ],
-    "trim": [
-      7,
-      6,
-      213,
-      201
-    ]
+    "index": 43,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
+    "art_label": "armor_dawn",
+    "art_category": "armor",
+    "editor_source": "custom/sources/aef26dd4be31f9ea6acae29a212054cc24fea954a9a15a5f504c5ede7821ac72.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        928,
+        344,
+        1254,
+        650
+      ]
+    },
+    "editor_render_hash": "9476f9b8e049fe9d4de048f6283cd7e2154b09d50c6528f652628b555bdfeb64",
+    "inventory_columns": 8
   },
   "helmet_exile": {
-    "index": 24,
-    "source": 1,
-    "source_box": [
-      0,
-      665,
-      222,
-      887
-    ],
-    "trim": [
-      22,
-      0,
-      198,
-      194
-    ]
+    "index": 26,
+    "columns": 8,
+    "sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/sprite",
+    "inventory_sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/inventory",
+    "art_label": "helmet_exile",
+    "art_category": "armor",
+    "editor_source": "custom/sources/67af3ee0f2bf29f0c925c11d3f32f3b666e64907b073e17eadaa0380fd71cbdd.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        0,
+        0,
+        334,
+        336
+      ]
+    },
+    "editor_render_hash": "bbe30aea657c4f000b3798e7a109dc02666e2a6e8ac113edaa6d3a39d77e9902",
+    "inventory_columns": 8
   },
   "helmet_ranger": {
-    "index": 25,
-    "source": 1,
-    "source_box": [
-      222,
-      665,
-      444,
-      887
-    ],
-    "trim": [
-      24,
-      4,
-      196,
-      192
-    ]
+    "index": 10,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
+    "art_label": "helmet_ranger",
+    "art_category": "armor",
+    "editor_source": "custom/sources/67af3ee0f2bf29f0c925c11d3f32f3b666e64907b073e17eadaa0380fd71cbdd.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        963,
+        16,
+        1231,
+        322
+      ]
+    },
+    "editor_render_hash": "a8ed9041a48350733aca2c7d3001bb91e9ed76745271a007e7758d3b36fe651a",
+    "inventory_columns": 8
   },
   "helmet_cyclops": {
-    "index": 26,
-    "source": 1,
-    "source_box": [
-      444,
-      665,
-      665,
-      887
-    ],
-    "trim": [
-      27,
-      1,
-      192,
-      188
-    ]
+    "index": 11,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
+    "art_label": "helmet_cyclops",
+    "art_category": "armor",
+    "editor_source": "custom/sources/67af3ee0f2bf29f0c925c11d3f32f3b666e64907b073e17eadaa0380fd71cbdd.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        321,
+        346,
+        632,
+        671
+      ]
+    },
+    "editor_render_hash": "07c9d1ceca215a0c6dc3ef7a1e0c3fd1957ef784b95061285f421810491fb193",
+    "inventory_columns": 8
   },
   "helmet_ghost": {
-    "index": 27,
-    "source": 1,
-    "source_box": [
-      665,
-      665,
-      887,
-      887
-    ],
-    "trim": [
-      27,
-      2,
-      195,
-      187
-    ]
+    "index": 30,
+    "columns": 8,
+    "sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/sprite",
+    "inventory_sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/inventory",
+    "art_label": "helmet_ghost",
+    "art_category": "armor",
+    "editor_source": "custom/sources/67af3ee0f2bf29f0c925c11d3f32f3b666e64907b073e17eadaa0380fd71cbdd.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        651,
+        11,
+        947,
+        317
+      ]
+    },
+    "editor_render_hash": "8c5ab6d8b41e5cefe2d098138c171b2b29a0ac53bd3429855fb105df5daf9f17",
+    "inventory_columns": 8
   },
   "helmet_fort": {
-    "index": 28,
-    "source": 1,
-    "source_box": [
-      887,
-      665,
-      1109,
-      887
-    ],
-    "trim": [
-      31,
-      1,
-      192,
-      190
-    ]
+    "index": 63,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
+    "art_label": "helmet_fort",
+    "art_category": "armor",
+    "editor_source": "custom/sources/67af3ee0f2bf29f0c925c11d3f32f3b666e64907b073e17eadaa0380fd71cbdd.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        640,
+        341,
+        955,
+        674
+      ]
+    },
+    "editor_render_hash": "b76aaa0468889b841128fd8f1564f17ab836e683078e6b777a6cd255ed1439d3",
+    "inventory_columns": 8
   },
   "helmet_horizon": {
-    "index": 29,
-    "source": 1,
-    "source_box": [
-      1109,
-      665,
-      1330,
-      887
-    ],
-    "trim": [
-      35,
-      1,
-      184,
-      188
-    ]
+    "index": 49,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
+    "art_label": "helmet_horizon",
+    "art_category": "armor",
+    "editor_source": "custom/sources/67af3ee0f2bf29f0c925c11d3f32f3b666e64907b073e17eadaa0380fd71cbdd.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        0,
+        338,
+        329,
+        663
+      ]
+    },
+    "editor_render_hash": "96e9e32559eef53f8f958af59c0cbf9f8d1c78d6c5c3e8e3c88023addd0c948a",
+    "inventory_columns": 8
   },
   "module_amplifier": {
-    "index": 32,
-    "source": 2,
-    "source_box": [
-      0,
-      0,
-      222,
-      222
-    ],
-    "trim": [
-      17,
-      46,
-      215,
-      222
-    ]
+    "index": 1,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
+    "art_label": "module_amplifier",
+    "art_category": "modules",
+    "editor_source": "custom/sources/37bba6b63c9bcae3b5bec7fb570b16bf536c8913c9c3234f85e8ee80647bc0c4.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        627,
+        631,
+        947,
+        948
+      ]
+    },
+    "editor_render_hash": "db322a688290335466327719d1602a1738fef0673d35b669a89793d98d78bc60",
+    "inventory_columns": 8
   },
   "module_optics": {
-    "index": 33,
-    "source": 2,
-    "source_box": [
-      222,
-      0,
-      444,
-      222
-    ],
-    "trim": [
-      2,
-      54,
-      222,
-      222
-    ]
+    "index": 62,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
+    "art_label": "module_optics",
+    "art_category": "modules",
+    "editor_source": "custom/sources/37bba6b63c9bcae3b5bec7fb570b16bf536c8913c9c3234f85e8ee80647bc0c4.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        0,
+        639,
+        313,
+        886
+      ]
+    },
+    "editor_render_hash": "e56533e733ca9b39ee6781fd52984c93adc7f522590c7d780c7b937ad274a216",
+    "inventory_columns": 8
   },
   "module_stabilizer": {
-    "index": 34,
-    "source": 2,
-    "source_box": [
-      444,
-      0,
-      665,
-      222
-    ],
-    "trim": [
-      17,
-      32,
-      204,
-      222
-    ]
+    "index": 28,
+    "columns": 8,
+    "sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/sprite",
+    "inventory_sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/inventory",
+    "art_label": "module_stabilizer",
+    "art_category": "modules",
+    "editor_source": "custom/sources/37bba6b63c9bcae3b5bec7fb570b16bf536c8913c9c3234f85e8ee80647bc0c4.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        326,
+        964,
+        646,
+        1233
+      ]
+    },
+    "editor_render_hash": "8e7f843f1fccec34e53ec50fdbb4400a2adb81be044cc347fc61e9f90622faba",
+    "inventory_columns": 8
   },
   "module_armor_plate": {
     "index": 35,
@@ -544,132 +808,196 @@
     ]
   },
   "module_burst_core": {
-    "index": 36,
-    "source": 2,
-    "source_box": [
-      887,
-      0,
-      1109,
-      222
-    ],
-    "trim": [
-      2,
-      49,
-      221,
-      222
-    ]
+    "index": 60,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
+    "art_label": "module_burst_core",
+    "art_category": "modules",
+    "editor_source": "custom/sources/37bba6b63c9bcae3b5bec7fb570b16bf536c8913c9c3234f85e8ee80647bc0c4.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        4,
+        964,
+        316,
+        1235
+      ]
+    },
+    "editor_render_hash": "5f3a3c1d4f8b265cc71ff079bc5806203e2ecde24cca66b5c8cf722c72732e69",
+    "inventory_columns": 8
   },
   "module_rangefinder": {
-    "index": 37,
-    "source": 2,
-    "source_box": [
-      1109,
-      0,
-      1330,
-      222
-    ],
-    "trim": [
-      7,
-      76,
-      221,
-      221
-    ]
+    "index": 14,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
+    "art_label": "module_rangefinder",
+    "art_category": "modules",
+    "editor_source": "custom/sources/37bba6b63c9bcae3b5bec7fb570b16bf536c8913c9c3234f85e8ee80647bc0c4.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        952,
+        3,
+        1254,
+        298
+      ]
+    },
+    "editor_render_hash": "51a374ecc5802c10cd78c39b1b840c5729257ce5878bec64aa0a915ae29ae2bb",
+    "inventory_columns": 8
   },
   "module_accelerator": {
-    "index": 38,
-    "source": 2,
-    "source_box": [
-      1330,
-      0,
-      1552,
-      222
-    ],
-    "trim": [
-      6,
-      64,
-      222,
-      222
-    ]
+    "index": 33,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
+    "art_label": "module_accelerator",
+    "art_category": "modules",
+    "editor_source": "custom/sources/37bba6b63c9bcae3b5bec7fb570b16bf536c8913c9c3234f85e8ee80647bc0c4.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        318,
+        634,
+        622,
+        951
+      ]
+    },
+    "editor_render_hash": "d97426943b50faa8b27ce46db4179c876d22a58fbeca8c973eab0f708b8edd6e",
+    "inventory_columns": 8
   },
   "module_critical_processor": {
-    "index": 39,
-    "source": 2,
-    "source_box": [
-      1552,
-      0,
-      1774,
-      222
-    ],
-    "trim": [
-      20,
-      48,
-      202,
-      222
-    ]
+    "index": 13,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
+    "art_label": "module_critical_processor",
+    "art_category": "modules",
+    "editor_source": "custom/sources/37bba6b63c9bcae3b5bec7fb570b16bf536c8913c9c3234f85e8ee80647bc0c4.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        600,
+        328,
+        920,
+        628
+      ]
+    },
+    "editor_render_hash": "76f40122baedb9a2f1aa30bf42f22fc51d174e5efec3769409d61d05ede05d37",
+    "inventory_columns": 8
   },
   "module_focusing_lens": {
-    "index": 40,
-    "source": 2,
-    "source_box": [
-      0,
-      222,
-      222,
-      444
-    ],
-    "trim": [
-      16,
-      36,
-      209,
-      219
-    ]
+    "index": 34,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
+    "art_label": "module_focusing_lens",
+    "art_category": "modules",
+    "editor_source": "custom/sources/37bba6b63c9bcae3b5bec7fb570b16bf536c8913c9c3234f85e8ee80647bc0c4.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        941,
+        948,
+        1254,
+        1254
+      ]
+    },
+    "editor_render_hash": "8d0d5f9b2d7103b861e6ff2219bf20306fa6012f59abc20b1a79a8ea20e6275a",
+    "inventory_columns": 8
   },
   "module_magnetic_coil": {
-    "index": 41,
-    "source": 2,
-    "source_box": [
-      222,
-      222,
-      444,
-      444
-    ],
-    "trim": [
-      11,
-      32,
-      207,
-      216
-    ]
+    "index": 42,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
+    "art_label": "module_magnetic_coil",
+    "art_category": "modules",
+    "editor_source": "custom/sources/37bba6b63c9bcae3b5bec7fb570b16bf536c8913c9c3234f85e8ee80647bc0c4.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        930,
+        322,
+        1254,
+        615
+      ]
+    },
+    "editor_render_hash": "6c82eef32a35c3a6d216fdff503b2a7f549fd35648b8638cce0de306de996c78",
+    "inventory_columns": 8
   },
   "module_ballistic_computer": {
-    "index": 42,
-    "source": 2,
-    "source_box": [
-      444,
-      222,
-      665,
-      444
-    ],
-    "trim": [
-      11,
-      28,
-      205,
-      220
-    ]
+    "index": 31,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
+    "art_label": "module_ballistic_computer",
+    "art_category": "modules",
+    "editor_source": "custom/sources/37bba6b63c9bcae3b5bec7fb570b16bf536c8913c9c3234f85e8ee80647bc0c4.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        0,
+        0,
+        318,
+        311
+      ]
+    },
+    "editor_render_hash": "41091a368bd7c28327988f1d0c60a7245560d01af8899ea8a7d1bef734a8109c",
+    "inventory_columns": 8
   },
   "module_tungsten_channel": {
-    "index": 43,
-    "source": 2,
-    "source_box": [
-      665,
-      222,
-      887,
-      444
-    ],
-    "trim": [
-      0,
-      47,
-      213,
-      209
-    ]
+    "index": 39,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
+    "art_label": "module_tungsten_channel",
+    "art_category": "modules",
+    "editor_source": "custom/sources/37bba6b63c9bcae3b5bec7fb570b16bf536c8913c9c3234f85e8ee80647bc0c4.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        321,
+        19,
+        643,
+        298
+      ]
+    },
+    "editor_render_hash": "d7de5849c8ff6c6790ea5f2cbae1667876df1be7984b11cb6b2b91aa939c7f39",
+    "inventory_columns": 8
   },
   "module_ceramic_inserts": {
     "index": 44,
@@ -1052,34 +1380,124 @@
     "columns": 4
   },
   "module_carbon_grip": {
-    "index": 0,
-    "sheet": "expansion028",
-    "columns": 6,
-    "inventory_sheet": "inventory_expansion028"
+    "index": 23,
+    "columns": 8,
+    "sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/sprite",
+    "inventory_sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/inventory",
+    "art_label": "module_carbon_grip",
+    "art_category": "modules",
+    "editor_source": "custom/sources/37bba6b63c9bcae3b5bec7fb570b16bf536c8913c9c3234f85e8ee80647bc0c4.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        321,
+        303,
+        573,
+        636
+      ]
+    },
+    "editor_render_hash": "35045b453e3a9fd77e9e9e2fc85a0fb9c596ed307f46ffb4385b2717c35fb120",
+    "inventory_columns": 8
   },
   "module_tactical_grip": {
-    "index": 1,
-    "sheet": "expansion028",
-    "columns": 6,
-    "inventory_sheet": "inventory_expansion028"
+    "index": 24,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
+    "art_label": "module_tactical_grip",
+    "art_category": "modules",
+    "editor_source": "custom/sources/37bba6b63c9bcae3b5bec7fb570b16bf536c8913c9c3234f85e8ee80647bc0c4.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        963,
+        639,
+        1253,
+        959
+      ]
+    },
+    "editor_render_hash": "2f5b0a97856a12d4854c37c2920e60bc929278d25e4bc010419bd062f2e007f5",
+    "inventory_columns": 8
   },
   "module_electronic_compensator": {
-    "index": 2,
-    "sheet": "expansion028",
-    "columns": 6,
-    "inventory_sheet": "inventory_expansion028"
+    "index": 7,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
+    "art_label": "module_electronic_compensator",
+    "art_category": "modules",
+    "editor_source": "custom/sources/37bba6b63c9bcae3b5bec7fb570b16bf536c8913c9c3234f85e8ee80647bc0c4.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        0,
+        309,
+        318,
+        599
+      ]
+    },
+    "editor_render_hash": "d5998b96e514cc50be808c24d3005b05dd258ed60b8130229ac4b5b1cdb4ebcf",
+    "inventory_columns": 8
   },
   "module_phase_approximator": {
-    "index": 3,
-    "sheet": "expansion028",
-    "columns": 6,
-    "inventory_sheet": "inventory_expansion028"
+    "index": 11,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
+    "art_label": "module_phase_approximator",
+    "art_category": "modules",
+    "editor_source": "custom/sources/37bba6b63c9bcae3b5bec7fb570b16bf536c8913c9c3234f85e8ee80647bc0c4.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        638,
+        961,
+        944,
+        1233
+      ]
+    },
+    "editor_render_hash": "b580fde0ca65b4cb0f04db03d145800834c5647a7262534aefdce594c3341cd1",
+    "inventory_columns": 8
   },
   "module_gauss_accelerator": {
-    "index": 4,
-    "sheet": "expansion028",
-    "columns": 6,
-    "inventory_sheet": "inventory_expansion028"
+    "index": 58,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
+    "art_label": "module_gauss_accelerator",
+    "art_category": "modules",
+    "editor_source": "custom/sources/37bba6b63c9bcae3b5bec7fb570b16bf536c8913c9c3234f85e8ee80647bc0c4.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        643,
+        3,
+        947,
+        317
+      ]
+    },
+    "editor_render_hash": "6e2c0907e725ad604966e557b5b8cd1d8feb41ec35f402a4391d67fc71883b26",
+    "inventory_columns": 8
   },
   "module_polyfiber": {
     "index": 5,
@@ -1256,10 +1674,28 @@
     "inventory_sheet": "inventory_expansion029"
   },
   "repairkit": {
-    "index": 16,
-    "sheet": "expansion029",
+    "index": 35,
     "columns": 8,
-    "inventory_sheet": "inventory_expansion029"
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
+    "art_label": "repairkit",
+    "art_category": "other",
+    "editor_source": "custom/sources/7280e8f6cfd1e84a0f130057ca58c08d42fcef4ab09c594177184c7e5f611890.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        7,
+        693,
+        313,
+        967
+      ]
+    },
+    "editor_render_hash": "6146decde7afcec72eaa90a58f0dd4de2aab2cb0807ecb4cbf36df336c5f7739",
+    "inventory_columns": 8
   },
   "courier_parcel": {
     "index": 17,
@@ -1322,10 +1758,28 @@
     "inventory_sheet": "inventory_expansion029"
   },
   "service_cartographer": {
-    "index": 27,
-    "sheet": "expansion029",
+    "index": 44,
     "columns": 8,
-    "inventory_sheet": "inventory_expansion029"
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
+    "art_label": "service_cartographer",
+    "art_category": "other",
+    "editor_source": "custom/sources/dfad55c3301c8d5286c7a31713619e33d12ca5b509a67e7ace38ff0f3919458d.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        1528,
+        1053,
+        2041,
+        1500
+      ]
+    },
+    "editor_render_hash": "faae2d0642209ca4ace0cc7deae3b3284734068f42abfab959ec9dd120ec987d",
+    "inventory_columns": 8
   },
   "action_delivery": {
     "index": 28,
@@ -1418,10 +1872,28 @@
     "inventory_sheet": "inventory_expansion029"
   },
   "event_theme:camp": {
-    "index": 43,
-    "sheet": "expansion029",
+    "index": 51,
     "columns": 8,
-    "inventory_sheet": "inventory_expansion029"
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
+    "art_label": "event_theme:camp",
+    "art_category": "events",
+    "editor_source": "custom/sources/30e29d03feda65b7e6404f54bd3c9c7e6ce1eb21184f343bd486df21ca505e84.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        1388,
+        1495,
+        2048,
+        2026
+      ]
+    },
+    "editor_render_hash": "af73d56e4cb83fc9324671f63b3e1ea270743f3ded8b3b17feeb49684ed77430",
+    "inventory_columns": 8
   },
   "event_theme:mines": {
     "index": 44,
@@ -1598,13 +2070,13 @@
     "inventory_sheet": "inventory_expansion029"
   },
   "art_custom_001": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/929e22a5df764dfa858e71a1b6091200/sprite",
-    "inventory_sheet": "custom/929e22a5df764dfa858e71a1b6091200/inventory",
+    "index": 9,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
     "art_label": "weapon_plasm_flamer",
     "art_category": "weapons",
-    "editor_source": "custom/sources/a6dd3ee52356574a684e310ede7a320210f9b85b416160ec618a9aff55285854.png",
+    "editor_source": "custom/sources/1ab70e96e17c9cee5eefaf0abd4efdcf9ac2f264b9804caafe3058d98c57c8e4.png",
     "editor_settings": {
       "fit": "contain",
       "padding": 4.0,
@@ -1612,18 +2084,20 @@
       "mirror": false,
       "trim": true,
       "crop": [
-        20,
+        648,
         24,
-        322,
-        344
+        935,
+        291
       ]
-    }
+    },
+    "editor_render_hash": "a1ea9f4885d152479e0025b18aa596ada4cd7f8e9784eb1589f97863f5833649",
+    "inventory_columns": 8
   },
   "art_custom_002": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/ff61ed6e81c348af987480758c332e19/sprite",
-    "inventory_sheet": "custom/ff61ed6e81c348af987480758c332e19/inventory",
+    "index": 17,
+    "columns": 8,
+    "sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/sprite",
+    "inventory_sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/inventory",
     "art_label": "weapon_handgun_energy",
     "art_category": "weapons",
     "editor_source": "custom/sources/a6dd3ee52356574a684e310ede7a320210f9b85b416160ec618a9aff55285854.png",
@@ -1639,13 +2113,14 @@
         319,
         1209
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_003": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/722229e3b3ac44d3afad4df832cd8f26/sprite",
-    "inventory_sheet": "custom/722229e3b3ac44d3afad4df832cd8f26/inventory",
+    "index": 61,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
     "art_label": "event_theme:tomb",
     "art_category": "events",
     "editor_source": "custom/sources/7de8a147c9844637c9441387b850b01b81771afd9a7f334e2d2faabb3ff16d26.png",
@@ -1661,16 +2136,17 @@
         318,
         924
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_004": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/0c9ace9f760b40539f2fa9a1f69920f8/sprite",
-    "inventory_sheet": "custom/0c9ace9f760b40539f2fa9a1f69920f8/inventory",
+    "index": 5,
+    "columns": 8,
+    "sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/sprite",
+    "inventory_sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/inventory",
     "art_label": "event_theme:bonfire",
     "art_category": "events",
-    "editor_source": "custom/sources/7de8a147c9844637c9441387b850b01b81771afd9a7f334e2d2faabb3ff16d26.png",
+    "editor_source": "custom/sources/30e29d03feda65b7e6404f54bd3c9c7e6ce1eb21184f343bd486df21ca505e84.png",
     "editor_settings": {
       "fit": "contain",
       "padding": 4.0,
@@ -1678,18 +2154,20 @@
       "mirror": false,
       "trim": true,
       "crop": [
-        0,
-        0,
-        329,
-        314
+        739,
+        776,
+        1278,
+        1294
       ]
-    }
+    },
+    "editor_render_hash": "30bd6bce01e7fc94ba9bb58efb8c11b62e712d874c9bc0fb55b1b9296017ed90",
+    "inventory_columns": 8
   },
   "art_custom_005": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/cd50527607374e23b66f242c886c8892/sprite",
-    "inventory_sheet": "custom/cd50527607374e23b66f242c886c8892/inventory",
+    "index": 8,
+    "columns": 8,
+    "sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/sprite",
+    "inventory_sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/inventory",
     "art_label": "event_theme:ruined_house",
     "art_category": "events",
     "editor_source": "custom/sources/7de8a147c9844637c9441387b850b01b81771afd9a7f334e2d2faabb3ff16d26.png",
@@ -1705,13 +2183,14 @@
         624,
         317
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_006": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/453991a2c39c445a86bde99f435494fd/sprite",
-    "inventory_sheet": "custom/453991a2c39c445a86bde99f435494fd/inventory",
+    "index": 4,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
     "art_label": "event_theme:old_bus",
     "art_category": "events",
     "editor_source": "custom/sources/7de8a147c9844637c9441387b850b01b81771afd9a7f334e2d2faabb3ff16d26.png",
@@ -1727,13 +2206,14 @@
         638,
         929
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_007": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/1d44670ca0d444f380dffd44f815de80/sprite",
-    "inventory_sheet": "custom/1d44670ca0d444f380dffd44f815de80/inventory",
+    "index": 23,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
     "art_label": "event_theme:thunderstorm",
     "art_category": "events",
     "editor_source": "custom/sources/7de8a147c9844637c9441387b850b01b81771afd9a7f334e2d2faabb3ff16d26.png",
@@ -1749,13 +2229,14 @@
         968,
         1243
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_008": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/b136f3a2890f4970b014974509b886b7/sprite",
-    "inventory_sheet": "custom/b136f3a2890f4970b014974509b886b7/inventory",
+    "index": 19,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
     "art_label": "event_theme:red_camp",
     "art_category": "events",
     "editor_source": "custom/sources/7de8a147c9844637c9441387b850b01b81771afd9a7f334e2d2faabb3ff16d26.png",
@@ -1771,13 +2252,14 @@
         318,
         1238
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_009": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/024c438f8b2c451a8c5e54eb9770acc1/sprite",
-    "inventory_sheet": "custom/024c438f8b2c451a8c5e54eb9770acc1/inventory",
+    "index": 28,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
     "art_label": "event_theme:hazard",
     "art_category": "events",
     "editor_source": "custom/sources/7de8a147c9844637c9441387b850b01b81771afd9a7f334e2d2faabb3ff16d26.png",
@@ -1793,13 +2275,14 @@
         638,
         1243
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_010": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/cf6921bfc9784ce38f13aad04450e5d4/sprite",
-    "inventory_sheet": "custom/cf6921bfc9784ce38f13aad04450e5d4/inventory",
+    "index": 59,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
     "art_label": "event_theme:helicopter",
     "art_category": "events",
     "editor_source": "custom/sources/7de8a147c9844637c9441387b850b01b81771afd9a7f334e2d2faabb3ff16d26.png",
@@ -1815,13 +2298,14 @@
         973,
         322
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_011": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/1e42c413a9d747cf90a0cc52f0989359/sprite",
-    "inventory_sheet": "custom/1e42c413a9d747cf90a0cc52f0989359/inventory",
+    "index": 50,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
     "art_label": "event_theme:radio_sign3",
     "art_category": "events",
     "editor_source": "custom/sources/7de8a147c9844637c9441387b850b01b81771afd9a7f334e2d2faabb3ff16d26.png",
@@ -1837,13 +2321,14 @@
         1254,
         330
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_012": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/1826578f1bdd47039cdd0ba5d8d11692/sprite",
-    "inventory_sheet": "custom/1826578f1bdd47039cdd0ba5d8d11692/inventory",
+    "index": 2,
+    "columns": 8,
+    "sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/sprite",
+    "inventory_sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/inventory",
     "art_label": "event_theme:hideout",
     "art_category": "events",
     "editor_source": "custom/sources/7de8a147c9844637c9441387b850b01b81771afd9a7f334e2d2faabb3ff16d26.png",
@@ -1859,13 +2344,14 @@
         1254,
         612
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_013": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/954bb34247ca417ea6f3fd98ed2e6a6b/sprite",
-    "inventory_sheet": "custom/954bb34247ca417ea6f3fd98ed2e6a6b/inventory",
+    "index": 31,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
     "art_label": "event_theme:drop",
     "art_category": "events",
     "editor_source": "custom/sources/7de8a147c9844637c9441387b850b01b81771afd9a7f334e2d2faabb3ff16d26.png",
@@ -1881,13 +2367,14 @@
         1254,
         934
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_014": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/5e637a623fe34661bbf81989213cb9b0/sprite",
-    "inventory_sheet": "custom/5e637a623fe34661bbf81989213cb9b0/inventory",
+    "index": 18,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
     "art_label": "event_theme:footprint",
     "art_category": "events",
     "editor_source": "custom/sources/7de8a147c9844637c9441387b850b01b81771afd9a7f334e2d2faabb3ff16d26.png",
@@ -1903,13 +2390,14 @@
         1254,
         1235
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_015": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/03c115b5e854454ba7a686ec85632ce8/sprite",
-    "inventory_sheet": "custom/03c115b5e854454ba7a686ec85632ce8/inventory",
+    "index": 13,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
     "art_label": "event_theme:megaloot",
     "art_category": "events",
     "editor_source": "custom/sources/7de8a147c9844637c9441387b850b01b81771afd9a7f334e2d2faabb3ff16d26.png",
@@ -1925,13 +2413,14 @@
         302,
         623
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_016": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/a9222f96c7ac4b5090bd3b8cbf675b6c/sprite",
-    "inventory_sheet": "custom/a9222f96c7ac4b5090bd3b8cbf675b6c/inventory",
+    "index": 51,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
     "art_label": "event_theme:come_with_me",
     "art_category": "events",
     "editor_source": "custom/sources/7de8a147c9844637c9441387b850b01b81771afd9a7f334e2d2faabb3ff16d26.png",
@@ -1947,13 +2436,14 @@
         952,
         626
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_017": {
     "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/3a4cf2680827d3bcec7333b964122ddf0b758514e383c0a3d42cc0699e1a8cd2/sprite",
-    "inventory_sheet": "custom/variants/3a4cf2680827d3bcec7333b964122ddf0b758514e383c0a3d42cc0699e1a8cd2/inventory",
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
     "art_label": "event_theme:caged_monster",
     "art_category": "events",
     "editor_source": "custom/sources/7de8a147c9844637c9441387b850b01b81771afd9a7f334e2d2faabb3ff16d26.png",
@@ -1969,16 +2459,17 @@
         643,
         626
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_018": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/a35359c063854f7d3b29d740edf2de2493a304bad99ae44c872a3e4bae806685/sprite",
-    "inventory_sheet": "custom/variants/a35359c063854f7d3b29d740edf2de2493a304bad99ae44c872a3e4bae806685/inventory",
+    "index": 32,
+    "columns": 8,
+    "sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/sprite",
+    "inventory_sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/inventory",
     "art_label": "weapon_flame_rifle",
     "art_category": "weapons",
-    "editor_source": "custom/sources/a6dd3ee52356574a684e310ede7a320210f9b85b416160ec618a9aff55285854.png",
+    "editor_source": "custom/sources/1ab70e96e17c9cee5eefaf0abd4efdcf9ac2f264b9804caafe3058d98c57c8e4.png",
     "editor_settings": {
       "fit": "contain",
       "padding": 4.0,
@@ -1986,21 +2477,23 @@
       "mirror": false,
       "trim": true,
       "crop": [
-        631,
-        614,
-        943,
-        888
+        0,
+        624,
+        322,
+        904
       ]
-    }
+    },
+    "editor_render_hash": "5f6f75f59731edefa49d6c044c1ef7ccf9244e9e9307fcc0958ec09460601179",
+    "inventory_columns": 8
   },
   "weapon_custom_002": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/a35359c063854f7d3b29d740edf2de2493a304bad99ae44c872a3e4bae806685/sprite",
-    "inventory_sheet": "custom/variants/a35359c063854f7d3b29d740edf2de2493a304bad99ae44c872a3e4bae806685/inventory",
+    "index": 32,
+    "columns": 8,
+    "sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/sprite",
+    "inventory_sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/inventory",
     "art_label": "weapon_flame_rifle",
     "art_category": "weapons",
-    "editor_source": "custom/sources/a6dd3ee52356574a684e310ede7a320210f9b85b416160ec618a9aff55285854.png",
+    "editor_source": "custom/sources/1ab70e96e17c9cee5eefaf0abd4efdcf9ac2f264b9804caafe3058d98c57c8e4.png",
     "editor_settings": {
       "fit": "contain",
       "padding": 4.0,
@@ -2008,21 +2501,23 @@
       "mirror": false,
       "trim": true,
       "crop": [
-        631,
-        614,
-        943,
-        888
+        0,
+        624,
+        322,
+        904
       ]
-    }
+    },
+    "editor_render_hash": "5f6f75f59731edefa49d6c044c1ef7ccf9244e9e9307fcc0958ec09460601179",
+    "inventory_columns": 8
   },
   "art_custom_019": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/76df830102442cb0959bbd48de5e0d751d68034e8994e5decb82c0ed9c453369/sprite",
-    "inventory_sheet": "custom/variants/76df830102442cb0959bbd48de5e0d751d68034e8994e5decb82c0ed9c453369/inventory",
+    "index": 38,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
     "art_label": "weapon_happy_man",
     "art_category": "weapons",
-    "editor_source": "custom/sources/bf9a156c41b30c1de5b8ed3690e32db11a7198947d78e44aa7ec407cc890a4aa.png",
+    "editor_source": "custom/sources/1ab70e96e17c9cee5eefaf0abd4efdcf9ac2f264b9804caafe3058d98c57c8e4.png",
     "editor_settings": {
       "fit": "contain",
       "padding": 4.0,
@@ -2030,21 +2525,23 @@
       "mirror": false,
       "trim": true,
       "crop": [
-        932,
-        11,
-        1261,
-        323
+        956,
+        312,
+        1254,
+        593
       ]
-    }
+    },
+    "editor_render_hash": "44ad862926df8e8d5a7016385917189ed519bed245f09359c821547286b84b69",
+    "inventory_columns": 8
   },
   "weapon_custom_003": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/76df830102442cb0959bbd48de5e0d751d68034e8994e5decb82c0ed9c453369/sprite",
-    "inventory_sheet": "custom/variants/76df830102442cb0959bbd48de5e0d751d68034e8994e5decb82c0ed9c453369/inventory",
+    "index": 38,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
     "art_label": "weapon_happy_man",
     "art_category": "weapons",
-    "editor_source": "custom/sources/bf9a156c41b30c1de5b8ed3690e32db11a7198947d78e44aa7ec407cc890a4aa.png",
+    "editor_source": "custom/sources/1ab70e96e17c9cee5eefaf0abd4efdcf9ac2f264b9804caafe3058d98c57c8e4.png",
     "editor_settings": {
       "fit": "contain",
       "padding": 4.0,
@@ -2052,18 +2549,20 @@
       "mirror": false,
       "trim": true,
       "crop": [
-        932,
-        11,
-        1261,
-        323
+        956,
+        312,
+        1254,
+        593
       ]
-    }
+    },
+    "editor_render_hash": "44ad862926df8e8d5a7016385917189ed519bed245f09359c821547286b84b69",
+    "inventory_columns": 8
   },
   "art_custom_020": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/bc9d8251750262c2bc007e9b223e350fe462edc29e4d9e896389627e4c076a53/sprite",
-    "inventory_sheet": "custom/variants/bc9d8251750262c2bc007e9b223e350fe462edc29e4d9e896389627e4c076a53/inventory",
+    "index": 54,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
     "art_label": "event_theme:hungry_pilgrims",
     "art_category": "events",
     "editor_source": "custom/sources/793885c5f11d21c45fe4084a563450335928001f80b6fbc2468aebaa9775f75c.png",
@@ -2079,16 +2578,17 @@
         447,
         430
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_021": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/eb53b515d04402f849de5a887a433dae4b2be025683df0bde2c4999eab42ca31/sprite",
-    "inventory_sheet": "custom/variants/eb53b515d04402f849de5a887a433dae4b2be025683df0bde2c4999eab42ca31/inventory",
+    "index": 45,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
     "art_label": "event_theme:caged_beast",
     "art_category": "events",
-    "editor_source": "custom/sources/793885c5f11d21c45fe4084a563450335928001f80b6fbc2468aebaa9775f75c.png",
+    "editor_source": "custom/sources/30e29d03feda65b7e6404f54bd3c9c7e6ce1eb21184f343bd486df21ca505e84.png",
     "editor_settings": {
       "fit": "contain",
       "padding": 4.0,
@@ -2096,18 +2596,20 @@
       "mirror": false,
       "trim": true,
       "crop": [
-        439,
-        11,
-        853,
-        411
+        686,
+        1368,
+        1370,
+        2039
       ]
-    }
+    },
+    "editor_render_hash": "f6124d0c640f195321e1d494bf3c9dcc5657caaadfe1c5e8705081a9eaae818d",
+    "inventory_columns": 8
   },
   "art_custom_022": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/7646e8cda66334884958a15e6044dabe320d671fac81679cd16ba1df3d5d7f70/sprite",
-    "inventory_sheet": "custom/variants/7646e8cda66334884958a15e6044dabe320d671fac81679cd16ba1df3d5d7f70/inventory",
+    "index": 16,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
     "art_label": "event_theme:doggy",
     "art_category": "events",
     "editor_source": "custom/sources/793885c5f11d21c45fe4084a563450335928001f80b6fbc2468aebaa9775f75c.png",
@@ -2123,13 +2625,14 @@
         1218,
         432
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_023": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/0e138a4b9fa62d1d0b0cafa40e03389343a6dd6151265e14f3ff448dac81dcdf/sprite",
-    "inventory_sheet": "custom/variants/0e138a4b9fa62d1d0b0cafa40e03389343a6dd6151265e14f3ff448dac81dcdf/inventory",
+    "index": 22,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
     "art_label": "event_theme:old_hunter",
     "art_category": "events",
     "editor_source": "custom/sources/793885c5f11d21c45fe4084a563450335928001f80b6fbc2468aebaa9775f75c.png",
@@ -2145,13 +2648,14 @@
         444,
         822
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_024": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/6d3dedc7436d3b261539ab97a28fd6f9c0a1d06239cf9bba6eb0a0bdc90ba5ea/sprite",
-    "inventory_sheet": "custom/variants/6d3dedc7436d3b261539ab97a28fd6f9c0a1d06239cf9bba6eb0a0bdc90ba5ea/inventory",
+    "index": 56,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
     "art_label": "event_theme:scavenger",
     "art_category": "events",
     "editor_source": "custom/sources/793885c5f11d21c45fe4084a563450335928001f80b6fbc2468aebaa9775f75c.png",
@@ -2167,13 +2671,14 @@
         807,
         806
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_025": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/fe33d416feffe3013c12a6c413e338a8b35d93ea104eda3fbaa314e87e1393c4/sprite",
-    "inventory_sheet": "custom/variants/fe33d416feffe3013c12a6c413e338a8b35d93ea104eda3fbaa314e87e1393c4/inventory",
+    "index": 17,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
     "art_label": "event_theme:unknown_signal",
     "art_category": "events",
     "editor_source": "custom/sources/793885c5f11d21c45fe4084a563450335928001f80b6fbc2468aebaa9775f75c.png",
@@ -2189,13 +2694,14 @@
         1250,
         824
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_026": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/998f901a0f87243325385fc2a372633d820ff1e97f71d261f9580d7f458fd42f/sprite",
-    "inventory_sheet": "custom/variants/998f901a0f87243325385fc2a372633d820ff1e97f71d261f9580d7f458fd42f/inventory",
+    "index": 1,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
     "art_label": "event_theme:cordon_mark",
     "art_category": "events",
     "editor_source": "custom/sources/793885c5f11d21c45fe4084a563450335928001f80b6fbc2468aebaa9775f75c.png",
@@ -2211,13 +2717,14 @@
         409,
         1241
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_027": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/6d437f0f75e8bb55f80c177fd3fec3d3933bbc0492cd8d24e0681ceb492c2116/sprite",
-    "inventory_sheet": "custom/variants/6d437f0f75e8bb55f80c177fd3fec3d3933bbc0492cd8d24e0681ceb492c2116/inventory",
+    "index": 3,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
     "art_label": "event_theme:kites",
     "art_category": "events",
     "editor_source": "custom/sources/793885c5f11d21c45fe4084a563450335928001f80b6fbc2468aebaa9775f75c.png",
@@ -2233,13 +2740,14 @@
         853,
         1238
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_028": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/69be4291c7c0dc39565db2f0fa4bf66fb46b8e4b3ce64112e053c3a88e6473b4/sprite",
-    "inventory_sheet": "custom/variants/69be4291c7c0dc39565db2f0fa4bf66fb46b8e4b3ce64112e053c3a88e6473b4/inventory",
+    "index": 48,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
     "art_label": "event_theme:papers",
     "art_category": "events",
     "editor_source": "custom/sources/793885c5f11d21c45fe4084a563450335928001f80b6fbc2468aebaa9775f75c.png",
@@ -2255,13 +2763,14 @@
         1254,
         1224
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_029": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/8505983df21175d1dfb44e4c5999a5660d3b5ba092ceaeb683ee7028da08ed01/sprite",
-    "inventory_sheet": "custom/variants/8505983df21175d1dfb44e4c5999a5660d3b5ba092ceaeb683ee7028da08ed01/inventory",
+    "index": 42,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
     "art_label": "event_theme:magnetic_data",
     "art_category": "events",
     "editor_source": "custom/sources/9e52af325322cf2f292139b146432a7bd08b3a5ee12e9b8858e52ee8bb705874.png",
@@ -2277,13 +2786,14 @@
         434,
         435
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_030": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/1ebdbb244c9ad64c625bc13fc2f175e4bde40001937bb1ba6d5276b418f7a9c9/sprite",
-    "inventory_sheet": "custom/variants/1ebdbb244c9ad64c625bc13fc2f175e4bde40001937bb1ba6d5276b418f7a9c9/inventory",
+    "index": 59,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
     "art_label": "event_theme:notebook",
     "art_category": "events",
     "editor_source": "custom/sources/9e52af325322cf2f292139b146432a7bd08b3a5ee12e9b8858e52ee8bb705874.png",
@@ -2299,13 +2809,14 @@
         842,
         440
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_031": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/2c10fa48f743e7352036068f9194fba383c4547f08326b70372672e5c9c2d1b3/sprite",
-    "inventory_sheet": "custom/variants/2c10fa48f743e7352036068f9194fba383c4547f08326b70372672e5c9c2d1b3/inventory",
+    "index": 57,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
     "art_label": "event_theme:yellow_ribbon",
     "art_category": "events",
     "editor_source": "custom/sources/9e52af325322cf2f292139b146432a7bd08b3a5ee12e9b8858e52ee8bb705874.png",
@@ -2321,13 +2832,14 @@
         1254,
         430
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_032": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/c5a316e198b68ff9064e9789fd2d24a1a94075d797dc531d678c6c0435d54c5b/sprite",
-    "inventory_sheet": "custom/variants/c5a316e198b68ff9064e9789fd2d24a1a94075d797dc531d678c6c0435d54c5b/inventory",
+    "index": 41,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
     "art_label": "event_theme:stash_rock",
     "art_category": "events",
     "editor_source": "custom/sources/9e52af325322cf2f292139b146432a7bd08b3a5ee12e9b8858e52ee8bb705874.png",
@@ -2343,13 +2855,14 @@
         426,
         827
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_033": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/f0035ea46c5cd45111e466117b93552d772fb06fc52f5207b30a7807d3de3d82/sprite",
-    "inventory_sheet": "custom/variants/f0035ea46c5cd45111e466117b93552d772fb06fc52f5207b30a7807d3de3d82/inventory",
+    "index": 12,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
     "art_label": "event_theme:food_stash",
     "art_category": "events",
     "editor_source": "custom/sources/9e52af325322cf2f292139b146432a7bd08b3a5ee12e9b8858e52ee8bb705874.png",
@@ -2365,13 +2878,14 @@
         828,
         787
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_034": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/6b64a63f6d343cb33e5dcbf7d67c0a7c5b53f51497210d91a9b94fcaab8d68ea/sprite",
-    "inventory_sheet": "custom/variants/6b64a63f6d343cb33e5dcbf7d67c0a7c5b53f51497210d91a9b94fcaab8d68ea/inventory",
+    "index": 13,
+    "columns": 8,
+    "sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/sprite",
+    "inventory_sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/inventory",
     "art_label": "event_theme:caravan_gift",
     "art_category": "events",
     "editor_source": "custom/sources/9e52af325322cf2f292139b146432a7bd08b3a5ee12e9b8858e52ee8bb705874.png",
@@ -2387,13 +2901,14 @@
         1254,
         827
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_035": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/1d4aa9176ca1488286c3da143e6a367dbc0393e85618c00cd1976f63ba6fa036/sprite",
-    "inventory_sheet": "custom/variants/1d4aa9176ca1488286c3da143e6a367dbc0393e85618c00cd1976f63ba6fa036/inventory",
+    "index": 2,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
     "art_label": "event_theme:mushrooms",
     "art_category": "events",
     "editor_source": "custom/sources/9e52af325322cf2f292139b146432a7bd08b3a5ee12e9b8858e52ee8bb705874.png",
@@ -2409,13 +2924,14 @@
         428,
         1233
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_036": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/41decbd17de988ae0863db9946d0d8282ea101e0b1b6e97dee28548bd5dbb206/sprite",
-    "inventory_sheet": "custom/variants/41decbd17de988ae0863db9946d0d8282ea101e0b1b6e97dee28548bd5dbb206/inventory",
+    "index": 29,
+    "columns": 8,
+    "sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/sprite",
+    "inventory_sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/inventory",
     "art_label": "event_theme:wild_honey",
     "art_category": "events",
     "editor_source": "custom/sources/9e52af325322cf2f292139b146432a7bd08b3a5ee12e9b8858e52ee8bb705874.png",
@@ -2431,16 +2947,17 @@
         820,
         1233
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_037": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/420c804d63827c6b134116884a0e54a32b34a73ed35e85179cb04eb43322f86e/sprite",
-    "inventory_sheet": "custom/variants/420c804d63827c6b134116884a0e54a32b34a73ed35e85179cb04eb43322f86e/inventory",
+    "index": 4,
+    "columns": 8,
+    "sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/sprite",
+    "inventory_sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/inventory",
     "art_label": "event_theme:bush_stash",
     "art_category": "events",
-    "editor_source": "custom/sources/9e52af325322cf2f292139b146432a7bd08b3a5ee12e9b8858e52ee8bb705874.png",
+    "editor_source": "custom/sources/30e29d03feda65b7e6404f54bd3c9c7e6ce1eb21184f343bd486df21ca505e84.png",
     "editor_settings": {
       "fit": "contain",
       "padding": 4.0,
@@ -2448,18 +2965,20 @@
       "mirror": false,
       "trim": true,
       "crop": [
-        831,
-        819,
-        1254,
-        1238
+        20,
+        1399,
+        673,
+        2048
       ]
-    }
+    },
+    "editor_render_hash": "b85b40b0475ebfa627dc38d08577905f40a00d0c24951142691dfe0d0b02332e",
+    "inventory_columns": 8
   },
   "art_custom_038": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/da91c8edac1e402236d7e10394dc1399dd0e23377127f93f2321b81eb4b3150a/sprite",
-    "inventory_sheet": "custom/variants/da91c8edac1e402236d7e10394dc1399dd0e23377127f93f2321b81eb4b3150a/inventory",
+    "index": 46,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
     "art_label": "event_theme:green_hill",
     "art_category": "events",
     "editor_source": "custom/sources/cab0c3e021b02e0e4d2a94f8bc4f7b377d6d6b52f9725815190331fb16061ff2.png",
@@ -2475,13 +2994,14 @@
         420,
         620
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_039": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/389e5498611c196c7cb2012ab57b1baa98a2bb8b47988312f248c40c253bbc01/sprite",
-    "inventory_sheet": "custom/variants/389e5498611c196c7cb2012ab57b1baa98a2bb8b47988312f248c40c253bbc01/inventory",
+    "index": 24,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
     "art_label": "event_theme:trader_in_trouble",
     "art_category": "events",
     "editor_source": "custom/sources/cab0c3e021b02e0e4d2a94f8bc4f7b377d6d6b52f9725815190331fb16061ff2.png",
@@ -2497,13 +3017,14 @@
         863,
         647
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_040": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/bec9f4fd1f187428beb77e3b969a8307b7d562b9e9041e0a769daf7404aabfa5/sprite",
-    "inventory_sheet": "custom/variants/bec9f4fd1f187428beb77e3b969a8307b7d562b9e9041e0a769daf7404aabfa5/inventory",
+    "index": 3,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
     "art_label": "event_theme:under_ladder",
     "art_category": "events",
     "editor_source": "custom/sources/cab0c3e021b02e0e4d2a94f8bc4f7b377d6d6b52f9725815190331fb16061ff2.png",
@@ -2519,13 +3040,14 @@
         1237,
         663
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_041": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/b471825a917dfb278f085a11a116021f884316158a079b63f595077f26fd7826/sprite",
-    "inventory_sheet": "custom/variants/b471825a917dfb278f085a11a116021f884316158a079b63f595077f26fd7826/inventory",
+    "index": 53,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
     "art_label": "event_theme:apthek",
     "art_category": "events",
     "editor_source": "custom/sources/cab0c3e021b02e0e4d2a94f8bc4f7b377d6d6b52f9725815190331fb16061ff2.png",
@@ -2541,13 +3063,14 @@
         705,
         1195
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_042": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/6a4d3bd249079c9fa38169d0277a4ed7995aaa9adcb1427443aa303536170efd/sprite",
-    "inventory_sheet": "custom/variants/6a4d3bd249079c9fa38169d0277a4ed7995aaa9adcb1427443aa303536170efd/inventory",
+    "index": 44,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
     "art_label": "event_theme:radio_sign",
     "art_category": "events",
     "editor_source": "custom/sources/cab0c3e021b02e0e4d2a94f8bc4f7b377d6d6b52f9725815190331fb16061ff2.png",
@@ -2563,13 +3086,14 @@
         1220,
         1187
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_043": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/83c5de6582140d2bf78093311304bd7a7126b6ccc5050468517ef93a0b1bc005/sprite",
-    "inventory_sheet": "custom/variants/83c5de6582140d2bf78093311304bd7a7126b6ccc5050468517ef93a0b1bc005/inventory",
+    "index": 45,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
     "art_label": "event_theme:water_off",
     "art_category": "events",
     "editor_source": "custom/sources/1a02a2bf0189ca6d7d6dffd7ad04fc59a9315288544585ee565d504c21382a5c.png",
@@ -2585,13 +3109,14 @@
         401,
         607
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_044": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/913325a13fbd552a96d93d522dbe33f71b9c4ef21d2c29f56af0ccf90627bc35/sprite",
-    "inventory_sheet": "custom/variants/913325a13fbd552a96d93d522dbe33f71b9c4ef21d2c29f56af0ccf90627bc35/inventory",
+    "index": 62,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
     "art_label": "event_theme:stash_under_tree",
     "art_category": "events",
     "editor_source": "custom/sources/1a02a2bf0189ca6d7d6dffd7ad04fc59a9315288544585ee565d504c21382a5c.png",
@@ -2607,13 +3132,14 @@
         836,
         639
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_045": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/6a66706ba5b5b390d37374b1a55b6226add82685b9b1de0a53aae86f9c11b7b0/sprite",
-    "inventory_sheet": "custom/variants/6a66706ba5b5b390d37374b1a55b6226add82685b9b1de0a53aae86f9c11b7b0/inventory",
+    "index": 25,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
     "art_label": "event_theme:broken_bridge",
     "art_category": "events",
     "editor_source": "custom/sources/1a02a2bf0189ca6d7d6dffd7ad04fc59a9315288544585ee565d504c21382a5c.png",
@@ -2629,13 +3155,14 @@
         1254,
         642
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_046": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/e96ab67655c927f88916791ff215f7ed366f43fdaf401c538b8616a8df1342c2/sprite",
-    "inventory_sheet": "custom/variants/e96ab67655c927f88916791ff215f7ed366f43fdaf401c538b8616a8df1342c2/inventory",
+    "index": 38,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
     "art_label": "event_theme:wires",
     "art_category": "events",
     "editor_source": "custom/sources/1a02a2bf0189ca6d7d6dffd7ad04fc59a9315288544585ee565d504c21382a5c.png",
@@ -2651,13 +3178,14 @@
         616,
         1222
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_047": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/eba6c9f7528bd6a44ee41fe483054121fdc01d5ef4f56f893609327c7397a391/sprite",
-    "inventory_sheet": "custom/variants/eba6c9f7528bd6a44ee41fe483054121fdc01d5ef4f56f893609327c7397a391/inventory",
+    "index": 33,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
     "art_label": "event_theme:dune_wires",
     "art_category": "events",
     "editor_source": "custom/sources/1a02a2bf0189ca6d7d6dffd7ad04fc59a9315288544585ee565d504c21382a5c.png",
@@ -2673,16 +3201,17 @@
         1254,
         1227
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_048": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/9c0e64157debc37d5844b01bee3239a0d5630084a039462a66fdb8f63a8926ac/sprite",
-    "inventory_sheet": "custom/variants/9c0e64157debc37d5844b01bee3239a0d5630084a039462a66fdb8f63a8926ac/inventory",
+    "index": 7,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
     "art_label": "event_theme:sand_glass",
     "art_category": "events",
-    "editor_source": "custom/sources/24adad0cc9bb1a509f0224de8ac02f838a7d8b25435be2b90c1deaa9078f86fc.png",
+    "editor_source": "custom/sources/a5fa157d8df534b7b5234d788aeeebc54e3649de8f7c86a72c80824ef42811d9.png",
     "editor_settings": {
       "fit": "contain",
       "padding": 4.0,
@@ -2695,16 +3224,17 @@
         433,
         410
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_049": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/317f4f7d7004b2660e1362d4048c3c70eff43445011fff83bca80f031bba8b92/sprite",
-    "inventory_sheet": "custom/variants/317f4f7d7004b2660e1362d4048c3c70eff43445011fff83bca80f031bba8b92/inventory",
+    "index": 11,
+    "columns": 8,
+    "sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/sprite",
+    "inventory_sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/inventory",
     "art_label": "event_theme:solar_glass",
     "art_category": "events",
-    "editor_source": "custom/sources/24adad0cc9bb1a509f0224de8ac02f838a7d8b25435be2b90c1deaa9078f86fc.png",
+    "editor_source": "custom/sources/a5fa157d8df534b7b5234d788aeeebc54e3649de8f7c86a72c80824ef42811d9.png",
     "editor_settings": {
       "fit": "contain",
       "padding": 4.0,
@@ -2717,16 +3247,17 @@
         820,
         433
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_050": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/c892bf9c27d66ba31804c4854898453de57df91098e1e8abd16ec280d0521b17/sprite",
-    "inventory_sheet": "custom/variants/c892bf9c27d66ba31804c4854898453de57df91098e1e8abd16ec280d0521b17/inventory",
+    "index": 1,
+    "columns": 8,
+    "sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/sprite",
+    "inventory_sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/inventory",
     "art_label": "event_theme:mann",
     "art_category": "events",
-    "editor_source": "custom/sources/24adad0cc9bb1a509f0224de8ac02f838a7d8b25435be2b90c1deaa9078f86fc.png",
+    "editor_source": "custom/sources/a5fa157d8df534b7b5234d788aeeebc54e3649de8f7c86a72c80824ef42811d9.png",
     "editor_settings": {
       "fit": "contain",
       "padding": 4.0,
@@ -2739,16 +3270,17 @@
         1223,
         433
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_051": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/62f2ae2415882c44f88eb62cd370a0c41129f2906a315f7a5eb15e32b553cbff/sprite",
-    "inventory_sheet": "custom/variants/62f2ae2415882c44f88eb62cd370a0c41129f2906a315f7a5eb15e32b553cbff/inventory",
+    "index": 5,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
     "art_label": "event_theme:lady",
     "art_category": "events",
-    "editor_source": "custom/sources/24adad0cc9bb1a509f0224de8ac02f838a7d8b25435be2b90c1deaa9078f86fc.png",
+    "editor_source": "custom/sources/a5fa157d8df534b7b5234d788aeeebc54e3649de8f7c86a72c80824ef42811d9.png",
     "editor_settings": {
       "fit": "contain",
       "padding": 4.0,
@@ -2761,16 +3293,17 @@
         1586,
         433
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_052": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/fb800f3a538ded7eb7fbf79d0a3047cbc39160aeca057f83a43e12e1210f7848/sprite",
-    "inventory_sheet": "custom/variants/fb800f3a538ded7eb7fbf79d0a3047cbc39160aeca057f83a43e12e1210f7848/inventory",
+    "index": 22,
+    "columns": 8,
+    "sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/sprite",
+    "inventory_sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/inventory",
     "art_label": "event_theme:old_press",
     "art_category": "events",
-    "editor_source": "custom/sources/24adad0cc9bb1a509f0224de8ac02f838a7d8b25435be2b90c1deaa9078f86fc.png",
+    "editor_source": "custom/sources/a5fa157d8df534b7b5234d788aeeebc54e3649de8f7c86a72c80824ef42811d9.png",
     "editor_settings": {
       "fit": "contain",
       "padding": 4.0,
@@ -2783,16 +3316,17 @@
         424,
         860
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_053": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/b420d434af553dd176d6362ff574ecf1a441db960bfec756e6d1ef2a228a2a4b/sprite",
-    "inventory_sheet": "custom/variants/b420d434af553dd176d6362ff574ecf1a441db960bfec756e6d1ef2a228a2a4b/inventory",
+    "index": 41,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
     "art_label": "event_theme:pocket",
     "art_category": "events",
-    "editor_source": "custom/sources/24adad0cc9bb1a509f0224de8ac02f838a7d8b25435be2b90c1deaa9078f86fc.png",
+    "editor_source": "custom/sources/a5fa157d8df534b7b5234d788aeeebc54e3649de8f7c86a72c80824ef42811d9.png",
     "editor_settings": {
       "fit": "contain",
       "padding": 4.0,
@@ -2805,16 +3339,17 @@
         831,
         875
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_054": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/e8011b2d8331ac03c901d9cec478aaa89800def026e26045c2c79d08f7211ee3/sprite",
-    "inventory_sheet": "custom/variants/e8011b2d8331ac03c901d9cec478aaa89800def026e26045c2c79d08f7211ee3/inventory",
+    "index": 18,
+    "columns": 8,
+    "sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/sprite",
+    "inventory_sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/inventory",
     "art_label": "event_theme:spoiled_food",
     "art_category": "events",
-    "editor_source": "custom/sources/24adad0cc9bb1a509f0224de8ac02f838a7d8b25435be2b90c1deaa9078f86fc.png",
+    "editor_source": "custom/sources/a5fa157d8df534b7b5234d788aeeebc54e3649de8f7c86a72c80824ef42811d9.png",
     "editor_settings": {
       "fit": "contain",
       "padding": 4.0,
@@ -2827,16 +3362,17 @@
         1232,
         884
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_055": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/c9197899e78b2999dd30bf152b7a8a0ad9ca4367e397593eb4d11a8ab13f73ad/sprite",
-    "inventory_sheet": "custom/variants/c9197899e78b2999dd30bf152b7a8a0ad9ca4367e397593eb4d11a8ab13f73ad/inventory",
+    "index": 27,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
     "art_label": "event_theme:barbed_wires",
     "art_category": "events",
-    "editor_source": "custom/sources/bd477e1ab4c518f74034e3a74b3e2e5cabfb48e995d53256093a8887c24efb3c.png",
+    "editor_source": "custom/sources/30e29d03feda65b7e6404f54bd3c9c7e6ce1eb21184f343bd486df21ca505e84.png",
     "editor_settings": {
       "fit": "contain",
       "padding": 4.0,
@@ -2844,18 +3380,20 @@
       "mirror": false,
       "trim": true,
       "crop": [
-        0,
-        204,
-        313,
-        642
+        59,
+        781,
+        607,
+        1254
       ]
-    }
+    },
+    "editor_render_hash": "d4fc04838735041e074d8b62eab0ab341bd0a3c64bd19892dc681a60bef2a527",
+    "inventory_columns": 8
   },
   "art_custom_056": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/034fa390aaec3ec9081b33111a44c2e4cc87df86fb4e02e259b9ade45c8f60db/sprite",
-    "inventory_sheet": "custom/variants/034fa390aaec3ec9081b33111a44c2e4cc87df86fb4e02e259b9ade45c8f60db/inventory",
+    "index": 43,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
     "art_label": "event_theme:thief_trader1",
     "art_category": "events",
     "editor_source": "custom/sources/bd477e1ab4c518f74034e3a74b3e2e5cabfb48e995d53256093a8887c24efb3c.png",
@@ -2871,13 +3409,14 @@
         1254,
         636
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_057": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/e7e18e486e0dce797b20011ec1cabc5a728e8f7fabf2fdd3f4c226b1d5af4c46/sprite",
-    "inventory_sheet": "custom/variants/e7e18e486e0dce797b20011ec1cabc5a728e8f7fabf2fdd3f4c226b1d5af4c46/inventory",
+    "index": 53,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
     "art_label": "event_theme:thief_trader2",
     "art_category": "events",
     "editor_source": "custom/sources/bd477e1ab4c518f74034e3a74b3e2e5cabfb48e995d53256093a8887c24efb3c.png",
@@ -2893,13 +3432,14 @@
         334,
         1128
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_058": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/ecb1f83e6f8f394a9e3a819852a6341afdfbcb71586913969f02198a6ff471d1/sprite",
-    "inventory_sheet": "custom/variants/ecb1f83e6f8f394a9e3a819852a6341afdfbcb71586913969f02198a6ff471d1/inventory",
+    "index": 57,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
     "art_label": "event_theme:thief_trader3",
     "art_category": "events",
     "editor_source": "custom/sources/bd477e1ab4c518f74034e3a74b3e2e5cabfb48e995d53256093a8887c24efb3c.png",
@@ -2915,13 +3455,14 @@
         659,
         1147
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_059": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/061db79f5cbb8301c18a7b803576c89ab1eb4fc03b5852be12a82f03772fa3d2/sprite",
-    "inventory_sheet": "custom/variants/061db79f5cbb8301c18a7b803576c89ab1eb4fc03b5852be12a82f03772fa3d2/inventory",
+    "index": 8,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
     "art_label": "event_theme:industrial_light",
     "art_category": "events",
     "editor_source": "custom/sources/bd477e1ab4c518f74034e3a74b3e2e5cabfb48e995d53256093a8887c24efb3c.png",
@@ -2937,13 +3478,14 @@
         960,
         1147
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_060": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/087b459912ec5fe0c2a3999c7cce406334374c817a0f553e75f1a0764ec89dda/sprite",
-    "inventory_sheet": "custom/variants/087b459912ec5fe0c2a3999c7cce406334374c817a0f553e75f1a0764ec89dda/inventory",
+    "index": 49,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
     "art_label": "event_theme:radio_sign2",
     "art_category": "events",
     "editor_source": "custom/sources/bd477e1ab4c518f74034e3a74b3e2e5cabfb48e995d53256093a8887c24efb3c.png",
@@ -2959,16 +3501,17 @@
         1253,
         1130
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_061": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/53572a1a105d500914ce8cfd1a33976e7f1f188b797b8fac81b4aff7950acd40/sprite",
-    "inventory_sheet": "custom/variants/53572a1a105d500914ce8cfd1a33976e7f1f188b797b8fac81b4aff7950acd40/inventory",
+    "index": 20,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
     "art_label": "event_theme:curier_advise",
     "art_category": "events",
-    "editor_source": "custom/sources/82e47981ac3c41d54f3ddc319a43e576cedd5209f03b72171ddd9e55a04e5a37.png",
+    "editor_source": "custom/sources/a5fa157d8df534b7b5234d788aeeebc54e3649de8f7c86a72c80824ef42811d9.png",
     "editor_settings": {
       "fit": "contain",
       "padding": 4.0,
@@ -2981,16 +3524,17 @@
         1592,
         916
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_062": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/366b26512b0cdb7b6f96a34847b60e0c18594b79611cdf451d26674a89a68d67/sprite",
-    "inventory_sheet": "custom/variants/366b26512b0cdb7b6f96a34847b60e0c18594b79611cdf451d26674a89a68d67/inventory",
+    "index": 24,
+    "columns": 8,
+    "sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/sprite",
+    "inventory_sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/inventory",
     "art_label": "event_theme:lone_man",
     "art_category": "events",
-    "editor_source": "custom/sources/82e47981ac3c41d54f3ddc319a43e576cedd5209f03b72171ddd9e55a04e5a37.png",
+    "editor_source": "custom/sources/a5fa157d8df534b7b5234d788aeeebc54e3649de8f7c86a72c80824ef42811d9.png",
     "editor_settings": {
       "fit": "contain",
       "padding": 4.0,
@@ -3003,16 +3547,17 @@
         1920,
         899
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_063": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/5a5f618830c78cf18ee186c8138d1c9f519ec03b487acd50961b5af1f94c428b/sprite",
-    "inventory_sheet": "custom/variants/5a5f618830c78cf18ee186c8138d1c9f519ec03b487acd50961b5af1f94c428b/inventory",
+    "index": 18,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
     "art_label": "event_theme:acum",
     "art_category": "events",
-    "editor_source": "custom/sources/ddcbe74d011cd47a809e730afcccccb8b36f224b5aca986625a517d1946ba68c.png",
+    "editor_source": "custom/sources/30e29d03feda65b7e6404f54bd3c9c7e6ce1eb21184f343bd486df21ca505e84.png",
     "editor_settings": {
       "fit": "contain",
       "padding": 4.0,
@@ -3020,18 +3565,20 @@
       "mirror": false,
       "trim": true,
       "crop": [
-        0,
-        0,
-        434,
-        427
+        55,
+        61,
+        656,
+        627
       ]
-    }
+    },
+    "editor_render_hash": "0b1d60630b4b2471273c2e2544ad3d57216e8ae7e113be57026caacd267f5606",
+    "inventory_columns": 8
   },
   "art_custom_064": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/2fba79764e09a833472754ce34d57ece70d859e18b9a34a18d8ebb995e10d2e6/sprite",
-    "inventory_sheet": "custom/variants/2fba79764e09a833472754ce34d57ece70d859e18b9a34a18d8ebb995e10d2e6/inventory",
+    "index": 26,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
     "art_label": "event_theme:oil_danger",
     "art_category": "events",
     "editor_source": "custom/sources/ddcbe74d011cd47a809e730afcccccb8b36f224b5aca986625a517d1946ba68c.png",
@@ -3047,13 +3594,14 @@
         842,
         419
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_065": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/033e5e0fb3ff4d506a35779244af6eec0299351b4580309e4b4bf2b4c053810b/sprite",
-    "inventory_sheet": "custom/variants/033e5e0fb3ff4d506a35779244af6eec0299351b4580309e4b4bf2b4c053810b/inventory",
+    "index": 52,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
     "art_label": "event_theme:falling_from_dune",
     "art_category": "events",
     "editor_source": "custom/sources/ddcbe74d011cd47a809e730afcccccb8b36f224b5aca986625a517d1946ba68c.png",
@@ -3069,16 +3617,17 @@
         1254,
         424
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_066": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/6a0d7469295669c5103ad1eda2468e86948422758505ff91a3f653f8eb29f060/sprite",
-    "inventory_sheet": "custom/variants/6a0d7469295669c5103ad1eda2468e86948422758505ff91a3f653f8eb29f060/inventory",
+    "index": 37,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
     "art_label": "event_theme:barbed_chest",
     "art_category": "events",
-    "editor_source": "custom/sources/ddcbe74d011cd47a809e730afcccccb8b36f224b5aca986625a517d1946ba68c.png",
+    "editor_source": "custom/sources/30e29d03feda65b7e6404f54bd3c9c7e6ce1eb21184f343bd486df21ca505e84.png",
     "editor_settings": {
       "fit": "contain",
       "padding": 4.0,
@@ -3086,18 +3635,20 @@
       "mirror": false,
       "trim": true,
       "crop": [
-        0,
-        416,
-        428,
-        838
+        1401,
+        26,
+        2048,
+        680
       ]
-    }
+    },
+    "editor_render_hash": "2ee60e5cd918d108d4d3ebe374f2ef19c09c240d889087fc09f1602c517dbf58",
+    "inventory_columns": 8
   },
   "art_custom_067": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/1408482b5901193d59c6d44afbea1f799fadb19a82080a4582f69e86ae9e2bb6/sprite",
-    "inventory_sheet": "custom/variants/1408482b5901193d59c6d44afbea1f799fadb19a82080a4582f69e86ae9e2bb6/inventory",
+    "index": 6,
+    "columns": 8,
+    "sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/sprite",
+    "inventory_sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/inventory",
     "art_label": "event_theme:metalstorm",
     "art_category": "events",
     "editor_source": "custom/sources/ddcbe74d011cd47a809e730afcccccb8b36f224b5aca986625a517d1946ba68c.png",
@@ -3113,16 +3664,17 @@
         831,
         814
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_068": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/0e7b8f810c28ae3d67a9ae5b15988b7c722ffbbd3deb8416d0eed89cc2badf71/sprite",
-    "inventory_sheet": "custom/variants/0e7b8f810c28ae3d67a9ae5b15988b7c722ffbbd3deb8416d0eed89cc2badf71/inventory",
+    "index": 23,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
     "art_label": "event_theme:bush_safe",
     "art_category": "events",
-    "editor_source": "custom/sources/ddcbe74d011cd47a809e730afcccccb8b36f224b5aca986625a517d1946ba68c.png",
+    "editor_source": "custom/sources/30e29d03feda65b7e6404f54bd3c9c7e6ce1eb21184f343bd486df21ca505e84.png",
     "editor_settings": {
       "fit": "contain",
       "padding": 4.0,
@@ -3130,18 +3682,20 @@
       "mirror": false,
       "trim": true,
       "crop": [
-        831,
-        432,
-        1254,
-        814
+        1392,
+        715,
+        2048,
+        1390
       ]
-    }
+    },
+    "editor_render_hash": "00247083eb205427985e35d529553cca158992c3d35d067d4761aea6501f243a",
+    "inventory_columns": 8
   },
   "art_custom_069": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/726802e726f14bc727585abea2974b98a17599b32d047cd1070861682f43bafa/sprite",
-    "inventory_sheet": "custom/variants/726802e726f14bc727585abea2974b98a17599b32d047cd1070861682f43bafa/inventory",
+    "index": 47,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
     "art_label": "event_theme:car_safe",
     "art_category": "events",
     "editor_source": "custom/sources/ddcbe74d011cd47a809e730afcccccb8b36f224b5aca986625a517d1946ba68c.png",
@@ -3157,13 +3711,14 @@
         407,
         1238
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_070": {
     "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/f6403cdf7540b62bcada76b17b254ee09c94992fef4958f76ee385e50591ea27/sprite",
-    "inventory_sheet": "custom/variants/f6403cdf7540b62bcada76b17b254ee09c94992fef4958f76ee385e50591ea27/inventory",
+    "columns": 8,
+    "sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/sprite",
+    "inventory_sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/inventory",
     "art_label": "event_theme:caravan_safe",
     "art_category": "events",
     "editor_source": "custom/sources/ddcbe74d011cd47a809e730afcccccb8b36f224b5aca986625a517d1946ba68c.png",
@@ -3179,13 +3734,14 @@
         834,
         1254
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_071": {
     "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/f1588963553f38ec548507e2a78736d0d0b4f99859fd863e6f7326a80f514fda/sprite",
-    "inventory_sheet": "custom/variants/f1588963553f38ec548507e2a78736d0d0b4f99859fd863e6f7326a80f514fda/inventory",
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
     "art_label": "event_theme:expedition_safe",
     "art_category": "events",
     "editor_source": "custom/sources/ddcbe74d011cd47a809e730afcccccb8b36f224b5aca986625a517d1946ba68c.png",
@@ -3201,16 +3757,17 @@
         1254,
         1235
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_072": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/cfd1b1302f546eedf76465397a655a9105a153f3ed452e1e6f2f6787cc7e7e9d/sprite",
-    "inventory_sheet": "custom/variants/cfd1b1302f546eedf76465397a655a9105a153f3ed452e1e6f2f6787cc7e7e9d/inventory",
+    "index": 52,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
     "art_label": "money",
     "art_category": "other",
-    "editor_source": "custom/sources/0999e006e638af382da83e30d3175c9dc18cc5d06f01c5400f6cd34da9a0d019.png",
+    "editor_source": "custom/sources/7280e8f6cfd1e84a0f130057ca58c08d42fcef4ab09c594177184c7e5f611890.png",
     "editor_settings": {
       "fit": "contain",
       "padding": 4.0,
@@ -3218,21 +3775,23 @@
       "mirror": false,
       "trim": true,
       "crop": [
+        930,
         0,
-        24,
-        428,
-        408
+        1250,
+        287
       ]
-    }
+    },
+    "editor_render_hash": "2c444bc6c07250c45352d32707f4e9f6de19811ffd3498a73a8b11db93bc65d6",
+    "inventory_columns": 8
   },
   "art_custom_073": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/29729ef6d2e570bd71fa66cbd958765eec53a057079e6689e3bbd5fa16577c71/sprite",
-    "inventory_sheet": "custom/variants/29729ef6d2e570bd71fa66cbd958765eec53a057079e6689e3bbd5fa16577c71/inventory",
+    "index": 20,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
     "art_label": "event_theme:find_money",
     "art_category": "events",
-    "editor_source": "custom/sources/0999e006e638af382da83e30d3175c9dc18cc5d06f01c5400f6cd34da9a0d019.png",
+    "editor_source": "custom/sources/23dc153df296ebb66777b2aa387998d0e756092be4f626eda62a14c138238c95.png",
     "editor_settings": {
       "fit": "contain",
       "padding": 4.0,
@@ -3240,21 +3799,23 @@
       "mirror": false,
       "trim": true,
       "crop": [
-        439,
-        3,
-        842,
-        408
+        695,
+        18,
+        1366,
+        610
       ]
-    }
+    },
+    "editor_render_hash": "b09376b5b044f1f04ba555eb7b0e7b5bb45e0007f1ebc9bf2c80cd53a5ad7e84",
+    "inventory_columns": 8
   },
   "art_custom_074": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/6d5a155048bbbcd5ac07756910f6b4165cc566248decf5fcd75b86e2bc2cbb66/sprite",
-    "inventory_sheet": "custom/variants/6d5a155048bbbcd5ac07756910f6b4165cc566248decf5fcd75b86e2bc2cbb66/inventory",
+    "index": 10,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
     "art_label": "event_theme:crater",
     "art_category": "events",
-    "editor_source": "custom/sources/0999e006e638af382da83e30d3175c9dc18cc5d06f01c5400f6cd34da9a0d019.png",
+    "editor_source": "custom/sources/23dc153df296ebb66777b2aa387998d0e756092be4f626eda62a14c138238c95.png",
     "editor_settings": {
       "fit": "contain",
       "padding": 4.0,
@@ -3262,21 +3823,23 @@
       "mirror": false,
       "trim": true,
       "crop": [
-        423,
-        405,
-        836,
-        835
+        708,
+        671,
+        1362,
+        1355
       ]
-    }
+    },
+    "editor_render_hash": "e8913fd1449b9b984b097e265eec6c5cd30aa4c14361a38a778f30fe31c0bc5f",
+    "inventory_columns": 8
   },
   "art_custom_075": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/00f2f584386a5d466c820320063374c40f75e5a9029983a217e8703078d57714/sprite",
-    "inventory_sheet": "custom/variants/00f2f584386a5d466c820320063374c40f75e5a9029983a217e8703078d57714/inventory",
+    "index": 17,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
     "art_label": "event_theme:abandoned_church",
     "art_category": "events",
-    "editor_source": "custom/sources/0999e006e638af382da83e30d3175c9dc18cc5d06f01c5400f6cd34da9a0d019.png",
+    "editor_source": "custom/sources/23dc153df296ebb66777b2aa387998d0e756092be4f626eda62a14c138238c95.png",
     "editor_settings": {
       "fit": "contain",
       "padding": 4.0,
@@ -3284,21 +3847,23 @@
       "mirror": false,
       "trim": true,
       "crop": [
-        839,
-        392,
-        1254,
-        832
+        1375,
+        658,
+        2046,
+        1368
       ]
-    }
+    },
+    "editor_render_hash": "af512b7e9df8facdaf0c00863b3bf635743e189c36794aa703ab70ec31fbdea5",
+    "inventory_columns": 8
   },
   "art_custom_076": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/18751ecd8790066c896d9865894febc9c9e0a254bc0ee34c4816268dd45617bc/sprite",
-    "inventory_sheet": "custom/variants/18751ecd8790066c896d9865894febc9c9e0a254bc0ee34c4816268dd45617bc/inventory",
+    "index": 47,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
     "art_label": "event_theme:collapsed_bridge",
     "art_category": "events",
-    "editor_source": "custom/sources/0999e006e638af382da83e30d3175c9dc18cc5d06f01c5400f6cd34da9a0d019.png",
+    "editor_source": "custom/sources/23dc153df296ebb66777b2aa387998d0e756092be4f626eda62a14c138238c95.png",
     "editor_settings": {
       "fit": "contain",
       "padding": 4.0,
@@ -3306,21 +3871,23 @@
       "mirror": false,
       "trim": true,
       "crop": [
-        0,
-        832,
-        420,
-        1251
+        20,
+        1381,
+        664,
+        2039
       ]
-    }
+    },
+    "editor_render_hash": "932b42dcf828cd63f4fcce022f8e64f5c197400528aebf951989e77f896f6d05",
+    "inventory_columns": 8
   },
   "art_custom_077": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/8bc1c288fea1bc9ce9dc76d385396c2e9a182ea3c3eabff46553e7e77403c133/sprite",
-    "inventory_sheet": "custom/variants/8bc1c288fea1bc9ce9dc76d385396c2e9a182ea3c3eabff46553e7e77403c133/inventory",
+    "index": 14,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
     "art_label": "event_theme:blue_liqiud",
     "art_category": "events",
-    "editor_source": "custom/sources/0999e006e638af382da83e30d3175c9dc18cc5d06f01c5400f6cd34da9a0d019.png",
+    "editor_source": "custom/sources/23dc153df296ebb66777b2aa387998d0e756092be4f626eda62a14c138238c95.png",
     "editor_settings": {
       "fit": "contain",
       "padding": 4.0,
@@ -3328,21 +3895,23 @@
       "mirror": false,
       "trim": true,
       "crop": [
-        426,
-        843,
-        842,
-        1241
+        704,
+        1386,
+        1370,
+        2022
       ]
-    }
+    },
+    "editor_render_hash": "ed5618efeeae5dff911218afb29577d691463210996dcc01c211ba0e4f260603",
+    "inventory_columns": 8
   },
   "art_custom_078": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/caa29981e83d407c6aae36f0905d483321ab4f45e19b1f784fb7fa9e9fb81336/sprite",
-    "inventory_sheet": "custom/variants/caa29981e83d407c6aae36f0905d483321ab4f45e19b1f784fb7fa9e9fb81336/inventory",
+    "index": 15,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
     "art_label": "event_theme:leps",
     "art_category": "events",
-    "editor_source": "custom/sources/0999e006e638af382da83e30d3175c9dc18cc5d06f01c5400f6cd34da9a0d019.png",
+    "editor_source": "custom/sources/23dc153df296ebb66777b2aa387998d0e756092be4f626eda62a14c138238c95.png",
     "editor_settings": {
       "fit": "contain",
       "padding": 4.0,
@@ -3350,21 +3919,23 @@
       "mirror": false,
       "trim": true,
       "crop": [
-        831,
-        835,
-        1254,
-        1249
+        1397,
+        1386,
+        2048,
+        2022
       ]
-    }
+    },
+    "editor_render_hash": "8256cba929d793df8282c00e0221114933de923d9fcaba442956c0636b9a676d",
+    "inventory_columns": 8
   },
   "art_custom_079": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/c53cef4a033d404e1f6ad6263299175cfd9d4435e243a4a5da4d7c5324a89902/sprite",
-    "inventory_sheet": "custom/variants/c53cef4a033d404e1f6ad6263299175cfd9d4435e243a4a5da4d7c5324a89902/inventory",
+    "index": 7,
+    "columns": 8,
+    "sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/sprite",
+    "inventory_sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/inventory",
     "art_label": "antagonist",
     "art_category": "other",
-    "editor_source": "custom/sources/0999e006e638af382da83e30d3175c9dc18cc5d06f01c5400f6cd34da9a0d019.png",
+    "editor_source": "custom/sources/23dc153df296ebb66777b2aa387998d0e756092be4f626eda62a14c138238c95.png",
     "editor_settings": {
       "fit": "contain",
       "padding": 4.0,
@@ -3372,21 +3943,23 @@
       "mirror": false,
       "trim": true,
       "crop": [
-        4,
-        422,
-        423,
-        830
+        0,
+        675,
+        660,
+        1377
       ]
-    }
+    },
+    "editor_render_hash": "34c5422b6b7df1268a7de922b4cf4f075448be7c7efe35e51da99193a140b853",
+    "inventory_columns": 8
   },
   "art_custom_080": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/bb7464d738678aadbe48b37ac75c9834506dbc140501e7e12fdc53a74884caf8/sprite",
-    "inventory_sheet": "custom/variants/bb7464d738678aadbe48b37ac75c9834506dbc140501e7e12fdc53a74884caf8/inventory",
+    "index": 15,
+    "columns": 8,
+    "sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/sprite",
+    "inventory_sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/inventory",
     "art_label": "food:weird_nuts",
     "art_category": "other",
-    "editor_source": "custom/sources/07fd2cd5c6d2d006ea69c14d0b8707b3e718ae712feaf8538bad36588eadff2f.png",
+    "editor_source": "custom/sources/7280e8f6cfd1e84a0f130057ca58c08d42fcef4ab09c594177184c7e5f611890.png",
     "editor_settings": {
       "fit": "contain",
       "padding": 4.0,
@@ -3394,21 +3967,23 @@
       "mirror": false,
       "trim": true,
       "crop": [
-        0,
-        3,
-        428,
-        419
+        960,
+        346,
+        1254,
+        626
       ]
-    }
+    },
+    "editor_render_hash": "7cf115ee23d04e54426d8c09d03d671e0a80ddea3d31709fa9962f82e5a46015",
+    "inventory_columns": 8
   },
   "art_custom_081": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/2536a2769cd9e19c221dcbea673aa28930bba6280d3a4241d086f80c797bf438/sprite",
-    "inventory_sheet": "custom/variants/2536a2769cd9e19c221dcbea673aa28930bba6280d3a4241d086f80c797bf438/inventory",
+    "index": 30,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
     "art_label": "food:mushrooms",
     "art_category": "other",
-    "editor_source": "custom/sources/07fd2cd5c6d2d006ea69c14d0b8707b3e718ae712feaf8538bad36588eadff2f.png",
+    "editor_source": "custom/sources/7280e8f6cfd1e84a0f130057ca58c08d42fcef4ab09c594177184c7e5f611890.png",
     "editor_settings": {
       "fit": "contain",
       "padding": 4.0,
@@ -3416,43 +3991,47 @@
       "mirror": false,
       "trim": true,
       "crop": [
-        858,
-        8,
-        1254,
-        419
+        28,
+        0,
+        321,
+        325
       ]
-    }
+    },
+    "editor_render_hash": "bce8dce469853baaaf205b4d3fa5361dbd197146968672a93d00e714c02cdc29",
+    "inventory_columns": 8
   },
   "art_custom_082": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/d3ce7baf22c8609d22d113c6bdfbe6e5c8e2427dbbb7e4f8ff40477618d9882f/sprite",
-    "inventory_sheet": "custom/variants/d3ce7baf22c8609d22d113c6bdfbe6e5c8e2427dbbb7e4f8ff40477618d9882f/inventory",
+    "index": 25,
+    "columns": 8,
+    "sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/sprite",
+    "inventory_sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/inventory",
     "art_label": "food:old_meat",
     "art_category": "other",
-    "editor_source": "custom/sources/07fd2cd5c6d2d006ea69c14d0b8707b3e718ae712feaf8538bad36588eadff2f.png",
+    "editor_source": "custom/sources/7280e8f6cfd1e84a0f130057ca58c08d42fcef4ab09c594177184c7e5f611890.png",
     "editor_settings": {
       "fit": "contain",
       "padding": 4.0,
       "rotation": 0,
-      "mirror": true,
+      "mirror": false,
       "trim": true,
       "crop": [
-        850,
-        427,
+        965,
+        642,
         1254,
-        808
+        929
       ]
-    }
+    },
+    "editor_render_hash": "da975e39e9f460340f3cbbba168388f38d11bdcaabddb436860c12a9236491bb",
+    "inventory_columns": 8
   },
   "art_custom_083": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/ea99f4489c8999d52550540d22b35bd6c0ce2d524cf8fea00d049b7c6a037f14/sprite",
-    "inventory_sheet": "custom/variants/ea99f4489c8999d52550540d22b35bd6c0ce2d524cf8fea00d049b7c6a037f14/inventory",
+    "index": 5,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
     "art_label": "food:mre",
     "art_category": "other",
-    "editor_source": "custom/sources/07fd2cd5c6d2d006ea69c14d0b8707b3e718ae712feaf8538bad36588eadff2f.png",
+    "editor_source": "custom/sources/7280e8f6cfd1e84a0f130057ca58c08d42fcef4ab09c594177184c7e5f611890.png",
     "editor_settings": {
       "fit": "contain",
       "padding": 4.0,
@@ -3460,21 +4039,23 @@
       "mirror": false,
       "trim": true,
       "crop": [
-        871,
-        824,
-        1254,
-        1246
+        313,
+        647,
+        659,
+        1002
       ]
-    }
+    },
+    "editor_render_hash": "9c672223e22c8059f2024413c8ab0f2cbe1271a7583ed6e4fb699b445f85320a",
+    "inventory_columns": 8
   },
   "art_custom_084": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/9cb4a9e845a32c00739f89570de525ae1476f9067fda118126674f1795848d18/sprite",
-    "inventory_sheet": "custom/variants/9cb4a9e845a32c00739f89570de525ae1476f9067fda118126674f1795848d18/inventory",
+    "index": 6,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
     "art_label": "med:pills",
     "art_category": "other",
-    "editor_source": "custom/sources/07fd2cd5c6d2d006ea69c14d0b8707b3e718ae712feaf8538bad36588eadff2f.png",
+    "editor_source": "custom/sources/7280e8f6cfd1e84a0f130057ca58c08d42fcef4ab09c594177184c7e5f611890.png",
     "editor_settings": {
       "fit": "contain",
       "padding": 4.0,
@@ -3482,40 +4063,44 @@
       "mirror": false,
       "trim": true,
       "crop": [
-        0,
-        416,
-        431,
-        806
+        329,
+        13,
+        619,
+        314
       ]
-    }
+    },
+    "editor_render_hash": "8914b6027a808e3396ef3e1ff2ef2917fa527befa460f21efd6b4cb94f1ba46c",
+    "inventory_columns": 8
   },
   "art_custom_085": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/cde436dd22023a7bb0b12a8ebf3c45aad989520ba29eaa5c0708f1853992e9e4/sprite",
-    "inventory_sheet": "custom/variants/cde436dd22023a7bb0b12a8ebf3c45aad989520ba29eaa5c0708f1853992e9e4/inventory",
+    "index": 9,
+    "columns": 8,
+    "sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/sprite",
+    "inventory_sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/inventory",
     "art_label": "med:plaster",
     "art_category": "other",
-    "editor_source": "custom/sources/07fd2cd5c6d2d006ea69c14d0b8707b3e718ae712feaf8538bad36588eadff2f.png",
+    "editor_source": "custom/sources/7280e8f6cfd1e84a0f130057ca58c08d42fcef4ab09c594177184c7e5f611890.png",
     "editor_settings": {
       "fit": "contain",
       "padding": 4.0,
       "rotation": 0,
-      "mirror": true,
+      "mirror": false,
       "trim": true,
       "crop": [
-        431,
-        405,
-        847,
-        830
+        643,
+        5,
+        930,
+        306
       ]
-    }
+    },
+    "editor_render_hash": "05170e05d7368810c0ca40e47a209712fcb57dd0b5a05128a5a17d51a2616a5b",
+    "inventory_columns": 8
   },
   "art_custom_086": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/c9315b50a6d38fb366924f8d79fb66c883842518ceb61091a997c0b3c0db62e5/sprite",
-    "inventory_sheet": "custom/variants/c9315b50a6d38fb366924f8d79fb66c883842518ceb61091a997c0b3c0db62e5/inventory",
+    "index": 12,
+    "columns": 8,
+    "sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/sprite",
+    "inventory_sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/inventory",
     "art_label": "event_theme:rock_under_feet",
     "art_category": "events",
     "editor_source": "custom/sources/07fd2cd5c6d2d006ea69c14d0b8707b3e718ae712feaf8538bad36588eadff2f.png",
@@ -3531,13 +4116,14 @@
         423,
         1249
       ]
-    }
+    },
+    "inventory_columns": 8
   },
   "art_custom_087": {
-    "index": 0,
-    "columns": 1,
-    "sheet": "custom/variants/976c11bcf444db0c01ebdfeedd70c582bc90df9460a0b4c04489d9ab3e8338a3/sprite",
-    "inventory_sheet": "custom/variants/976c11bcf444db0c01ebdfeedd70c582bc90df9460a0b4c04489d9ab3e8338a3/inventory",
+    "index": 19,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
     "art_label": "event_theme:tar",
     "art_category": "events",
     "editor_source": "custom/sources/07fd2cd5c6d2d006ea69c14d0b8707b3e718ae712feaf8538bad36588eadff2f.png",
@@ -3553,6 +4139,655 @@
         882,
         1230
       ]
-    }
+    },
+    "inventory_columns": 8
+  },
+  "art_custom_088": {
+    "index": 27,
+    "columns": 8,
+    "sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/sprite",
+    "inventory_sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/inventory",
+    "art_label": "food:surstromming",
+    "art_category": "other",
+    "editor_source": "custom/sources/7280e8f6cfd1e84a0f130057ca58c08d42fcef4ab09c594177184c7e5f611890.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        659,
+        679,
+        968,
+        956
+      ]
+    },
+    "editor_render_hash": "392b5a23baf7898117ba56c3e8a3877ed9b6682cf466be44993abe6a9a99819e",
+    "inventory_columns": 8
+  },
+  "art_custom_089": {
+    "index": 14,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
+    "art_label": "antagonist · event_theme:abandoned_church",
+    "art_category": "other",
+    "editor_source": "custom/sources/23dc153df296ebb66777b2aa387998d0e756092be4f626eda62a14c138238c95.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        704,
+        1390,
+        1375,
+        2026
+      ]
+    },
+    "editor_render_hash": "ed5618efeeae5dff911218afb29577d691463210996dcc01c211ba0e4f260603",
+    "inventory_columns": 8
+  },
+  "med": {
+    "index": 2,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
+    "art_label": "med",
+    "art_category": "other",
+    "editor_source": "custom/sources/7280e8f6cfd1e84a0f130057ca58c08d42fcef4ab09c594177184c7e5f611890.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        313,
+        338,
+        657,
+        631
+      ]
+    },
+    "editor_render_hash": "39c65e33d988679fcc37acfa428d5d19f37923cf64dc810c694d44ab587771d6",
+    "inventory_columns": 8
+  },
+  "item_med": {
+    "index": 2,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
+    "art_label": "med",
+    "art_category": "other",
+    "editor_source": "custom/sources/7280e8f6cfd1e84a0f130057ca58c08d42fcef4ab09c594177184c7e5f611890.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        313,
+        338,
+        657,
+        631
+      ]
+    },
+    "editor_render_hash": "39c65e33d988679fcc37acfa428d5d19f37923cf64dc810c694d44ab587771d6",
+    "inventory_columns": 8
+  },
+  "item_custom_006": {
+    "index": 6,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
+    "art_label": "med:pills",
+    "art_category": "other",
+    "editor_source": "custom/sources/7280e8f6cfd1e84a0f130057ca58c08d42fcef4ab09c594177184c7e5f611890.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        329,
+        13,
+        619,
+        314
+      ]
+    },
+    "editor_render_hash": "8914b6027a808e3396ef3e1ff2ef2917fa527befa460f21efd6b4cb94f1ba46c",
+    "inventory_columns": 8
+  },
+  "item_custom_007": {
+    "index": 9,
+    "columns": 8,
+    "sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/sprite",
+    "inventory_sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/inventory",
+    "art_label": "med:plaster",
+    "art_category": "other",
+    "editor_source": "custom/sources/7280e8f6cfd1e84a0f130057ca58c08d42fcef4ab09c594177184c7e5f611890.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        643,
+        5,
+        930,
+        306
+      ]
+    },
+    "editor_render_hash": "05170e05d7368810c0ca40e47a209712fcb57dd0b5a05128a5a17d51a2616a5b",
+    "inventory_columns": 8
+  },
+  "item_custom_005": {
+    "index": 25,
+    "columns": 8,
+    "sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/sprite",
+    "inventory_sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/inventory",
+    "art_label": "food:old_meat",
+    "art_category": "other",
+    "editor_source": "custom/sources/7280e8f6cfd1e84a0f130057ca58c08d42fcef4ab09c594177184c7e5f611890.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        965,
+        642,
+        1254,
+        929
+      ]
+    },
+    "editor_render_hash": "da975e39e9f460340f3cbbba168388f38d11bdcaabddb436860c12a9236491bb",
+    "inventory_columns": 8
+  },
+  "item_custom_002": {
+    "index": 27,
+    "columns": 8,
+    "sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/sprite",
+    "inventory_sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/inventory",
+    "art_label": "food:surstromming",
+    "art_category": "other",
+    "editor_source": "custom/sources/7280e8f6cfd1e84a0f130057ca58c08d42fcef4ab09c594177184c7e5f611890.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        659,
+        679,
+        968,
+        956
+      ]
+    },
+    "editor_render_hash": "392b5a23baf7898117ba56c3e8a3877ed9b6682cf466be44993abe6a9a99819e",
+    "inventory_columns": 8
+  },
+  "journal": {
+    "index": 39,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
+    "art_label": "journal",
+    "art_category": "other",
+    "editor_source": "custom/sources/5784472cd9ef46eee4c418f1338163c83c915d49361e732114eecc63407bed04.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        1419,
+        13,
+        2015,
+        675
+      ]
+    },
+    "editor_render_hash": "0feb5bd1c6636d4e6b1dbe18df0fe2902cce07f81da5f3c2f45cb5b998bcb50c",
+    "inventory_columns": 8
+  },
+  "item_custom_003": {
+    "index": 30,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
+    "art_label": "food:mushrooms",
+    "art_category": "other",
+    "editor_source": "custom/sources/7280e8f6cfd1e84a0f130057ca58c08d42fcef4ab09c594177184c7e5f611890.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        28,
+        0,
+        321,
+        325
+      ]
+    },
+    "editor_render_hash": "bce8dce469853baaaf205b4d3fa5361dbd197146968672a93d00e714c02cdc29",
+    "inventory_columns": 8
+  },
+  "fragments": {
+    "index": 4,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
+    "art_label": "fragments",
+    "art_category": "other",
+    "editor_source": "custom/sources/d4cec15081a8f5eb267c56bd27dfa1cd2a816044b87344d01c3eb3abc9fc4b5e.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        1537,
+        70,
+        2024,
+        491
+      ]
+    },
+    "editor_render_hash": "02959cb3e8a63e34690be0dcc83d9adccb249f9e83a818516c9558d4bbc9d420",
+    "inventory_columns": 8
+  },
+  "parts": {
+    "index": 60,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
+    "art_label": "parts",
+    "art_category": "other",
+    "editor_source": "custom/sources/d4cec15081a8f5eb267c56bd27dfa1cd2a816044b87344d01c3eb3abc9fc4b5e.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        1550,
+        1061,
+        2019,
+        1495
+      ]
+    },
+    "editor_render_hash": "b13519a91b9c0f56a975fbc436afb7d527f1f4510c6ea1966d001a2d62f48633",
+    "inventory_columns": 8
+  },
+  "item_credits": {
+    "index": 52,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
+    "art_label": "money",
+    "art_category": "other",
+    "editor_source": "custom/sources/7280e8f6cfd1e84a0f130057ca58c08d42fcef4ab09c594177184c7e5f611890.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        930,
+        0,
+        1250,
+        287
+      ]
+    },
+    "editor_render_hash": "2c444bc6c07250c45352d32707f4e9f6de19811ffd3498a73a8b11db93bc65d6",
+    "inventory_columns": 8
+  },
+  "item_repairkit": {
+    "index": 35,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
+    "art_label": "repairkit",
+    "art_category": "other",
+    "editor_source": "custom/sources/7280e8f6cfd1e84a0f130057ca58c08d42fcef4ab09c594177184c7e5f611890.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        7,
+        693,
+        313,
+        967
+      ]
+    },
+    "editor_render_hash": "6146decde7afcec72eaa90a58f0dd4de2aab2cb0807ecb4cbf36df336c5f7739",
+    "inventory_columns": 8
+  },
+  "weapon_custom_001": {
+    "index": 9,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
+    "art_label": "weapon_plasm_flamer",
+    "art_category": "weapons",
+    "editor_source": "custom/sources/1ab70e96e17c9cee5eefaf0abd4efdcf9ac2f264b9804caafe3058d98c57c8e4.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        648,
+        24,
+        935,
+        291
+      ]
+    },
+    "editor_render_hash": "a1ea9f4885d152479e0025b18aa596ada4cd7f8e9784eb1589f97863f5833649",
+    "inventory_columns": 8
+  },
+  "ammo:bolt": {
+    "index": 30,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
+    "art_label": "ammo:bolt",
+    "art_category": "other",
+    "editor_source": "custom/sources/2e88aed001fa6ea4638e9a8a317c873f8170d16ce3b543511dcf4dce9c4d6df9.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        31,
+        913,
+        324,
+        1195
+      ]
+    },
+    "editor_render_hash": "2b8949da7d866836a578ebfe7fcba3feb868d55fae2f2c9dfea7f8fdc354912f",
+    "inventory_columns": 8
+  },
+  "ammo:energy": {
+    "index": 48,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
+    "art_label": "ammo:energy",
+    "art_category": "other",
+    "editor_source": "custom/sources/2e88aed001fa6ea4638e9a8a317c873f8170d16ce3b543511dcf4dce9c4d6df9.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        350,
+        341,
+        592,
+        607
+      ]
+    },
+    "editor_render_hash": "51f865e75979830b179ba0ea7e4e9b0c2942ecd2d68d8dab83d0e488bde7cfc6",
+    "inventory_columns": 8
+  },
+  "ammo:heavy": {
+    "index": 36,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
+    "art_label": "ammo:heavy",
+    "art_category": "other",
+    "editor_source": "custom/sources/2e88aed001fa6ea4638e9a8a317c873f8170d16ce3b543511dcf4dce9c4d6df9.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        632,
+        623,
+        941,
+        908
+      ]
+    },
+    "editor_render_hash": "716d545e9efdb3075f075bc3b660844c31469778875a23d8f03414348e4b4c6b",
+    "inventory_columns": 8
+  },
+  "ammo:pistol": {
+    "index": 21,
+    "columns": 8,
+    "sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/sprite",
+    "inventory_sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/inventory",
+    "art_label": "ammo:pistol",
+    "art_category": "other",
+    "editor_source": "custom/sources/2e88aed001fa6ea4638e9a8a317c873f8170d16ce3b543511dcf4dce9c4d6df9.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        23,
+        43,
+        313,
+        309
+      ]
+    },
+    "editor_render_hash": "d20e880007cf6092b8888903444778ea71936b276c63401c7ac2ebbcfe1b7f06",
+    "inventory_columns": 8
+  },
+  "ammo:rifle": {
+    "index": 27,
+    "columns": 8,
+    "sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/sprite",
+    "inventory_sheet": "custom/atlases/7511973bef56fd44940683db167ffbbb2305ce28e0348e3bbd936e8eff584373/inventory",
+    "art_label": "ammo:rifle",
+    "art_category": "other",
+    "editor_source": "custom/sources/2e88aed001fa6ea4638e9a8a317c873f8170d16ce3b543511dcf4dce9c4d6df9.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        944,
+        336,
+        1231,
+        601
+      ]
+    },
+    "editor_render_hash": "2a2e99040603ed89b501eaf6e27baa92ca165ba7c54ff060f306124ae45ebea7",
+    "inventory_columns": 8
+  },
+  "ammo:shell": {
+    "index": 36,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
+    "art_label": "ammo:shell",
+    "art_category": "other",
+    "editor_source": "custom/sources/2e88aed001fa6ea4638e9a8a317c873f8170d16ce3b543511dcf4dce9c4d6df9.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        944,
+        30,
+        1234,
+        306
+      ]
+    },
+    "editor_render_hash": "4d08cdc549d8ce7e6c95a5e82965010c7e6698d1c327c450931b12178261d889",
+    "inventory_columns": 8
+  },
+  "food": {
+    "index": 28,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
+    "art_label": "food",
+    "art_category": "other",
+    "editor_source": "custom/sources/7280e8f6cfd1e84a0f130057ca58c08d42fcef4ab09c594177184c7e5f611890.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        689,
+        354,
+        949,
+        639
+      ]
+    },
+    "editor_render_hash": "bec65dd0a134211053c8bd102ac1fcad0ec8c56cf80846fb33578e3aa65ca707",
+    "inventory_columns": 8
+  },
+  "item_food": {
+    "index": 28,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
+    "art_label": "food",
+    "art_category": "other",
+    "editor_source": "custom/sources/7280e8f6cfd1e84a0f130057ca58c08d42fcef4ab09c594177184c7e5f611890.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        689,
+        354,
+        949,
+        639
+      ]
+    },
+    "editor_render_hash": "bec65dd0a134211053c8bd102ac1fcad0ec8c56cf80846fb33578e3aa65ca707",
+    "inventory_columns": 8
+  },
+  "item_custom_001": {
+    "index": 15,
+    "columns": 8,
+    "sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/sprite",
+    "inventory_sheet": "custom/atlases/7a3d72f7b2506a7ef4e953e095a8060cb9bc956bda9c6ff4875c62150f028a37/inventory",
+    "art_label": "food:weird_nuts",
+    "art_category": "other",
+    "editor_source": "custom/sources/7280e8f6cfd1e84a0f130057ca58c08d42fcef4ab09c594177184c7e5f611890.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        960,
+        346,
+        1254,
+        626
+      ]
+    },
+    "editor_render_hash": "7cf115ee23d04e54426d8c09d03d671e0a80ddea3d31709fa9962f82e5a46015",
+    "inventory_columns": 8
+  },
+  "item_custom_004": {
+    "index": 5,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
+    "art_label": "food:mre",
+    "art_category": "other",
+    "editor_source": "custom/sources/7280e8f6cfd1e84a0f130057ca58c08d42fcef4ab09c594177184c7e5f611890.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        313,
+        647,
+        659,
+        1002
+      ]
+    },
+    "editor_render_hash": "9c672223e22c8059f2024413c8ab0f2cbe1271a7583ed6e4fb699b445f85320a",
+    "inventory_columns": 8
+  },
+  "rad": {
+    "index": 37,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
+    "art_label": "rad",
+    "art_category": "other",
+    "editor_source": "custom/sources/7280e8f6cfd1e84a0f130057ca58c08d42fcef4ab09c594177184c7e5f611890.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        44,
+        328,
+        305,
+        647
+      ]
+    },
+    "editor_render_hash": "b748ce220497ce2af44256fa897168440ae05e22c4750b7e50a2955dfcff15f0",
+    "inventory_columns": 8
+  },
+  "item_rad": {
+    "index": 37,
+    "columns": 8,
+    "sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/sprite",
+    "inventory_sheet": "custom/atlases/d639110b2c7e5dcbd9f5447716a733eb3ab3fef6788a2cbed3d84f4001f44f50/inventory",
+    "art_label": "rad",
+    "art_category": "other",
+    "editor_source": "custom/sources/7280e8f6cfd1e84a0f130057ca58c08d42fcef4ab09c594177184c7e5f611890.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        44,
+        328,
+        305,
+        647
+      ]
+    },
+    "editor_render_hash": "b748ce220497ce2af44256fa897168440ae05e22c4750b7e50a2955dfcff15f0",
+    "inventory_columns": 8
   }
 }

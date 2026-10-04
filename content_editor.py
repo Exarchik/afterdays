@@ -78,6 +78,8 @@ class ContentEditor(ttk.Frame):
         self.dialogues.rebuild();self.dialogues.status.set('Діалоги збережено')
         self.quests.rebuild();self.quests.status.set('Квести збережено · Перезапустіть гру')
         self.arts.rebuild();self.arts.status.set('Арти збережено · Перезапустіть гру')
+        self.items.refresh_preview()
+        if self.store.asset_cleanup_warning:self.arts.status.set(self.store.asset_cleanup_warning)
         return True
 
     def close(self):

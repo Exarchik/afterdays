@@ -163,6 +163,24 @@ class Store:
             if path.read_bytes()!=self.disk[key]: raise ValueError(f'{path.name} змінено іншою програмою. Перезапустіть редактор перед збереженням.')
 
     def save(self, extra=None):
+        import custom_atlases
+        self.check_disk()
+        original=copy.deepcopy(self.data);pending=dict(self.pending_assets)
+        try:
+            sprites,backup,assets=custom_atlases.pack(self)
+            self.data['sprites']=sprites;self.pending_assets=assets
+            self._packed_backup=backup
+            self.refresh_art();self._save(extra)
+        except Exception:
+            self.data=original;self.pending_assets=pending;self.refresh_art()
+            raise
+        finally:self.__dict__.pop('_packed_backup',None)
+        self.refresh_art()
+        self.asset_cleanup_warning=''
+        try:self.removed_asset_files=custom_atlases.cleanup(self.root)
+        except (OSError,ValueError) as exc:self.asset_cleanup_warning='Атласи збережено; очищення старих файлів відкладено: '+str(exc)
+
+    def _save(self, extra=None):
         errors=self.validate()
         if errors: raise ValueError('\n'.join(errors))
         self.check_disk()
@@ -181,6 +199,14 @@ class Store:
                 if path.read_bytes()==blob:continue
                 raise ValueError('Файл нового асета вже існує з іншим вмістом: '+str(path))
             key='asset:'+relative;paths[key]=path;payloads[key]=blob;before[key]=None;asset_keys.append(key)
+        # Backups participate in the same rollback as catalogs, and reference packed pages.
+        catalog_keys=list(changed)
+        for key in catalog_keys:
+            backup_key='backup:'+key;backup_path=paths[key].with_suffix(paths[key].suffix+'.bak')
+            paths[backup_key]=backup_path
+            payloads[backup_key]=(json.dumps(self._packed_backup,ensure_ascii=False,indent=2)+'\n').encode('utf-8') if key=='sprites' else before[key]
+            before[backup_key]=backup_path.read_bytes() if backup_path.exists() else None
+            changed.append(backup_key)
         changed=asset_keys+changed
         staged={};replaced=[]
         try:
@@ -191,7 +217,6 @@ class Store:
                 staged[key]=Path(temp)
                 with os.fdopen(fd,'wb') as stream:
                     stream.write(payloads[key] if isinstance(payloads[key],bytes) else (json.dumps(payloads[key],ensure_ascii=False,indent=2)+'\n').encode('utf-8'))
-                if before[key] is not None:path.with_suffix(path.suffix+'.bak').write_bytes(before[key])
             for key in changed:
                 os.replace(staged[key],paths[key]);replaced.append(key)
         except OSError:
