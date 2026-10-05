@@ -4907,7 +4907,7 @@
       "enabled": true,
       "weight": 1.0,
       "title": "Зброярська скриня",
-      "description": "У розбитій вантажівці вціліла сталева скриня. Крізь щілину видно коробки набоїв.",
+      "description": "У розбитій автівці вціліла сталева скриня. Крізь щілину видно коробки набоїв.",
       "art": "art_custom_069",
       "choices": [
         {
@@ -4943,8 +4943,13 @@
         {
           "kind": "ammo",
           "amount": 12,
+          "maximum": 15,
           "per_level": 4,
-          "ammo": "random"
+          "step": 0,
+          "step_cap": 0,
+          "chance": 1.0,
+          "ammo": "random",
+          "destination": "loot"
         },
         {
           "kind": "repairkit",
