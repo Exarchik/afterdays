@@ -11,14 +11,14 @@ import afterdays as rules
 BG, PANEL, TEXT, MUTED, GOLD = '#141c1a', '#202b27', '#e4e8d9', '#9baa9e', '#d7b77a'
 
 
-def icon(c, item, x, y, size=48):
+def icon(c, item, x, y, size=48, badge=True):
     """Deterministic vector pictograms; rarity outlines and class-specific silhouettes."""
     if item is None:
         return
     if sprites.draw(c,sprites.item_key(item),x,y,size):
-        if item.get('kind')=='weapon' and size>=48:
-            from adventure import damage_type
-            sprites.draw(c,'damage:'+damage_type(item),x+size-16,y,16)
+        if badge and item.get('kind')=='weapon' and size>=48:
+            badge_size=32 if size>=96 else 24
+            sprites.weapon_badge(c,item,x+size-badge_size,y,badge_size)
         for n,mod in enumerate(item.get('modules',[])):
             c.create_rectangle(x+size*(.08+n*.17),y+size*.90,x+size*(.20+n*.17),y+size*.97,fill=rules.RARITIES[mod['rarity']][1],outline='#18251c')
         return
@@ -159,6 +159,9 @@ def icon(c, item, x, y, size=48):
         line(22, 32, 30, 21, 40, 30, fill='#bfd38e', width=2)
         oval(28, 46, 36, 53, fill=GOLD, outline='')
 
+    if badge and k=='weapon' and size>=48:
+        badge_size=32 if size>=96 else 24
+        sprites.weapon_badge(c,item,x+size-badge_size,y,badge_size)
     if k in ('armor','helmet'):
         for n,mod in enumerate(item.get('modules',[])):
             rect(6+n*11,58,14+n*11,63,fill=rules.RARITIES[mod['rarity']][1],outline='')
@@ -341,7 +344,8 @@ class ItemGrid(tk.Frame):
             c.create_rectangle(*r, fill=TYPE_COLORS.get(item['kind'],'#233229'),outline=color,width=3 if item['id']==self.selection else 1)
             art=sprites.inventory_photo(c,item,int(cell-6))
             if art:c.create_image(x+cell/2,y+3,image=art,anchor='n')
-            else:icon(c,item,x+(cell-min(cell-8,72))/2,y+3,min(cell-8,72))
+            else:icon(c,item,x+(cell-min(cell-8,72))/2,y+3,min(cell-8,72),badge=False)
+            if item['kind']=='weapon':sprites.weapon_badge(c,item,x+cell-28,y+20,24)
             for slot,mod in enumerate(item.get('modules',[])):
                 c.create_rectangle(x+7+slot*9,y+46,x+13+slot*9,y+49,fill=rules.RARITIES[mod['rarity']][1],outline='#14201b')
             if item['kind'] in ('weapon','armor','helmet','module'):

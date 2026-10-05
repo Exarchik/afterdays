@@ -42,7 +42,7 @@ class Game(scavenging.Game):
 
     def promotion(self,item,merchant):
         """Повертає діючу акційну знижку на товар."""
-        sale=item.get('promotion',{})
+        sale=item.get('promotion') or {}
         city=self.trading_city(merchant)
         return sale.get('discount',0) if city is not None and self.reputation(city)>=60 and sale.get('city')==city and sale.get('merchant')==merchant else 0
 

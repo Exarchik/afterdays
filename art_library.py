@@ -8,7 +8,7 @@ import sys
 
 SIZES=(16,24,32,48,64,96,144,192)
 WIDTHS=(48,56,64,80,96,128)
-GROUPS={'events':'Події','weapons':'Зброя','armor':'Броня та шоломи','modules':'Модулі',
+GROUPS={'events':'Події','weapons':'Зброя','weapon_badges':'Емблеми зброї','armor':'Броня та шоломи','modules':'Модулі',
         'monsters':'Монстри','corpses':'Рештки','trophies':'Трофеї','other':'Інше'}
 DEFAULTS=dict(fit='contain',padding=4,trim=True,rotation=0,mirror=False,crop=None)
 

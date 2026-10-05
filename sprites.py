@@ -9,6 +9,15 @@ MANIFEST=json.loads((ROOT/'manifest.json').read_text(encoding='utf-8')) if (ROOT
 MANIFEST.update(content.read('sprites.json'))
 NPC_TEXT_BINDINGS=content.read('sprite_text_bindings.json')
 SIZES=(16,24,32,48,64,96,144,192)
+WEAPON_BADGE_TYPES=('kinetic','piercing','energy','electric','thermal')
+
+def weapon_badge_key(item):
+    if item.get('kind')!='weapon':return None
+    from adventure import damage_type
+    return f'weapon_badge:{damage_type(item)}:{max(0,min(4,int(item.get("rarity",0))))}'
+
+def weapon_badge(canvas,item,x,y,size=24):
+    return draw(canvas,weapon_badge_key(item),x,y,size)
 
 def item_key(item):
     if item.get('kind')=='credits':return content.CONSUMABLES.get('item_credits',{}).get('sprite_id') or 'credits'

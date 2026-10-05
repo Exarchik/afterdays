@@ -246,9 +246,6 @@ class TradingPanel(tk.Frame):
         hidden=self.merchant==2 and self.source=='stock' and item['kind']=='sealed'
         shown=dict(item,kind='sealed',name=tr('advanced_ui.0019'),rarity=0) if hidden else item
         icon(self.preview,shown,2,5,76)
-        if item['kind']=='weapon' and not hidden:
-            from adventure import damage_type
-            sprites.draw(self.preview,'damage:'+damage_type(item),52,60,24)
         desc=tr('advanced_ui.0020') if hidden else self.app.description(item)
         allowed=self.source=='stock' or self.app.game.buys_kind(item,self.merchant)
         buying=self.source=='stock'

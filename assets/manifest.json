@@ -2046,5 +2046,530 @@
       203,
       181
     ]
+  },
+  "weapon_badge:kinetic:0": {
+    "sheet": "weapon_badges/atlas",
+    "columns": 5,
+    "index": 0,
+    "art_label": "Емблема: Кінетична — Звичайний",
+    "art_category": "weapon_badges",
+    "editor_source": "weapon_badges/source.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4,
+      "trim": true,
+      "rotation": 0,
+      "mirror": false,
+      "crop": [
+        10,
+        25,
+        250,
+        270
+      ]
+    }
+  },
+  "weapon_badge:kinetic:1": {
+    "sheet": "weapon_badges/atlas",
+    "columns": 5,
+    "index": 1,
+    "art_label": "Емблема: Кінетична — Незвичний",
+    "art_category": "weapon_badges",
+    "editor_source": "weapon_badges/source.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4,
+      "trim": true,
+      "rotation": 0,
+      "mirror": false,
+      "crop": [
+        250,
+        25,
+        501,
+        270
+      ]
+    }
+  },
+  "weapon_badge:kinetic:2": {
+    "sheet": "weapon_badges/atlas",
+    "columns": 5,
+    "index": 2,
+    "art_label": "Емблема: Кінетична — Рідкісний",
+    "art_category": "weapon_badges",
+    "editor_source": "weapon_badges/source.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4,
+      "trim": true,
+      "rotation": 0,
+      "mirror": false,
+      "crop": [
+        501,
+        25,
+        751,
+        270
+      ]
+    }
+  },
+  "weapon_badge:kinetic:3": {
+    "sheet": "weapon_badges/atlas",
+    "columns": 5,
+    "index": 3,
+    "art_label": "Емблема: Кінетична — Унікальний",
+    "art_category": "weapon_badges",
+    "editor_source": "weapon_badges/source.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4,
+      "trim": true,
+      "rotation": 0,
+      "mirror": false,
+      "crop": [
+        751,
+        25,
+        1000,
+        270
+      ]
+    }
+  },
+  "weapon_badge:kinetic:4": {
+    "sheet": "weapon_badges/atlas",
+    "columns": 5,
+    "index": 4,
+    "art_label": "Емблема: Кінетична — Міфічний",
+    "art_category": "weapon_badges",
+    "editor_source": "weapon_badges/source.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4,
+      "trim": true,
+      "rotation": 0,
+      "mirror": false,
+      "crop": [
+        1000,
+        25,
+        1254,
+        270
+      ]
+    }
+  },
+  "weapon_badge:piercing:0": {
+    "sheet": "weapon_badges/atlas",
+    "columns": 5,
+    "index": 5,
+    "art_label": "Емблема: Пробивна — Звичайний",
+    "art_category": "weapon_badges",
+    "editor_source": "weapon_badges/source.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4,
+      "trim": true,
+      "rotation": 0,
+      "mirror": false,
+      "crop": [
+        10,
+        270,
+        250,
+        507
+      ]
+    }
+  },
+  "weapon_badge:piercing:1": {
+    "sheet": "weapon_badges/atlas",
+    "columns": 5,
+    "index": 6,
+    "art_label": "Емблема: Пробивна — Незвичний",
+    "art_category": "weapon_badges",
+    "editor_source": "weapon_badges/source.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4,
+      "trim": true,
+      "rotation": 0,
+      "mirror": false,
+      "crop": [
+        250,
+        270,
+        501,
+        507
+      ]
+    }
+  },
+  "weapon_badge:piercing:2": {
+    "sheet": "weapon_badges/atlas",
+    "columns": 5,
+    "index": 7,
+    "art_label": "Емблема: Пробивна — Рідкісний",
+    "art_category": "weapon_badges",
+    "editor_source": "weapon_badges/source.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4,
+      "trim": true,
+      "rotation": 0,
+      "mirror": false,
+      "crop": [
+        501,
+        270,
+        751,
+        507
+      ]
+    }
+  },
+  "weapon_badge:piercing:3": {
+    "sheet": "weapon_badges/atlas",
+    "columns": 5,
+    "index": 8,
+    "art_label": "Емблема: Пробивна — Унікальний",
+    "art_category": "weapon_badges",
+    "editor_source": "weapon_badges/source.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4,
+      "trim": true,
+      "rotation": 0,
+      "mirror": false,
+      "crop": [
+        751,
+        270,
+        1000,
+        507
+      ]
+    }
+  },
+  "weapon_badge:piercing:4": {
+    "sheet": "weapon_badges/atlas",
+    "columns": 5,
+    "index": 9,
+    "art_label": "Емблема: Пробивна — Міфічний",
+    "art_category": "weapon_badges",
+    "editor_source": "weapon_badges/source.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4,
+      "trim": true,
+      "rotation": 0,
+      "mirror": false,
+      "crop": [
+        1000,
+        270,
+        1254,
+        507
+      ]
+    }
+  },
+  "weapon_badge:energy:0": {
+    "sheet": "weapon_badges/atlas",
+    "columns": 5,
+    "index": 10,
+    "art_label": "Емблема: Енергетична — Звичайний",
+    "art_category": "weapon_badges",
+    "editor_source": "weapon_badges/source.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4,
+      "trim": true,
+      "rotation": 0,
+      "mirror": false,
+      "crop": [
+        10,
+        507,
+        250,
+        744
+      ]
+    }
+  },
+  "weapon_badge:energy:1": {
+    "sheet": "weapon_badges/atlas",
+    "columns": 5,
+    "index": 11,
+    "art_label": "Емблема: Енергетична — Незвичний",
+    "art_category": "weapon_badges",
+    "editor_source": "weapon_badges/source.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4,
+      "trim": true,
+      "rotation": 0,
+      "mirror": false,
+      "crop": [
+        250,
+        507,
+        501,
+        744
+      ]
+    }
+  },
+  "weapon_badge:energy:2": {
+    "sheet": "weapon_badges/atlas",
+    "columns": 5,
+    "index": 12,
+    "art_label": "Емблема: Енергетична — Рідкісний",
+    "art_category": "weapon_badges",
+    "editor_source": "weapon_badges/source.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4,
+      "trim": true,
+      "rotation": 0,
+      "mirror": false,
+      "crop": [
+        501,
+        507,
+        751,
+        744
+      ]
+    }
+  },
+  "weapon_badge:energy:3": {
+    "sheet": "weapon_badges/atlas",
+    "columns": 5,
+    "index": 13,
+    "art_label": "Емблема: Енергетична — Унікальний",
+    "art_category": "weapon_badges",
+    "editor_source": "weapon_badges/source.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4,
+      "trim": true,
+      "rotation": 0,
+      "mirror": false,
+      "crop": [
+        751,
+        507,
+        1000,
+        744
+      ]
+    }
+  },
+  "weapon_badge:energy:4": {
+    "sheet": "weapon_badges/atlas",
+    "columns": 5,
+    "index": 14,
+    "art_label": "Емблема: Енергетична — Міфічний",
+    "art_category": "weapon_badges",
+    "editor_source": "weapon_badges/source.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4,
+      "trim": true,
+      "rotation": 0,
+      "mirror": false,
+      "crop": [
+        1000,
+        507,
+        1254,
+        744
+      ]
+    }
+  },
+  "weapon_badge:electric:0": {
+    "sheet": "weapon_badges/atlas",
+    "columns": 5,
+    "index": 15,
+    "art_label": "Емблема: Електрична — Звичайний",
+    "art_category": "weapon_badges",
+    "editor_source": "weapon_badges/source.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4,
+      "trim": true,
+      "rotation": 0,
+      "mirror": false,
+      "crop": [
+        10,
+        744,
+        250,
+        980
+      ]
+    }
+  },
+  "weapon_badge:electric:1": {
+    "sheet": "weapon_badges/atlas",
+    "columns": 5,
+    "index": 16,
+    "art_label": "Емблема: Електрична — Незвичний",
+    "art_category": "weapon_badges",
+    "editor_source": "weapon_badges/source.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4,
+      "trim": true,
+      "rotation": 0,
+      "mirror": false,
+      "crop": [
+        250,
+        744,
+        501,
+        980
+      ]
+    }
+  },
+  "weapon_badge:electric:2": {
+    "sheet": "weapon_badges/atlas",
+    "columns": 5,
+    "index": 17,
+    "art_label": "Емблема: Електрична — Рідкісний",
+    "art_category": "weapon_badges",
+    "editor_source": "weapon_badges/source.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4,
+      "trim": true,
+      "rotation": 0,
+      "mirror": false,
+      "crop": [
+        501,
+        744,
+        751,
+        980
+      ]
+    }
+  },
+  "weapon_badge:electric:3": {
+    "sheet": "weapon_badges/atlas",
+    "columns": 5,
+    "index": 18,
+    "art_label": "Емблема: Електрична — Унікальний",
+    "art_category": "weapon_badges",
+    "editor_source": "weapon_badges/source.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4,
+      "trim": true,
+      "rotation": 0,
+      "mirror": false,
+      "crop": [
+        751,
+        744,
+        1000,
+        980
+      ]
+    }
+  },
+  "weapon_badge:electric:4": {
+    "sheet": "weapon_badges/atlas",
+    "columns": 5,
+    "index": 19,
+    "art_label": "Емблема: Електрична — Міфічний",
+    "art_category": "weapon_badges",
+    "editor_source": "weapon_badges/source.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4,
+      "trim": true,
+      "rotation": 0,
+      "mirror": false,
+      "crop": [
+        1000,
+        744,
+        1254,
+        980
+      ]
+    }
+  },
+  "weapon_badge:thermal:0": {
+    "sheet": "weapon_badges/atlas",
+    "columns": 5,
+    "index": 20,
+    "art_label": "Емблема: Термічна — Звичайний",
+    "art_category": "weapon_badges",
+    "editor_source": "weapon_badges/source.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4,
+      "trim": true,
+      "rotation": 0,
+      "mirror": false,
+      "crop": [
+        10,
+        980,
+        250,
+        1220
+      ]
+    }
+  },
+  "weapon_badge:thermal:1": {
+    "sheet": "weapon_badges/atlas",
+    "columns": 5,
+    "index": 21,
+    "art_label": "Емблема: Термічна — Незвичний",
+    "art_category": "weapon_badges",
+    "editor_source": "weapon_badges/source.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4,
+      "trim": true,
+      "rotation": 0,
+      "mirror": false,
+      "crop": [
+        250,
+        980,
+        501,
+        1220
+      ]
+    }
+  },
+  "weapon_badge:thermal:2": {
+    "sheet": "weapon_badges/atlas",
+    "columns": 5,
+    "index": 22,
+    "art_label": "Емблема: Термічна — Рідкісний",
+    "art_category": "weapon_badges",
+    "editor_source": "weapon_badges/source.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4,
+      "trim": true,
+      "rotation": 0,
+      "mirror": false,
+      "crop": [
+        501,
+        980,
+        751,
+        1220
+      ]
+    }
+  },
+  "weapon_badge:thermal:3": {
+    "sheet": "weapon_badges/atlas",
+    "columns": 5,
+    "index": 23,
+    "art_label": "Емблема: Термічна — Унікальний",
+    "art_category": "weapon_badges",
+    "editor_source": "weapon_badges/source.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4,
+      "trim": true,
+      "rotation": 0,
+      "mirror": false,
+      "crop": [
+        751,
+        980,
+        1000,
+        1220
+      ]
+    }
+  },
+  "weapon_badge:thermal:4": {
+    "sheet": "weapon_badges/atlas",
+    "columns": 5,
+    "index": 24,
+    "art_label": "Емблема: Термічна — Міфічний",
+    "art_category": "weapon_badges",
+    "editor_source": "weapon_badges/source.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4,
+      "trim": true,
+      "rotation": 0,
+      "mirror": false,
+      "crop": [
+        1000,
+        980,
+        1254,
+        1220
+      ]
+    }
   }
 }
