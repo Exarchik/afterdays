@@ -814,6 +814,17 @@
                   "step_cap": 0,
                   "chance": 1.0,
                   "destination": "loot"
+                },
+                {
+                  "kind": "med",
+                  "amount": 1,
+                  "item_id": "item_custom_007",
+                  "maximum": 3,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 0.25,
+                  "destination": "loot"
                 }
               ]
             }
@@ -839,7 +850,7 @@
       "terrain": "road",
       "enabled": true,
       "weight": 1.0,
-      "title": "Латки для каравану",
+      "title": "Караван потребує допомоги",
       "description": "Візник ремонтує захист фургона.",
       "art": "event_theme:pilgrims",
       "choices": [
@@ -849,7 +860,7 @@
           "costs": [
             {
               "kind": "fragments",
-              "amount": 6
+              "amount": 15
             }
           ],
           "outcomes": [
@@ -2990,7 +3001,7 @@
       "weight": 1.0,
       "title": "Свіжі позначки",
       "description": "Хтось залишив попередження про радіацію та одну запасну пігулку.",
-      "art": "art_custom_060",
+      "art": "art_custom_011",
       "choices": [
         {
           "id": "act",
@@ -3494,7 +3505,7 @@
       "weight": 1.0,
       "title": "Пакунок на даху",
       "description": "Сходи хитаються, але нагорі видно сумку.",
-      "art": "quest:cache",
+      "art": "art_custom_096",
       "choices": [
         {
           "id": "act",
@@ -3516,56 +3527,6 @@
             },
             {
               "chance": 0.35,
-              "effects": [
-                {
-                  "kind": "damage",
-                  "amount": 6
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "id": "leave",
-          "text": "Пройти повз",
-          "costs": [],
-          "outcomes": [
-            {
-              "chance": 1,
-              "effects": []
-            }
-          ]
-        }
-      ],
-      "legacy_group": "additional"
-    },
-    {
-      "id": "buried_battery",
-      "category": "salvage",
-      "terrain": "waste",
-      "enabled": true,
-      "weight": 1.0,
-      "title": "Заритий акумулятор",
-      "description": "З піску стирчать клеми. Корпус може бути під напругою.",
-      "art": "art_custom_063",
-      "choices": [
-        {
-          "id": "act",
-          "text": "Відкрити",
-          "costs": [],
-          "outcomes": [
-            {
-              "chance": 0.6,
-              "effects": [
-                {
-                  "kind": "ammo",
-                  "amount": 12,
-                  "ammo": "energy"
-                }
-              ]
-            },
-            {
-              "chance": 0.4,
               "effects": [
                 {
                   "kind": "damage",
@@ -3743,6 +3704,56 @@
       ],
       "legacy_group": "additional",
       "legacy_release": "0.32"
+    },
+    {
+      "id": "buried_battery",
+      "category": "salvage",
+      "terrain": "waste",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Старий акумулятор",
+      "description": "З піску стирчать капот іржавого автомобіля, в ньому ще лишився акумулятор. Схоже він досі може бути під напругою.",
+      "art": "art_custom_063",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Відкрити",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 0.6,
+              "effects": [
+                {
+                  "kind": "ammo",
+                  "amount": 12,
+                  "ammo": "energy"
+                }
+              ]
+            },
+            {
+              "chance": 0.4,
+              "effects": [
+                {
+                  "kind": "damage",
+                  "amount": 6
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Пройти повз",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "additional"
     },
     {
       "id": "meteor",
@@ -4402,7 +4413,7 @@
       "terrain": "any",
       "enabled": true,
       "weight": 1.0,
-      "art": "terrain:radiation",
+      "art": "art_custom_097",
       "choices": [
         {
           "id": "act",
