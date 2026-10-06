@@ -140,7 +140,7 @@ class SurvivalTests(unittest.TestCase):
     def test_radiation_death_uses_existing_defeat(self):
         g=self.game();g.survival['radiation']=95;g.hp=1
         with patch.object(g,'defeat',wraps=g.defeat) as defeat:self.assertFalse(g.add_radiation());defeat.assert_called_once()
-        self.assertEqual(g.hp,g.max_hp);self.assertEqual(g.radiation_injury,0)
+        self.assertEqual(g.hp,max(1,math.ceil(g.max_hp*.25)));self.assertEqual(g.radiation_injury,0)
 
 
 if __name__=='__main__':unittest.main()

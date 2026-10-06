@@ -113,7 +113,7 @@ class RouteController:
             if not self.path:
                 if guided:g.log(tr('update024.guide_arrived',city=g.city_name(self.guided_city)))
                 self.guided_city=None;self.pause()
-            elif g.battle or g.road_event or (not guided and (g.traveler or g.city is not None or getattr(g,'local_settlers',lambda:[])())):self.pause()
+            elif g.battle or g.road_event or (not guided and (g.traveler or g.city is not None or g.local_graves() or getattr(g,'local_settlers',lambda:[])())):self.pause()
         self.app.refresh()
 
     def tick(self):

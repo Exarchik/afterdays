@@ -35,7 +35,7 @@ class FactionTests(unittest.TestCase):
         for level in (1,2,5,10):
             for seed in range(20):
                 e=rules.make_human(random.Random(seed),'human_bandit','bandits',level,[1,1],doc)
-                self.assertIn('weapon',e['equipment']);self.assertIn('armor',e['equipment'])
+                self.assertIn('weapon',e['equipment'])
                 for item in e['equipment'].values():
                     self.assertLessEqual(item['level'],level);self.assertLessEqual(content.EQUIPMENT[item['type_id']]['min_level'],level)
                     for mod in item['modules']:
@@ -49,7 +49,7 @@ class FactionTests(unittest.TestCase):
         self.assertTrue(any(i['kind']=='credits' for i in drops));self.assertFalse(any(i['kind']=='trophy' for i in drops))
         with patch.object(rng,'random',return_value=.25):drops=rules.human_loot(rng,e)
         self.assertFalse(any(i['kind'] in ('weapon','armor','helmet') for i in drops))
-        values=iter([.1,.8,.1]+[.99]*5)
+        values=iter([.8 if n==1 else .1 for n in range(len(e['equipment']))]+[.99]*5)
         with patch.object(rng,'random',side_effect=lambda:next(values)):drops=rules.human_loot(rng,e)
         self.assertEqual([i['id'] for i in drops],[i['id'] for n,i in enumerate(e['equipment'].values()) if n!=1])
 

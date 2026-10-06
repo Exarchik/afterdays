@@ -140,7 +140,7 @@ def draw_battle(app):
             c.create_rectangle(px-u*.5,top,px+u*.5,top+3,fill='#23392d',outline='')
             c.create_rectangle(px-u*.5,top,px-u*.5+u*e['hp']/e['max_hp'],top+3,fill='#d88667',outline='')
             faction_name=faction_rules.catalog()['factions'].get(faction_rules.faction_of(e),{}).get('name','')
-            c.create_text(px,top-7,text=f'L{e.get("level",1)} · {faction_name}'+(' · z' if b.get('dungeon') and not e.get('awake') else ''),fill='#9cdda8' if friendly else '#e6c18d',font=('Segoe UI',7))
+            c.create_text(px,top-7,text=f'L{e.get("level",1)} · {faction_name}'+(' · z' if not e.get('awake',not b.get('dungeon')) else ''),fill='#9cdda8' if friendly else '#e6c18d',font=('Segoe UI',7))
     target=enemies.get(hovered)
     if target:
         valid,reason,chance=g.shot_info(target)

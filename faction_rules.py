@@ -114,6 +114,7 @@ def make_human(rng,ident,faction,level,pos,document=None):
     doc=document or catalog();d=doc['humans'][ident];gear={}
     level=max(1,int(level))
     for slot in ('weapon','armor','helmet'):
+        if slot=='armor' and rng.random()<.5:continue
         pool=[k for k,v in content.EQUIPMENT.items() if v['kind']==slot and v['min_level']<=level]
         if not pool:continue
         item=p.equipment(rng.choice(pool),rng.randint(0,d['max_rarity']),rng,level)

@@ -99,7 +99,7 @@ class HumanPanel(CatalogPanel):
             self.pictures[field]=ttk.Label(frame);self.pictures[field].pack()
             ttk.Button(frame,text='Обрати арт',command=lambda k=field:self.choose_art(k)).pack()
             ttk.Button(frame,text='Стандартний вигляд',command=lambda k=field:self.clear_art(k)).pack()
-        ttk.Label(self.form,text='Без арту: силует героя. Трофеїв немає. Зброя, броня та шолом генеруються з каталогів; рівень не вищий за локацію.',wraplength=700).pack(pady=6)
+        ttk.Label(self.form,text='Без арту: силует героя. Трофеїв немає. Зброя, броня та шолом генеруються з каталогів; рівень не вищий за локацію. У 50% людей бронежилет відсутній.',wraplength=700).pack(pady=6)
         self.fields={}
         for key,label,low,high in self.FIELDS:
             var=tk.StringVar();self.fields[key]=var;row(self.form,label,var)

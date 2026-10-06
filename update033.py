@@ -69,13 +69,9 @@ class Game(combat033.Combat,storm033.Storms,update032.Game):
         return ok
 
     def _finish_enemy(self,enemy,weapon=None):
-        """Roll one independent rare-or-better item for each defeated mythic monster."""
+        """Finish monsters without equipment bonuses, including mythic creatures."""
         b=self.battle
         if not b or enemy not in b['enemies']:return
-        if enemy.get('grade')=='mythic' and self.rng.random()<.30:
-            item=self.reward_item(4,2,level=enemy.get('level',self.region_level))
-            if 'durability' in item:item['durability']=self.rng.randint(10,95)
-            b.setdefault('mythic_bonus',[]).append(item)
         return super()._finish_enemy(enemy,weapon)
 
     def _reveal_notice(self,before):

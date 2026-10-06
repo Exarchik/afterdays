@@ -6,9 +6,10 @@ import hexgrid
 import progression as p
 import update046
 import faction_rules as rules
+from recovery047 import Recovery
 
 
-class Game(update046.Game):
+class Game(Recovery,update046.Game):
     def start_battle(self):
         super().start_battle()
         b=self.battle
@@ -27,6 +28,9 @@ class Game(update046.Game):
             else:
                 actor=monster_rules.make(self.rng,ident,level,old['pos']);actor['faction']=faction
             b['enemies'][n]=actor
+            actor['awake']=self.rng.random()>=.25
+            actor['sight']=5
+        self.wake_enemies()
         self.check_faction_victory()
 
     def prepare_factions(self):
@@ -67,10 +71,6 @@ class Game(update046.Game):
         b.setdefault('corpses',[]).append({k:copy.deepcopy(e[k]) for k in ('pos','kind','type_id','grade','human','corpse_sprite_id','faction') if k in e})
         b.setdefault('kills',[]).append({k:copy.deepcopy(e[k]) for k in ('kind','type_id','grade','level','human','faction') if k in e})
         if e.get('human'):b.setdefault('faction_loot',[]).extend(rules.human_loot(self.rng,e))
-        elif e.get('grade')=='mythic' and self.rng.random()<.30:
-            item=self.reward_item(4,2,level=e.get('level',self.region_level))
-            if 'durability' in item:item['durability']=self.rng.randint(10,95)
-            b.setdefault('mythic_bonus',[]).append(item)
         if not npc_kill:self.gain_xp(self.enemy_xp(e))
 
     def check_faction_victory(self):
@@ -122,15 +122,26 @@ class Game(update046.Game):
             return self.battle is None
         return super().flee()
 
+    def wake_enemies(self,pos=None):
+        b=self.battle
+        if not b:return
+        self.prepare_factions()
+        for actor in b.get('enemies',[]):
+            if actor.get('awake',not b.get('dungeon')):continue
+            targets=[e['pos'] for e in b['enemies'] if e is not actor and rules.hostile(rules.faction_of(actor),rules.faction_of(e))]
+            if self.hostile_to_player(actor):targets.append(pos if pos is not None else b['pos'])
+            if any(hexgrid.distance(actor['pos'],target)<=actor.get('sight',5) and hexgrid.visible(tuple(actor['pos']),tuple(target),b['walls']) for target in targets):actor['awake']=True
+
     def faction_turn(self):
         b=self.battle
         if not b:return
         self.prepare_factions()
+        self.wake_enemies()
         if self.check_faction_victory():
             if self.battle:b['ap']=self.max_ap
             return
         for actor in list(b['enemies']):
-            if actor not in b['enemies'] or b.get('dungeon') and not actor.get('awake'):continue
+            if actor not in b['enemies'] or not actor.get('awake',not b.get('dungeon')):continue
             candidates=[e for e in b['enemies'] if e is not actor and rules.hostile(rules.faction_of(actor),rules.faction_of(e))]
             player=dict(id='player',pos=b['pos'],defense=self.defense,resists={})
             if self.hostile_to_player(actor):candidates.append(player)
@@ -153,6 +164,7 @@ class Game(update046.Game):
                 route=hexgrid.path_to(tuple(actor['pos']),tuple(target['pos']),b['w'],b['h'],blocked)
                 if not route or route[0]==tuple(target['pos']):break
                 actor['pos']=list(route[0]);motion.append(actor['pos'][:])
+                self.wake_enemies()
             self.emit_move(motion,actor['id'])
             if hexgrid.distance(actor['pos'],target['pos'])>actor['range'] or not hexgrid.visible(tuple(actor['pos']),tuple(target['pos']),b['walls']):continue
             self.faction_attack(actor,target,target is player)

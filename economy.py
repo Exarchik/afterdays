@@ -85,37 +85,22 @@ class Game(a.Game):
   """Завершує переможний бій і нараховує його результати."""
   if not self.battle:return
   b=self.battle;self._last_battle=copy.deepcopy(b);kills=[e for e in b.get('kills',[]) if not e.get('human')]
-  chance,rolls,cap=loot_rules(kills)
-  human_only=(bool(b.get('kills')) and not kills) or (b.get('safe_exit047') and not b.get('kills'))
-  if human_only:rolls=0
   self.battle=None;qid=self.quest_battle;self.quest_battle=None
-  credits=round(self.rng.randint(40,65)*(1+.35*(b.get('region_level',1)-1))*(1+.15*self.rank('scavenger')));credits=0 if human_only else credits;self.money+=credits
   before_loot={i['id']:i.get('qty',1) for i in self.loot}
-  drops=0
-  for _ in range(rolls):
-   if self.rng.random()<chance:
-    item=self.reward_item(cap,level=self.monster_loot_level(kills,b.get('region_level',1)))
-    if 'durability' in item and self.rng.random()<.95:item['durability']=self.rng.randint(10,95)
-    p.add_to(self.loot,item);drops+=1
-  # Independent supplies. They never replace successful equipment rolls.
-  for _ in range(0 if human_only else 2):
-   if self.rng.random()<.20:p.add_to(self.loot,p.ammunition(self.rng.choice(list(p.AMMO)),max(1,self.rng.randint(3,12)//2)))
   for kind,prob in [('food',.20),('med',.12),('rad',.05)]:
-   if not human_only and self.rng.random()<prob:p.add_to(self.loot,p.supply(kind))
+   if kills and self.rng.random()<prob:p.add_to(self.loot,p.supply(kind))
   for fn in (p.parts,p.fragments):
-   if not human_only and self.rng.random()<.35:p.add_to(self.loot,fn(self.rng.randint(2,8)))
+   if kills and self.rng.random()<.35:p.add_to(self.loot,fn(self.rng.randint(2,8)))
   for e in kills:
    if self.rng.random()<.65:p.add_to(self.loot,trophy(e['kind']))
   for item in b.get('faction_loot',[]):p.add_to(self.loot,item)
-  for item in b.get('mythic_bonus',[]):p.add_to(self.loot,item)
   if getattr(self,'coward_turns',0):
    from loot032 import halve_new_loot
    halve_new_loot(self,before_loot)
-   penalty=credits-credits//2;self.money-=penalty;credits-=penalty
   if qid:
    q=next((q for q in self.quests if q['id']==qid and q['status']=='active'),None)
    if q:q['progress']=1;self.emit(tr('economy.0004'),color='#c7a0f1')
-  self.log(tr('economy.0005', v0=credits, v1=rolls, v2=chance, v3=drops))
+  self.log('Бій завершено. Доступну здобич можна забрати у вкладці «Здобич».')
  def price_quest(self,q):
   """Розраховує винагороду завдання з урахуванням його рівня."""
   zone=q.get('level',q.get('zone',self.region_at(*self.cities[q['city']])))

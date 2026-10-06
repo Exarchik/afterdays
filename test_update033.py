@@ -70,12 +70,12 @@ class Update033Tests(unittest.TestCase):
         g=r.Game(3);w=p.equipment('weapon_watch_rifle',level=2);preview=upgrade_description(w,update031.upgraded(w));self.assertIn('До\tПісля',preview);self.assertIn('Рівень\t2\t3',preview)
         for level in (1,5,15):
             q=dict(kind='hunt',city=0,status='offered',unique=False,level=level);g.price_quest(q);self.assertEqual(q['xp_reward'],25+5*(level-1))
-    def test_mythic_bonus_once(self):
-        """Each mythic death has a 30% rare+ roll at its level, with no duplicate processing."""
+    def test_mythic_no_equipment_bonus(self):
+        """Mythic monsters no longer drop gear; duplicate death gives no extra XP."""
         g,w,b=self.arena();enemy=b['enemies'][0];enemy.update(grade='mythic',level=5)
         with patch.object(g.rng,'random',return_value=.29):g._finish_enemy(enemy,w)
-        self.assertEqual(len(b['mythic_bonus']),1);self.assertGreaterEqual(b['mythic_bonus'][0]['rarity'],2);self.assertEqual(b['mythic_bonus'][0]['level'],5)
-        g._finish_enemy(enemy,w);self.assertEqual(len(b['mythic_bonus']),1)
+        self.assertFalse(b.get('mythic_bonus'));xp=g.xp
+        g._finish_enemy(enemy,w);self.assertEqual(g.xp,xp)
         g,w,b=self.arena();enemy=b['enemies'][0];enemy['grade']='mythic'
         with patch.object(g.rng,'random',return_value=.30):g._finish_enemy(enemy,w)
         self.assertFalse(b.get('mythic_bonus'))

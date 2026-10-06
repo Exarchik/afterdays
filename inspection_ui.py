@@ -23,8 +23,8 @@ def monster_text(g,e):
       tr('inspection_ui.0007'),tr('inspection_ui.0008', v0=e['hp'], v1=e['max_hp']),tr('inspection_ui.0009', v0=e.get('attack', 0)),
       tr('inspection_ui.0010', v0=e.get('defense', e.get('armor', 0))),tr('inspection_ui.0011', v0=e['damage']),
       tr('inspection_ui.0012'),tr('inspection_ui.0013', v0=e['range']),tr('inspection_ui.0014', v0=e['speed']),
-      tr('inspection_ui.0015', v0=3 if e['kind'] == 8 else 0),tr('inspection_ui.0016', v0=g.enemy_xp(e)),
-      tr('inspection_ui.0017')+(tr('inspection_ui.0018') if g.battle.get('dungeon') and not e.get('awake') else tr('inspection_ui.0019')),
+      tr('inspection_ui.0015', v0=e.get('regen',content.MONSTER_DATA.get(e.get('type_id'),{}).get('regen',0))),tr('inspection_ui.0016', v0=g.enemy_xp(e)),
+      tr('inspection_ui.0017')+('Відпочиває' if not e.get('awake',not g.battle.get('dungeon')) else tr('inspection_ui.0019')),
       tr('inspection_ui.0020', v0=balance.multiplier(e.get('attack', 0), g.defense)),
       tr('inspection_ui.0021', v0=max(0,min(45, g.protection_stat('evasion')))),tr('inspection_ui.0022')]
     for key,(label,color) in a.DAMAGE_TYPES.items():
@@ -32,9 +32,6 @@ def monster_text(g,e):
     import faction_rules
     faction=faction_rules.catalog()['factions'].get(faction_rules.faction_of(e),{})
     lines.insert(1,'Фракція: '+faction.get('name','—'))
-    if e.get('human'):
-        lines += ['Спорядження (кожен предмет: 25% шансу здобичі):']
-        lines += [item_text(g,i) for i in e.get('equipment',{}).values()]
     desc=e.get('description','') if e.get('human') else content.t(content.monster_id(e)+'.description')
     if desc:lines.append(desc)
     if g.weapon:
@@ -68,10 +65,28 @@ def inspect_monster(app,event):
     if not app.game.battle:return
     pos=app.cell(event);enemy=next((e for e in app.game.battle['enemies'] if tuple(e['pos'])==pos),None)
     if not enemy:return
-    win=window(app,tr('inspection_ui.0030')+enemy['name']);art=tk.Canvas(win,bg=PANEL,height=96,highlightthickness=0);art.pack(fill='x')
+    win=window(app,('Персонаж: ' if enemy.get('human') else tr('inspection_ui.0030'))+enemy['name']);art=tk.Canvas(win,bg=PANEL,height=96,highlightthickness=0);art.pack(fill='x')
     from visuals import monster
     monster(art,enemy,18,5,86)
+    if enemy.get('human'):equipment_cards(win,enemy)
     detail=Detail(win,height=22);detail.pack(fill='both',expand=True,padx=12,pady=8);detail.config(text=monster_text(app.game,enemy))
+
+def equipment_cards(parent,enemy):
+    """Show the actual NPC loadout, without player-specific damage estimates."""
+    from visuals import icon
+    frame=tk.Frame(parent,bg=PANEL);frame.pack(fill='x',padx=10,pady=5)
+    for column,(slot,label) in enumerate((('weapon','Зброя'),('armor','Броня'),('helmet','Шолом'))):
+        frame.columnconfigure(column,weight=1,uniform='gear')
+        card=tk.Frame(frame,bg=PANEL);card.grid(row=0,column=column,sticky='nsew',padx=3)
+        item=enemy.get('equipment',{}).get(slot)
+        art=tk.Canvas(card,bg=PANEL,height=64,width=64,highlightthickness=0);art.pack()
+        if item:
+            icon(art,item,0,0,64);stats=p.stats(item)
+            summary=(f"Шкода: {p.mr.shot_damage(item,enemy.get('level',1))} · дальність: {stats.get('range',1)}" if slot=='weapon' else f"Захист: {stats.get('defense',0)}")
+            text=f"{item['name']}\nL{item.get('level',1)} · {p.mr.condition(item):g}% міцності\n{summary}\nМодулів: {len(item.get('modules',[]))}"
+        else:text={'weapon':'Без зброї','armor':'Без броні','helmet':'Без шолома'}[slot]
+        tk.Label(card,text=text,bg=PANEL,fg=TEXT,wraplength=190,justify='center').pack(fill='x')
+    return frame
 
 def result(app,item,animate=False):
     win=window(app,tr('inspection_ui.0031') if animate else tr('inspection_ui.0032'))

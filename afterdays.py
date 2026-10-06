@@ -494,13 +494,13 @@ class LegacyGame:
         self.hp = self.max_hp
         self.battle = None
         self.loot.clear()
-        self.log(tr('afterdays.0063', v0=loss))
+        if not getattr(self,'_grave_death',False):self.log(tr('afterdays.0063', v0=loss))
 
     def rest(self):
         """Відновлює гравця під час відпочинку в поселенні."""
         if self.city is None or self.battle:
             return False
-        if self.hp == self.max_hp and not getattr(self,'coward_turns',0) and getattr(self,'hunger',20)>=20:
+        if self.hp == self.max_hp and not getattr(self,'coward_turns',0) and getattr(self,'hunger',20)>=20 and [self.x,self.y]==getattr(self,'respawn_pos',self.cities[0]):
             self.log(tr('afterdays.0064'))
             return False
         if self.money < 15:
@@ -1259,6 +1259,10 @@ def launch(test_hook=None):
                 import generator_ui
                 generator_ui.show(self,generator)
             junk=getattr(self.game,'_junkyard_request',None)
+            if getattr(self.game,'_grave_request',False):
+                self.game._grave_request=False
+                import recovery_ui
+                recovery_ui.show(self)
             if junk:
                 self.game._junkyard_request=None
                 import junkyard_ui
@@ -1513,6 +1517,7 @@ def launch(test_hook=None):
                 draw_border(c,self.game,t,ox,oy,self.map_revealed)
                 frontier_ui.draw_metro(c,self.game,t,ox,oy,self.map_revealed)
                 __import__('map033').draw_storm(c,self.game,t,ox,oy,self.map_revealed)
+                __import__('recovery_ui').draw_markers(c,self.game,t,ox,oy,self.map_revealed)
                 from expedition_ui import draw_search_areas
                 draw_search_areas(c,self.game,t,ox,oy)
                 for n,(x,y) in enumerate(self.game.cities):
@@ -1632,6 +1637,7 @@ def launch(test_hook=None):
             from border_ui import draw_border
             draw_border(c,g,t,self.ox-self.vx*t,self.oy-self.vy*t,self.map_revealed,(self.vx,self.vy,cols,rows))
             __import__('map033').draw_storm(c,g,t,self.ox-self.vx*t,self.oy-self.vy*t,self.map_revealed)
+            if not b:__import__('recovery_ui').draw_markers(c,g,t,self.ox-self.vx*t,self.oy-self.vy*t,self.map_revealed)
             def center(pos):
                 return self.ox+(pos[0]-self.vx+.5)*t, self.oy+(pos[1]-self.vy+.5)*t
             if b:
@@ -1676,6 +1682,7 @@ def launch(test_hook=None):
                     c.create_text(px+t*.4,py-t*.5,text='¤',fill='#f1d383',font=('Segoe UI',16,'bold'))
             self.hint.config(text=(tr('afterdays.0189') if b else
                                    tr('journey.hint')))
+            if not b and g.local_graves():self.hint.config(text='Тут лежать ваші речі. Натисніть E, щоб відкрити надгробок.')
 
         def cell(self, event):
             """Перетворює координати курсора на клітинку карти."""
