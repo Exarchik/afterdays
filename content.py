@@ -72,6 +72,7 @@ def identify_item(item):
     return item
 
 def identify_monster(enemy):
+    if enemy.get('human'):return enemy
     ident=monster_id(enemy);enemy['type_id']=ident
     enemy['kind']=MONSTER_DATA[ident]['legacy_index']
     return enemy
@@ -90,6 +91,9 @@ def migrate(game):
         if q.get('target_kind') is not None:q['target_type_id']=monster_id(q['target_kind'])
     if game.battle:
         for enemy in game.battle.get('enemies',[]):
+            if enemy.get('human'):
+                for item in enemy.get('equipment',{}).values():identify_item(item)
+                continue
             identify_monster(enemy);enemy['name']=(t('monster.grade.'+enemy['grade']) if enemy.get('grade','normal')!='normal' else '')+name(enemy['type_id'])+(t('exp.weak') if enemy.get('weak') else '')
         for group in ('kills','corpses'):
             for enemy in game.battle.get(group,[]):identify_monster(enemy)

@@ -84,10 +84,12 @@ class Game(a.Game):
  def victory(self):
   """Завершує переможний бій і нараховує його результати."""
   if not self.battle:return
-  b=self.battle;self._last_battle=copy.deepcopy(b);kills=b.get('kills',[])
+  b=self.battle;self._last_battle=copy.deepcopy(b);kills=[e for e in b.get('kills',[]) if not e.get('human')]
   chance,rolls,cap=loot_rules(kills)
+  human_only=(bool(b.get('kills')) and not kills) or (b.get('safe_exit047') and not b.get('kills'))
+  if human_only:rolls=0
   self.battle=None;qid=self.quest_battle;self.quest_battle=None
-  credits=round(self.rng.randint(40,65)*(1+.35*(b.get('region_level',1)-1))*(1+.15*self.rank('scavenger')));self.money+=credits
+  credits=round(self.rng.randint(40,65)*(1+.35*(b.get('region_level',1)-1))*(1+.15*self.rank('scavenger')));credits=0 if human_only else credits;self.money+=credits
   before_loot={i['id']:i.get('qty',1) for i in self.loot}
   drops=0
   for _ in range(rolls):
@@ -96,14 +98,15 @@ class Game(a.Game):
     if 'durability' in item and self.rng.random()<.95:item['durability']=self.rng.randint(10,95)
     p.add_to(self.loot,item);drops+=1
   # Independent supplies. They never replace successful equipment rolls.
-  for _ in range(2):
+  for _ in range(0 if human_only else 2):
    if self.rng.random()<.20:p.add_to(self.loot,p.ammunition(self.rng.choice(list(p.AMMO)),max(1,self.rng.randint(3,12)//2)))
   for kind,prob in [('food',.20),('med',.12),('rad',.05)]:
-   if self.rng.random()<prob:p.add_to(self.loot,p.supply(kind))
+   if not human_only and self.rng.random()<prob:p.add_to(self.loot,p.supply(kind))
   for fn in (p.parts,p.fragments):
-   if self.rng.random()<.35:p.add_to(self.loot,fn(self.rng.randint(2,8)))
+   if not human_only and self.rng.random()<.35:p.add_to(self.loot,fn(self.rng.randint(2,8)))
   for e in kills:
    if self.rng.random()<.65:p.add_to(self.loot,trophy(e['kind']))
+  for item in b.get('faction_loot',[]):p.add_to(self.loot,item)
   for item in b.get('mythic_bonus',[]):p.add_to(self.loot,item)
   if getattr(self,'coward_turns',0):
    from loot032 import halve_new_loot

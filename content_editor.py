@@ -11,6 +11,7 @@ from art_library import Library
 from art_editor import ArtPanel
 from quest_editor import QuestPanel
 from dialogue_editor import DialoguePanel
+from faction_editor import FactionPanel, HumanPanel
 
 
 class ContentEditor(ttk.Frame):
@@ -33,12 +34,16 @@ class ContentEditor(ttk.Frame):
             self.tabs.add(panel,text=title);self.panels[section]=panel
             if section=='module':
                 self.items=ConsumablePanel(self.tabs,self.store,self.save_all);self.tabs.add(self.items,text='Предмети')
+        self.humans=HumanPanel(self.tabs,self.store,self.save_all);self.tabs.add(self.humans,text='Люди')
+        self.factions=FactionPanel(self.tabs,self.store,self.save_all);self.tabs.add(self.factions,text='Фракції')
+        self.tabs.bind('<<NotebookTabChanged>>',lambda e:self.factions.refresh_choices() if self.tabs.select()==str(self.factions) else None)
         self.arts=ArtPanel(self.tabs,self.library,self.commit,self.refresh_assets,self.save_all,lambda:self.events.document['events'])
         self.tabs.add(self.arts,text='Арти')
         root.bind('<Control-s>',lambda e:self.save_all())
         root.protocol('WM_DELETE_WINDOW',self.close)
 
     def refresh_assets(self):
+        self.humans.show_art()
         self.items.refresh_preview()
         self.events.refresh_art()
         self.dialogues.show_art()
@@ -46,6 +51,9 @@ class ContentEditor(ttk.Frame):
             if panel.current:panel.open(panel.current)
 
     def commit(self):
+        if not self.humans.commit():self.tabs.select(self.humans);return False
+        self.factions.refresh_choices()
+        if not self.factions.commit():self.tabs.select(self.factions);return False
         if not self.items.commit():self.tabs.select(self.items);return False
         if not self.quests.commit():self.tabs.select(self.quests);return False
         if not self.dialogues.commit():self.tabs.select(self.dialogues);return False
@@ -75,6 +83,9 @@ class ContentEditor(ttk.Frame):
             messagebox.showerror('Зміни не збережено',str(exc),parent=self.root);return False
         for panel in self.panels.values():panel.rebuild();panel.status.set('Збережено · Перезапустіть гру; уже створені предмети в сейві зберігають свої характеристики')
         self.items.rebuild()
+        self.humans.rebuild();self.factions.rebuild()
+        self.humans.status.set('Збережено · Перезапустіть гру')
+        self.factions.status.set('Збережено · Перезапустіть гру')
         self.dialogues.rebuild();self.dialogues.status.set('Діалоги збережено')
         self.quests.rebuild();self.quests.status.set('Квести збережено · Перезапустіть гру')
         self.arts.rebuild();self.arts.status.set('Арти збережено · Перезапустіть гру')

@@ -1053,7 +1053,7 @@ class ExpansionGame(LegacyGame):
 
 
 from progression import equipment, module, supply, stats, item_weight, item_value
-from update046 import Game
+from update047 import Game
 from reputation import buy_factor, sell_factor
 
 # GUI imports are delayed so the model and tests work without a display.

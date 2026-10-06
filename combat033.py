@@ -107,13 +107,13 @@ class Combat:
             if saved and self.rng.random()*100<saved:self.emit(tr('modules.ammo_saved'),color='#9cdcd8')
             else:self.consume('ammo',1,ammo)
         shell=category(w)=='shotgun';count=6 if shell else bullets
-        targets=[e for e in b['enemies'] if e is not target and behind(b['pos'],target['pos'],e['pos']) and hexgrid.visible(tuple(b['pos']),tuple(e['pos']),b['walls'])]
+        targets=[e for e in b['enemies'] if e is not target and (not hasattr(self,'hostile_to_player') or self.hostile_to_player(e)) and behind(b['pos'],target['pos'],e['pos']) and hexgrid.visible(tuple(b['pos']),tuple(e['pos']),b['walls'])]
         targets.sort(key=lambda e:hexgrid.distance(target['pos'],e['pos']))
         misfire=self.rng.random()<misfire_chance(w) if misfire_chance(w) else False
         stray=None
         if misfire:
             self.emit(tr('update033.jam'),color='#ffc46e')
-            pool=[e for e in b['enemies'] if e is not target and hexgrid.distance(b['pos'],e['pos'])<=p.stats(w)['range'] and hexgrid.visible(tuple(b['pos']),tuple(e['pos']),b['walls'])]
+            pool=[e for e in b['enemies'] if e is not target and (not hasattr(self,'hostile_to_player') or self.hostile_to_player(e)) and hexgrid.distance(b['pos'],e['pos'])<=p.stats(w)['range'] and hexgrid.visible(tuple(b['pos']),tuple(e['pos']),b['walls'])]
             if pool and self.rng.random()<.25:stray=self.rng.choice(pool)
         for n in range(count):
             hit=None

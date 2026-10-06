@@ -129,4 +129,5 @@ def quest_key(q):
     return "quest:metro" if "metro_city" in q else "quest:"+q["kind"]
 
 def corpse_key(corpse):
+    if corpse.get('human'):return corpse.get('corpse_sprite_id') or None
     return "corpse:"+content.monster_id(corpse.get("type_id",corpse.get("kind",0)))

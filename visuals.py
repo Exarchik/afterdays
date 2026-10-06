@@ -168,6 +168,9 @@ def icon(c, item, x, y, size=48, badge=True):
 
 
 def monster(c, enemy, x, y, size):
+    if enemy.get('human'):
+        if not sprites.draw(c,enemy.get('sprite_id'),x,y,size):human(c,x+size/2,y+size*.83,size/2.9)
+        return
     if sprites.draw(c,content.monster_id(enemy),x,y,size):
         if enemy.get('grade','normal')!='normal':
             c.create_oval(x,y,x+size,y+size,outline='#dc8ef5' if enemy['grade']=='mythic' else '#eac863',width=2)
@@ -728,3 +731,12 @@ class QuestPanel(tk.Frame):
         """Перевіряє умови здачі, видає нагороду й завершує завдання."""
         q=self.selected()
         if q:self.app.act(lambda:self.app.game.turn_in(q['id']))
+
+
+def human(c,px,py,u):
+    c.create_oval(px-u*.45,py-u*.1,px+u*.45,py+u*.3,fill='#253d33',outline='#c8efce',width=2)
+    c.create_line(px-u*.18,py-u*.4,px-u*.25,py+u*.1,fill='#bdccb5',width=4)
+    c.create_line(px+u*.18,py-u*.4,px+u*.25,py+u*.1,fill='#bdccb5',width=4)
+    c.create_polygon(px-u*.3,py-u*1.05,px+u*.3,py-u*1.05,px+u*.25,py-u*.35,px-u*.25,py-u*.35,fill='#aebea4',outline='#edf0d6')
+    c.create_oval(px-u*.23,py-u*1.52,px+u*.23,py-u*1.02,fill='#d6d9b9',outline='#edf0d6')
+    c.create_line(px+u*.1,py-u*.75,px+u*.65,py-u*.85,fill='#b9d5c8',width=3)

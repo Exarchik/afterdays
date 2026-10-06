@@ -502,6 +502,7 @@ class Game(p.Game):
         """Передає хід ворогам і відновлює ОД наступного ходу."""
         b=self.battle
         if not b:return
+        if hasattr(self,'faction_turn'):return self.faction_turn()
         for e in list(b['enemies']):
             if b.get('dungeon') and not e.get('awake'):continue
             if content.MONSTER_DATA[content.monster_id(e)]['regen']:e['hp']=min(e['max_hp'],e['hp']+content.MONSTER_DATA[content.monster_id(e)]['regen'])

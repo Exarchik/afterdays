@@ -29,7 +29,13 @@ def monster_text(g,e):
       tr('inspection_ui.0021', v0=max(0,min(45, g.protection_stat('evasion')))),tr('inspection_ui.0022')]
     for key,(label,color) in a.DAMAGE_TYPES.items():
         value=e.get('resists',{}).get(key,0);lines.append(f'{label}\t'+(tr('inspection_ui.0023', v0=value) if value>0 else tr('inspection_ui.0024', v0=-value) if value<0 else '0%'))
-    desc=content.t(content.monster_id(e)+'.description')
+    import faction_rules
+    faction=faction_rules.catalog()['factions'].get(faction_rules.faction_of(e),{})
+    lines.insert(1,'Фракція: '+faction.get('name','—'))
+    if e.get('human'):
+        lines += ['Спорядження (кожен предмет: 25% шансу здобичі):']
+        lines += [item_text(g,i) for i in e.get('equipment',{}).values()]
+    desc=e.get('description','') if e.get('human') else content.t(content.monster_id(e)+'.description')
     if desc:lines.append(desc)
     if g.weapon:
         valid,why,chance=g.shot_info(e)
@@ -63,7 +69,8 @@ def inspect_monster(app,event):
     pos=app.cell(event);enemy=next((e for e in app.game.battle['enemies'] if tuple(e['pos'])==pos),None)
     if not enemy:return
     win=window(app,tr('inspection_ui.0030')+enemy['name']);art=tk.Canvas(win,bg=PANEL,height=96,highlightthickness=0);art.pack(fill='x')
-    sprites.draw(art,'monster:'+str(enemy['kind']),18,5,86)
+    from visuals import monster
+    monster(art,enemy,18,5,86)
     detail=Detail(win,height=22);detail.pack(fill='both',expand=True,padx=12,pady=8);detail.config(text=monster_text(app.game,enemy))
 
 def result(app,item,animate=False):

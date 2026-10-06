@@ -179,6 +179,9 @@ class Library:
         except (ImportError,OSError,ValueError):return None
     def usage(self,key,events):
         uses=[]
+        for d in self.store.data.get('factions',{}).get('humans',{}).values():
+            for field in ('sprite_id','corpse_sprite_id'):
+                if d.get(field)==key:uses.append(d['name']+' · '+field)
         for e in events:
             if e.get('art')==key:uses.append('Подія: '+e['title'])
         for group in ('equipment','modules','monsters','consumables'):

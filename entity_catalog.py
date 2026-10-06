@@ -79,7 +79,7 @@ def validate_definition(section, ident, data, texts, art):
 class Store:
     def __init__(self, root=ROOT):
         self.root=Path(root)
-        self.paths={group:self.root/'data'/f'{group}.json' for group in ('equipment','modules','monsters','sprites','quests','dialogues','consumables')}
+        self.paths={group:self.root/'data'/f'{group}.json' for group in ('equipment','modules','monsters','sprites','quests','dialogues','consumables','factions')}
         self.paths['texts']=self.root/'locales/uk/entities.json'
         self.data={key:read(path) for key,path in self.paths.items()}
         self.baseline=copy.deepcopy(self.data)
@@ -136,7 +136,9 @@ class Store:
     def validate(self):
         import quest_catalog
         import consumable_rules
-        errors=consumable_rules.validate(self.data['consumables'],self.art)
+        import faction_rules
+        errors=faction_rules.validate(self.data['factions'],self.data['monsters'],self.art)
+        errors+=consumable_rules.validate(self.data['consumables'],self.art)
         errors+=quest_catalog.validate(self.data['quests'])
         if not errors:
             import story_system

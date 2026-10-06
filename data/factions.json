@@ -1,0 +1,114 @@
+{
+  "factions": {
+    "bandits": {
+      "name": "Бандити",
+      "encounter_weight": 25.0,
+      "player": "hostile",
+      "members": [
+        "human_bandit"
+      ],
+      "relations": {
+        "bandits": "friendly",
+        "settlers": "hostile",
+        "monsters": "hostile",
+        "infected": "hostile"
+      }
+    },
+    "settlers": {
+      "name": "Поселенці",
+      "encounter_weight": 25.0,
+      "player": "friendly",
+      "members": [
+        "human_settler"
+      ],
+      "relations": {
+        "bandits": "hostile",
+        "settlers": "friendly",
+        "monsters": "hostile",
+        "infected": "hostile"
+      }
+    },
+    "monsters": {
+      "name": "Монстри",
+      "encounter_weight": 33.0,
+      "player": "hostile",
+      "members": [
+        "monster_rodent",
+        "monster_feral",
+        "monster_spitter",
+        "monster_blind_hound",
+        "monster_shellback",
+        "monster_acid_tick",
+        "monster_ash_wolf",
+        "monster_sentry_drone",
+        "monster_swamp_mutant",
+        "monster_bone_giant",
+        "monster_spark",
+        "monster_chimera_spider"
+      ],
+      "relations": {
+        "bandits": "hostile",
+        "settlers": "hostile",
+        "monsters": "friendly",
+        "infected": "hostile"
+      }
+    },
+    "infected": {
+      "name": "Заражені монстри",
+      "encounter_weight": 15.0,
+      "player": "hostile",
+      "members": [
+        "monster_rodent",
+        "monster_feral",
+        "monster_spitter",
+        "monster_blind_hound",
+        "monster_shellback",
+        "monster_acid_tick",
+        "monster_ash_wolf",
+        "monster_sentry_drone",
+        "monster_swamp_mutant",
+        "monster_bone_giant",
+        "monster_spark",
+        "monster_chimera_spider"
+      ],
+      "relations": {
+        "bandits": "hostile",
+        "settlers": "hostile",
+        "monsters": "hostile",
+        "infected": "hostile"
+      }
+    }
+  },
+  "humans": {
+    "human_bandit": {
+      "description": "",
+      "min_level": 1,
+      "hp": 25,
+      "hp_per_level": 5,
+      "attack": 0,
+      "defense": 0,
+      "speed": 3,
+      "regen": 0,
+      "max_rarity": 2,
+      "module_chance": 35,
+      "sprite_id": "",
+      "corpse_sprite_id": "",
+      "name": "Бандит"
+    },
+    "human_settler": {
+      "description": "",
+      "min_level": 1,
+      "hp": 30,
+      "hp_per_level": 5,
+      "attack": 0,
+      "defense": 0,
+      "speed": 3,
+      "regen": 0,
+      "max_rarity": 2,
+      "module_chance": 35,
+      "sprite_id": "",
+      "corpse_sprite_id": "",
+      "name": "Поселенець"
+    }
+  }
+}

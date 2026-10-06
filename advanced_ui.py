@@ -91,7 +91,9 @@ def draw_battle(app):
         for corpse in b.get('corpses',[]):
             if tuple(corpse['pos'])==pos:
                 size=u*2.9
-                sprites.draw(c,sprites.corpse_key(corpse),px-size/2,py+u*.1-size/2,size)
+                if not sprites.draw(c,sprites.corpse_key(corpse),px-size/2,py+u*.1-size/2,size) and corpse.get('human'):
+                    c.create_line(px-u*.5,py,px+u*.4,py+u*.12,fill='#87917c',width=max(3,int(u*.22)))
+                    c.create_oval(px-u*.7,py-u*.13,px-u*.4,py+u*.12,fill='#b5b79e',outline='')
         if pos in walls:
             if sprites.draw(c,'obstacle:forest' if kind=='forest' else 'obstacle:ruin' if kind in ('ruin','city') else 'obstacle:cliff',px-2*u,py+1.2*u-4*u,4*u):pass
             elif kind=='forest':
@@ -105,6 +107,9 @@ def draw_battle(app):
                 c.create_polygon(px,py-u*.4-z,px+u*.8,py-z,px,py+u*.4-z,px-u*.8,py-z,fill='#989681',outline='#c1b89b')
                 if kind=='ruin':
                     c.create_line(px+u*.2,py-z*.45,px+u*.6,py-z*.62,fill='#263b32',width=3)
+        if b.get('safe_exit047') and list(pos)==b['exit']:
+            c.create_oval(px-u*.7,py-u*.35,px+u*.7,py+u*.35,outline='#80e3b4',width=3)
+            c.create_text(px,py-u*.65,text='ВИХІД',fill='#80e3b4',font=('Segoe UI',8,'bold'))
         if b.get('dungeon') and list(pos) in (b['exit'],b['chest']):
             is_exit=list(pos)==b['exit']
             sprites.draw(c,'dungeon_exit' if is_exit else 'metro' if b.get('metro_station') else 'dungeon_chest',px-u,py-u*1.7,u*2)
@@ -113,12 +118,8 @@ def draw_battle(app):
             c.create_text(px,py-u*.65,text=tr('advanced_ui.0001') if is_exit else tr('metro035.trolley') if b.get('metro_station') else tr('advanced_ui.0002'),fill=color,font=('Segoe UI',8,'bold'))
         if list(pos)==b['pos']:
             if hasattr(getattr(app,'fx',None),'position'):px,py=center(app.fx.position('player',b['pos']))
-            c.create_oval(px-u*.45,py-u*.1,px+u*.45,py+u*.3,fill='#253d33',outline='#c8efce',width=2)
-            c.create_line(px-u*.18,py-u*.4,px-u*.25,py+u*.1,fill='#bdccb5',width=4)
-            c.create_line(px+u*.18,py-u*.4,px+u*.25,py+u*.1,fill='#bdccb5',width=4)
-            c.create_polygon(px-u*.3,py-u*1.05,px+u*.3,py-u*1.05,px+u*.25,py-u*.35,px-u*.25,py-u*.35,fill='#aebea4',outline='#edf0d6')
-            c.create_oval(px-u*.23,py-u*1.52,px+u*.23,py-u*1.02,fill='#d6d9b9',outline='#edf0d6')
-            c.create_line(px+u*.1,py-u*.75,px+u*.65,py-u*.85,fill='#b9d5c8',width=3)
+            from visuals import human
+            human(c,px,py,u)
         if pos in enemies:
             e=enemies[pos];valid,_,_=g.shot_info(e)
             px,py=center(app.fx.position(e['id'],e['pos'])) if hasattr(getattr(app,'fx',None),'position') else center(pos)
@@ -131,11 +132,15 @@ def draw_battle(app):
             size=u*2.9
             sprite_top=py-size+0.5*u
             monster(c,e,px-size/2,sprite_top,size)
+            import faction_rules
+            friendly=not faction_rules.hostile(faction_rules.faction_of(e),'player')
+            c.create_oval(px-u*.5,py-u*.1,px+u*.5,py+u*.3,outline='#80e3b4' if friendly else '#ed846e',width=2)
             app.iso['sprites'].append((px-size/2,py-size,px+size/2,py+.18*u,pos))
             top=py-size-u*.18
             c.create_rectangle(px-u*.5,top,px+u*.5,top+3,fill='#23392d',outline='')
             c.create_rectangle(px-u*.5,top,px-u*.5+u*e['hp']/e['max_hp'],top+3,fill='#d88667',outline='')
-            c.create_text(px,top-7,text=f'L{e.get("level",1)}'+(' · z' if b.get('dungeon') and not e.get('awake') else ''),fill='#e6c18d',font=('Segoe UI',7))
+            faction_name=faction_rules.catalog()['factions'].get(faction_rules.faction_of(e),{}).get('name','')
+            c.create_text(px,top-7,text=f'L{e.get("level",1)} · {faction_name}'+(' · z' if b.get('dungeon') and not e.get('awake') else ''),fill='#9cdda8' if friendly else '#e6c18d',font=('Segoe UI',7))
     target=enemies.get(hovered)
     if target:
         valid,reason,chance=g.shot_info(target)
@@ -153,6 +158,7 @@ def draw_battle(app):
     count=g.count('ammo',weapon.get('ammo_type','pistol')) if weapon else 0
     app.hint.config(text=tr('advanced_ui.0004', v0=ammo, v1=count))
 
+    if b.get('safe_exit047'):app.hint.config(text='Лише союзники. Зелена точка — безпечний вихід і здобич; штрафу «Боягуз» немає.')
     if b.get('dungeon'):
         app.map_title.config(text=tr('advanced_ui.0005', v0=b['dungeon_kind'], v1=len(b['enemies']), v2=b['ap'], v3=g.max_ap))
         app.hint.config(text=(tr('advanced_ui.0006') if b.get('cleared') else '')+tr('advanced_ui.0007'))
