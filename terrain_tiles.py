@@ -46,6 +46,8 @@ def photo(canvas,key,width,height):
     while len(cache)>512:cache.popitem(last=False)
     return cache[identity]
 def draw(canvas,game,gx,gy,x,y,size):
+    if hasattr(canvas, "draw_terrain"):
+        return canvas.draw_terrain(game,gx,gy,x,y,size)
     if not hasattr(canvas,'tk'):return False
     left,top=round(x),round(y);width=round(x+size)-left;height=round(y+size)-top
     if width<=0 or height<=0:return False

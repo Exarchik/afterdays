@@ -71,6 +71,8 @@ def photo(widget,key,size=48):
     return root._sprite_cache[cache]
 
 def draw(canvas,key,x,y,size=48):
+    if hasattr(canvas, "draw_sprite"):
+        return canvas.draw_sprite(key,x,y,size)
     image=photo(canvas,key,size)
     if image is None:return False
     canvas.create_image(x+size/2,y+size/2,image=image,anchor='center')

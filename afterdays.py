@@ -1,4 +1,4 @@
-"""Afterdays — standalone turn-based RPG. Python 3.10+, Tkinter, no pip packages."""
+"""Afterdays — turn-based RPG with Arcade rendering and a legacy Tk UI shell."""
 from __future__ import annotations
 import hexgrid
 from i18n import t as tr
@@ -1057,7 +1057,11 @@ from update047 import Game
 from reputation import buy_factor, sell_factor
 
 # GUI imports are delayed so the model and tests work without a display.
-def launch(test_hook=None):
+def launch(test_hook=None, renderer=None):
+    import os
+    from arcade_canvas import canvas_class
+    renderer = renderer or os.environ.get('AFTERDAYS_RENDERER', 'arcade')
+    MapCanvas = canvas_class(renderer)
     import tkinter as tk
     from tkinter import ttk, messagebox
     import visuals
@@ -1122,7 +1126,7 @@ def launch(test_hook=None):
             left.pack_propagate(False)
             self.map_title = tk.Label(left, bg=BG, fg=GOLD, anchor='w', font=('Segoe UI', 12, 'bold'))
             self.map_title.pack(fill='x', pady=(0, 6))
-            self.canvas = tk.Canvas(left, bg='#17201c', highlightthickness=1, highlightbackground='#475244')
+            self.canvas = MapCanvas(left, bg='#17201c', highlightthickness=1, highlightbackground='#475244')
             self.canvas.pack(fill='both', expand=True)
             self.canvas.bind('<Configure>', lambda e: self.draw())
             self.canvas.bind('<Button-1>', self.map_click)
@@ -1623,6 +1627,9 @@ def launch(test_hook=None):
                         continue
                     kind = None if b else g.world[y][x]
                     color = ('#3b4939' if (x, y) in reachable else '#29332c') if b else advanced_ui.region_color(TERRAINS[kind][0],x)
+                    if not b and hasattr(c, 'draw_terrain'):
+                        c.draw_terrain(g,x,y,px,py,t)
+                        continue
                     c.create_rectangle(px, py, px+t, py+t, fill=color, outline='#28332c')
                     if b and (x, y) in walls:
                         c.create_rectangle(px+3, py+3, px+t-3, py+t-3, fill='#656457', outline='#99927c')
@@ -1841,11 +1848,17 @@ def launch(test_hook=None):
     if test_hook:
         root.after(100, lambda: test_hook(root, app))
     root.mainloop()
+    if getattr(root, '_renderer_error', None) is not None:
+        raise RuntimeError('Arcade/OpenGL: '+str(root._renderer_error)+
+                           '\nДля старого рендерера: START_WINDOWS.bat --renderer=tk') from root._renderer_error
 
 
 if __name__ == '__main__':
     try:
-        launch()
-    except ImportError:
-        print(tr('afterdays.0210'))
+        import argparse
+        parser = argparse.ArgumentParser(description='Afterdays')
+        parser.add_argument('--renderer', choices=('arcade', 'tk'), default=None)
+        launch(renderer=parser.parse_args().renderer)
+    except (ImportError, RuntimeError) as exc:
+        print(str(exc))
         sys.exit(1)
