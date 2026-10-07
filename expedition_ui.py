@@ -1,3 +1,4 @@
+import world_hex
 """Area boundaries and visited/searched cells; never expose hidden targets."""
 def draw_search_areas(canvas,game,t,ox,oy,viewport=None):
     draw_defense_areas(canvas,game,t,ox,oy,viewport)
@@ -17,7 +18,7 @@ def defense_cells(game,q):
     """Return cells where the active settlement-defense contract counts kills."""
     cx,cy=game.cities[q['city']]
     return {(x,y) for y in range(max(0,cy-10),min(len(game.world),cy+11))
-            for x in range(max(0,cx-10),min(len(game.world[0]),cx+11)) if (x-cx)**2+(y-cy)**2<=100}
+            for x in range(max(0,cx-10),min(len(game.world[0]),cx+11)) if world_hex.distance((x,y),(cx,cy))<=10}
 
 def draw_defense_areas(canvas,game,t,ox,oy,viewport=None):
     """Outline active defense zones on the overworld and atlas without revealing terrain."""

@@ -66,6 +66,7 @@ class JourneyTests(unittest.TestCase):
   self.assertFalse(g.guide_travel(g.guide_destinations()[0]['city']));self.assertFalse(g.guide_travel(99));self.assertEqual(g.turn,turn)
 
 class FakeGame:
+ def local_graves(self):return []
  def __init__(self):
   """Ініціалізує об’єкт, його початковий стан і потрібні залежності."""
   self.x=self.y=self.turn=0;self.battle=None;self.road_event=None;self.traveler=None;self.city=None;self.walls=set();self.log=Mock()

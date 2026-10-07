@@ -101,7 +101,7 @@ class Update031Tests(unittest.TestCase):
         """The drawn perimeter encloses exactly the cells accepted by defense quest distance checks."""
         g=r.Game(1);q=dict(kind='hunt',city=0,status='active',progress=0,goal=5,target_kind=None,level=1)
         g.quests=[q];cells=expedition_ui.defense_cells(g,q)
-        self.assertIn((15,5),cells);self.assertNotIn((15,6),cells)
+        self.assertIn((15,5),cells);self.assertIn((15,6),cells);self.assertNotIn((16,5),cells)
         c=MagicMock();expedition_ui.draw_search_areas(c,g,10,0,0)
         self.assertTrue(c.create_line.called)
         q['status']='done';c.reset_mock();expedition_ui.draw_search_areas(c,g,10,0,0);c.create_line.assert_not_called()

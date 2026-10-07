@@ -94,6 +94,8 @@ class Effects:
                 x,y=hexgrid.center(pos,iso['u'],iso['ox'],iso['oy'])
                 return x,y-iso['u']*.85
         if entity=='player':pos=app.route.position() if hasattr(app,'route') else [app.game.x,app.game.y]
+        if hasattr(app,'world_view'):
+            x,y=app.world_view.point(pos);return x,y-app.tile*.25
         return app.ox+(pos[0]-app.vx+.5)*app.tile,app.oy+(pos[1]-app.vy+.25)*app.tile
 
     def render(self):
@@ -110,9 +112,9 @@ class Effects:
             if e['kind']=='reveal':
                 a=self.app;t=a.tile
                 for x,y in e['cells']:
-                    if a.vx<=x<a.vx+23 and a.vy<=y<a.vy+17:
-                        px=a.ox+(x-a.vx)*t;py=a.oy+(y-a.vy)*t
-                        c.create_rectangle(px+1,py+1,px+t-1,py+t-1,outline=e['color'],width=2 if int(dt*7)%2 else 4,fill=e['color'],stipple='gray75',tags='fx')
+                    if hasattr(a,"world_view") and a.world_view.visible((x,y)):
+                        if hasattr(a,'world_view'):
+                            c.create_polygon(*a.world_view.polygon((x,y),.94),outline=e['color'],width=2 if int(dt*7)%2 else 4,fill=e['color'],stipple='gray75',tags='fx')
                 continue
             px,py=self.point(e['pos'],e.get('entity'))
             if e['kind'] in ('attack','slash'):

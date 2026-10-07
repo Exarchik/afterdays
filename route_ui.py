@@ -64,7 +64,7 @@ class RouteController:
 
     def segment_duration(self):
         """Обчислює час проходження відрізка маршруту."""
-        return self.seconds_per_cell/(2 if getattr(self,'guided_city',None) is not None else 1)*math.dist((self.app.game.x,self.app.game.y),self.path[0]) if self.path else self.seconds_per_cell
+        return self.seconds_per_cell/(2 if getattr(self,'guided_city',None) is not None else 1)
 
     def position(self):
         """Повертає проміжну позицію для плавної анімації."""
@@ -78,7 +78,7 @@ class RouteController:
         a=self.app
         if not hasattr(a,'tile') or a.game.battle:return
         x,y=self.position();t=a.tile
-        px=a.ox+(x-a.vx+.5)*t;py=a.oy+(y-a.vy+.5)*t
+        px,py=a.world_view.point((x,y))
         a.canvas.coords('coward_icon',px,py-t*.55)
         a.canvas.coords('world_player_ring',px-t*.31,py-t*.31,px+t*.31,py+t*.31)
         a.canvas.coords('world_player_arrow',px,py-t*.22,px+t*.16,py+t*.17,px,py+t*.09,px-t*.16,py+t*.17)
@@ -86,15 +86,15 @@ class RouteController:
     def paint(self):
         """Малює актуальне представлення даних на Canvas."""
         a=self.app;c=a.canvas;t=a.tile
-        def point(p):return a.ox+(p[0]-a.vx+.5)*t,a.oy+(p[1]-a.vy+.5)*t
+        def point(p):return a.world_view.point(p)
         positions=[(a.game.x,a.game.y)]+self.path
         for p,q in zip(positions,positions[1:]):
-            if all(a.vx<=v[0]<a.vx+23 and a.vy<=v[1]<a.vy+17 for v in (p,q)):
+            if all(a.world_view.visible(v) for v in (p,q)):
                 c.create_line(*point(p),*point(q),fill='#e6cc8a',width=2,dash=(4,4),tags='route')
         if self.path:
             end=self.path[-1]
-            if a.vx<=end[0]<a.vx+23 and a.vy<=end[1]<a.vy+17:
-                x,y=point(end);c.create_rectangle(x-t*.4,y-t*.4,x+t*.4,y+t*.4,outline='#e6cc8a',width=2,dash=(4,3),tags='route')
+            if a.world_view.visible(end):
+                c.create_polygon(*a.world_view.polygon(end,.85),fill='',outline='#e6cc8a',width=2,dash=(4,3),tags='route')
 
     def advance(self):
         """Просуває поточну анімацію або маршрут на наступний етап."""

@@ -39,7 +39,7 @@ def place(game,count):
     return selected
 
 def road_path(game,start):
-    from afterdays import neighbors
+    from world_hex import neighbors
     start=tuple(start);queue=deque([start]);previous={start:None}
     while queue:
         pos=queue.popleft()

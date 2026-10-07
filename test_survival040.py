@@ -82,10 +82,10 @@ class SurvivalTests(unittest.TestCase):
             self.assertEqual(g.survival['regen_remainder'],0)
 
     def test_one_survival_tick_per_cell_including_diagonal(self):
-        g=self.game();g.world_distance_remainder=.9;g.radiation['11,11']=4
+        g=self.game();g.y=11;g.world_distance_remainder=.9;g.radiation['11,12']=4
         with patch.object(g,'protection_stat',return_value=0):g.step(1,1)
-        self.assertEqual(g.turn,2);self.assertEqual(g.hunger,19);self.assertEqual(g.radiation_injury,5)
-        state=copy.deepcopy(g.survival);g.world[11][12]='water'
+        self.assertEqual(g.turn,1);self.assertEqual(g.hunger,19);self.assertEqual(g.radiation_injury,5)
+        state=copy.deepcopy(g.survival);g.world[12][12]='water'
         self.assertFalse(g.step(1,0));self.assertEqual(g.survival,state)
 
     def test_regen_not_on_battle_round_but_after_combat_once(self):

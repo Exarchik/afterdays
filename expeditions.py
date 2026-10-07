@@ -1,3 +1,4 @@
+import world_hex
 import hexgrid
 """Field tests, cache searches, generator repairs and tracked elite hunts."""
 import copy,math,json
@@ -30,7 +31,7 @@ class Game(contracts.Game):
         earned=xp/(40*max(1,self.region_level))
         positions=set(map(tuple,self.cities))|{tuple(s['pos']) for s in self.special_sites}
         for pos in positions:
-            if math.dist(pos,(self.x,self.y))>10:continue
+            if world_hex.distance(pos,(self.x,self.y))>10:continue
             record=self.record_at(pos);total=record.get('combat_fraction',0)+earned
             gain=math.floor(total+1e-9);record['combat_fraction']=max(0,total-gain)
             record['value']=min(100,record['value']+gain)
@@ -51,7 +52,7 @@ class Game(contracts.Game):
     def _kill_objectives(self,kind):
         """Оновлює завдання на вбивство з перевіркою типу ворога і зони."""
         for q in self.quests:
-            if q['status']=='active' and q['kind']=='hunt' and math.dist((self.x,self.y),self.cities[q['city']])<=10 and monster_rules.base_level(kind)<=q.get('level',1) and (q['target_kind'] is None or content.monster_id(q['target_kind'])==content.monster_id(kind)):
+            if q['status']=='active' and q['kind']=='hunt' and world_hex.distance((self.x,self.y),self.cities[q['city']])<=10 and monster_rules.base_level(kind)<=q.get('level',1) and (q['target_kind'] is None or content.monster_id(q['target_kind'])==content.monster_id(kind)):
                 q['progress']=min(q['goal'],q['progress']+1)
 
     def constrain_targets(self,offers):

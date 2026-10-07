@@ -1,3 +1,4 @@
+import world_hex
 import hexgrid
 from i18n import t as tr
 """v0.4 world encounters, combat feedback, damage profiles and shared storage."""
@@ -185,7 +186,7 @@ class Game(p.Game):
         """Знаходить зв’язану область прохідних клітинок від заданого старту."""
         seen={tuple(start)};queue=deque(seen)
         while queue:
-            for q in r.neighbors(*queue.popleft(),len(self.world[0]),len(self.world)):
+            for q in world_hex.neighbors(*queue.popleft(),len(self.world[0]),len(self.world)):
                 if q not in seen and self.passable(*q):seen.add(q);queue.append(q)
         return seen
 
@@ -220,15 +221,15 @@ class Game(p.Game):
             self.log(tr('adventure.0141') if self.road_event else tr('adventure.0142'))
             self.emit(tr('adventure.0143') if self.road_event else tr('adventure.0144'),color='#eea18b');return False
         self.x+=dx;self.y+=dy;self.traveler=None
-        distance=self.world_distance_remainder+math.hypot(dx,dy)
-        ticks=math.floor(distance+1e-9)
-        self.world_distance_remainder=max(0.0,distance-ticks)
+        # Array diagonals can be ordinary hex edges: exactly one turn per cell.
+        ticks=1
+        self.world_distance_remainder=0.0
         self.reveal(self.x,self.y,2)
         for _ in range(ticks):
             if not self._world_time_tick():return True
         self._visit_objectives()
         for site in list(self.special_sites):
-            if not site['found'] and math.dist(site['pos'],(self.x,self.y))<=1.5:self.discover(site['id'])
+            if not site['found'] and world_hex.distance(site['pos'],(self.x,self.y))<=1:self.discover(site['id'])
         if self.city is not None:self.log(tr('adventure.0150', v0=self.city_name(self.city)));return True
         if getattr(self,'_guided_trip',False):return True
         terrain=self.world[self.y][self.x]
@@ -605,6 +606,7 @@ class Game(p.Game):
             game.log(tr('adventure.0227'))
         remainder=game.world_distance_remainder
         if not isinstance(remainder,(int,float)) or not 0<=remainder<1:raise ValueError(tr('adventure.0226'))
+        game.world_distance_remainder=0.0  # Retire legacy square-diagonal fractions.
         game._events=[];game._last_battle=None
         if game.battle:
             game.battle.setdefault('corpses',[]);game.battle.setdefault('max_ap',game.max_ap)
@@ -619,7 +621,7 @@ class Game(p.Game):
         known=set(self.explored)
         for yy in range(max(0,y-radius),min(32,y+radius+1)):
             for xx in range(max(0,x-radius),min(len(self.world[0]),x+radius+1)):
-                if math.dist((x,y),(xx,yy))<=radius:known.add(f'{xx},{yy}')
+                if world_hex.distance((x,y),(xx,yy))<=radius:known.add(f'{xx},{yy}')
         self.explored=sorted(known)
         for n,pos in enumerate(self.cities):
             if self.revealed(*pos) and n not in self.known_cities:
