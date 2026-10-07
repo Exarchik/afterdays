@@ -1,3 +1,4 @@
+import quest_area
 """Tk rendering of the pointy-top hex overworld and its overview atlas."""
 from dataclasses import dataclass
 import math
@@ -146,7 +147,7 @@ def draw_areas(c,g,v):
             from expedition_ui import defense_cells
             cells=defense_cells(g,q);color='#e5b75b'
         elif q.get('area') and not g.quest_ready(q):
-            a,b,x,y=q['area'];cells={(xx,yy) for yy in range(b,y+1) for xx in range(a,x+1)}
+            cells=set(quest_area.cells(q))
             color='#8bc4e4' if q['kind']=='scout' else '#99dd9f'
         else:continue
         for pos in sorted(cells):

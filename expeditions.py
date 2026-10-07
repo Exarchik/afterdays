@@ -1,3 +1,4 @@
+import quest_area
 import world_hex
 import hexgrid
 """Field tests, cache searches, generator repairs and tracked elite hunts."""
@@ -106,11 +107,11 @@ class Game(contracts.Game):
             candidates=self.quest_locations(q)
             if kind=='cache':
                 reachable=self.player_reachable_world(self.cities[q['city']]);minimum=3 if q['level']>=3 else 1
-                candidates=[(x,y) for x,y in candidates if all(__import__('quest_limits').nearby(self,q,(xx,yy)) and (xx,yy) in reachable and [xx,yy] not in self.cities and minimum<=self.region_at(xx,yy)<=q['level']+1 for yy in range(y-1,y+2) for xx in range(x-1,x+2))]
+                candidates=[(x,y) for x,y in candidates if all(__import__('quest_limits').nearby(self,q,(xx,yy)) and (xx,yy) in reachable and [xx,yy] not in self.cities and minimum<=self.region_at(xx,yy)<=q['level']+1 for xx,yy in quest_area.around((x,y)))]
             if not candidates:self.log(tr('exp.no_location'));return False
             q['pos']=list(self.rng.choice(candidates))
             if kind=='cache':
-                x,y=q['pos'];q['area']=[x-1,y-1,x+1,y+1];q['cache_pos']=[self.rng.randint(x-1,x+1),self.rng.randint(y-1,y+1)];q['searched_cells']=[]
+                x,y=q['pos'];q['area']=[x-1,y-1,x+1,y+1];q['cache_pos']=list(self.rng.choice(quest_area.around((x,y))));q['area_shape']='hex7';q['searched_cells']=[]
             elif kind=='generator':
                 board=[1]*9
                 for _ in range(6):board=toggle_cells(board,self.rng.randrange(9))
@@ -133,8 +134,7 @@ class Game(contracts.Game):
         for q in self.quests:
             if q['status']!='active' or q['kind'] not in ('generator','cache','elite_hunt') or self.quest_ready(q):continue
             if q['kind']=='cache':
-                a,b,c,d=q['area']
-                if a<=self.x<=c and b<=self.y<=d:return q
+                if quest_area.contains(q,self.x,self.y):return q
             elif q.get('pos')==[self.x,self.y]:return q
         return None
 

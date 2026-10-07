@@ -1,3 +1,4 @@
+import quest_area
 import copy,json,math,tempfile,unittest
 from pathlib import Path
 from unittest.mock import patch,MagicMock
@@ -74,12 +75,13 @@ class ExpeditionTests(unittest.TestCase):
   g.bag[:]=[i for i in g.bag if i['kind']!=q['material']];self.assertFalse(g.repair_generator(q['id']))
   p.add_to(g.bag,p.parts(q['material_qty']) if q['material']=='parts' else p.fragments(q['material_qty']))
   self.assertTrue(g.repair_generator(q['id']));self.assertEqual(g.count(q['material']),0);self.assertFalse(g.repair_generator(q['id']));self.return_to_giver(g,q)
- def test_cache_all_nine_cells_once_and_return(self):
+ def test_cache_all_seven_cells_once_and_return(self):
   """Перевіряє сценарій «cache all nine cells once and return» та очікувані результати."""
   g,q=self.contract('cache');a,b,c,d=q['area'];target=q['cache_pos']
-  self.assertEqual((c-a+1)*(d-b+1),9)
+  self.assertEqual(len(quest_area.cells(q)),7)
   for y in range(b,d+1):
    for x in range(a,c+1):
+    if not quest_area.contains(q,x,y):continue
     if [x,y]==target:continue
     g.x,g.y=x,y;self.assertTrue(g.search());self.assertFalse(g.search());self.assertFalse(g.quest_ready(q))
   g.x,g.y=target;self.assertTrue(g.search());self.assertFalse(g.quest_ready(q));p.add_to(g.bag,p.parts(1));self.assertTrue(g.unlock_cache(q['id'],q['lock_target']));self.assertTrue(g.quest_ready(q));self.assertTrue(g.loot)

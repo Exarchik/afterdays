@@ -1,3 +1,4 @@
+import quest_area
 """Persistent multi-stage metro restoration using existing quest minigames."""
 import copy
 import math
@@ -42,7 +43,7 @@ class Game(update033.Game):
                 self.init_generator(s);s.update(material=self.rng.choice(['parts','fragments']),material_qty=self.rng.randint(2,6))
             elif kind=='radio':s.update(radio_target=[self.rng.randint(2,18) for _ in range(3)],radio_values=[10]*3,radio_attempts=0)
             elif kind=='cache':
-                x,y=pos;s.update(area=[x-1,y-1,x+1,y+1],cache_pos=[self.rng.randint(x-1,x+1),self.rng.randint(y-1,y+1)],searched_cells=[])
+                x,y=pos;s.update(area=[x-1,y-1,x+1,y+1],cache_pos=list(self.rng.choice(quest_area.around((x,y)))),searched_cells=[],area_shape='hex7')
             elif kind=='dungeon':s['dungeon_kind']=tr('metro035.vault')
             elif kind=='hermit':s.update(task=self.rng.choice(['food','med','parts','hunt']),need=self.rng.randint(2,5),kills=0,talked=False)
             steps.append(s)
@@ -74,7 +75,7 @@ class Game(update033.Game):
             if not q.get('metro_chain') or q['status']!='active' or q['metro_chain']['installed']:continue
             s=self.metro_step(q);here=s['pos']==[self.x,self.y]
             if s.get('area'):
-                a,b,c,d=s['area'];here=a<=self.x<=c and b<=self.y<=d
+                here=quest_area.contains(s,self.x,self.y)
             if here:result.append(q)
         return result
 

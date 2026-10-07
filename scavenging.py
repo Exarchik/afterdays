@@ -1,3 +1,4 @@
+import quest_area
 """Maintenance, area contracts and persistent draggable junkyard searches."""
 import copy, math
 import junk_physics
@@ -10,7 +11,7 @@ economy.BASE_REWARDS['junkyard']=100
 
 
 def in_area(q,x,y):
-    a,b,c,d=q['area'];return a<=x<=c and b<=y<=d
+    return quest_area.contains(q,x,y)
 
 def contains(obj,x,y):return obj['x']<=x<=obj['x']+obj['w'] and obj['y']<=y<=obj['y']+obj['h']
 
@@ -91,7 +92,7 @@ class Game(expeditions.Game):
         """Повертає актуальний список доступних завдань квестодавця."""
         offers=super().mayor_offers()
         for q in offers:
-            if q['kind']=='scout' and q['status']=='offered':q['goal']=9
+            if q['kind']=='scout' and q['status']=='offered':q['goal']=7
         return offers
 
     def area_candidates(self,q):
@@ -99,7 +100,7 @@ class Game(expeditions.Game):
         reachable=self.player_reachable_world(self.cities[q['city']]);minimum=3 if q['level']>=3 else 1
         def valid(pos):
             x,y=pos
-            return all(__import__('quest_limits').nearby(self,q,(xx,yy)) and (xx,yy) in reachable and [xx,yy] not in self.cities and minimum<=self.region_at(xx,yy)<=q['level']+1 for yy in range(y-1,y+2) for xx in range(x-1,x+2))
+            return all(__import__('quest_limits').nearby(self,q,(xx,yy)) and (xx,yy) in reachable and [xx,yy] not in self.cities and minimum<=self.region_at(xx,yy)<=q['level']+1 for xx,yy in quest_area.around((x,y)))
         nearby=[pos for pos in self.quest_locations(q) if valid(pos)]
         if nearby:return nearby
         occupied={tuple(t['pos']) for t in self.quests if t.get('pos') and t['status']=='active' and t['id']!=q['id']}
@@ -107,9 +108,9 @@ class Game(expeditions.Game):
 
     def setup_area(self,q,candidates):
         """Призначає область пошуку та початковий стан її дослідження."""
-        x,y=self.rng.choice(candidates);q.update(pos=[x,y],area=[x-1,y-1,x+1,y+1],searched_cells=[],visited_cells=[])
-        q['goal']=9 if q['kind']=='scout' else 1;q['progress']=0
-        if q['kind']=='retrieve':q['relic_pos']=[self.rng.randint(x-1,x+1),self.rng.randint(y-1,y+1)]
+        x,y=self.rng.choice(candidates);q.update(pos=[x,y],area=[x-1,y-1,x+1,y+1],searched_cells=[],visited_cells=[],area_shape='hex7')
+        q['goal']=7 if q['kind']=='scout' else 1;q['progress']=0
+        if q['kind']=='retrieve':q['relic_pos']=list(self.rng.choice(quest_area.around((x,y))))
 
     def init_generator(self,q):
         """Готує послідовність рубильників і стан генератора."""
@@ -267,7 +268,7 @@ class Game(expeditions.Game):
             desc=tr('scav.desc_'+q['kind'])
             if q.get('area'):desc+='\n'+tr('exp.area',x=q['area'][0],y=q['area'][1],xx=q['area'][2],yy=q['area'][3])
             elif q.get('pos'):desc+='\n'+tr('exp.point',x=q['pos'][0],y=q['pos'][1])
-            return tr('exp.quest_text',title=q['title'],level=q['level'],desc=desc,progress=q['progress'],goal=9 if q['kind']=='scout' else q['goal'],city=self.city_name(q['city']),money=q['reward'],xp=q['xp_reward'])
+            return tr('exp.quest_text',title=q['title'],level=q['level'],desc=desc,progress=q['progress'],goal=7 if q['kind']=='scout' else q['goal'],city=self.city_name(q['city']),money=q['reward'],xp=q['xp_reward'])
         return super().quest_text(q)
 
     @classmethod
@@ -281,4 +282,5 @@ class Game(expeditions.Game):
             if q['kind'] in ('scout','retrieve') and 'metro_city' not in q and not q.get('area') and not game.quest_ready(q):
                 pool=game.area_candidates(q)
                 if pool:game.setup_area(q,pool)
+        quest_area.migrate_game(game)
         return game

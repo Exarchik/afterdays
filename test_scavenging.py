@@ -1,3 +1,4 @@
+import quest_area
 import copy,json,math,tempfile,unittest
 from pathlib import Path
 from unittest.mock import patch,MagicMock
@@ -70,18 +71,18 @@ class ScavengingTests(unittest.TestCase):
   p.add_to(g.bag,p.fragments(1000));self.assertTrue(g.craft_module('fragments',1000));self.assertEqual(g.count('fragments'),0)
   for n in (10,75,150,500,1000):self.assertAlmostEqual(sum(g.craft_odds(n)),100)
   g.xp=__import__('progression').xp_for_level(7);self.assertLess(g.craft_odds(150)[4],g.craft_odds(1000)[4])
- def test_scout_visits_nine_distinct_cells(self):
+ def test_scout_visits_seven_distinct_cells(self):
   """Перевіряє сценарій «scout visits nine distinct cells» та очікувані результати."""
-  g,q=self.quest('scout');x,y,xx,yy=q['area'];self.assertEqual(q['goal'],9)
+  g,q=self.quest('scout');x,y,xx,yy=q['area'];self.assertEqual(q['goal'],7)
   g.x,g.y=q['pos'];g._visit_objectives();g._visit_objectives();self.assertEqual(q['progress'],1);self.assertFalse(g.quest_ready(q))
-  for cy in range(y,yy+1):
-   for cx in range(x,xx+1):g.x,g.y=cx,cy;g._visit_objectives()
+  for cx,cy in quest_area.cells(q):g.x,g.y=cx,cy;g._visit_objectives()
   self.assertTrue(g.quest_ready(q));g.x,g.y=g.cities[q['city']];self.assertTrue(g.turn_in(q['id']))
  def test_relic_search_no_fixed_center_shortcut(self):
   """Перевіряє сценарій «relic search no fixed center shortcut» та очікувані результати."""
   g,q=self.quest('retrieve');x,y,xx,yy=q['area'];self.assertFalse(any(i.get('quest_id')==q['id'] for i in g.bag))
   for cy in range(y,yy+1):
    for cx in range(x,xx+1):
+    if not quest_area.contains(q,cx,cy):continue
     if [cx,cy]==q['relic_pos']:continue
     g.x,g.y=cx,cy;before=g.turn;self.assertTrue(g.search());self.assertEqual(g.turn,before+1);self.assertFalse(g.quest_ready(q));self.assertFalse(g.search())
   g.x,g.y=q['relic_pos'];self.assertTrue(g.search());self.assertTrue(g.quest_ready(q));self.assertEqual(sum(i.get('quest_id')==q['id'] for i in g.bag),1)
@@ -90,8 +91,7 @@ class ScavengingTests(unittest.TestCase):
   """Перевіряє сценарій «area cells obey location bounds» та очікувані результати."""
   for kind in ('scout','retrieve'):
    g,q=self.quest(kind);reachable=g.player_reachable_world(g.cities[q['city']]);x,y,xx,yy=q['area']
-   for cy in range(y,yy+1):
-    for cx in range(x,xx+1):self.assertIn((cx,cy),reachable);self.assertLessEqual(g.region_at(cx,cy),q['level']+1)
+   for cx,cy in quest_area.cells(q):self.assertIn((cx,cy),reachable);self.assertLessEqual(g.region_at(cx,cy),q['level']+1)
  def test_generator_wrong_order_resets_and_saves(self):
   """Перевіряє сценарій «generator wrong order resets and saves» та очікувані результати."""
   g,q=self.quest('generator');g.x,g.y=q['pos'];order=q['generator_order'][:];self.assertEqual(sorted(order),list(range(5)))
@@ -145,6 +145,6 @@ class ScavengingTests(unittest.TestCase):
   g,q=self.quest('generator');q.pop('generator_order');q.pop('generator_input');q['generator_board']=[1]*9;reward=q['reward']
   h=self.save_reload(g);self.assertEqual(len(h.quests[-1]['generator_order']),5);self.assertEqual(h.quests[-1]['reward'],reward)
   g,q=self.quest('scout');q.pop('area');q.pop('visited_cells');q['goal']=1
-  h=self.save_reload(g);self.assertEqual(h.quests[-1]['goal'],9);self.assertEqual(len(h.quests[-1]['area']),4)
+  h=self.save_reload(g);self.assertEqual(h.quests[-1]['goal'],7);self.assertEqual(len(h.quests[-1]['area']),4)
 
 if __name__=='__main__':unittest.main()
