@@ -1,3 +1,4 @@
+import world_hex
 import hexgrid
 from i18n import t as tr
 """v0.4 world encounters, combat feedback, damage profiles and shared storage."""
@@ -146,7 +147,7 @@ class Game(p.Game):
                 rx,ry=self.rng.randint(1,5),self.rng.randint(1,4)
                 for y in range(max(0,cy-ry),min(32,cy+ry+1)):
                     for x in range(max(0,cx-rx),min(len(self.world[0]),cx+rx+1)):
-                        if ((x-cx)/rx)**2+((y-cy)/ry)**2<=1 and self.world[y][x] not in ('road','city') and math.dist((x,y),(5,5))>2:
+                        if ((x-cx)/rx)**2+((y-cy)/ry)**2<=1 and self.world[y][x] not in ('road','city') and world_hex.distance((x,y),(5,5))>2:
                             self.world[y][x]=kind
         reachable=self.reachable_world((5,5))
         self.build_radiation()
@@ -160,7 +161,7 @@ class Game(p.Game):
             cy=self.rng.choices(range(2,30),weights=[y**2 for y in range(2,30)])[0];radius=self.rng.randint(1,5)
             for y in range(max(0,cy-radius),min(32,cy+radius+1)):
                 for x in range(max(0,cx-radius),min(len(self.world[0]),cx+radius+1)):
-                    if not (x<len(self.world[0])//2 and y<16) and math.dist((x,y),(cx,cy))<=radius and self.passable(x,y) and [x,y] not in self.cities and math.dist((x,y),(5,5))>2:
+                    if not (x<len(self.world[0])//2 and y<16) and world_hex.distance((x,y),(cx,cy))<=radius and self.passable(x,y) and [x,y] not in self.cities and world_hex.distance((x,y),(5,5))>2:
                         self.radiation[f'{x},{y}']=self.rng.randint(2,4)
 
     def add_sites(self):
@@ -169,7 +170,7 @@ class Game(p.Game):
             reachable=self.reachable_world((5,5));existing={s['name'] for s in self.special_sites}
             for name,npc,role in SITES[:16]:
                 if name in existing:continue
-                pool=[p for p in sorted(reachable) if 1<=p[0]<len(self.world[0])-1 and 1<=p[1]<len(self.world)-1 and self.world[p[1]][p[0]] not in ('city','road','site') and all(math.dist(p,c)>2 for c in self.cities) and all(math.dist(p,s['pos'])>=7 for s in self.special_sites)]
+                pool=[p for p in sorted(reachable) if 1<=p[0]<len(self.world[0])-1 and 1<=p[1]<len(self.world)-1 and self.world[p[1]][p[0]] not in ('city','road','site') and all(world_hex.distance(p,c)>2 for c in self.cities) and all(world_hex.distance(p,s['pos'])>=7 for s in self.special_sites)]
                 if not pool:break
                 pos=self.rng.choice(pool)
                 self.special_sites.append(dict(id=r.uid(),name=name,npc=npc,role=role,pos=list(pos),found=False,city_id=None))
@@ -185,7 +186,7 @@ class Game(p.Game):
         """Знаходить зв’язану область прохідних клітинок від заданого старту."""
         seen={tuple(start)};queue=deque(seen)
         while queue:
-            for q in r.neighbors(*queue.popleft(),len(self.world[0]),len(self.world)):
+            for q in world_hex.neighbors(*queue.popleft(),len(self.world[0]),len(self.world)):
                 if q not in seen and self.passable(*q):seen.add(q);queue.append(q)
         return seen
 
@@ -197,7 +198,7 @@ class Game(p.Game):
     def discover(self,site_id=None):
         """Відкриває найближчі локації й оновлює туман війни."""
         hidden=[s for s in self.special_sites if not s['found']]
-        site=next((s for s in hidden if s['id']==site_id),None) if site_id else min(hidden,key=lambda s:math.dist(s['pos'],(self.x,self.y)),default=None)
+        site=next((s for s in hidden if s['id']==site_id),None) if site_id else min(hidden,key=lambda s:world_hex.distance(s['pos'],(self.x,self.y)),default=None)
         if not site:return False
         site['found']=True;site['city_id']=len(self.cities)
         self.cities.append(site['pos'][:]);self.city_names.append(site['name'])
@@ -220,15 +221,15 @@ class Game(p.Game):
             self.log(tr('adventure.0141') if self.road_event else tr('adventure.0142'))
             self.emit(tr('adventure.0143') if self.road_event else tr('adventure.0144'),color='#eea18b');return False
         self.x+=dx;self.y+=dy;self.traveler=None
-        distance=self.world_distance_remainder+math.hypot(dx,dy)
-        ticks=math.floor(distance+1e-9)
-        self.world_distance_remainder=max(0.0,distance-ticks)
+        # Array diagonals can be ordinary hex edges: exactly one turn per cell.
+        ticks=1
+        self.world_distance_remainder=0.0
         self.reveal(self.x,self.y,2)
         for _ in range(ticks):
             if not self._world_time_tick():return True
         self._visit_objectives()
         for site in list(self.special_sites):
-            if not site['found'] and math.dist(site['pos'],(self.x,self.y))<=1.5:self.discover(site['id'])
+            if not site['found'] and world_hex.distance(site['pos'],(self.x,self.y))<=1:self.discover(site['id'])
         if self.city is not None:self.log(tr('adventure.0150', v0=self.city_name(self.city)));return True
         if getattr(self,'_guided_trip',False):return True
         terrain=self.world[self.y][self.x]
@@ -574,7 +575,7 @@ class Game(p.Game):
                 if not game.passable(*pos):game.world[pos[1]][pos[0]]='waste'
                 # Carve a short connector only if the old position is isolated by new obstacles.
                 if tuple(pos) not in game.reachable_world(tuple(game.cities[0])):
-                    x,y=pos;cx,cy=min(game.cities[:game.main_city_count],key=lambda c:math.dist(c,pos))
+                    x,y=pos;cx,cy=min(game.cities[:game.main_city_count],key=lambda c:world_hex.distance(c,pos))
                     while x!=cx:
                         x+=1 if cx>x else -1
                         if not game.passable(x,y):game.world[y][x]='waste'
@@ -605,6 +606,7 @@ class Game(p.Game):
             game.log(tr('adventure.0227'))
         remainder=game.world_distance_remainder
         if not isinstance(remainder,(int,float)) or not 0<=remainder<1:raise ValueError(tr('adventure.0226'))
+        game.world_distance_remainder=0.0  # Retire legacy square-diagonal fractions.
         game._events=[];game._last_battle=None
         if game.battle:
             game.battle.setdefault('corpses',[]);game.battle.setdefault('max_ap',game.max_ap)
@@ -619,7 +621,7 @@ class Game(p.Game):
         known=set(self.explored)
         for yy in range(max(0,y-radius),min(32,y+radius+1)):
             for xx in range(max(0,x-radius),min(len(self.world[0]),x+radius+1)):
-                if math.dist((x,y),(xx,yy))<=radius:known.add(f'{xx},{yy}')
+                if world_hex.distance((x,y),(xx,yy))<=radius:known.add(f'{xx},{yy}')
         self.explored=sorted(known)
         for n,pos in enumerate(self.cities):
             if self.revealed(*pos) and n not in self.known_cities:

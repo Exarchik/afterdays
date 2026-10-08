@@ -1,3 +1,4 @@
+import world_hex
 """Starter-zone edge barriers and a permanent mayor-issued checkpoint permit."""
 from collections import deque
 import afterdays as r
@@ -34,8 +35,8 @@ class Border:
             self._border_edges=[]
             for y in range(32):
                 for x in range(len(self.world[0])):
-                    for b in ((x+1,y),(x,y+1)):
-                        if b[0]<len(self.world[0]) and b[1]<32 and self.border_edge((x,y),b):self._border_edges.append(((x,y),b))
+                    for b in world_hex.neighbors(x,y,len(self.world[0]),len(self.world)):
+                        if b>(x,y) and self.border_edge((x,y),b):self._border_edges.append(((x,y),b))
         return self._border_edges
 
     def can_step(self,dx,dy):
@@ -45,7 +46,7 @@ class Border:
     def step(self,dx,dy):
         """Виконує крок світом і запускає пов’язані з ходом події."""
         a=(self.x,self.y);b=(self.x+dx,self.y+dy)
-        if not self.battle and abs(dx)+abs(dy)==1 and self.passable(*b) and not self.can_cross(a,b):
+        if not self.battle and b in world_hex.adjacent(a) and self.passable(*b) and not self.can_cross(a,b):
             text=tr('border.locked') if self.checkpoint(a,b) else tr('border.fence')
             self.log(text);self.emit(text,color='#eea18b');return False
         return super().step(dx,dy)
@@ -55,7 +56,7 @@ class Border:
         seen={tuple(start)};queue=deque(seen)
         while queue:
             a=queue.popleft()
-            for b in r.neighbors(*a,len(self.world[0]),len(self.world)):
+            for b in world_hex.neighbors(*a,len(self.world[0]),len(self.world)):
                 if b not in seen and self.passable(*b) and self.can_cross(a,b):seen.add(b);queue.append(b)
         return seen
 

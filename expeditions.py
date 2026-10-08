@@ -1,3 +1,5 @@
+import quest_area
+import world_hex
 import hexgrid
 """Field tests, cache searches, generator repairs and tracked elite hunts."""
 import copy,math,json
@@ -30,7 +32,7 @@ class Game(contracts.Game):
         earned=xp/(40*max(1,self.region_level))
         positions=set(map(tuple,self.cities))|{tuple(s['pos']) for s in self.special_sites}
         for pos in positions:
-            if math.dist(pos,(self.x,self.y))>10:continue
+            if world_hex.distance(pos,(self.x,self.y))>10:continue
             record=self.record_at(pos);total=record.get('combat_fraction',0)+earned
             gain=math.floor(total+1e-9);record['combat_fraction']=max(0,total-gain)
             record['value']=min(100,record['value']+gain)
@@ -51,7 +53,7 @@ class Game(contracts.Game):
     def _kill_objectives(self,kind):
         """Оновлює завдання на вбивство з перевіркою типу ворога і зони."""
         for q in self.quests:
-            if q['status']=='active' and q['kind']=='hunt' and math.dist((self.x,self.y),self.cities[q['city']])<=10 and monster_rules.base_level(kind)<=q.get('level',1) and (q['target_kind'] is None or content.monster_id(q['target_kind'])==content.monster_id(kind)):
+            if q['status']=='active' and q['kind']=='hunt' and world_hex.distance((self.x,self.y),self.cities[q['city']])<=10 and monster_rules.base_level(kind)<=q.get('level',1) and (q['target_kind'] is None or content.monster_id(q['target_kind'])==content.monster_id(kind)):
                 q['progress']=min(q['goal'],q['progress']+1)
 
     def constrain_targets(self,offers):
@@ -105,11 +107,11 @@ class Game(contracts.Game):
             candidates=self.quest_locations(q)
             if kind=='cache':
                 reachable=self.player_reachable_world(self.cities[q['city']]);minimum=3 if q['level']>=3 else 1
-                candidates=[(x,y) for x,y in candidates if all(__import__('quest_limits').nearby(self,q,(xx,yy)) and (xx,yy) in reachable and [xx,yy] not in self.cities and minimum<=self.region_at(xx,yy)<=q['level']+1 for yy in range(y-1,y+2) for xx in range(x-1,x+2))]
+                candidates=[(x,y) for x,y in candidates if all(__import__('quest_limits').nearby(self,q,(xx,yy)) and (xx,yy) in reachable and [xx,yy] not in self.cities and minimum<=self.region_at(xx,yy)<=q['level']+1 for xx,yy in quest_area.around((x,y)))]
             if not candidates:self.log(tr('exp.no_location'));return False
             q['pos']=list(self.rng.choice(candidates))
             if kind=='cache':
-                x,y=q['pos'];q['area']=[x-1,y-1,x+1,y+1];q['cache_pos']=[self.rng.randint(x-1,x+1),self.rng.randint(y-1,y+1)];q['searched_cells']=[]
+                x,y=q['pos'];q['area']=[x-1,y-1,x+1,y+1];q['cache_pos']=list(self.rng.choice(quest_area.around((x,y))));q['area_shape']='hex7';q['searched_cells']=[]
             elif kind=='generator':
                 board=[1]*9
                 for _ in range(6):board=toggle_cells(board,self.rng.randrange(9))
@@ -132,8 +134,7 @@ class Game(contracts.Game):
         for q in self.quests:
             if q['status']!='active' or q['kind'] not in ('generator','cache','elite_hunt') or self.quest_ready(q):continue
             if q['kind']=='cache':
-                a,b,c,d=q['area']
-                if a<=self.x<=c and b<=self.y<=d:return q
+                if quest_area.contains(q,self.x,self.y):return q
             elif q.get('pos')==[self.x,self.y]:return q
         return None
 

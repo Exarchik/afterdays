@@ -1,3 +1,4 @@
+import world_hex
 """Local reputation, persistent shop shelves and quest boards."""
 import math
 import afterdays as r
@@ -65,7 +66,7 @@ class Reputation:
         # Direct neighbours only. Hidden sites have stable coordinate-based records.
         positions=set(map(tuple,self.cities))|{tuple(s['pos']) for s in self.special_sites}
         for pos in positions:
-            if math.dist(origin,pos)<=10:
+            if world_hex.distance(origin,pos)<=10:
                 target=self.record_at(pos)
                 target['value']=min(100,target['value']+gain)
         self.schedule_thanks()

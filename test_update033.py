@@ -113,8 +113,10 @@ class Update033Tests(unittest.TestCase):
         from unittest.mock import MagicMock
         from adventure_ui import Effects
         g=r.Game(2);app=SimpleNamespace(game=g,root=MagicMock(),canvas=MagicMock(),tile=20,ox=0,oy=0,vx=29,vy=9)
+        from world_map import layout
+        app.world_view=layout(800,600,112,32,(30,10))
         fx=Effects(app);app.fx=fx;g.emit(kind='reveal',scene='world');g._events[-1]['cells']=[[30,10],[31,10]]
-        fx.ingest();self.assertTrue(fx.blocked);self.assertEqual(fx.reveal_focus(),(30,10));fx.render();self.assertEqual(app.canvas.create_rectangle.call_count,2)
+        fx.ingest();self.assertTrue(fx.blocked);self.assertEqual(fx.reveal_focus(),(30,10));fx.render();self.assertEqual(app.canvas.create_polygon.call_count,2)
 
     def test_cartographer_highlight(self):
         """Map buying emits exactly the newly revealed cells."""

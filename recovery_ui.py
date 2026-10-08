@@ -2,16 +2,18 @@
 import tkinter as tk
 from tkinter import ttk
 
-def draw_markers(canvas,game,t,ox,oy,revealed):
+def draw_markers(canvas,game,t,ox,oy,revealed,point=None):
     x,y=game.respawn_pos
     if revealed(x,y):
-        px,py=ox+(x+.83)*t,oy+(y+.12)*t;size=max(5,min(13,t*.38))
+        px,py=point((x,y)) if point else (ox+(x+.5)*t,oy+(y+.5)*t)
+        px+=.33*t;py-=.38*t;size=max(5,min(13,t*.38))
         canvas.create_line(px,py,px,py+size*1.4,fill='#78e89a',width=2,tags='respawn_flag')
         canvas.create_polygon(px,py,px+size,py+size*.3,px,py+size*.65,fill='#49cc77',outline='#a4f3ba',tags='respawn_flag')
     for grave in game.graves:
         x,y=grave['pos']
         if not revealed(x,y):continue
-        px,py=ox+(x+.5)*t,oy+(y+.5)*t;s=max(5,min(16,t*.36))
+        px,py=point((x,y)) if point else (ox+(x+.5)*t,oy+(y+.5)*t)
+        s=max(5,min(16,t*.36))
         canvas.create_oval(px-s*.65,py-s,px+s*.65,py,fill='#aeb6b3',outline='#dae3dc',tags='grave_marker')
         canvas.create_rectangle(px-s*.65,py-s*.45,px+s*.65,py+s*.7,fill='#aeb6b3',outline='#dae3dc',tags='grave_marker')
         canvas.create_line(px,py-s*.4,px,py+s*.4,fill='#34443b',width=2,tags='grave_marker')

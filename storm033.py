@@ -1,3 +1,4 @@
+import world_hex
 """Persistent radiation storms advance by world turns and eventually leave the map."""
 import random
 from i18n import t as tr
@@ -25,10 +26,10 @@ class Storms:
         s=self.storm
         if not s:return []
         x,y=s['pos'];r=s['radius']
-        return [(a,b) for b in range(max(0,y-r),min(len(self.world),y+r+1)) for a in range(max(0,x-r),min(len(self.world[0]),x+r+1)) if (a-x)**2+(b-y)**2<=r*r]
+        return [(a,b) for a,b in world_hex.disk((x,y),r) if 0<=a<len(self.world[0]) and 0<=b<len(self.world)]
 
     def advance_storm(self):
-        """Advance once per elapsed turn; spawn occasionally and drift one orthogonal cell per tick."""
+        """Advance once per elapsed turn; spawn occasionally and drift one hex edge per tick."""
         state=self.reputation_state;last=state.get('storm033_turn',self.turn-1)
         for tick in range(last+1,self.turn+1):
             rng=random.Random(f'storm033:{self.cities[:self.main_city_count]}:{tick}')
@@ -41,7 +42,7 @@ class Storms:
                 continue
             s['age']+=1
             if s['age']>2*(len(self.world)+len(self.world[0])) or rng.random()<.7:s['pos'][0]+=s['direction']
-            else:s['pos'][1]+=rng.choice([-1,1])
+            else:s['pos']=list(world_hex.adjacent(s['pos'])[rng.choice((1,5) if s['direction']==1 else (2,4))])
             x,y=s['pos'];r=s['radius']
             if x < -r or y < -r or x>=len(self.world[0])+r or y>=len(self.world)+r:state.pop('storm033',None)
         state['storm033_turn']=self.turn

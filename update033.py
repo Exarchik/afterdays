@@ -1,3 +1,4 @@
+import world_hex
 """Shared-storage modules, maintenance costs and exploration updates for v0.33."""
 import copy,math
 import update032,combat033,storm033
@@ -100,7 +101,7 @@ class Game(combat033.Combat,storm033.Storms,update032.Game):
         """Check mayor-map eligibility after the quest's reputation reward has been applied."""
         ok=super().turn_in(ident);city=self.city
         if ok and city is not None and city<self.main_city_count and city in self.mayors and city not in self.map_rewards and self.reputation(city)>50 and sum(q['status']=='done' and q['city']==city for q in self.quests)>5:
-            nearby=sorted((n for n in range(self.main_city_count) if n not in self.known_cities),key=lambda n:math.dist(self.cities[n],self.cities[city]))[:1]
+            nearby=sorted((n for n in range(self.main_city_count) if n not in self.known_cities),key=lambda n:world_hex.distance(self.cities[n],self.cities[city]))[:1]
             if nearby:
                 self.map_rewards.append(city);self.reveal(*self.cities[nearby[0]],0)
                 self._mayor_notice=tr('border.city_reveal',city=self.city_name(city),destination=self.city_name(nearby[0]));self.log(self._mayor_notice)

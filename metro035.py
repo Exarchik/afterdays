@@ -1,3 +1,5 @@
+import world_hex
+import quest_area
 """Persistent multi-stage metro restoration using existing quest minigames."""
 import copy
 import math
@@ -25,7 +27,7 @@ class Game(update033.Game):
         areas=self.area_candidates(q)
         origin=self.cities[q['city']];reachable=self.player_reachable_world(origin)
         minimum=3 if q['level']>=3 else 1
-        cities=[pos for pos in self.cities[:self.main_city_count] if tuple(pos) in reachable and math.dist(pos,origin)<=25 and minimum<=self.region_at(*pos)<=q['level']+1]
+        cities=[pos for pos in self.cities[:self.main_city_count] if tuple(pos) in reachable and world_hex.distance(pos,origin)<=25 and minimum<=self.region_at(*pos)<=q['level']+1]
         available=[k for k in KINDS if (k!='cache' or areas) and (k!='archive' or cities)]
         last=self.rng.choice(['dungeon']+(['cache'] if areas else []))
         types=self.rng.sample([k for k in available if k!=last],self.rng.randint(1,min(4,len(available)-1)))+[last]
@@ -42,7 +44,7 @@ class Game(update033.Game):
                 self.init_generator(s);s.update(material=self.rng.choice(['parts','fragments']),material_qty=self.rng.randint(2,6))
             elif kind=='radio':s.update(radio_target=[self.rng.randint(2,18) for _ in range(3)],radio_values=[10]*3,radio_attempts=0)
             elif kind=='cache':
-                x,y=pos;s.update(area=[x-1,y-1,x+1,y+1],cache_pos=[self.rng.randint(x-1,x+1),self.rng.randint(y-1,y+1)],searched_cells=[])
+                x,y=pos;s.update(area=[x-1,y-1,x+1,y+1],cache_pos=list(self.rng.choice(quest_area.around((x,y)))),searched_cells=[],area_shape='hex7')
             elif kind=='dungeon':s['dungeon_kind']=tr('metro035.vault')
             elif kind=='hermit':s.update(task=self.rng.choice(['food','med','parts','hunt']),need=self.rng.randint(2,5),kills=0,talked=False)
             steps.append(s)
@@ -74,7 +76,7 @@ class Game(update033.Game):
             if not q.get('metro_chain') or q['status']!='active' or q['metro_chain']['installed']:continue
             s=self.metro_step(q);here=s['pos']==[self.x,self.y]
             if s.get('area'):
-                a,b,c,d=s['area'];here=a<=self.x<=c and b<=self.y<=d
+                here=quest_area.contains(s,self.x,self.y)
             if here:result.append(q)
         return result
 
@@ -188,7 +190,7 @@ class Game(update033.Game):
         for q in self.quests:
             if q.get('metro_chain') and q['status']=='active':
                 s=self.metro_step(q)
-                if s['metro_role']=='hermit' and s['task']=='hunt' and s['talked'] and math.dist(s['pos'],(self.x,self.y))<=10:
+                if s['metro_role']=='hermit' and s['task']=='hunt' and s['talked'] and world_hex.distance(s['pos'],(self.x,self.y))<=10:
                     s['kills']=min(s['need'],s['kills']+1)
 
     def metro_chest(self):

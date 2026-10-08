@@ -1,3 +1,4 @@
+import world_hex
 import copy,json,math,random,tempfile,unittest
 from pathlib import Path
 from types import SimpleNamespace
@@ -13,7 +14,7 @@ class SettlementTests(unittest.TestCase):
   """Перевіряє сценарій «nearest chain has five unique stations» та очікувані результати."""
   for seed in range(10):
    g=r.Game(seed);order=metro_routes.station_order(g);self.assertEqual(order[0],0);self.assertEqual(set(order),set(frontier.METRO_CITIES));self.assertEqual(len(order),5)
-   for n in range(1,5):self.assertEqual(order[n],min(order[n:],key=lambda k:(math.dist(g.cities[order[n-1]],g.cities[k]),k)))
+   for n in range(1,5):self.assertEqual(order[n],min(order[n:],key=lambda k:(world_hex.distance(g.cities[order[n-1]],g.cities[k]),k)))
    self.assertIn(10,g.mayors)
  def test_fog_masks_segments_and_unknown_branch_dim(self):
   """Перевіряє сценарій «fog masks segments and unknown branch dim» та очікувані результати."""
@@ -21,7 +22,7 @@ class SettlementTests(unittest.TestCase):
   metro_routes.draw(c,g,1,0,0,lambda x,y:True);self.assertEqual(c.create_line.call_count,4);self.assertEqual(c.create_oval.call_count,5)
   self.assertTrue(all(call.kwargs['fill']=='#47615d' for call in c.create_line.call_args_list))
   pieces=list(metro_routes.visible_segments([0,0],[10,0],lambda x,y:x<3 or x>=7))
-  self.assertEqual(len(pieces),2);self.assertLessEqual(pieces[0][2],3);self.assertGreaterEqual(pieces[1][0],7)
+  self.assertEqual(len(pieces),2);self.assertLessEqual(pieces[0][2],world_hex.center((3,0))[0]);self.assertGreaterEqual(pieces[1][0],world_hex.center((6,0))[0])
  def test_city_neighbors_safe_and_saved_world_changes_only_there(self):
   """Перевіряє сценарій «city neighbors safe and saved world changes only there» та очікувані результати."""
   fixture=Path(__file__).parent/'tests_fixtures/save_v0151.json';old=json.loads(fixture.read_text());g=r.Game.load(fixture)

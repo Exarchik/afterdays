@@ -1,3 +1,4 @@
+import world_hex
 """Persistent torn-map puzzles and settlement recruitment contracts."""
 import copy
 import math
@@ -94,8 +95,8 @@ class Game(cache_events.Game):
 
     def create_settler(self,role):
         """Створює мандрівного кандидата на поселення та його завдання."""
-        if role not in ('smith','tech','mayor') or not any(math.dist((self.x,self.y),self.cities[i])<=25 for i in self.eligible_settlements(role)) or any(n['role']==role and n['state']!='settled' for n in self.settlers()):return None
-        city=min(range(self.main_city_count),key=lambda i:math.dist(self.cities[i],(self.x,self.y)))
+        if role not in ('smith','tech','mayor') or not any(world_hex.distance((self.x,self.y),self.cities[i])<=25 for i in self.eligible_settlements(role)) or any(n['role']==role and n['state']!='settled' for n in self.settlers()):return None
+        city=min(range(self.main_city_count),key=lambda i:world_hex.distance(self.cities[i],(self.x,self.y)))
         q=self.new_restoration_quest('recruit_'+role,city);q['pos']=[self.x,self.y];q['issuer_pos']=[self.x,self.y];q['goal']=1
         n=dict(id=r.uid(),role=role,pos=[self.x,self.y],state='offered',city=None,quest=q)
         self.settlers().append(n)

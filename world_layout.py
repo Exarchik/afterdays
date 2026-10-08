@@ -1,3 +1,4 @@
+import world_hex
 """Seeded town placement and a connected, varying overworld road network."""
 import math
 import random
@@ -14,10 +15,10 @@ def build(rng_state):
     for col,row in sectors:
         candidates=[(x,y) for y in range(max(2,row*10+2),min(30,(row+1)*10))
                     for x in range(max(2,col*WIDTH//5+2),min(WIDTH-2,(col+1)*WIDTH//5))
-                    if all(math.dist((x,y),p)>=6 for p in cities)]
+                    if all(world_hex.distance((x,y),p)>=6 for p in cities)]
         # Fixed sectors have enough space; a farthest point also guarantees termination.
         if not candidates:
-            candidates=[max(((x,y) for y in range(2,30) for x in range(2,WIDTH-2)),key=lambda p:min(math.dist(p,c) for c in cities))]
+            candidates=[max(((x,y) for y in range(2,30) for x in range(2,WIDTH-2)),key=lambda p:min(world_hex.distance(p,c) for c in cities))]
         cities.append(list(rng.choice(candidates)))
     available=set(range(1,CITY_COUNT));selected=[0]
     for target in (WIDTH*.25,WIDTH*.5,WIDTH*.75,WIDTH-4):
@@ -28,22 +29,12 @@ def build(rng_state):
     world=[[rng.choices(('waste','forest','ruin'),(65,23,12))[0] for _ in range(WIDTH)] for _ in range(HEIGHT)]
     connected={0};edges=[]
     while len(connected)<len(cities):
-        distance,a,b=min((math.dist(cities[a],cities[b]),a,b) for a in sorted(connected) for b in range(len(cities)) if b not in connected)
+        distance,a,b=min((world_hex.distance(cities[a],cities[b]),a,b) for a in sorted(connected) for b in range(len(cities)) if b not in connected)
         edges.append((a,b));connected.add(b)
     extra=[(a,b) for a in range(CITY_COUNT) for b in range(a+1,CITY_COUNT) if (a,b) not in edges and (b,a) not in edges]
-    extra.sort(key=lambda pair:math.dist(cities[pair[0]],cities[pair[1]]))
+    extra.sort(key=lambda pair:world_hex.distance(cities[pair[0]],cities[pair[1]]))
     edges+=rng.sample(extra[:20],2)
     for a,b in edges:
-        x,y=cities[a];tx,ty=cities[b]
-        if rng.randrange(2):
-            mid=rng.randint(min(x,tx),max(x,tx));points=[(mid,y),(mid,ty),(tx,ty)]
-        else:
-            mid=rng.randint(min(y,ty),max(y,ty));points=[(x,mid),(tx,mid),(tx,ty)]
-        world[y][x]='road'
-        for px,py in points:
-            while (x,y)!=(px,py):
-                if x!=px:x+=1 if px>x else -1
-                else:y+=1 if py>y else -1
-                world[y][x]='road'
+        for x,y in world_hex.line_path(cities[a],cities[b]):world[y][x]='road'
     for x,y in cities:world[y][x]='city'
     return cities,world

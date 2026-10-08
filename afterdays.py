@@ -358,7 +358,7 @@ class LegacyGame:
             candidates = [(x, 5) for x in range(9, 14)]
         self.rng.shuffle(candidates)
         enemies = []
-        danger = min(5, math.hypot(self.x-5, self.y-5) // 9)
+        danger = min(5, __import__('world_hex').distance((self.x,self.y),(5,5)) // 9)
         for n in range(self.rng.randint(2, 3)):
             kind = self.rng.randrange(3)
             name, hp, damage, reach, speed = [
@@ -646,7 +646,7 @@ class ExpansionGame(LegacyGame):
     def _connect_cities(self):
         """Прокладає дороги між основними поселеннями."""
         for point in self.cities[5:]:
-            near = min(self.cities[:5], key=lambda p: math.dist(p, point))
+            near = min(self.cities[:5], key=lambda p: __import__('world_hex').distance(p,point))
             for x in range(min(near[0], point[0]), max(near[0], point[0])+1):
                 self.world[point[1]][x] = 'road'
             for y in range(min(near[1], point[1]), max(near[1], point[1])+1):
@@ -794,7 +794,7 @@ class ExpansionGame(LegacyGame):
     def start_battle(self):
         """Створює бойовий стан, ворогів та арену поточної зустрічі."""
         super().start_battle()
-        danger = min(5, int(math.hypot(self.x-5, self.y-5)//9))
+        danger = min(5, int(__import__('world_hex').distance((self.x,self.y),(5,5))//9))
         for e in self.battle['enemies']:
             kind = self.rng.randrange(min(len(MONSTERS), 6 + danger*2))
             name, hp, damage, reach, speed, armor, color = MONSTERS[kind]
@@ -1311,7 +1311,7 @@ def launch(test_hook=None):
                 ammo_type=weapon.get('ammo_type','pistol')
                 self.city_info.config(text=self.city_info.cget('text')+tr('afterdays.0158', v0=progression.AMMO[ammo_type][0], v1=g.count('ammo', ammo_type), v2=weapon.get('durability', 100)))
             self.city_info.config(text=self.city_info.cget('text')+'\n'+tr('survival040.sheet',rad=g.radiation_injury,hunger=g.hunger))
-            near = sorted(((n,pos) for n,pos in enumerate(g.cities) if n in g.known_cities), key=lambda entry: math.dist(entry[1], (g.x, g.y)))[:3]
+            near = sorted(((n,pos) for n,pos in enumerate(g.cities) if n in g.known_cities), key=lambda entry: __import__('world_hex').distance(entry[1], (g.x, g.y)))[:3]
             self.cities_label.config(text='\n'.join(f'◆ {self.game.city_name(n)} ({p[0]}, {p[1]})' for n,p in near))
             self.player_panel.refresh()
             self.inv_panel.refresh()
@@ -1495,52 +1495,12 @@ def launch(test_hook=None):
             detail.pack(fill='x', padx=12, pady=8)
             layout = {}
             def paint(event=None):
-                c.delete('all');c._terrain_refs=[]
-                t = min(c.winfo_width()/len(self.game.world[0]), c.winfo_height()/32)
-                ox, oy = (c.winfo_width()-len(self.game.world[0])*t)/2, (c.winfo_height()-32*t)/2
-                layout.update(t=t, ox=ox, oy=oy)
-                for y in range(32):
-                    for x in range(len(self.game.world[0])):
-                        if not self.map_revealed(x,y):
-                            c.create_rectangle(ox+x*t,oy+y*t,ox+(x+1)*t,oy+(y+1)*t,fill='#101714',outline='')
-                            continue
-                        kind = self.game.world[y][x]
-                        c.create_rectangle(ox+x*t,oy+y*t,ox+(x+1)*t,oy+(y+1)*t,fill=TERRAINS[kind][0],outline='')
-                for x,y in self.game.trails:
-                    if not self.map_revealed(x,y):continue
-                    c.create_oval(ox+(x+.35)*t,oy+(y+.35)*t,ox+(x+.65)*t,oy+(y+.65)*t,fill='#c8b17c',outline='')
-                for key in self.game.radiation:
-                    x,y=map(int,key.split(','))
-                    if not self.map_revealed(x,y):continue
-                    c.create_rectangle(ox+x*t,oy+y*t,ox+(x+1)*t,oy+(y+1)*t,outline='#9fba51')
-                from border_ui import draw_border
-                draw_border(c,self.game,t,ox,oy,self.map_revealed)
-                frontier_ui.draw_metro(c,self.game,t,ox,oy,self.map_revealed)
-                __import__('map033').draw_storm(c,self.game,t,ox,oy,self.map_revealed)
-                __import__('recovery_ui').draw_markers(c,self.game,t,ox,oy,self.map_revealed)
-                from expedition_ui import draw_search_areas
-                draw_search_areas(c,self.game,t,ox,oy)
-                for n,(x,y) in enumerate(self.game.cities):
-                    if not self.map_city_known(n):continue
-                    px,py = ox+(x+.5)*t, oy+(y+.5)*t
-                    c.create_rectangle(px-t*.4,py-t*.4,px+t*.4,py+t*.4,outline=GOLD)
-                    c.create_text(px+8,py-9,text=self.game.city_name(n), fill=self.game.city_color(n,TEXT), anchor='w', font=('Segoe UI', 8))
-                for cache in self.game.reputation_state.get('road_caches',[]):
-                    x,y=cache['pos']
-                    if not cache['opened'] and self.map_revealed(x,y):c.create_text(ox+(x+.5)*t,oy+(y+.5)*t,text='▣',fill='#efc76b',font=('Segoe UI',10,'bold'))
-                for q in self.game.quests:
-                    if q['status'] != 'active':
-                        continue
-                    pos = self.game.quest_return_pos(q) if self.game.quest_ready(q) else q.get('pos')
-                    if pos:
-                        px,py = ox+(pos[0]+.5)*t, oy+(pos[1]+.5)*t
-                        c.create_oval(px-8,py-8,px+8,py+8,fill='#a674cd' if q.get('unique') else '#b48b40',outline='#ffe6a3')
-                        c.create_text(px,py,text='✓' if self.game.quest_ready(q) else '!',fill='#19271e',font=('Segoe UI',11,'bold'))
-                px,py = ox+(self.game.x+.5)*t, oy+(self.game.y+.5)*t
-                c.create_oval(px-5,py-5,px+5,py+5,fill='#d8fae2',outline='#ffffff',width=2)
+                from world_map import draw
+                layout['view']=draw(self,c,overview=True)
             def click(event):
-                t,ox,oy = layout['t'],layout['ox'],layout['oy']
-                pos=[int((event.x-ox)//t), int((event.y-oy)//t)]
+                if 'view' not in layout:return
+                pos=list(layout['view'].cell(event.x,event.y))
+                if not (0<=pos[0]<len(self.game.world[0]) and 0<=pos[1]<len(self.game.world)):return
                 if pos in self.game.cities and self.map_city_known(self.game.cities.index(pos)):
                     n=self.game.cities.index(pos)
                     detail.config(text=f'{self.game.city_name(n)} ({pos[0]}, {pos[1]}) · '+', '.join(MERCHANTS[m] for m in self.game.city_merchants[n])+(tr('afterdays.0182') if n in self.game.mayors else tr('afterdays.0183'))+(tr('afterdays.0184') if n in self.game.technicians else '')+tr('afterdays.0185', v0=self.game.region_at(pos[0], pos[1]))+tr('update024.reputation',value=self.game.reputation(n)),fg=self.game.city_color(n,TEXT))
@@ -1588,107 +1548,15 @@ def launch(test_hook=None):
                 advanced_ui.draw_battle(self)
                 self.fx.render()
                 return
-            c.delete('all');c._terrain_refs=[]
-            width, height = max(c.winfo_width(), 200), max(c.winfo_height(), 200)
-            b = g.battle
-            cols, rows = (15, 11) if b else (23, 17)
-            self.tile = max(8, min(width/cols, height/rows))
-            t = self.tile
-            self.ox, self.oy = (width-cols*t)/2, (height-rows*t)/2
-            focus_x,focus_y=self.fx.reveal_focus()
-            self.vx, self.vy = (0, 0) if b else (max(0, min(len(g.world[0])-cols, focus_x-cols//2)), max(0, min(32-rows, focus_y-rows//2)))
-            walls = set(map(tuple, b['walls'])) if b else set()
-            reachable = {}
-            if b:
-                occupied = walls | {tuple(e['pos']) for e in b['enemies']}
-                reachable = {tuple(b['pos']): 0}
-                queue = deque([tuple(b['pos'])])
-                while queue:
-                    p = queue.popleft()
-                    if reachable[p] >= b['ap']:
-                        continue
-                    for q in neighbors(*p, cols, rows):
-                        if q not in occupied and q not in reachable:
-                            reachable[q] = reachable[p]+1
-                            queue.append(q)
-                self.map_title.config(text=tr('afterdays.0187', v0=b['round'], v1=b['ap']))
-            else:
-                self.map_title.config(text=tr('debug.map_hint') if TEST_MODE else tr('afterdays.0188'))
-            for sy in range(rows):
-                for sx in range(cols):
-                    x, y = sx+self.vx, sy+self.vy
-                    px, py = self.ox+sx*t, self.oy+sy*t
-                    if not b and not self.map_revealed(x,y):
-                        c.create_rectangle(px,py,px+t,py+t,fill='#101714',outline='#1b2721')
-                        continue
-                    kind = None if b else g.world[y][x]
-                    color = ('#3b4939' if (x, y) in reachable else '#29332c') if b else advanced_ui.region_color(TERRAINS[kind][0],x)
-                    c.create_rectangle(px, py, px+t, py+t, fill=color, outline='#28332c')
-                    if b and (x, y) in walls:
-                        c.create_rectangle(px+3, py+3, px+t-3, py+t-3, fill='#656457', outline='#99927c')
-                        c.create_line(px+5, py+t-6, px+t-6, py+5, fill='#454b41')
-                    else:
-                        visuals.terrain(c, kind, px, py, t, x, y, g, bool(b))
-                    if b and x == 0:
-                        c.create_line(px+2, py+2, px+2, py+t-2, fill='#72ad91', width=3)
-            adventure_ui.paint_world_extras(self)
-            from expedition_ui import draw_search_areas
-            draw_search_areas(c,g,t,self.ox-self.vx*t,self.oy-self.vy*t,(self.vx,self.vy,cols,rows))
-            from border_ui import draw_border
-            draw_border(c,g,t,self.ox-self.vx*t,self.oy-self.vy*t,self.map_revealed,(self.vx,self.vy,cols,rows))
-            __import__('map033').draw_storm(c,g,t,self.ox-self.vx*t,self.oy-self.vy*t,self.map_revealed)
-            if not b:__import__('recovery_ui').draw_markers(c,g,t,self.ox-self.vx*t,self.oy-self.vy*t,self.map_revealed)
-            def center(pos):
-                return self.ox+(pos[0]-self.vx+.5)*t, self.oy+(pos[1]-self.vy+.5)*t
-            if b:
-                for e in b['enemies']:
-                    px, py = center(e['pos'])
-                    valid, _, chance = g.shot_info(e)
-                    if valid:
-                        c.create_oval(px-t*.44, py-t*.44, px+t*.44, py+t*.44, outline='#c8b475', dash=(3,2))
-                    visuals.monster(c, e, px-t*.39, py-t*.42, t*.78)
-                    c.create_rectangle(px-t*.36, py+t*.36, px+t*.36, py+t*.43, fill='#191c17', outline='')
-                    c.create_rectangle(px-t*.36, py+t*.36, px-t*.36+t*.72*e['hp']/e['max_hp'], py+t*.43, fill='#d8876c', outline='')
-            if not b:self.route.paint()
-            px, py = center(b['pos'] if b else self.route.position())
-            c.create_oval(px-t*.31, py-t*.31, px+t*.31, py+t*.31, fill='#cce4d0', outline='#ffffff', width=2,tags='world_player_ring')
-            c.create_polygon(px, py-t*.22, px+t*.16, py+t*.17, px, py+t*.09, px-t*.16, py+t*.17, fill='#233a31',tags='world_player_arrow')
-            if not b and g.coward_turns:c.create_text(px,py-t*.55,text='⚑',fill='#ed795c',font=('Segoe UI',12,'bold'),tags='coward_icon')
-            if not b:
-                for idx, pos in enumerate(g.cities):
-                    if not self.map_city_known(idx):continue
-                    if self.vx <= pos[0] < self.vx+cols and self.vy <= pos[1] < self.vy+rows:
-                        px, py = center(pos)
-                        c.create_text(px, py-t*.67, text=g.city_name(idx), fill=g.city_color(idx,'#efe0b5'), font=('Segoe UI', 8), anchor='s')
-            if not b:
-                for q in g.quests:
-                    if q['status'] != 'active':
-                        continue
-                    pos = g.quest_return_pos(q) if g.quest_ready(q) else q.get('pos')
-                    if pos and self.vx <= pos[0] < self.vx+cols and self.vy <= pos[1] < self.vy+rows:
-                        px,py = center(pos)
-                        if pos == [g.x, g.y]:
-                            px += t*.30
-                            py -= t*.30
-                        c.create_oval(px-t*.3,py-t*.3,px+t*.3,py+t*.3,fill='#ae7ed2' if q.get('unique') else '#c9a252',outline='#f9dd8d',width=2)
-                        c.create_text(px,py,text='✓' if g.quest_ready(q) else '!',fill='#14291f',font=('Segoe UI',max(10,int(t*.45)),'bold'))
-                for npc in g.settlers():
-                    pos=npc['pos']
-                    if npc['state'] in ('offered','active','permission') and self.map_revealed(*pos) and self.vx<=pos[0]<self.vx+cols and self.vy<=pos[1]<self.vy+rows:
-                        px,py=center(pos)
-                        sprites.draw(c,'npc:mayor' if npc['role']=='mayor' else 'npc_roamer_'+npc['role'],px-t*.4,py-t*.4,t*.8)
-                if g.traveler and g.traveler['pos'] == [g.x,g.y]:
-                    px,py=center((g.x,g.y))
-                    c.create_text(px+t*.4,py-t*.5,text='¤',fill='#f1d383',font=('Segoe UI',16,'bold'))
-            self.hint.config(text=(tr('afterdays.0189') if b else
-                                   tr('journey.hint')))
-            if not b and g.local_graves():self.hint.config(text='Тут лежать ваші речі. Натисніть E, щоб відкрити надгробок.')
+            from world_map import draw
+            draw(self)
+            self.fx.render()
 
         def cell(self, event):
             """Перетворює координати курсора на клітинку карти."""
             if self.game.battle:
                 return advanced_ui.iso_cell(self,event)
-            return int((event.x-self.ox)//self.tile)+self.vx, int((event.y-self.oy)//self.tile)+self.vy
+            return self.world_view.cell(event.x,event.y)
 
         def clear_battle_hover(self,event=None):
             """Прибирає ціль наведення після виходу курсора з арени."""
@@ -1710,7 +1578,7 @@ def launch(test_hook=None):
             else:
                 pos=self.cell(event)
                 if 0<=pos[0]<len(self.game.world[0]) and 0<=pos[1]<32:
-                    edges=[(pos,q) for q in neighbors(*pos,len(self.game.world[0]),len(self.game.world)) if self.game.border_edge(pos,q)]
+                    edges=[(pos,q) for q in __import__('world_hex').neighbors(*pos,len(self.game.world[0]),len(self.game.world)) if self.game.border_edge(pos,q)]
                     if edges and self.map_revealed(*pos):
                         gate=any(self.game.checkpoint(a,b) for a,b in edges)
                         self.hint.config(text=tr('border.open_hint') if gate and self.game.border_open else tr('border.locked') if gate else tr('border.fence'))
@@ -1747,6 +1615,11 @@ def launch(test_hook=None):
             if self.dialog:
                 return
             key = event.keysym.lower()
+            if not self.game.battle:
+                from world_hex import key_delta
+                delta=key_delta(key,self.game.y)
+                if delta is not None:
+                    self.route.clear();self.act(lambda:self.world_step(*delta));return 'break'
             directions = {'w': (0,-1), 'up': (0,-1), 's': (0,1), 'down': (0,1),
                           'a': (-1,0), 'left': (-1,0), 'd': (1,0), 'right': (1,0)}
             if key in directions:
