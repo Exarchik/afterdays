@@ -147,7 +147,7 @@ class Game(p.Game):
                 rx,ry=self.rng.randint(1,5),self.rng.randint(1,4)
                 for y in range(max(0,cy-ry),min(32,cy+ry+1)):
                     for x in range(max(0,cx-rx),min(len(self.world[0]),cx+rx+1)):
-                        if ((x-cx)/rx)**2+((y-cy)/ry)**2<=1 and self.world[y][x] not in ('road','city') and math.dist((x,y),(5,5))>2:
+                        if ((x-cx)/rx)**2+((y-cy)/ry)**2<=1 and self.world[y][x] not in ('road','city') and world_hex.distance((x,y),(5,5))>2:
                             self.world[y][x]=kind
         reachable=self.reachable_world((5,5))
         self.build_radiation()
@@ -161,7 +161,7 @@ class Game(p.Game):
             cy=self.rng.choices(range(2,30),weights=[y**2 for y in range(2,30)])[0];radius=self.rng.randint(1,5)
             for y in range(max(0,cy-radius),min(32,cy+radius+1)):
                 for x in range(max(0,cx-radius),min(len(self.world[0]),cx+radius+1)):
-                    if not (x<len(self.world[0])//2 and y<16) and math.dist((x,y),(cx,cy))<=radius and self.passable(x,y) and [x,y] not in self.cities and math.dist((x,y),(5,5))>2:
+                    if not (x<len(self.world[0])//2 and y<16) and world_hex.distance((x,y),(cx,cy))<=radius and self.passable(x,y) and [x,y] not in self.cities and world_hex.distance((x,y),(5,5))>2:
                         self.radiation[f'{x},{y}']=self.rng.randint(2,4)
 
     def add_sites(self):
@@ -170,7 +170,7 @@ class Game(p.Game):
             reachable=self.reachable_world((5,5));existing={s['name'] for s in self.special_sites}
             for name,npc,role in SITES[:16]:
                 if name in existing:continue
-                pool=[p for p in sorted(reachable) if 1<=p[0]<len(self.world[0])-1 and 1<=p[1]<len(self.world)-1 and self.world[p[1]][p[0]] not in ('city','road','site') and all(math.dist(p,c)>2 for c in self.cities) and all(math.dist(p,s['pos'])>=7 for s in self.special_sites)]
+                pool=[p for p in sorted(reachable) if 1<=p[0]<len(self.world[0])-1 and 1<=p[1]<len(self.world)-1 and self.world[p[1]][p[0]] not in ('city','road','site') and all(world_hex.distance(p,c)>2 for c in self.cities) and all(world_hex.distance(p,s['pos'])>=7 for s in self.special_sites)]
                 if not pool:break
                 pos=self.rng.choice(pool)
                 self.special_sites.append(dict(id=r.uid(),name=name,npc=npc,role=role,pos=list(pos),found=False,city_id=None))
@@ -198,7 +198,7 @@ class Game(p.Game):
     def discover(self,site_id=None):
         """Відкриває найближчі локації й оновлює туман війни."""
         hidden=[s for s in self.special_sites if not s['found']]
-        site=next((s for s in hidden if s['id']==site_id),None) if site_id else min(hidden,key=lambda s:math.dist(s['pos'],(self.x,self.y)),default=None)
+        site=next((s for s in hidden if s['id']==site_id),None) if site_id else min(hidden,key=lambda s:world_hex.distance(s['pos'],(self.x,self.y)),default=None)
         if not site:return False
         site['found']=True;site['city_id']=len(self.cities)
         self.cities.append(site['pos'][:]);self.city_names.append(site['name'])
@@ -575,7 +575,7 @@ class Game(p.Game):
                 if not game.passable(*pos):game.world[pos[1]][pos[0]]='waste'
                 # Carve a short connector only if the old position is isolated by new obstacles.
                 if tuple(pos) not in game.reachable_world(tuple(game.cities[0])):
-                    x,y=pos;cx,cy=min(game.cities[:game.main_city_count],key=lambda c:math.dist(c,pos))
+                    x,y=pos;cx,cy=min(game.cities[:game.main_city_count],key=lambda c:world_hex.distance(c,pos))
                     while x!=cx:
                         x+=1 if cx>x else -1
                         if not game.passable(x,y):game.world[y][x]='waste'

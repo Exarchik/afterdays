@@ -1,6 +1,6 @@
 """Real Tk smoke check; never writes the user's save."""
 import faulthandler
-faulthandler.dump_traceback_later(20)
+faulthandler.dump_traceback_later(60)
 import hashlib
 import sys
 import tempfile
@@ -30,6 +30,13 @@ def check(root,app):
             app.refresh()
             assert app.canvas.find_withtag('world_hex')
             assert hashlib.sha256(save.read_bytes()).hexdigest()==digest
+        app.draw();ids=app.canvas.find_withtag('world_hex')
+        overlay_ids=app.canvas.find_withtag('world_overlay')
+        app.draw()
+        assert ids==app.canvas.find_withtag('world_hex')
+        assert overlay_ids==app.canvas.find_withtag('world_overlay')
+        app.canvas.delete('all');app.draw()
+        assert app.canvas.find_withtag('world_hex') and ids!=app.canvas.find_withtag('world_hex')
         root.update()
         from PIL import ImageGrab
         target=Path(tempfile.gettempdir())/'afterdays-hex-world.png'
@@ -43,6 +50,8 @@ def check(root,app):
         print("Opening battle",flush=True)
         app.game.start_battle();app.refresh();root.update()
         assert app.game.battle and hasattr(app,'iso')
+        app.game.battle=None;app.refresh();root.update()
+        assert app.canvas.find_withtag('world_hex')
         print('PASS: new game, existing save, hit testing, atlas, combat; save unchanged',flush=True)
     except Exception:
         import traceback

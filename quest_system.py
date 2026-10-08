@@ -1,3 +1,4 @@
+import world_hex
 """Quest capacity, cancellation, repair deliveries and reputation-aware travellers."""
 import copy
 import math
@@ -46,7 +47,7 @@ class QuestSystem:
     def trading_city(self,merchant):
         """Визначає місто, на репутацію якого впливає поточна торгівля."""
         if merchant in (3,4) and self.traveler and self.traveler['pos']==[self.x,self.y] and (merchant==3 or self.traveler.get('hunter')):
-            return min(range(self.main_city_count),key=lambda n:math.dist((self.x,self.y),self.cities[n]))
+            return min(range(self.main_city_count),key=lambda n:world_hex.distance((self.x,self.y),self.cities[n]))
         return self.city
 
     def change_reputation(self,amount,city):
@@ -54,7 +55,7 @@ class QuestSystem:
         origin=self.cities[city]
         positions=set(map(tuple,self.cities))|{tuple(s['pos']) for s in self.special_sites}
         for pos in positions:
-            if math.dist(origin,pos)<=10:
+            if world_hex.distance(origin,pos)<=10:
                 record=self.record_at(pos);record['value']=max(0,min(100,record['value']+amount))
 
     def abandon_quest(self,quest_id):

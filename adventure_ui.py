@@ -155,7 +155,9 @@ class Effects:
         self.active=[e for e in self.active if 'paused_at' in e or now<e['start']+e['duration']]
         if self.snapshot is not None and now>=self.until:
             self.snapshot=None;self.app.refresh()
-        if had_motion:self.app.draw()
+        focus=self.reveal_focus()
+        previous=getattr(self,'_last_reveal_focus',None);self._last_reveal_focus=focus
+        if had_motion and (self.app.game.battle or self.snapshot is not None or focus!=previous):self.app.draw()
         else:self.render()
         self.app.root.after(33,self.tick)
 
@@ -360,23 +362,3 @@ def road_window(app):
         tk.Button(body,text=label,command=lambda key=key:choose(key),wraplength=660,
                   justify='left',anchor='w',bg=PANEL,fg=TEXT,activebackground=PANEL,
                   activeforeground=GOLD,padx=12,pady=8).pack(fill='x',padx=22,pady=4)
-
-
-def paint_world_extras(app):
-    c,g=app.canvas,app.game
-    trails=set(map(tuple,g.trails))
-    for cache in g.reputation_state.get('road_caches',[]):
-        x,y=cache['pos']
-        if not cache['opened'] and app.map_revealed(x,y) and app.vx<=x<app.vx+23 and app.vy<=y<app.vy+17:
-            px,py=app.ox+(x-app.vx+.5)*app.tile,app.oy+(y-app.vy+.5)*app.tile
-            c.create_text(px,py,text='▣',fill='#efc76b',font=('Segoe UI',15,'bold'))
-    for y in range(app.vy,min(32,app.vy+17)):
-        for x in range(app.vx,min(len(g.world[0]),app.vx+23)):
-            if not app.map_revealed(x,y):continue
-            px,py=app.ox+(x-app.vx+.5)*app.tile,app.oy+(y-app.vy+.5)*app.tile;t=app.tile
-            if (x,y) in trails:
-                for q in r.neighbors(x,y,len(g.world[0]),len(g.world)):
-                    if q in trails:c.create_line(px,py,px+(q[0]-x)*t*.5,py+(q[1]-y)*t*.5,fill='#c5b590',dash=(3,2),width=2)
-            if f'{x},{y}' in g.radiation:
-                c.create_rectangle(px-t*.42,py-t*.42,px+t*.42,py+t*.42,outline='#8dae56')
-                c.create_text(px,py,text='☢',fill='#b9d95b',font=('Segoe UI',max(9,int(t*.5))))

@@ -139,7 +139,7 @@ class ScavengingTests(unittest.TestCase):
  def test_xp_and_area_rendering(self):
   """Перевіряє сценарій «xp and area rendering» та очікувані результати."""
   g,q=self.quest('scout');text=frontier_ui.player_text(g);self.assertIn(str(p.xp_for_level(g.level+1)-g.xp)+' XP',text)
-  canvas=MagicMock();draw_search_areas(canvas,g,20,0,0);self.assertEqual(canvas.create_rectangle.call_count,1)
+  canvas=MagicMock();draw_search_areas(canvas,g,20,0,0);self.assertEqual(canvas.create_line.call_count,18)
  def test_old_generator_and_quests_migrate_without_losing_rewards(self):
   """Перевіряє сценарій «old generator and quests migrate without losing rewards» та очікувані результати."""
   g,q=self.quest('generator');q.pop('generator_order');q.pop('generator_input');q['generator_board']=[1]*9;reward=q['reward']

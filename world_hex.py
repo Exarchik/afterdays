@@ -64,3 +64,20 @@ def key_delta(key,y):
     if direction is None:return None
     target=adjacent((0,y))[direction]
     return target[0],target[1]-y
+
+
+def disk(pos,radius):
+    """Unclipped hex radius; callers clip against their own world bounds."""
+    x,y=pos
+    return [(a,b) for b in range(y-radius,y+radius+1)
+            for a in range(x-radius,x+radius+1) if distance(pos,(a,b))<=radius]
+
+
+def line_path(start,end):
+    """Shortest connected hex route, preferring a continuing heading on ties."""
+    current=tuple(start);end=tuple(end);result=[current];heading=None
+    while current!=end:
+        choices=[(n,p) for n,p in enumerate(adjacent(current)) if distance(p,end)<distance(current,end)]
+        heading,current=min(choices,key=lambda pair:(pair[0]!=heading,pair[0]))
+        result.append(current)
+    return result

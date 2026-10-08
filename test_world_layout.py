@@ -1,3 +1,4 @@
+import world_hex
 import unittest,tempfile
 from pathlib import Path
 import afterdays as r
@@ -13,7 +14,7 @@ class WorldLayoutTests(unittest.TestCase):
    road_cells={(x,y) for y,row in enumerate(g.world) for x,k in enumerate(row) if k in ('road','city')}
    seen={(5,5)};queue=list(seen)
    for x,y in queue:
-    for p in ((x-1,y),(x+1,y),(x,y-1),(x,y+1)):
+    for p in world_hex.adjacent((x,y)):
      if p in road_cells and p not in seen:seen.add(p);queue.append(p)
    self.assertTrue(set(map(tuple,g.cities))<=seen)
    positions.add(tuple(map(tuple,g.cities)));networks.add(frozenset(road_cells))

@@ -1,3 +1,4 @@
+import world_hex
 import quest_area
 """Persistent multi-stage metro restoration using existing quest minigames."""
 import copy
@@ -26,7 +27,7 @@ class Game(update033.Game):
         areas=self.area_candidates(q)
         origin=self.cities[q['city']];reachable=self.player_reachable_world(origin)
         minimum=3 if q['level']>=3 else 1
-        cities=[pos for pos in self.cities[:self.main_city_count] if tuple(pos) in reachable and math.dist(pos,origin)<=25 and minimum<=self.region_at(*pos)<=q['level']+1]
+        cities=[pos for pos in self.cities[:self.main_city_count] if tuple(pos) in reachable and world_hex.distance(pos,origin)<=25 and minimum<=self.region_at(*pos)<=q['level']+1]
         available=[k for k in KINDS if (k!='cache' or areas) and (k!='archive' or cities)]
         last=self.rng.choice(['dungeon']+(['cache'] if areas else []))
         types=self.rng.sample([k for k in available if k!=last],self.rng.randint(1,min(4,len(available)-1)))+[last]
@@ -189,7 +190,7 @@ class Game(update033.Game):
         for q in self.quests:
             if q.get('metro_chain') and q['status']=='active':
                 s=self.metro_step(q)
-                if s['metro_role']=='hermit' and s['task']=='hunt' and s['talked'] and math.dist(s['pos'],(self.x,self.y))<=10:
+                if s['metro_role']=='hermit' and s['task']=='hunt' and s['talked'] and world_hex.distance(s['pos'],(self.x,self.y))<=10:
                     s['kills']=min(s['need'],s['kills']+1)
 
     def metro_chest(self):

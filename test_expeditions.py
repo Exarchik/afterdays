@@ -148,5 +148,5 @@ class ExpeditionTests(unittest.TestCase):
   """Перевіряє сценарій «cache does not reveal exact target on map» та очікувані результати."""
   from expedition_ui import draw_search_areas
   g,q=self.contract('cache');c=MagicMock();draw_search_areas(c,g,10,0,0)
-  self.assertEqual(c.create_rectangle.call_count,1);self.assertEqual(c.create_oval.call_count,0)
+  self.assertEqual(c.create_line.call_count,18);self.assertEqual(c.create_oval.call_count,0)
   self.assertNotIn(str(tuple(q['cache_pos'])),g.quest_text(q))

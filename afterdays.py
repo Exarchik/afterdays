@@ -358,7 +358,7 @@ class LegacyGame:
             candidates = [(x, 5) for x in range(9, 14)]
         self.rng.shuffle(candidates)
         enemies = []
-        danger = min(5, math.hypot(self.x-5, self.y-5) // 9)
+        danger = min(5, __import__('world_hex').distance((self.x,self.y),(5,5)) // 9)
         for n in range(self.rng.randint(2, 3)):
             kind = self.rng.randrange(3)
             name, hp, damage, reach, speed = [
@@ -646,7 +646,7 @@ class ExpansionGame(LegacyGame):
     def _connect_cities(self):
         """Прокладає дороги між основними поселеннями."""
         for point in self.cities[5:]:
-            near = min(self.cities[:5], key=lambda p: math.dist(p, point))
+            near = min(self.cities[:5], key=lambda p: __import__('world_hex').distance(p,point))
             for x in range(min(near[0], point[0]), max(near[0], point[0])+1):
                 self.world[point[1]][x] = 'road'
             for y in range(min(near[1], point[1]), max(near[1], point[1])+1):
@@ -794,7 +794,7 @@ class ExpansionGame(LegacyGame):
     def start_battle(self):
         """Створює бойовий стан, ворогів та арену поточної зустрічі."""
         super().start_battle()
-        danger = min(5, int(math.hypot(self.x-5, self.y-5)//9))
+        danger = min(5, int(__import__('world_hex').distance((self.x,self.y),(5,5))//9))
         for e in self.battle['enemies']:
             kind = self.rng.randrange(min(len(MONSTERS), 6 + danger*2))
             name, hp, damage, reach, speed, armor, color = MONSTERS[kind]
@@ -1311,7 +1311,7 @@ def launch(test_hook=None):
                 ammo_type=weapon.get('ammo_type','pistol')
                 self.city_info.config(text=self.city_info.cget('text')+tr('afterdays.0158', v0=progression.AMMO[ammo_type][0], v1=g.count('ammo', ammo_type), v2=weapon.get('durability', 100)))
             self.city_info.config(text=self.city_info.cget('text')+'\n'+tr('survival040.sheet',rad=g.radiation_injury,hunger=g.hunger))
-            near = sorted(((n,pos) for n,pos in enumerate(g.cities) if n in g.known_cities), key=lambda entry: math.dist(entry[1], (g.x, g.y)))[:3]
+            near = sorted(((n,pos) for n,pos in enumerate(g.cities) if n in g.known_cities), key=lambda entry: __import__('world_hex').distance(entry[1], (g.x, g.y)))[:3]
             self.cities_label.config(text='\n'.join(f'◆ {self.game.city_name(n)} ({p[0]}, {p[1]})' for n,p in near))
             self.player_panel.refresh()
             self.inv_panel.refresh()

@@ -46,20 +46,35 @@ def draw(app,canvas=None,overview=False):
         app.world_view=v;app.tile=v.radius*2;app.vx,app.vy=v.vx,v.vy
         app.ox,app.oy=v.ox,v.oy
         app.map_title.config(text='ГЕКСАГОНАЛЬНА МАПА · 6 напрямків')
-    c.delete('all');c._terrain_refs=[]
-    visible=lambda x,y:v.visible((x,y)) and app.map_revealed(x,y)
-    for y in range(v.vy,v.vy+v.rows):
-        for x in range(v.vx,v.vx+v.cols):
-            known=app.map_revealed(x,y);kind=g.world[y][x]
-            color=COLORS.get(kind,COLORS['waste']) if known else '#101714'
-            c.create_polygon(*v.polygon((x,y)),fill=color,outline='#30392d' if known else '#223128',tags='world_hex')
-            if not known:continue
-            if not overview:
-                from world_hex_art import photo
-                image=photo(c,g,x,y,v.radius)
-                c._terrain_refs.append(image)
-                c.create_image(*v.point((x,y)),image=image,tags='world_terrain')
-            if kind=='road':draw_road(c,g,v,(x,y),overview)
+    from debug_config import TEST_MODE
+    explored=set(g.explored)
+    full=TEST_MODE and app.show_full_map
+    known_cell=lambda x,y:full or f'{x},{y}' in explored
+    visible=lambda x,y:v.visible((x,y)) and known_cell(x,y)
+    # Include neighbouring terrain because road arms depend on offscreen neighbours.
+    terrain=tuple((x,y,g.world[y][x],known_cell(x,y))
+                  for y in range(max(0,v.vy-1),min(len(g.world),v.vy+v.rows+1))
+                  for x in range(max(0,v.vx-1),min(len(g.world[0]),v.vx+v.cols+1)))
+    key=(id(g),v,overview,terrain)
+    rebuild=getattr(c,'_world_background_key',None)!=key or not c.find_withtag('world_hex')
+    if rebuild:
+        c.delete('all');c._terrain_refs=[]
+        for y in range(v.vy,v.vy+v.rows):
+            for x in range(v.vx,v.vx+v.cols):
+                known=known_cell(x,y);kind=g.world[y][x]
+                color=COLORS.get(kind,COLORS['waste']) if known else '#101714'
+                c.create_polygon(*v.polygon((x,y)),fill=color,outline='#30392d' if known else '#223128',tags='world_hex')
+                if not known:continue
+                if not overview:
+                    from world_hex_art import photo
+                    image=photo(c,g,x,y,v.radius)
+                    c._terrain_refs.append(image)
+                    c.create_image(*v.point((x,y)),image=image,tags='world_terrain')
+        draw_roads(c,g,v,known_cell,overview)
+        c._world_background_key=key
+    else:
+        c.delete('route')
+    c=OverlayCanvas(c,reset=rebuild)
     trails=set(map(tuple,g.trails))
     for pos in sorted(trails):
         if not visible(*pos):continue
@@ -114,20 +129,59 @@ def draw(app,canvas=None,overview=False):
         if g.traveler and g.traveler['pos']==[g.x,g.y]:
             c.create_text(px+v.radius*.8,py-v.radius,text='¤',fill='#f1d383',font=('Segoe UI',16,'bold'))
         app.hint.config(text=HINT+('\nТут лежать ваші речі. E — відкрити надгробок.' if g.local_graves() else ''))
+    c.finish()
     return v
 
 
-def draw_road(c,g,v,pos,overview):
-    center=v.point(pos)
-    ends=[]
-    for nxt in grid.neighbors(*pos,len(g.world[0]),len(g.world)):
-        if g.world[nxt[1]][nxt[0]] in ('road','city','site'):
-            target=v.point(nxt);ends.append(((center[0]+target[0])/2,(center[1]+target[1])/2))
-    # Every asphalt arm ends exactly on its shared hex edge, supporting all 64 masks.
-    for end in ends:c.create_line(*center,*end,fill='#3d4241',width=max(2,v.radius*.64),capstyle='round',tags='hex_road')
-    for end in ends:c.create_line(*center,*end,fill='#76756a',width=max(1,v.radius*.49),capstyle='round',tags='hex_road')
+def road_neighbors(g,pos):
+    """Suppress the largest edge of each tiny triangle, preserving connectivity."""
+    pos=tuple(pos)
+    candidates={p for p in grid.neighbors(*pos,len(g.world[0]),len(g.world))
+                if g.world[p[1]][p[0]] in ('road','city','site')}
+    edge=lambda a,b:tuple(sorted((a,b)))
+    return [p for p in sorted(candidates)
+            if not any(edge(pos,p)==max(edge(pos,p),edge(pos,q),edge(p,q))
+                       for q in candidates.intersection(grid.adjacent(p)))]
+
+
+def draw_roads(c,g,v,revealed,overview=False):
+    """One road layer above terrain; continuous strokes meet on shared edges."""
+    paths=[];junctions=[]
+    for y in range(v.vy,v.vy+v.rows):
+        for x in range(v.vx,v.vx+v.cols):
+            pos=(x,y);kind=g.world[y][x]
+            # City art stays unobstructed; incoming roads stop at its hex edge.
+            if kind not in ('road','site') or not revealed(x,y):continue
+            center=v.point(pos)
+            neighbors=road_neighbors(g,pos)
+            if kind!='road':neighbors=[p for p in neighbors if g.world[p[1]][p[0]]=='road']
+            ends=[]
+            for nxt in neighbors:
+                other=v.point(nxt)
+                ends.append(((center[0]+other[0])/2,(center[1]+other[1])/2))
+            # On bends a quadratic spline is tangent to both adjoining segments.
+            # Its endpoints remain exactly at the shared edge midpoints.
+            if len(ends)==2 and kind=='road':
+                paths.append((*ends[0],*center,*ends[1]))
+            else:
+                paths.extend((*center,*end) for end in ends)
+                if ends:junctions.append(center)
+    # Draw the entire shoulder first, then the entire surface. Individual tile
+    # caps can never cover another tile's asphalt or create dark seams.
+    for color,width in (('#45463d',.67),('#777567',.49)):
+        for points in paths:
+            c.create_line(*points,fill=color,width=max(1,v.radius*width),
+                          capstyle='butt',joinstyle='round',smooth=True,
+                          splinesteps=16,tags='hex_road')
+        radius=max(1,v.radius*width)/2
+        for x,y in junctions:
+            c.create_oval(x-radius,y-radius,x+radius,y+radius,fill=color,outline='',tags='hex_road')
+    # Subtle solid center marking avoids restarting dash patterns at every hex.
     if not overview:
-        for end in ends:c.create_line(*center,*end,fill='#c3bda0',width=1,dash=(3,4),tags='hex_road')
+        for points in paths:
+            c.create_line(*points,fill='#a39d80',width=max(1,v.radius*.035),
+                          capstyle='butt',joinstyle='round',smooth=True,
+                          splinesteps=16,tags='hex_road')
 
 
 def draw_borders(c,g,v,visible):
@@ -175,3 +229,41 @@ def draw_metro(c,g,v,visible):
         x,y=v.point(g.cities[n]);color='#58d9d1' if n in g.metro_unlocked else '#658079'
         c.create_oval(x-5,y-5,x+5,y+5,fill='#173b3a',outline=color,tags='metro_station')
         c.create_text(x,y,text='M',fill=color,font=('Segoe UI',7,'bold'),tags='metro_station')
+
+
+class OverlayCanvas:
+    """Retain dynamic canvas items; update only changed geometry or options."""
+    def __init__(self,canvas,reset=False):
+        self.canvas=canvas;self.index=0;self.changed=False
+        if reset or not hasattr(canvas,'_world_overlay_items'):canvas._world_overlay_items=[]
+        self.items=canvas._world_overlay_items
+    def __getattr__(self,name):
+        method=getattr(self.canvas,name)
+        if not name.startswith('create_'):return method
+        def create(*args,**kwargs):
+            tags=kwargs.get('tags',())
+            if isinstance(tags,str):tags=(tags,)
+            kwargs['tags']=tuple(tags)+('world_overlay',)
+            index=self.index;self.index+=1
+            if index<len(self.items):
+                old_name,old_args,old_options,ident=self.items[index]
+                if old_name==name:
+                    if args!=old_args or any(t.startswith('world_player') for t in tags):self.canvas.coords(ident,*args)
+                    options={k:v for k,v in kwargs.items() if old_options.get(k)!=v}
+                    # Reset options that disappear when this slot represents another object.
+                    if old_options.keys()!=kwargs.keys():
+                        self.canvas.delete(ident);ident=method(*args,**kwargs);self.changed=True
+                    elif options:self.canvas.itemconfigure(ident,**options)
+                else:
+                    self.canvas.delete(ident);ident=method(*args,**kwargs);self.changed=True
+                self.items[index]=(name,args,kwargs,ident)
+            else:
+                ident=method(*args,**kwargs);self.items.append((name,args,kwargs,ident));self.changed=True
+            return ident
+        return create
+    def finish(self):
+        for _,_,_,ident in self.items[self.index:]:self.canvas.delete(ident)
+        del self.items[self.index:]
+        if self.changed:
+            for _,_,_,ident in self.items:self.canvas.tag_raise(ident)
+        for tag in ('world_player_ring','world_player_arrow','coward_icon','fx'):self.canvas.tag_raise(tag)
