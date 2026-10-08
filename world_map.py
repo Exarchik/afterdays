@@ -101,7 +101,12 @@ def draw(app,canvas=None,overview=False):
     for n,pos in enumerate(g.cities):
         if not v.visible(pos) or not app.map_city_known(n):continue
         px,py=v.point(pos)
-        if overview:c.create_polygon(*v.polygon(pos,.8),fill='',outline='#e5ca87')
+        special=g.world[pos[1]][pos[0]]=='site'
+        dash=(2,2) if overview else (4,3)
+        outline=dict(fill='',dash=dash if special else (),tags='location_outline')
+        # A dark under-stroke keeps the thin blue edge legible over bright art.
+        c.create_polygon(*v.polygon(pos,.96),outline='#193b4b',width=3 if not overview else 2,**outline)
+        c.create_polygon(*v.polygon(pos,.96),outline='#71d2ff',width=1.5 if not overview else 1,**outline)
         c.create_text(px,py-v.radius-3,text=g.city_name(n),fill=g.city_color(n,'#efe0b5'),
                       anchor='s',font=('Segoe UI',8),tags='city_name')
     for q in g.quests:
