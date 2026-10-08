@@ -32,13 +32,11 @@ class Update033Tests(unittest.TestCase):
         self.assertGreater(far,near);self.assertEqual(g.fire_mode(),'aimed');self.assertFalse(g.cycle_fire_mode())
         self.assertTrue(g.shoot('0'));self.assertAlmostEqual(w['durability'],98.8)
     def test_shotgun_secondary_out_of_range(self):
-        """Missed pellets can hit behind the primary beyond nominal range, but cannot pass walls."""
-        g,w,b=self.arena('weapon_thunder_shotgun',mr.gear_stats(p.equipment('weapon_thunder_shotgun',level=p.GEAR_MIN_LEVEL['weapon_thunder_shotgun']))['range'])
-        primary,secondary=b['enemies'];self.assertFalse(g.shot_info(secondary)[0])
-        # First primary roll misses, then secondary and critical rolls succeed.
-        with patch.object(g.rng,'randrange',side_effect=[99,0,99]*6),patch.object(g.rng,'randint',return_value=0):self.assertTrue(g.shoot('0'))
-        self.assertEqual(primary['hp'],10000);self.assertLess(secondary['hp'],10000)
-        self.assertEqual(len([e for e in g._events if e.get('fire_mode')=='pellet']),6)
+        """Out-of-range enemies cannot receive reserved pellets."""
+        g,w,b=self.arena('weapon_thunder_shotgun',3)
+        primary,secondary=b['enemies']
+        with patch.object(g.rng,'randrange',return_value=0):self.assertTrue(g.shoot('0'))
+        self.assertLess(primary['hp'],10000);self.assertEqual(secondary['hp'],10000)
     def test_condition_and_misfire(self):
         """Condition bands are exact; total damage including elemental modules approaches one."""
         g,w,b=self.arena();w['modules']=[p.module(index='module_phase_approximator')]

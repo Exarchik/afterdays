@@ -107,25 +107,23 @@ class Combat:
             if saved and self.rng.random()*100<saved:self.emit(tr('modules.ammo_saved'),color='#9cdcd8')
             else:self.consume('ammo',1,ammo)
         shell=category(w)=='shotgun';count=6 if shell else bullets
-        targets=[e for e in b['enemies'] if e is not target and (not hasattr(self,'hostile_to_player') or self.hostile_to_player(e)) and behind(b['pos'],target['pos'],e['pos']) and hexgrid.visible(tuple(b['pos']),tuple(e['pos']),b['walls'])]
-        targets.sort(key=lambda e:hexgrid.distance(target['pos'],e['pos']))
+        from spread048 import allocate
+        assignments=allocate(self,target,count,shell,mode=='burst')
+        volley=__import__('uuid').uuid4().hex
         misfire=self.rng.random()<misfire_chance(w) if misfire_chance(w) else False
         stray=None
         if misfire:
             self.emit(tr('update033.jam'),color='#ffc46e')
             pool=[e for e in b['enemies'] if e is not target and (not hasattr(self,'hostile_to_player') or self.hostile_to_player(e)) and hexgrid.distance(b['pos'],e['pos'])<=p.stats(w)['range'] and hexgrid.visible(tuple(b['pos']),tuple(e['pos']),b['walls'])]
             if pool and self.rng.random()<.25:stray=self.rng.choice(pool)
-        for n in range(count):
+        for n,assigned in enumerate(assignments):
             hit=None
             if misfire:
                 if stray in b['enemies'] and self.rng.randrange(100)<chance:hit=stray
-            elif target in b['enemies'] and self.rng.randrange(100)<chance:hit=target
-            elif shell:
-                for enemy in targets:
-                    if enemy in b['enemies'] and self.rng.randrange(100)<max(1,chance-15):hit=enemy;break
-            pos=(hit or target)['pos']
+            elif assigned in b['enemies'] and self.rng.randrange(100)<max(1,chance-(15 if assigned is not target else 0)):hit=assigned
+            pos=(hit or assigned)['pos']
             self.emit(kind='attack',pos=pos,source=b['pos'],color=DAMAGE_TYPES[damage_type(w)][1])
-            self._events[-1].update(fire_mode='pellet' if shell else mode,projectile=n)
+            self._events[-1].update(fire_mode='pellet' if shell else mode,projectile=n,volley=volley,volley_count=count)
             if hit:self._projectile_damage(hit,w,mode,n if shell else None)
             else:self.emit(tr('adventure.0218'),pos=pos,color='#d7d4c0')
         target['awake']=True

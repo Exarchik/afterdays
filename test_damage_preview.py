@@ -14,7 +14,7 @@ class DamagePreviewTests(unittest.TestCase):
                     g,w,b=arena.Update033Tests().arena(key,2 if key=='weapon_thunder_shotgun' else 4)
                     w['fire_mode']=mode;w['durability']=50.2;g.perks['engineer']=2
                     w['modules']=[p.module(index='module_phase_approximator')]
-                    b['max_ap']=b['ap']=12
+                    b['max_ap']=b['ap']=12;b['enemies']=b['enemies'][:1]
                     enemy=b['enemies'][0];enemy.update(defense=15,resists={'kinetic':30,'electric':-20})
                     dp.remember_target(g,enemy)
                     estimate=dp.estimate(g,w);before=enemy['hp']

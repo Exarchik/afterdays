@@ -16,7 +16,7 @@ class RouteController:
     def update_button(self):
         """Узгоджує стан кнопки руху з поточним маршрутом."""
         button=getattr(self.app,'route_button',None)
-        if button:button.config(text=tr('journey.pause') if self.running else tr('journey.resume'),state='normal' if self.path and not self.app.game.battle else 'disabled')
+        if button:button.config(text=tr('journey.pause') if self.running else tr('journey.resume'),state='normal' if self.path and not self.app.game.battle else 'disabled',style='RouteReady048.TButton' if self.path and not self.running else 'Action048.TButton')
 
     def clear(self):
         """Очищує поточний маршрут або стан взаємодії."""
@@ -34,14 +34,14 @@ class RouteController:
         a=self.app;g=a.game
         return bool(a.dialog or getattr(a,'_notice_open',False) or g.battle or g.road_event or a.fx.blocked)
 
-    def set_target(self,target):
-        """Будує маршрут до вибраної клітинки й починає рух."""
+    def set_target(self,target,*,start=False):
+        """Будує маршрут; за замовчуванням чекає команди руху."""
         if self.blocked():return False
         self.clear();self.path=world_route(self.game,target)
         if not self.path:
             if tuple(target)!=self.origin:self.game.log(tr('journey.no_route'))
             self.app.refresh();return False
-        self.running=True;self.started=time.monotonic();self.update_button();self.app.draw();return True
+        self.running=bool(start);self.started=time.monotonic() if start else None;self.update_button();self.app.draw();return True
 
     def toggle(self):
         """Перемикає паузу та продовження руху."""

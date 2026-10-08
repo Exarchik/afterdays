@@ -6429,5 +6429,137 @@
     },
     "editor_render_hash": "ad62e58227f241a08cf8bf3a4ed289b201f7166af3e2f46bd80ba259441e5575",
     "inventory_columns": 8
+  },
+  "action048_end": {
+    "index": 49,
+    "columns": 8,
+    "sheet": "custom/atlases/28cb8275d9ab5b302b5514a11f936aead87e97cbddcba6b34b652e20e6a771a6/sprite",
+    "inventory_sheet": "custom/atlases/28cb8275d9ab5b302b5514a11f936aead87e97cbddcba6b34b652e20e6a771a6/inventory",
+    "art_label": "Кнопка: Завершити хід (заглушка)",
+    "art_category": "other",
+    "editor_source": "custom/sources/5784472cd9ef46eee4c418f1338163c83c915d49361e732114eecc63407bed04.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        1419,
+        13,
+        2015,
+        675
+      ]
+    },
+    "editor_render_hash": "0feb5bd1c6636d4e6b1dbe18df0fe2902cce07f81da5f3c2f45cb5b998bcb50c",
+    "inventory_columns": 8,
+    "placeholder048": true
+  },
+  "action048_switch": {
+    "index": 120,
+    "source": 4,
+    "source_box": [
+      0,
+      665,
+      222,
+      887
+    ],
+    "trim": [
+      36,
+      9,
+      201,
+      178
+    ],
+    "art_label": "Кнопка: Змінити зброю (заглушка)",
+    "art_category": "other",
+    "placeholder048": true
+  },
+  "action048_med": {
+    "index": 6,
+    "columns": 8,
+    "sheet": "custom/atlases/28cb8275d9ab5b302b5514a11f936aead87e97cbddcba6b34b652e20e6a771a6/sprite",
+    "inventory_sheet": "custom/atlases/28cb8275d9ab5b302b5514a11f936aead87e97cbddcba6b34b652e20e6a771a6/inventory",
+    "art_label": "Кнопка: Аптечка (заглушка)",
+    "art_category": "other",
+    "editor_source": "custom/sources/7280e8f6cfd1e84a0f130057ca58c08d42fcef4ab09c594177184c7e5f611890.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        313,
+        338,
+        657,
+        631
+      ]
+    },
+    "editor_render_hash": "39c65e33d988679fcc37acfa428d5d19f37923cf64dc810c694d44ab587771d6",
+    "inventory_columns": 8,
+    "placeholder048": true
+  },
+  "action048_flee": {
+    "index": 126,
+    "source": 4,
+    "source_box": [
+      1330,
+      665,
+      1552,
+      887
+    ],
+    "trim": [
+      52,
+      0,
+      181,
+      183
+    ],
+    "art_label": "Кнопка: Вийти з бою (заглушка)",
+    "art_category": "other",
+    "placeholder048": true
+  },
+  "action048_move": {
+    "index": 0,
+    "source": 1,
+    "source_box": [
+      0,
+      0,
+      222,
+      222
+    ],
+    "trim": [
+      31,
+      67,
+      204,
+      207
+    ],
+    "art_label": "Кнопка: Рух (заглушка)",
+    "art_category": "other",
+    "placeholder048": true
+  },
+  "action048_search": {
+    "index": 3,
+    "columns": 8,
+    "sheet": "custom/atlases/28cb8275d9ab5b302b5514a11f936aead87e97cbddcba6b34b652e20e6a771a6/sprite",
+    "inventory_sheet": "custom/atlases/28cb8275d9ab5b302b5514a11f936aead87e97cbddcba6b34b652e20e6a771a6/inventory",
+    "art_label": "Кнопка: Пошук (заглушка)",
+    "art_category": "other",
+    "editor_source": "custom/sources/bf142c257a33b55c5fc5b8ce4a4b5428ccfaab8fd5260391eb53a12e331f113a.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        925,
+        950,
+        1254,
+        1288
+      ]
+    },
+    "editor_render_hash": "3b75b9eb89ea9f18aac5327c9485fa47e671e1b6e08cf6ce52396befe4204e91",
+    "inventory_columns": 8,
+    "placeholder048": true
   }
 }

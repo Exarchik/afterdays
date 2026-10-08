@@ -42,7 +42,7 @@ class Effects:
         g=self.app.game
         if g is not self.game:
             self.active=[];self.snapshot=None;self.game=g
-        now=time.monotonic();timeline=0;texts=0
+        now=time.monotonic();timeline=0;texts=0;volleys={}
         self.pause_world_notices(now)
         world_end=max([now]+[e['start']+e['duration']+.35+(now-e['paused_at'] if 'paused_at' in e else 0)
                             for e in self.active if e['kind']=='text' and e['scene']=='world'])
@@ -50,7 +50,14 @@ class Effects:
             event=dict(event);kind=event['kind']
             duration=min(.55,max(.12,.07*(len(event.get('path',[]))-1))) if kind=='move' else .65 if event.get('fire_mode')=='aimed' else .4 if kind in ('attack','slash') else 2.8 if kind=='reveal' else 1.0
             if kind in ('move','attack','slash'):
-                delay=timeline;timeline+=duration if kind=='move' else .02 if event.get('fire_mode')=='pellet' else .09 if event.get('fire_mode')=='burst' else .15
+                if kind=='attack' and event.get('volley'):
+                    ident=event['volley']
+                    if ident not in volleys:
+                        volleys[ident]=timeline
+                        timeline+=duration if event.get('fire_mode')=='pellet' else duration+.09*(event.get('volley_count',1)-1)
+                    delay=volleys[ident]+(0 if event.get('fire_mode')=='pellet' else .09*event.get('projectile',0))
+                else:
+                    delay=timeline;timeline+=duration if kind=='move' else .09 if event.get('fire_mode')=='burst' else .15
             else:
                 delay=max(0,timeline-.15);event['offset']=(texts%3)*16;texts+=1
             if kind=='text' and event['scene']=='world':

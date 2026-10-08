@@ -6,7 +6,7 @@ import world_hex as grid
 
 COLORS={'waste':'#665e49','road':'#665e49','forest':'#354a35','ruin':'#666359',
         'city':'#827346','site':'#708365','water':'#235665','cliff':'#686d64'}
-HINT='Клік — маршрут · Q/W — вгору ліворуч/праворуч · A/D — ліворуч/праворуч\nZ/X — вниз ліворуч/праворуч · Пробіл — пауза · E — дія · Shift+M — атлас'
+HINT='Клік — обрати маршрут · ▶ — рух · Q/W — вгору ліворуч/праворуч · A/D — ліворуч/праворуч\nZ/X — вниз ліворуч/праворуч · Пробіл — пауза · E — дія · Shift+M — атлас'
 
 
 @dataclass
@@ -111,8 +111,15 @@ def draw(app,canvas=None,overview=False):
                       anchor='s',font=('Segoe UI',8),tags='city_name')
     for q in g.quests:
         if q['status']!='active':continue
-        ready=g.quest_ready(q);pos=g.quest_return_pos(q) if ready else q.get('pos')
-        if not pos or not v.visible(pos):continue
+        from quest_navigation import destination,edge_arrow
+        ready=g.quest_ready(q);pos=destination(g,q)
+        if pos is None:continue
+        if not v.visible(pos):
+            if not overview:
+                arrow=edge_arrow(v,pos,(g.x,g.y))
+                if arrow:
+                    c.create_polygon(*arrow,fill='#ba8be5' if q.get('unique') else '#efd36f',outline='#28382c',width=1,tags='quest_edge_arrow')
+            continue
         px,py=v.point(pos)
         if list(pos)==[g.x,g.y]:px+=v.radius*.6;py-=v.radius*.6
         size=6 if overview else v.radius*.5

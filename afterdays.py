@@ -1134,17 +1134,19 @@ def launch(test_hook=None):
             self.hint.pack(fill='x', pady=5)
             controls = tk.Frame(left, bg=BG)
             controls.pack(fill='x')
-            self.end_button = ttk.Button(controls, text=tr('afterdays.0137'), command=lambda: self.act(self.game.end_turn))
+            from action_ui048 import ActionButton,styles
+            styles(root)
+            self.end_button = ActionButton(controls,'end','◷',tr('afterdays.0137'), command=lambda: self.act(self.game.end_turn))
             self.end_button.pack(side='left', padx=2)
-            ttk.Button(controls, text=tr('afterdays.0138'), command=lambda: self.act(self.game.switch)).pack(side='left', padx=2)
-            ttk.Button(controls, text=tr('afterdays.0139'), command=lambda: self.act(lambda: self.game.use('med'))).pack(side='left', padx=2)
-            self.flee_button = ttk.Button(controls, text=tr('afterdays.0140'), command=lambda: self.act(self.game.flee))
+            ActionButton(controls,'switch','⇄',tr('afterdays.0138'), command=lambda: self.act(self.game.switch)).pack(side='left', padx=2)
+            ActionButton(controls,'med','✚',tr('afterdays.0139'), command=lambda: self.act(lambda: self.game.use('med'))).pack(side='left', padx=2)
+            self.flee_button = ActionButton(controls,'flee','↪',tr('afterdays.0140'), command=lambda: self.act(self.game.flee))
             self.flee_button.pack(side='left', padx=2)
             from route_ui import RouteController
             self.route=RouteController(self)
-            self.route_button=ttk.Button(controls,text=tr('journey.resume'),command=self.route.toggle,state='disabled')
+            self.route_button=ActionButton(controls,'move','▶',tr('journey.resume'),command=self.route.toggle,state='disabled')
             self.route_button.pack(side='left',padx=2)
-            ttk.Button(controls,text=tr('afterdays.0141'),command=lambda:self.act(self.game.search)).pack(side='left',padx=2)
+            ActionButton(controls,'search','⌕',tr('afterdays.0141'),command=lambda:self.act(self.game.search)).pack(side='left',padx=2)
             side = tk.Frame(body, bg=PANEL, width=380)
             side.grid(row=0,column=1,sticky='nsew',padx=(6,0))
             side.pack_propagate(False)
@@ -1155,10 +1157,10 @@ def launch(test_hook=None):
 
             for n, button in enumerate(buttons):
                 button.grid(
-                    row=n//3, column=n%3,
+                    row=0, column=n,
                     sticky='ew', padx=2, pady=2
                 )
-            controls.columnconfigure((0,1,2),weight=1)
+            controls.columnconfigure(tuple(range(6)),weight=1)
             self.root.after_idle(lambda:self.hint.config(wraplength=max(300,left.winfo_width()-10)))
             self.tabs = ttk.Notebook(side)
             self.tabs.pack(fill='both', expand=True)

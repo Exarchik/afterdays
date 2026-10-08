@@ -124,7 +124,8 @@ class QuestCards(tk.Frame):
         if mayor:ttk.Button(controls,text=tr('refinement_ui.0029'),command=self.accept).pack(side='left',expand=True,fill='x')
         ttk.Button(controls,text=tr('refinement_ui.0030'),command=self.turn_in).pack(side='left',expand=True,fill='x')
         ttk.Button(controls,text=tr('quests.abandon'),command=self.abandon).pack(side='left',expand=True,fill='x')
-        if not mayor:ttk.Button(self,text=tr('refinement_ui.0031'),command=app.atlas).pack(fill='x',padx=8,pady=3)
+        self.navigate_button=ttk.Button(self,text='Рухатись до',command=self.navigate)
+        self.navigate_button.pack(fill='x',padx=8,pady=3)
         if mayor:
             import restoration_ui
             self.permission_button=ttk.Button(self,text=tr('restoration.permission'),command=lambda:restoration_ui.permission(app))
@@ -201,9 +202,17 @@ class QuestCards(tk.Frame):
             q=self.selected()
             if q and q['status']=='offered':q['seen']=True
         self.paint();self.describe()
+    def navigate(self):
+        from quest_navigation import destination
+        pos=destination(self.app.game,self.selected())
+        if pos is None:return
+        if self.app.dialog:self.app.dialog.close_dialog()
+        self.app.route.set_target(tuple(pos))
     def describe(self):
         """Показує характеристики вибраного предмета."""
         q=self.selected();self.detail.config(text=self.app.game.quest_text(q) if q else tr('refinement_ui.0038'))
+        from quest_navigation import destination
+        self.navigate_button.config(state='normal' if destination(self.app.game,q) is not None and not self.app.game.battle else 'disabled')
         if q and q['status']=='offered':q['seen']=True
     def accept(self):
         """Перевіряє можливість отримання предмета і додає його до сумки."""

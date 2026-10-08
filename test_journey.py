@@ -90,7 +90,7 @@ class RouteTests(unittest.TestCase):
  def test_speed_pause_resume(self):
   """Перевіряє сценарій «speed pause resume» та очікувані результати."""
   g,app,c=self.controller()
-  with patch('route_ui.time.monotonic',return_value=0):self.assertTrue(c.set_target((3,0)))
+  with patch('route_ui.time.monotonic',return_value=0):self.assertTrue(c.set_target((3,0),start=True))
   with patch('route_ui.time.monotonic',return_value=.3):
    c.advance();self.assertEqual(g.turn,0);self.assertAlmostEqual(c.position()[0],.45);c.pause()
   self.assertEqual(c.position(),(0,0));self.assertEqual(g.turn,0)
@@ -104,22 +104,22 @@ class RouteTests(unittest.TestCase):
   """Перевіряє сценарій «interruptions» та очікувані результати."""
   for attr in ('dialog','battle','road_event'):
    g,app,c=self.controller()
-   with patch('route_ui.time.monotonic',return_value=0):c.set_target((3,0))
+   with patch('route_ui.time.monotonic',return_value=0):c.set_target((3,0),start=True)
    setattr(app if attr=='dialog' else g,attr,True)
    with patch('route_ui.time.monotonic',return_value=1):c.advance()
    self.assertFalse(c.running);self.assertEqual(g.turn,0);self.assertEqual(len(c.path),3)
   g,app,c=self.controller()
-  with patch('route_ui.time.monotonic',return_value=0):c.set_target((3,0))
+  with patch('route_ui.time.monotonic',return_value=0):c.set_target((3,0),start=True)
   def encounter(dx,dy):g.step(dx,dy);g.traveler={'guide':True};return True
   app.world_step=encounter
   with patch('route_ui.time.monotonic',return_value=1):c.advance()
   self.assertFalse(c.running);self.assertEqual(g.turn,1);self.assertEqual(len(c.path),2)
  def test_stale_and_failed_routes(self):
   """Перевіряє сценарій «stale and failed routes» та очікувані результати."""
-  g,app,c=self.controller();c.set_target((3,0));app.game=FakeGame();c.advance();self.assertFalse(c.path)
-  c.set_target((3,0));app.game.x=4;c.advance();self.assertFalse(c.path)
+  g,app,c=self.controller();c.set_target((3,0),start=True);app.game=FakeGame();c.advance();self.assertFalse(c.path)
+  c.set_target((3,0),start=True);app.game.x=4;c.advance();self.assertFalse(c.path)
   g,app,c=self.controller()
-  with patch('route_ui.time.monotonic',return_value=0):c.set_target((3,0))
+  with patch('route_ui.time.monotonic',return_value=0):c.set_target((3,0),start=True)
   app.world_step=lambda dx,dy:False
   with patch('route_ui.time.monotonic',return_value=1):c.advance()
   self.assertEqual(g.turn,0);self.assertFalse(c.running)
