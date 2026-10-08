@@ -1126,6 +1126,7 @@ def launch(test_hook=None):
             self.canvas.pack(fill='both', expand=True)
             self.canvas.bind('<Configure>', lambda e: self.draw())
             self.canvas.bind('<Button-1>', self.map_click)
+            self.canvas.bind('<Double-Button-1>', lambda e:self.map_click(e,start=True))
             self.canvas.bind('<Motion>', self.map_hover)
             self.canvas.bind('<Leave>',self.clear_battle_hover)
             import inspection_ui
@@ -1597,7 +1598,7 @@ def launch(test_hook=None):
                 g.loot.clear()
             return g.step(dx, dy)
 
-        def map_click(self, event):
+        def map_click(self, event, *, start=False):
             """Обробляє натискання на клітинку карти або бойову ціль."""
             if self.dialog:
                 return
@@ -1610,7 +1611,7 @@ def launch(test_hook=None):
                 enemy = next((e for e in b['enemies'] if e['pos'] == [x, y]), None)
                 self.act(lambda: self.game.shoot(enemy['id']) if enemy else self.game.battle_move((x, y)))
             elif 0 <= x < len(self.game.world[0]) and 0 <= y < len(self.game.world):
-                self.route.set_target((x,y))
+                self.route.set_target((x,y),start=start)
 
         def key(self, event):
             """Обробляє гарячі клавіші гри."""
