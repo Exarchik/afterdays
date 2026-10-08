@@ -162,18 +162,17 @@ def draw_roads(c,g,v,revealed,overview=False):
     for y in range(v.vy,v.vy+v.rows):
         for x in range(v.vx,v.vx+v.cols):
             pos=(x,y);kind=g.world[y][x]
-            # City art stays unobstructed; incoming roads stop at its hex edge.
-            if kind not in ('road','site') or not revealed(x,y):continue
+            # City and special-location art stays clear; roads end at the shared edge.
+            if kind!='road' or not revealed(x,y):continue
             center=v.point(pos)
             neighbors=road_neighbors(g,pos)
-            if kind!='road':neighbors=[p for p in neighbors if g.world[p[1]][p[0]]=='road']
             ends=[]
             for nxt in neighbors:
                 other=v.point(nxt)
                 ends.append(((center[0]+other[0])/2,(center[1]+other[1])/2))
             # On bends a quadratic spline is tangent to both adjoining segments.
             # Its endpoints remain exactly at the shared edge midpoints.
-            if len(ends)==2 and kind=='road':
+            if len(ends)==2:
                 paths.append((*ends[0],*center,*ends[1]))
             else:
                 paths.extend((*center,*end) for end in ends)

@@ -16,9 +16,22 @@ def route_distance(start,path):
     return sum(world_hex.distance(a,b) for a,b in zip([tuple(start)]+path,path))
 
 
+def route_terrain_cost(game,pos):
+    """Planning preference only: every actual move still consumes one turn."""
+    world=getattr(game,'world',None)
+    if world is None:return 1.0
+    x,y=pos
+    if world[y][x]=='road':return 1.0
+    for nxt in world_hex.neighbors(x,y,len(world[0]),len(world)):
+        if world[nxt[1]][nxt[0]]=='road' and world_edge(game,pos,nxt):return 1.15
+    return 1.35
+
+
 def world_route(game,destination,start=None):
     start=tuple(start or (game.x,game.y));destination=tuple(destination)
     if start==destination or not game.passable(*destination):return []
+    # The minimum terrain cost is 1, so hex distance remains admissible.
+    terrain_cost={}
     def estimate(p):return world_hex.distance(p,destination)
     previous={start:None};cost={start:0};queue=[(estimate(start),0,start)]
     while queue:
@@ -30,7 +43,8 @@ def world_route(game,destination,start=None):
             return path[::-1]
         for b in world_hex.adjacent(a):
             if not world_edge(game,a,b):continue
-            candidate=distance+1
+            if b not in terrain_cost:terrain_cost[b]=route_terrain_cost(game,b)
+            candidate=distance+terrain_cost[b]
             if candidate>=cost.get(b,float('inf'))-1e-10:continue
             cost[b]=candidate;previous[b]=a
             heapq.heappush(queue,(candidate+estimate(b),candidate,b))
