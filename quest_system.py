@@ -77,14 +77,14 @@ class QuestSystem:
 
     def quest_return_city(self,q):
         """Визначає місто, у якому потрібно здати завдання."""
-        if q['kind']=='repair_delivery':
+        if q['kind'] in ('repair_delivery','delivery'):
             site=next((s for s in self.special_sites if s['id']==q['destination']),None)
             return site['city_id'] if site else None
         return q['city']
 
     def quest_return_pos(self,q):
         """Повертає координати місця здачі завдання."""
-        return q['pos'] if q['kind']=='repair_delivery' else self.cities[q['city']]
+        return q['pos'] if q['kind'] in ('repair_delivery','delivery') else self.cities[q['city']]
 
     def can_turn_in(self,q):
         """Перевіряє готовність завдання та присутність гравця в місці здачі."""
@@ -94,6 +94,9 @@ class QuestSystem:
         """Перевіряє виконання всіх умов для здачі завдання."""
         if q['kind']=='repair_delivery':
             return q['status']=='active' and any(i.get('quest_id')==q['id'] and i.get('durability',0)>=100 for i in self.bag)
+        if q['kind']=='delivery':
+            # The recipient accepts the parcel; older saves may already have handed it over.
+            return q['status']=='active' and (q['progress']>=q['goal'] or any(i.get('quest_id')==q['id'] for i in self.bag))
         return super().quest_ready(q)
 
     def stash_transfer(self,item_id,direction,qty=1):
@@ -136,12 +139,17 @@ class QuestSystem:
     def turn_in(self,quest_id):
         """Перевіряє умови здачі, видає нагороду й завершує завдання."""
         q=next((q for q in self.quests if q['id']==quest_id),None)
-        if q and q['kind']=='repair_delivery':
+        if q and q['kind'] in ('repair_delivery','delivery'):
+            # The parcel recipient closes the quest on the spot; no return to the quest giver.
             if not self.can_turn_in(q):return False
             self.bag[:]=[i for i in self.bag if i.get('quest_id')!=quest_id]
-            q['status']='done';q['progress']=1;self.money+=q['reward'];self.gain_xp(q['xp_reward'])
+            xp_before=self.xp
+            q['status']='done';q['progress']=q['goal'];self.money+=q['reward'];self.gain_xp(q['xp_reward'])
             self.give_quest_items(q);self.add_reputation(8 if q.get('unique') else 4,city=q['city'])
-            self.log(tr('quests.delivered',title=q['title']));return True
+            self.log(tr('quests.delivered',title=q['title']) if q['kind']=='repair_delivery' else tr('contracts.0010'))
+            self.log(tr('progression.0067',v0=q['title'],v1=q['reward'])+f' +{self.xp-xp_before} XP',color='#99dca5')
+            self.emit(f'+{q["reward"]} кр.',color='#99dca5')
+            return True
         return super().turn_in(quest_id)
 
     def repair(self,item_id,target=100):

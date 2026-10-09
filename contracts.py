@@ -93,8 +93,8 @@ class Game(Guides, QuestSystem, Border, Reputation, frontier.Game):
         if q['kind']=='delivery':
             parcel=next((i for i in self.bag if i.get('quest_id')==q['id']),None)
             if not parcel:self.log(tr('contracts.0009'));return False
-            self.bag.remove(parcel);q['progress']=1
-            self.log(tr('contracts.0010'));self.emit(tr('contracts.0011'),color='#99dca5')
+            if not self.turn_in(q['id']):return False
+            self.emit(tr('contracts.0011'),color='#99dca5')
         else:self._radio_request=q['id']
         return True
 
@@ -119,5 +119,6 @@ class Game(Guides, QuestSystem, Border, Reputation, frontier.Game):
             return tr('quests.repair_text',title=q['title'],item=item['name'],condition=round(item['durability']),destination=q['destination_name'],level=q['level'],money=q['reward'],xp=q['xp_reward'])
         if q['kind'] not in ('delivery','radio'):return super().quest_text(q)
         desc=(tr('contracts.0015')+q['destination_name']+tr('contracts.0016')) if q['kind']=='delivery' else tr('contracts.0017')
-        state=tr('contracts.0018') if q['status']=='done' else tr('contracts.0019') if self.quest_ready(q) else tr('contracts.0020') if q['status']=='offered' else tr('contracts.0021')
+        ready=tr('contracts.0025') if q['kind']=='delivery' else tr('contracts.0019')
+        state=tr('contracts.0018') if q['status']=='done' else ready if self.quest_ready(q) else tr('contracts.0020') if q['status']=='offered' else tr('contracts.0021')
         return tr('contracts.0023', v0='★ ' if q.get('unique') else '', v1=q['title'], v2=q['level'], v3=desc, v4=q.get('pos') or tr('contracts.0022'), v5=self.city_name(q['city']), v6=q['reward'], v7=q['xp_reward'], v8=state)+(tr('contracts.0024') if q.get('unique') else '')

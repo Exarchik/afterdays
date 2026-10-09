@@ -223,7 +223,7 @@ class Services(tk.Frame):
             if g.city in g.technicians:items.append(('tech',tr('adventure_ui.0014'),app.technician))
             if g.city in g.mayors:items.append(('mayor',g.current_site['npc'] if g.current_site else tr('adventure_ui.0015'),app.mayor))
             if g.regular_city and g.city not in g.mayors:items.append(('board',tr('quests.board'),app.mayor))
-            if any(q['kind']=='repair_delivery' and q['status']=='active' and g.quest_return_city(q)==g.city for q in g.quests):items.append(('board',tr('quests.recipient'),lambda:app.tabs.select(app.quest_tab)))
+            if any(q['kind'] in ('repair_delivery','delivery') and q['status']=='active' and g.quest_return_city(q)==g.city for q in g.quests):items.append(('board',tr('quests.recipient'),lambda:app.tabs.select(app.quest_tab)))
             if g.regular_city:
                 items.extend([('stash',tr('adventure_ui.0016'),app.storage),('rest',tr('adventure_ui.0017'),lambda:app.act(g.rest))])
             elif g.city is None:
