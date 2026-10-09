@@ -31,9 +31,13 @@ FIELDS = {
     'weapon': [('damage','Базова шкода',int),('attack','Базова атака',int),('range','Дальність',int),('accuracy','Точність, %',int),('weight','Вага, кг',float),('ap','Витрата ОД',int),('min_level','Мін. рівень появи',int),('ammo_type','Тип набоїв',AMMO),('damage_type','Тип шкоди',DAMAGE),('category','Клас зброї',CATEGORIES)],
     'armor': [('defense','Базовий захист',int),('weight','Вага, кг',float),('min_level','Мін. рівень появи',int)],
     'helmet': [('defense','Базовий захист',int),('weight','Вага, кг',float),('min_level','Мін. рівень появи',int)],
-    'module': [('target','Для спорядження',TARGETS),('stat','Основний параметр',STATS),('base','Базовий бонус',float),('weight','Вага, кг',float)],
+    'module': [('target','Для спорядження',TARGETS),('min_level','Мін. рівень появи',int),('stat','Основний параметр',STATS),('base','Базовий бонус',float),('weight','Вага, кг',float)],
     'monster': [('trophy_value','Базова вартість трофея, кр.',int),('base_level','Базовий рівень виду',int),('hp','Базове здоров’я',int),('damage','Базова шкода',int),('attack','Базова атака',int),('defense','Базовий захист',int),('range','Дальність',int),('speed','Швидкість',int),('regen','Регенерація за хід',int),('color','Колір без спрайта',str)],
 }
+
+def module_group(data):
+    return {'helmet':0,'armor':1,'protection':2,'weapon':3}[data.get('target','protection')]
+
 
 def read(path): return json.loads(Path(path).read_text(encoding='utf-8'))
 
@@ -47,7 +51,7 @@ def validate_definition(section, ident, data, texts, art):
     need(isinstance(texts.get('description'),str), 'опис має бути текстом')
     need(isinstance(data.get('sprite_id'),str) and data['sprite_id'] in art, 'невідомий асет')
     for field,label,kind in FIELDS[section]:
-        value=data.get(field, 2*(4+data.get('legacy_index',0)) if section=='monster' and field=='trophy_value' else .3 if section=='module' and field=='weight' else None)
+        value=data.get(field, 2*(4+data.get('legacy_index',0)) if section=='monster' and field=='trophy_value' else .3 if section=='module' and field=='weight' else 1 if section=='module' and field=='min_level' else None)
         if isinstance(kind,dict): need(isinstance(value,str) and value in kind, label+': невідоме значення')
         elif kind is str: need(isinstance(value,str),label+': потрібен текст')
         else:
@@ -63,6 +67,10 @@ def validate_definition(section, ident, data, texts, art):
     if section in ('module','monster'):
         need(type(data.get('legacy_index')) is int and data['legacy_index']>=0,'некоректний індекс')
     if section=='module':
+        minimum=data.get('min_equipment_rarity',0)
+        need(type(minimum) is int and 0<=minimum<5,'мінімальна рідкість спорядження: 0–4')
+        categories=data.get('weapon_categories',list(CATEGORIES))
+        need(isinstance(categories,list) and bool(categories) and all(isinstance(c,str) and c in CATEGORIES for c in categories),'виберіть хоча б один відомий клас зброї')
         for key,values in data.get('rarity_stats',{}).items():
             need(key in STATS,'невідомий параметр '+key)
             need(isinstance(values,list) and len(values)==5 and all(number(n) for n in values),'для '+key+' потрібні 5 чисел рідкості')
@@ -98,7 +106,10 @@ class Store:
     def draft(self, section, ident):
         data=copy.deepcopy(self.data[GROUPS[section]][ident]);texts=self.data['texts']
         names={field:texts.get(ident+'.'+field,'') for field in ('name','description','trophy')}
-        if section=='module': data.setdefault('weight',.3)
+        if section=='module':
+            data.setdefault('weight',.3);data.setdefault('min_level',1)
+            data.setdefault('min_equipment_rarity',0)
+            data.setdefault('weapon_categories',list(CATEGORIES))
         if section=='monster':
             data.setdefault('trophy_value',2*(4+data['legacy_index']))
             data.setdefault('corpse_sprite_id','corpse:'+ident)
@@ -152,6 +163,7 @@ class Store:
         for group in ('modules','monsters'):
             indices=[v['legacy_index'] for v in self.data[group].values()]
             if sorted(indices)!=list(range(len(indices))): errors.append(group+': порушена послідовність індексів')
+        if not any(d.get('min_level',1)==1 for d in self.data['modules'].values()): errors.append('Потрібен хоча б один модуль рівня 1.')
         # Generation always needs an entry available in the starting region.
         if not any(d['base_level']<=2 for d in self.data['monsters'].values()): errors.append('Потрібен хоча б один монстр рівня 1–2.')
         if not any(d['min_level']==1 for d in self.data['equipment'].values()): errors.append('Потрібен хоча б один предмет рівня 1.')

@@ -16,6 +16,7 @@ def remember_target(game,enemy):
 def attack_range(game,weapon,target):
     if mr.condition(weapon)<=0:return (0,0)
     mode=game.fire_mode(weapon)
+    weapon=mr.effective_weapon(game,weapon)
     crit=min(65,5+mr.gear_stats(weapon).get('crit',0))+(15 if mode=='aimed' else 0)
     criticals=([False] if crit<100 else [])+([True] if crit>0 else [])
     pellets=range(6) if combat033.category(weapon)=='shotgun' else [None]*(5 if mode=='burst' else 1)

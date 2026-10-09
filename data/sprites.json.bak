@@ -5829,5 +5829,743 @@
     },
     "editor_render_hash": "5794c99ea0010eb20f7c14121d88f6ba5916ddb5945cac83dfbf7a37afdb8c97",
     "inventory_columns": 8
+  },
+  "weapon_badge:electric:0": {
+    "index": 10,
+    "columns": 8,
+    "sheet": "custom/atlases/3e69a080b6558aee5415eea5c082eafa45de167b5fa585e3e35f0a6bfbe3aa1d/sprite",
+    "inventory_sheet": "custom/atlases/3e69a080b6558aee5415eea5c082eafa45de167b5fa585e3e35f0a6bfbe3aa1d/inventory",
+    "art_label": "Емблема: Електрична — Звичайний",
+    "art_category": "weapon_badges",
+    "editor_source": "custom/sources/95e59b76c194390eb69e734318219178a51c8fa1a3ebfb8b1891027203ea606e.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        34,
+        744,
+        256,
+        969
+      ]
+    },
+    "editor_render_hash": "58b41cb3a3836cbef5099675a3e5c9c821f2cea099956b4c460054c20185c414",
+    "inventory_columns": 8
+  },
+  "weapon_badge:electric:4": {
+    "index": 4,
+    "columns": 8,
+    "sheet": "custom/atlases/a4e29992cf6e42cce27e8190bdacab2d8881a22aeee3ee78e367e8247deb4199/sprite",
+    "inventory_sheet": "custom/atlases/a4e29992cf6e42cce27e8190bdacab2d8881a22aeee3ee78e367e8247deb4199/inventory",
+    "art_label": "Емблема: Електрична — Міфічний",
+    "art_category": "weapon_badges",
+    "editor_source": "custom/sources/95e59b76c194390eb69e734318219178a51c8fa1a3ebfb8b1891027203ea606e.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        995,
+        730,
+        1234,
+        961
+      ]
+    },
+    "editor_render_hash": "3d24750e8dfefe759870ce938c669631f7f8a92ebc9164024519acc181302620",
+    "inventory_columns": 8
+  },
+  "weapon_badge:electric:1": {
+    "index": 27,
+    "columns": 8,
+    "sheet": "custom/atlases/28cb8275d9ab5b302b5514a11f936aead87e97cbddcba6b34b652e20e6a771a6/sprite",
+    "inventory_sheet": "custom/atlases/28cb8275d9ab5b302b5514a11f936aead87e97cbddcba6b34b652e20e6a771a6/inventory",
+    "art_label": "Емблема: Електрична — Незвичний",
+    "art_category": "weapon_badges",
+    "editor_source": "custom/sources/95e59b76c194390eb69e734318219178a51c8fa1a3ebfb8b1891027203ea606e.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        273,
+        736,
+        503,
+        964
+      ]
+    },
+    "editor_render_hash": "48b63fa283333d5f2cbc7e539a6648404e8588eb30f7555ba30c33687b38197b",
+    "inventory_columns": 8
+  },
+  "weapon_badge:electric:2": {
+    "index": 56,
+    "columns": 8,
+    "sheet": "custom/atlases/28cb8275d9ab5b302b5514a11f936aead87e97cbddcba6b34b652e20e6a771a6/sprite",
+    "inventory_sheet": "custom/atlases/28cb8275d9ab5b302b5514a11f936aead87e97cbddcba6b34b652e20e6a771a6/inventory",
+    "art_label": "Емблема: Електрична — Рідкісний",
+    "art_category": "weapon_badges",
+    "editor_source": "custom/sources/95e59b76c194390eb69e734318219178a51c8fa1a3ebfb8b1891027203ea606e.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        501,
+        736,
+        751,
+        967
+      ]
+    },
+    "editor_render_hash": "54d93a8e923821378e6c10b05458a852231add0b906573e296cf1462fc0615e4",
+    "inventory_columns": 8
+  },
+  "weapon_badge:electric:3": {
+    "index": 6,
+    "columns": 8,
+    "sheet": "custom/atlases/3e69a080b6558aee5415eea5c082eafa45de167b5fa585e3e35f0a6bfbe3aa1d/sprite",
+    "inventory_sheet": "custom/atlases/3e69a080b6558aee5415eea5c082eafa45de167b5fa585e3e35f0a6bfbe3aa1d/inventory",
+    "art_label": "Емблема: Електрична — Унікальний",
+    "art_category": "weapon_badges",
+    "editor_source": "custom/sources/95e59b76c194390eb69e734318219178a51c8fa1a3ebfb8b1891027203ea606e.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        748,
+        738,
+        987,
+        969
+      ]
+    },
+    "editor_render_hash": "65403b2619d72501195492923c626a38634cc9805bc17cd52f5abdfb424a08f0",
+    "inventory_columns": 8
+  },
+  "weapon_badge:energy:0": {
+    "index": 59,
+    "columns": 8,
+    "sheet": "custom/atlases/28cb8275d9ab5b302b5514a11f936aead87e97cbddcba6b34b652e20e6a771a6/sprite",
+    "inventory_sheet": "custom/atlases/28cb8275d9ab5b302b5514a11f936aead87e97cbddcba6b34b652e20e6a771a6/inventory",
+    "art_label": "Емблема: Енергетична — Звичайний",
+    "art_category": "weapon_badges",
+    "editor_source": "custom/sources/95e59b76c194390eb69e734318219178a51c8fa1a3ebfb8b1891027203ea606e.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        31,
+        502,
+        256,
+        736
+      ]
+    },
+    "editor_render_hash": "04918df01445573caa2ada4df1dae607997ed497ead62d6e41ceaa858239d431",
+    "inventory_columns": 8
+  },
+  "weapon_badge:energy:4": {
+    "index": 19,
+    "columns": 8,
+    "sheet": "custom/atlases/3e69a080b6558aee5415eea5c082eafa45de167b5fa585e3e35f0a6bfbe3aa1d/sprite",
+    "inventory_sheet": "custom/atlases/3e69a080b6558aee5415eea5c082eafa45de167b5fa585e3e35f0a6bfbe3aa1d/inventory",
+    "art_label": "Емблема: Енергетична — Міфічний",
+    "art_category": "weapon_badges",
+    "editor_source": "custom/sources/95e59b76c194390eb69e734318219178a51c8fa1a3ebfb8b1891027203ea606e.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        990,
+        499,
+        1254,
+        736
+      ]
+    },
+    "editor_render_hash": "a2d45dc2a59a7faac0a59368a08204fc777d46b21ad475a40d421a26376a5e62",
+    "inventory_columns": 8
+  },
+  "weapon_badge:energy:1": {
+    "index": 24,
+    "columns": 8,
+    "sheet": "custom/atlases/3e69a080b6558aee5415eea5c082eafa45de167b5fa585e3e35f0a6bfbe3aa1d/sprite",
+    "inventory_sheet": "custom/atlases/3e69a080b6558aee5415eea5c082eafa45de167b5fa585e3e35f0a6bfbe3aa1d/inventory",
+    "art_label": "Емблема: Енергетична — Незвичний",
+    "art_category": "weapon_badges",
+    "editor_source": "custom/sources/95e59b76c194390eb69e734318219178a51c8fa1a3ebfb8b1891027203ea606e.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        283,
+        510,
+        501,
+        741
+      ]
+    },
+    "editor_render_hash": "000558671a5e78d93506535c057b7bf473f634a2a7a8e6e30894aab29a3318c7",
+    "inventory_columns": 8
+  },
+  "weapon_badge:energy:2": {
+    "index": 4,
+    "columns": 8,
+    "sheet": "custom/atlases/06e48e84a259df3049ae99d50a02a39bd492f215a6b73409b3eea4f94650e4b9/sprite",
+    "inventory_sheet": "custom/atlases/06e48e84a259df3049ae99d50a02a39bd492f215a6b73409b3eea4f94650e4b9/inventory",
+    "art_label": "Емблема: Енергетична — Рідкісний",
+    "art_category": "weapon_badges",
+    "editor_source": "custom/sources/95e59b76c194390eb69e734318219178a51c8fa1a3ebfb8b1891027203ea606e.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        501,
+        507,
+        752,
+        744
+      ]
+    },
+    "editor_render_hash": "6cc731886fbbd1e91d52560e59a8a6e32357602d191ae79902a6e2a9b6d1ee11",
+    "inventory_columns": 8
+  },
+  "weapon_badge:energy:3": {
+    "index": 0,
+    "columns": 8,
+    "sheet": "custom/atlases/3e69a080b6558aee5415eea5c082eafa45de167b5fa585e3e35f0a6bfbe3aa1d/sprite",
+    "inventory_sheet": "custom/atlases/3e69a080b6558aee5415eea5c082eafa45de167b5fa585e3e35f0a6bfbe3aa1d/inventory",
+    "art_label": "Емблема: Енергетична — Унікальний",
+    "art_category": "weapon_badges",
+    "editor_source": "custom/sources/95e59b76c194390eb69e734318219178a51c8fa1a3ebfb8b1891027203ea606e.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        751,
+        507,
+        1000,
+        739
+      ]
+    },
+    "editor_render_hash": "c8a8f4641af500693f39c98e8ed6af81c6dd4b7af5911b8bcd0ca52d18287d75",
+    "inventory_columns": 8
+  },
+  "weapon_badge:kinetic:0": {
+    "index": 36,
+    "columns": 8,
+    "sheet": "custom/atlases/06e48e84a259df3049ae99d50a02a39bd492f215a6b73409b3eea4f94650e4b9/sprite",
+    "inventory_sheet": "custom/atlases/06e48e84a259df3049ae99d50a02a39bd492f215a6b73409b3eea4f94650e4b9/inventory",
+    "art_label": "Емблема: Кінетична — Звичайний",
+    "art_category": "weapon_badges",
+    "editor_source": "custom/sources/95e59b76c194390eb69e734318219178a51c8fa1a3ebfb8b1891027203ea606e.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        10,
+        25,
+        250,
+        270
+      ]
+    },
+    "editor_render_hash": "788c77d98c6a36549dee3d2541a5f068070ea51e6b9c36df2e7f9b2606ad71df",
+    "inventory_columns": 8
+  },
+  "weapon_badge:kinetic:4": {
+    "index": 16,
+    "columns": 8,
+    "sheet": "custom/atlases/a4e29992cf6e42cce27e8190bdacab2d8881a22aeee3ee78e367e8247deb4199/sprite",
+    "inventory_sheet": "custom/atlases/a4e29992cf6e42cce27e8190bdacab2d8881a22aeee3ee78e367e8247deb4199/inventory",
+    "art_label": "Емблема: Кінетична — Міфічний",
+    "art_category": "weapon_badges",
+    "editor_source": "custom/sources/95e59b76c194390eb69e734318219178a51c8fa1a3ebfb8b1891027203ea606e.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        1000,
+        25,
+        1254,
+        270
+      ]
+    },
+    "editor_render_hash": "b04edb4d1c2299542faefca4efdf2c371c3537d4f14d9a6cbbca2a847b904014",
+    "inventory_columns": 8
+  },
+  "weapon_badge:kinetic:1": {
+    "index": 32,
+    "columns": 8,
+    "sheet": "custom/atlases/a4e29992cf6e42cce27e8190bdacab2d8881a22aeee3ee78e367e8247deb4199/sprite",
+    "inventory_sheet": "custom/atlases/a4e29992cf6e42cce27e8190bdacab2d8881a22aeee3ee78e367e8247deb4199/inventory",
+    "art_label": "Емблема: Кінетична — Незвичний",
+    "art_category": "weapon_badges",
+    "editor_source": "custom/sources/95e59b76c194390eb69e734318219178a51c8fa1a3ebfb8b1891027203ea606e.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        255,
+        25,
+        501,
+        270
+      ]
+    },
+    "editor_render_hash": "4449d516528573e8276c883d10d8744bc9ab64308c69a1187077b647fcb71d1f",
+    "inventory_columns": 8
+  },
+  "weapon_badge:kinetic:2": {
+    "index": 35,
+    "columns": 8,
+    "sheet": "custom/atlases/28cb8275d9ab5b302b5514a11f936aead87e97cbddcba6b34b652e20e6a771a6/sprite",
+    "inventory_sheet": "custom/atlases/28cb8275d9ab5b302b5514a11f936aead87e97cbddcba6b34b652e20e6a771a6/inventory",
+    "art_label": "Емблема: Кінетична — Рідкісний",
+    "art_category": "weapon_badges",
+    "editor_source": "custom/sources/95e59b76c194390eb69e734318219178a51c8fa1a3ebfb8b1891027203ea606e.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        506,
+        32,
+        752,
+        260
+      ]
+    },
+    "editor_render_hash": "8bf2dacd6be955edbebd56ed3b2c64ab17a018c75760b5a56ad02acac68b021e",
+    "inventory_columns": 8
+  },
+  "weapon_badge:kinetic:3": {
+    "index": 38,
+    "columns": 8,
+    "sheet": "custom/atlases/06e48e84a259df3049ae99d50a02a39bd492f215a6b73409b3eea4f94650e4b9/sprite",
+    "inventory_sheet": "custom/atlases/06e48e84a259df3049ae99d50a02a39bd492f215a6b73409b3eea4f94650e4b9/inventory",
+    "art_label": "Емблема: Кінетична — Унікальний",
+    "art_category": "weapon_badges",
+    "editor_source": "custom/sources/95e59b76c194390eb69e734318219178a51c8fa1a3ebfb8b1891027203ea606e.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        751,
+        32,
+        1000,
+        275
+      ]
+    },
+    "editor_render_hash": "9821f64bfa1191aa29115568b0461ba9adc973ce60b9c3381219a490cb3cf7de",
+    "inventory_columns": 8
+  },
+  "weapon_badge:piercing:0": {
+    "index": 20,
+    "columns": 8,
+    "sheet": "custom/atlases/28cb8275d9ab5b302b5514a11f936aead87e97cbddcba6b34b652e20e6a771a6/sprite",
+    "inventory_sheet": "custom/atlases/28cb8275d9ab5b302b5514a11f936aead87e97cbddcba6b34b652e20e6a771a6/inventory",
+    "art_label": "Емблема: Пробивна — Звичайний",
+    "art_category": "weapon_badges",
+    "editor_source": "custom/sources/95e59b76c194390eb69e734318219178a51c8fa1a3ebfb8b1891027203ea606e.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        10,
+        270,
+        250,
+        507
+      ]
+    },
+    "editor_render_hash": "8bb2347e828b2d1276255427481e239d1058f2443c49d4d49a29629bcd41bc13",
+    "inventory_columns": 8
+  },
+  "weapon_badge:piercing:4": {
+    "index": 35,
+    "columns": 8,
+    "sheet": "custom/atlases/06e48e84a259df3049ae99d50a02a39bd492f215a6b73409b3eea4f94650e4b9/sprite",
+    "inventory_sheet": "custom/atlases/06e48e84a259df3049ae99d50a02a39bd492f215a6b73409b3eea4f94650e4b9/inventory",
+    "art_label": "Емблема: Пробивна — Міфічний",
+    "art_category": "weapon_badges",
+    "editor_source": "custom/sources/95e59b76c194390eb69e734318219178a51c8fa1a3ebfb8b1891027203ea606e.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        1000,
+        270,
+        1254,
+        500
+      ]
+    },
+    "editor_render_hash": "f2f7a31bb6a0a7fc08ace549c826e84e9b8f34ce5657a519afb536c6b5382281",
+    "inventory_columns": 8
+  },
+  "weapon_badge:piercing:1": {
+    "index": 8,
+    "columns": 8,
+    "sheet": "custom/atlases/a4e29992cf6e42cce27e8190bdacab2d8881a22aeee3ee78e367e8247deb4199/sprite",
+    "inventory_sheet": "custom/atlases/a4e29992cf6e42cce27e8190bdacab2d8881a22aeee3ee78e367e8247deb4199/inventory",
+    "art_label": "Емблема: Пробивна — Незвичний",
+    "art_category": "weapon_badges",
+    "editor_source": "custom/sources/95e59b76c194390eb69e734318219178a51c8fa1a3ebfb8b1891027203ea606e.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        250,
+        270,
+        501,
+        507
+      ]
+    },
+    "editor_render_hash": "84618348e147775f71017be52e7d7b99a0efcd7cadfb5448c8d36ba0e2e2b9d0",
+    "inventory_columns": 8
+  },
+  "weapon_badge:piercing:2": {
+    "index": 18,
+    "columns": 8,
+    "sheet": "custom/atlases/3e69a080b6558aee5415eea5c082eafa45de167b5fa585e3e35f0a6bfbe3aa1d/sprite",
+    "inventory_sheet": "custom/atlases/3e69a080b6558aee5415eea5c082eafa45de167b5fa585e3e35f0a6bfbe3aa1d/inventory",
+    "art_label": "Емблема: Пробивна — Рідкісний",
+    "art_category": "weapon_badges",
+    "editor_source": "custom/sources/95e59b76c194390eb69e734318219178a51c8fa1a3ebfb8b1891027203ea606e.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        501,
+        270,
+        751,
+        507
+      ]
+    },
+    "editor_render_hash": "93ec685b1a58bb871c7539bb0c4a1850eefea6cc2ed1a866341aa6a4d5bb179c",
+    "inventory_columns": 8
+  },
+  "weapon_badge:piercing:3": {
+    "index": 61,
+    "columns": 8,
+    "sheet": "custom/atlases/28cb8275d9ab5b302b5514a11f936aead87e97cbddcba6b34b652e20e6a771a6/sprite",
+    "inventory_sheet": "custom/atlases/28cb8275d9ab5b302b5514a11f936aead87e97cbddcba6b34b652e20e6a771a6/inventory",
+    "art_label": "Емблема: Пробивна — Унікальний",
+    "art_category": "weapon_badges",
+    "editor_source": "custom/sources/95e59b76c194390eb69e734318219178a51c8fa1a3ebfb8b1891027203ea606e.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        751,
+        275,
+        995,
+        507
+      ]
+    },
+    "editor_render_hash": "a8e600b2da9ba3c54989f415f176ecf829eeba47d4a8eb26e0e08fb46ec7e61c",
+    "inventory_columns": 8
+  },
+  "weapon_badge:thermal:0": {
+    "index": 53,
+    "columns": 8,
+    "sheet": "custom/atlases/28cb8275d9ab5b302b5514a11f936aead87e97cbddcba6b34b652e20e6a771a6/sprite",
+    "inventory_sheet": "custom/atlases/28cb8275d9ab5b302b5514a11f936aead87e97cbddcba6b34b652e20e6a771a6/inventory",
+    "art_label": "Емблема: Термічна — Звичайний",
+    "art_category": "weapon_badges",
+    "editor_source": "custom/sources/95e59b76c194390eb69e734318219178a51c8fa1a3ebfb8b1891027203ea606e.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        10,
+        980,
+        250,
+        1220
+      ]
+    },
+    "editor_render_hash": "d9f5c2c1c64b68d719df26e89c4a50ee9fe8c4c8c4f0d442e3aeee6601c573a0",
+    "inventory_columns": 8
+  },
+  "weapon_badge:thermal:4": {
+    "index": 52,
+    "columns": 8,
+    "sheet": "custom/atlases/28cb8275d9ab5b302b5514a11f936aead87e97cbddcba6b34b652e20e6a771a6/sprite",
+    "inventory_sheet": "custom/atlases/28cb8275d9ab5b302b5514a11f936aead87e97cbddcba6b34b652e20e6a771a6/inventory",
+    "art_label": "Емблема: Термічна — Міфічний",
+    "art_category": "weapon_badges",
+    "editor_source": "custom/sources/95e59b76c194390eb69e734318219178a51c8fa1a3ebfb8b1891027203ea606e.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        1000,
+        965,
+        1254,
+        1220
+      ]
+    },
+    "editor_render_hash": "43c88be8a9e5d542f113415667b37b5951f42585c28457c5c94893a4ac0518cb",
+    "inventory_columns": 8
+  },
+  "weapon_badge:thermal:1": {
+    "index": 7,
+    "columns": 8,
+    "sheet": "custom/atlases/3e69a080b6558aee5415eea5c082eafa45de167b5fa585e3e35f0a6bfbe3aa1d/sprite",
+    "inventory_sheet": "custom/atlases/3e69a080b6558aee5415eea5c082eafa45de167b5fa585e3e35f0a6bfbe3aa1d/inventory",
+    "art_label": "Емблема: Термічна — Незвичний",
+    "art_category": "weapon_badges",
+    "editor_source": "custom/sources/95e59b76c194390eb69e734318219178a51c8fa1a3ebfb8b1891027203ea606e.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        260,
+        980,
+        501,
+        1220
+      ]
+    },
+    "editor_render_hash": "52e06f3bf57f14b7a47d278d175738f99fa2a43abd04935cc99584893aac077e",
+    "inventory_columns": 8
+  },
+  "weapon_badge:thermal:2": {
+    "index": 0,
+    "columns": 8,
+    "sheet": "custom/atlases/06e48e84a259df3049ae99d50a02a39bd492f215a6b73409b3eea4f94650e4b9/sprite",
+    "inventory_sheet": "custom/atlases/06e48e84a259df3049ae99d50a02a39bd492f215a6b73409b3eea4f94650e4b9/inventory",
+    "art_label": "Емблема: Термічна — Рідкісний",
+    "art_category": "weapon_badges",
+    "editor_source": "custom/sources/95e59b76c194390eb69e734318219178a51c8fa1a3ebfb8b1891027203ea606e.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        501,
+        980,
+        751,
+        1220
+      ]
+    },
+    "editor_render_hash": "8dcc34b89104ea4c29373e4ff7c0bf5bd31a46909e0988920eb4da652bf7dff8",
+    "inventory_columns": 8
+  },
+  "weapon_badge:thermal:3": {
+    "index": 25,
+    "columns": 8,
+    "sheet": "custom/atlases/3e69a080b6558aee5415eea5c082eafa45de167b5fa585e3e35f0a6bfbe3aa1d/sprite",
+    "inventory_sheet": "custom/atlases/3e69a080b6558aee5415eea5c082eafa45de167b5fa585e3e35f0a6bfbe3aa1d/inventory",
+    "art_label": "Емблема: Термічна — Унікальний",
+    "art_category": "weapon_badges",
+    "editor_source": "custom/sources/95e59b76c194390eb69e734318219178a51c8fa1a3ebfb8b1891027203ea606e.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 4.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": true,
+      "crop": [
+        750,
+        970,
+        1000,
+        1220
+      ]
+    },
+    "editor_render_hash": "ad62e58227f241a08cf8bf3a4ed289b201f7166af3e2f46bd80ba259441e5575",
+    "inventory_columns": 8
+  },
+  "action048_end": {
+    "index": 49,
+    "columns": 8,
+    "sheet": "custom/atlases/28cb8275d9ab5b302b5514a11f936aead87e97cbddcba6b34b652e20e6a771a6/sprite",
+    "inventory_sheet": "custom/atlases/28cb8275d9ab5b302b5514a11f936aead87e97cbddcba6b34b652e20e6a771a6/inventory",
+    "art_label": "Кнопка: Завершити хід (заглушка)",
+    "art_category": "other",
+    "editor_source": "custom/sources/5784472cd9ef46eee4c418f1338163c83c915d49361e732114eecc63407bed04.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        1419,
+        13,
+        2015,
+        675
+      ]
+    },
+    "editor_render_hash": "0feb5bd1c6636d4e6b1dbe18df0fe2902cce07f81da5f3c2f45cb5b998bcb50c",
+    "inventory_columns": 8,
+    "placeholder048": true
+  },
+  "action048_switch": {
+    "index": 120,
+    "source": 4,
+    "source_box": [
+      0,
+      665,
+      222,
+      887
+    ],
+    "trim": [
+      36,
+      9,
+      201,
+      178
+    ],
+    "art_label": "Кнопка: Змінити зброю (заглушка)",
+    "art_category": "other",
+    "placeholder048": true
+  },
+  "action048_med": {
+    "index": 6,
+    "columns": 8,
+    "sheet": "custom/atlases/28cb8275d9ab5b302b5514a11f936aead87e97cbddcba6b34b652e20e6a771a6/sprite",
+    "inventory_sheet": "custom/atlases/28cb8275d9ab5b302b5514a11f936aead87e97cbddcba6b34b652e20e6a771a6/inventory",
+    "art_label": "Кнопка: Аптечка (заглушка)",
+    "art_category": "other",
+    "editor_source": "custom/sources/7280e8f6cfd1e84a0f130057ca58c08d42fcef4ab09c594177184c7e5f611890.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        313,
+        338,
+        657,
+        631
+      ]
+    },
+    "editor_render_hash": "39c65e33d988679fcc37acfa428d5d19f37923cf64dc810c694d44ab587771d6",
+    "inventory_columns": 8,
+    "placeholder048": true
+  },
+  "action048_flee": {
+    "index": 126,
+    "source": 4,
+    "source_box": [
+      1330,
+      665,
+      1552,
+      887
+    ],
+    "trim": [
+      52,
+      0,
+      181,
+      183
+    ],
+    "art_label": "Кнопка: Вийти з бою (заглушка)",
+    "art_category": "other",
+    "placeholder048": true
+  },
+  "action048_move": {
+    "index": 0,
+    "source": 1,
+    "source_box": [
+      0,
+      0,
+      222,
+      222
+    ],
+    "trim": [
+      31,
+      67,
+      204,
+      207
+    ],
+    "art_label": "Кнопка: Рух (заглушка)",
+    "art_category": "other",
+    "placeholder048": true
+  },
+  "action048_search": {
+    "index": 3,
+    "columns": 8,
+    "sheet": "custom/atlases/28cb8275d9ab5b302b5514a11f936aead87e97cbddcba6b34b652e20e6a771a6/sprite",
+    "inventory_sheet": "custom/atlases/28cb8275d9ab5b302b5514a11f936aead87e97cbddcba6b34b652e20e6a771a6/inventory",
+    "art_label": "Кнопка: Пошук (заглушка)",
+    "art_category": "other",
+    "editor_source": "custom/sources/bf142c257a33b55c5fc5b8ce4a4b5428ccfaab8fd5260391eb53a12e331f113a.png",
+    "editor_settings": {
+      "fit": "contain",
+      "padding": 0.0,
+      "rotation": 0,
+      "mirror": false,
+      "trim": false,
+      "crop": [
+        925,
+        950,
+        1254,
+        1288
+      ]
+    },
+    "editor_render_hash": "3b75b9eb89ea9f18aac5327c9485fa47e671e1b6e08cf6ce52396befe4204e91",
+    "inventory_columns": 8,
+    "placeholder048": true
+  },
+  "module_custom_001": {
+    "index": 20,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
   }
 }

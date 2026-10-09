@@ -118,7 +118,7 @@ def make_human(rng,ident,faction,level,pos,document=None):
         pool=[k for k,v in content.EQUIPMENT.items() if v['kind']==slot and v['min_level']<=level]
         if not pool:continue
         item=p.equipment(rng.choice(pool),rng.randint(0,d['max_rarity']),rng,level)
-        candidates=[k for k in content.MODULE_IDS if content.MODULE_DATA[k]['target'] in (slot,'protection' if slot!='weapon' else slot)]
+        candidates=p.mr.eligible_modules(item)
         for _ in range(item.get('slots',0)):
             if candidates and rng.random()*100<d['module_chance']:
                 mod=p.module(rng.randint(0,item['rarity']),rng,content.MODULE_IDS.index(rng.choice(candidates)),level)

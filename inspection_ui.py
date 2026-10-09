@@ -36,7 +36,7 @@ def monster_text(g,e):
     if desc:lines.append(desc)
     if g.weapon:
         valid,why,chance=g.shot_info(e)
-        lines += [tr('inspection_ui.0025', v0=balance.multiplier(p.stats(g.weapon).get('attack', 0), e.get('defense', 0))),tr('inspection_ui.0026', v0=chance) if valid else tr('inspection_ui.0027')+why]
+        lines += [tr('inspection_ui.0025', v0=balance.multiplier(p.mr.weapon_stats(g,g.weapon).get('attack', 0), e.get('defense', 0))),tr('inspection_ui.0026', v0=chance) if valid else tr('inspection_ui.0027')+why]
     return '\n'.join(lines)
 
 def window(app,title):

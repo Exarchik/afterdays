@@ -78,7 +78,8 @@ def description(game,item):
         lines.append(tr('update033.condition_help'))
         lines.append(tr('refinement_ui.0012')+adventure.DAMAGE_TYPES[adventure.damage_type(item)][0])
         lines.append(tr('refinement_ui.0013')+p.AMMO[item.get('ammo_type','pistol')][0])
-    values=p.stats(item);baseline=p.stats(current) if current else {}
+    values=p.mr.weapon_stats(game,item) if kind=='weapon' else p.stats(item)
+    baseline=(p.mr.weapon_stats(game,current) if current.get('kind')=='weapon' else p.stats(current)) if current else {}
     for key in dict.fromkeys(list(values)+list(baseline)):
         if values.get(key) or (compare and baseline.get(key)):
             field(r.STAT_NAMES.get(key,key),values.get(key,0),baseline.get(key,0),unit='%' if key in ('accuracy','crit','evasion','damage_percent','defense_percent','max_condition_percent','local_damage_percent','local_defense_percent','weight_percent','ammo_save_percent','reflect_percent') else '')
@@ -89,7 +90,12 @@ def description(game,item):
         lines.extend('  • '+m['name']+' · '+r.RARITIES[m['rarity']][0] for m in item['modules'])
         if not item['modules']:lines.append(tr('refinement_ui.0016'))
     elif kind=='module':
-        lines.append(tr('refinement_ui.0017')+(tr('refinement_ui.0018') if item['target']=='weapon' else tr('refinement_ui.0019')))
+        rules=p.mr.restrictions(item)
+        target=rules.get('target',item.get('target'))
+        lines.append(tr('refinement_ui.0017')+{'weapon':'Зброя','armor':'Броня','helmet':'Шоломи','protection':'Броня та шоломи'}.get(target,str(target)))
+        lines.append('Мінімальна рідкість спорядження: '+r.RARITIES[rules.get('min_equipment_rarity',0)][0])
+        if target=='weapon':
+            lines.append('Класи зброї: '+', '.join(tr('update033.category_'+c) for c in rules.get('weapon_categories',p.mr.WEAPON_CATEGORIES)))
         lines.append(tr('modules.compatibility'))
         if item.get('tradeoff'):lines.append(tr('refinement_ui.0020'))
     elif kind in ('med','food','rad','repairkit'):

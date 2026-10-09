@@ -424,7 +424,7 @@ class Game(p.Game):
         """Перемикає активну руку зі зброєю."""
         other='weapon2' if self.active=='weapon1' else 'weapon1'
         if not self.equipped[other]:self.emit(tr('adventure.0207'));return False
-        self.active=other;self.emit(tr('adventure.0208'));return True
+        self.active=other;self.hp=min(self.hp,self.max_hp);self.emit(tr('adventure.0208'));return True
 
     def start_battle(self):
         """Створює бойовий стан, ворогів та арену поточної зустрічі."""
@@ -642,8 +642,8 @@ class Game(p.Game):
         item=super().roll_item()
         if item['kind'] in ('weapon','armor','helmet') and self.rng.random()<.08:
             count=1+(self.rng.random()<.04)
-            pool=[n for n,m in enumerate(r.MODULES) if m[1]==('weapon' if item['kind']=='weapon' else 'protection')]
-            for _ in range(min(count,item['slots'])):
+            pool=p.mr.eligible_modules(item)
+            for _ in range(min(count,item['slots']) if pool else 0):
                 item['modules'].append(p.module(self.rng.choices(range(item['rarity']+1),[65,24,8,2.5,.5][:item['rarity']+1])[0],self.rng,self.rng.choice(pool),item['level']))
         p.mr.clamp_condition(item)
         return item

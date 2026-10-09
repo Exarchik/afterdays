@@ -182,5 +182,9 @@
   "weapon_custom_002.name": "Автомат «Випалювач»",
   "weapon_custom_002.description": "",
   "weapon_custom_003.name": "Револьвер «Жартівник»",
-  "weapon_custom_003.description": ""
+  "weapon_custom_003.description": "",
+  "module_custom_001.name": "Система корегування",
+  "module_custom_001.description": "Вміло підвищує критичний шанс пострілу і зменшує зношення зброї",
+  "module_custom_002.name": "Вирівнювач",
+  "module_custom_002.description": "Зменшує знос зброї"
 }

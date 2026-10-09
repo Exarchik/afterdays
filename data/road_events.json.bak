@@ -2166,7 +2166,7 @@
       "enabled": true,
       "weight": 1.0,
       "title": "Пакунок допомоги",
-      "description": "Ви знайшли дві запечатані аптечки.",
+      "description": "Ви знайшли кілька аптечок і невеличкий запас їжі",
       "art": "art_custom_091",
       "choices": [
         {
@@ -2190,6 +2190,37 @@
                   "step": 0,
                   "step_cap": 0,
                   "chance": 0.75,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "food",
+                  "amount": 1,
+                  "item_id": "random",
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "food",
+                  "amount": 2,
+                  "item_id": "item_custom_001",
+                  "maximum": 5,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 0.33,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "food",
+                  "amount": 1,
+                  "item_id": "random",
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
                   "destination": "loot"
                 }
               ]
@@ -4943,8 +4974,13 @@
         {
           "kind": "ammo",
           "amount": 12,
+          "maximum": 15,
           "per_level": 4,
-          "ammo": "random"
+          "step": 0,
+          "step_cap": 0,
+          "chance": 1.0,
+          "ammo": "random",
+          "destination": "loot"
         },
         {
           "kind": "repairkit",

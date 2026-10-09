@@ -390,7 +390,7 @@ class LegacyGame:
         b, weapon = self.battle, self.weapon
         if not b or not weapon:
             return False, tr('afterdays.0049'), 0
-        s = stats(weapon)
+        s = __import__('module_rules').weapon_stats(self,weapon)
         distance = hexgrid.distance(b['pos'], enemy['pos'])
         if distance > s['range']:
             return False, tr('afterdays.0050'), 0
@@ -441,6 +441,7 @@ class LegacyGame:
                 return False
             self.battle['ap'] -= 1
         self.active = other
+        self.hp = min(self.hp,self.max_hp)
         return True
 
     def end_turn(self):
@@ -1295,7 +1296,7 @@ def launch(test_hook=None):
                         finally:self._notice_open=False;self.refresh()
                     root.after_idle(show_notice)
             weapon = g.weapon
-            ws = stats(weapon) if weapon else {}
+            ws = __import__('module_rules').weapon_stats(g,weapon) if weapon else {}
             self.status.refresh(g)
             combat = g.battle is not None
             self.end_button.config(state='normal' if combat else 'disabled')

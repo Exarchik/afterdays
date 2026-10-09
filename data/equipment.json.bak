@@ -465,10 +465,10 @@
   },
   "weapon_custom_003": {
     "kind": "weapon",
-    "damage": 37,
-    "range": 5,
+    "damage": 36,
+    "range": 6,
     "defense": 0,
-    "accuracy": 78,
+    "accuracy": 80,
     "weight": 4.0,
     "ap": 4,
     "min_level": 3,

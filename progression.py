@@ -51,8 +51,12 @@ def equipment(name=None, tier=0, rng=None, level=1):
 
 
 def module(tier=0,rng=None,index=None,level=1):
+    level=max(1,int(level))
+    if index is None:
+        eligible=[k for k in content.MODULE_IDS if content.MODULE_DATA[k].get('min_level',1)<=level]
+        index=(rng or r.random).choice(eligible or content.MODULE_IDS)
     item=_base_module(tier,rng,index)
-    item['level']=max(1,int(level))
+    item['level']=max(level,content.MODULE_DATA[item['type_id']].get('min_level',1))
     item['value']=round(30*(tier+1)**2*item['level']**1.3)
     item['tradeoff']=bool(rng is not None and rng.random()<.20)
     item['stats']=mr.module_stats(item['type_id'],tier,item['level'],item['tradeoff'])
@@ -180,13 +184,12 @@ class Game(r.ExpansionGame):
     @property
     def defense(self):
         """Обчислює сумарний захист екіпіровки й перків."""
-        base=sum(stats(i).get('defense',0) for i in self.equipped.values() if i)+self.rank('armorer')
+        base=sum(round(round(mr.aggregate(i).get('defense',0)*max(0,1+mr.aggregate(i).get('local_defense_percent',0)/100))*(.5+.5*mr.condition(i)/100)) for i in mr.active_equipment(self) if mr.condition(i)>0)+self.rank('armorer')
         return max(0,round(base*max(0,1+self.protection_stat('defense_percent')/100)))
 
     def protection_stat(self,key):
         """Підсумовує вказаний бонус захисного спорядження."""
-        return sum(stats(i).get(key,0) for i in self.equipped.values()
-                   if i and i['kind']!='weapon' and (i.get('durability',100)>0 or key=='capacity'))
+        return mr.character_stat(self,key)
 
     @property
     def region_level(self):

@@ -79,8 +79,9 @@ class Combat:
     def _projectile_damage(self,enemy,weapon,mode,pellet=None):
         """Resolve one bullet or one sixth of a shotgun shell after defense/resistance."""
         from adventure import damage_type,RESISTANCES,DAMAGE_TYPES
-        stats=p.stats(weapon);critical=self.rng.randrange(100)<(min(65,5+stats.get('crit',0))+(15 if mode=='aimed' else 0))
-        dealt=projectile_components(weapon,self.level,enemy,self.rng.randint(-2,2),critical,pellet,getattr(self,'outgoing_damage_multiplier',1))
+        effective=p.mr.effective_weapon(self,weapon)
+        stats=p.stats(effective);critical=self.rng.randrange(100)<(min(65,5+stats.get('crit',0))+(15 if mode=='aimed' else 0))
+        dealt=projectile_components(effective,self.level,enemy,self.rng.randint(-2,2),critical,pellet,getattr(self,'outgoing_damage_multiplier',1))
         amount=sum(dealt.values());enemy['hp']-=amount;enemy['awake']=True
         self.emit((tr('adventure.0217') if critical else '')+f'−{amount}',pos=enemy['pos'],color='#ffbf82' if critical else '#ff9d84')
         self.log(f'{enemy["name"]}: −{amount} HP ('+', '.join(f'{DAMAGE_TYPES[k][0]}: {v}' for k,v in dealt.items())+').')
@@ -102,7 +103,7 @@ class Combat:
         if reason:self.log(reason);self.emit(reason,color='#ffcb79');return False
         from damage_preview import remember_target
         remember_target(self,target)
-        b['ap']-=self.shot_ap();saved=p.mr.chance(p.stats(w).get('ammo_save_percent',0))
+        b['ap']-=self.shot_ap();saved=p.mr.chance(p.mr.weapon_stats(self,w).get('ammo_save_percent',0))
         for _ in range(bullets):
             if saved and self.rng.random()*100<saved:self.emit(tr('modules.ammo_saved'),color='#9cdcd8')
             else:self.consume('ammo',1,ammo)
@@ -114,7 +115,7 @@ class Combat:
         stray=None
         if misfire:
             self.emit(tr('update033.jam'),color='#ffc46e')
-            pool=[e for e in b['enemies'] if e is not target and (not hasattr(self,'hostile_to_player') or self.hostile_to_player(e)) and hexgrid.distance(b['pos'],e['pos'])<=p.stats(w)['range'] and hexgrid.visible(tuple(b['pos']),tuple(e['pos']),b['walls'])]
+            pool=[e for e in b['enemies'] if e is not target and (not hasattr(self,'hostile_to_player') or self.hostile_to_player(e)) and hexgrid.distance(b['pos'],e['pos'])<=p.mr.weapon_stats(self,w)['range'] and hexgrid.visible(tuple(b['pos']),tuple(e['pos']),b['walls'])]
             if pool and self.rng.random()<.25:stray=self.rng.choice(pool)
         for n,assigned in enumerate(assignments):
             hit=None

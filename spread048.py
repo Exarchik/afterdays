@@ -6,7 +6,7 @@ import hexgrid
 def candidates(game,target):
     from combat033 import behind
     import progression as p
-    source=game.battle['pos'];limit=p.stats(game.weapon)['range']
+    source=game.battle['pos'];limit=p.mr.weapon_stats(game,game.weapon)['range']
     def point(a):return a[0]+a[1]*.5,a[1]*math.sqrt(3)/2
     sx,sy=point(source);tx,ty=point(target['pos']);dx,dy=tx-sx,ty-sy
     result=[]

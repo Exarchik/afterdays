@@ -16,7 +16,7 @@ def definition_stats(data, tier, level, tradeoff=False):
     """Calculate an unsaved model with the same rules used by generated modules."""
     curves=data.get('rarity_stats') or {data['stat']:[data['base']*(n+1) for n in range(5)]}
     result={key:(values[tier] if key in PERCENT_STATS or key=='attack' else
-                 max(1,round(values[tier]*(1+.06*(level-1))))) for key,values in curves.items()}
+                 (max(1,round(values[tier]*(1+.06*(level-1)))) if values[tier]>0 else min(-1,round(values[tier]*(1+.06*(level-1)))) if values[tier]<0 else 0)) for key,values in curves.items()}
     if tradeoff:
         key=next(iter(result));result[key]=round(result[key]*1.7)
         result[key]=min(-1,result[key]) if curves[key][tier]<0 else max(1,result[key])
@@ -25,16 +25,78 @@ def definition_stats(data, tier, level, tradeoff=False):
     for key,value in data.get('fixed_penalties',{}).items():result[key]=result.get(key,0)+value
     return result
 
+WEAPON_CATEGORIES = ('pistol','rifle','automatic','shotgun','sniper')
+
+
+def restrictions(mod):
+    """Use current catalog rules for both new modules and existing saves."""
+    ident=content.module_id(mod.get('type_id',mod.get('name','')))
+    return content.MODULE_DATA.get(ident,mod)
+
+
 def compatible(item, mod):
-    return bool(item and mod and mod.get('kind')=='module' and
-        (mod.get('target')==item.get('kind') or mod.get('target')=='protection' and item.get('kind') in ('armor','helmet')) and
-        mod.get('rarity',0)<=item.get('rarity',0) and mod.get('level',1)<=item.get('level',1))
+    if not item or not mod or mod.get('kind')!='module':return False
+    rules=restrictions(mod);target=rules.get('target',mod.get('target'))
+    if not (target==item.get('kind') or target=='protection' and item.get('kind') in ('armor','helmet')):return False
+    if max(mod.get('rarity',0),rules.get('min_equipment_rarity',0))>item.get('rarity',0):return False
+    if mod.get('level',1)>item.get('level',1):return False
+    if item.get('kind')=='weapon':
+        ident=content.entity_id(item.get('type_id',item.get('name','')))
+        category=content.EQUIPMENT.get(ident,{}).get('category',item.get('category','pistol'))
+        if category not in rules.get('weapon_categories',WEAPON_CATEGORIES):return False
+    return True
+
+
+def eligible_modules(item):
+    """Definitions that can spawn already installed on this equipment."""
+    return [ident for ident in content.MODULE_IDS if compatible(item,dict(
+        kind='module',type_id=ident,rarity=0,level=content.MODULE_DATA[ident].get('min_level',1)))]
+
 
 def aggregate(item):
     result=dict(item.get('stats',{}))
     for mod in item.get('modules',[]):
         for key,value in mod.get('stats',{}).items():result[key]=result.get(key,0)+value
     return result
+
+OFFENSIVE_STATS = ('damage','damage_percent','attack','accuracy','crit','range',
+                   'damage_electric','damage_piercing','ammo_save_percent')
+
+
+def active_equipment(game):
+    gear=game.equipped
+    return [gear[k] for k in ('armor','helmet',getattr(game,'active','weapon1')) if gear.get(k)]
+
+
+def character_stat(game,key):
+    # Capacity remains useful even when an item is broken, as before.
+    return sum(aggregate(i).get(key,0) for i in active_equipment(game)
+               if condition(i)>0 or key=='capacity')
+
+
+def effective_weapon(game,weapon):
+    """Detached combat view: local multipliers first, shared bonuses afterward.
+
+    Never write derived stats into inventory or saves. The supplied weapon replaces
+    the active weapon for previews, so a holstered weapon cannot contribute twice.
+    """
+    if not weapon:return None
+    raw=aggregate(weapon)
+    local=max(0,1+raw.pop('local_damage_percent',0)/100)
+    for key in ('damage','damage_electric','damage_piercing'):
+        if key in raw:raw[key]=round(raw[key]*local)
+    for slot in ('armor','helmet'):
+        item=game.equipped.get(slot)
+        if not item or condition(item)<=0:continue
+        bonuses=aggregate(item)
+        for key in OFFENSIVE_STATS:
+            if key in bonuses:raw[key]=raw.get(key,0)+bonuses[key]
+    return dict(weapon,stats=raw,modules=[])
+
+
+def weapon_stats(game,weapon):
+    return gear_stats(effective_weapon(game,weapon)) if weapon else {}
+
 
 def max_condition(item):
     if item.get('kind')=='module':return 100

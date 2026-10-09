@@ -69,8 +69,8 @@ class Game(a.Game):
   names=[n for n,v in r.GEAR.items() if v[0]==category and p.GEAR_MIN_LEVEL[n]<=level]
   item=p.equipment(self.rng.choice(names),tier,self.rng,level)
   if self.rng.random()<.08:
-   target='weapon' if category=='weapon' else 'protection';pool=[n for n,m in enumerate(r.MODULES) if m[1]==target]
-   for _ in range(min(item['slots'],1+(self.rng.random()<.04))):item['modules'].append(p.module(tier,self.rng,self.rng.choice(pool),level))
+   pool=p.mr.eligible_modules(item)
+   for _ in range(min(item['slots'],1+(self.rng.random()<.04)) if pool else 0):item['modules'].append(p.module(tier,self.rng,self.rng.choice(pool),level))
   p.mr.clamp_condition(item)
   return item
  def monster_loot_level(self,kills,fallback=1):

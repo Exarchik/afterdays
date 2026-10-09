@@ -7,7 +7,7 @@ import adventure as a
 from visuals import PANEL, TEXT, GOLD
 
 def player_text(g):
-    w=g.weapon;s=p.stats(w) if w else {};base=p.mr.shot_damage(w,g.level) if w else 0
+    w=g.weapon;effective=p.mr.effective_weapon(g,w);s=p.mr.weapon_stats(g,w)
     lines=[tr('frontier_ui.0001', v0=g.level, v1=g.money)+tr('scav.xp_remaining',level=g.level+1,xp=p.xp_for_level(g.level+1)-g.xp),tr('frontier_ui.0002', v0=g.hp, v1=g.max_hp),
            tr('frontier_ui.0003', v0=g.battle['ap'] if g.battle else g.max_ap, v1=g.max_ap),
            tr('frontier_ui.0004', v0=g.defense, v1=max(0,min(45, g.protection_stat('evasion')))),
@@ -20,7 +20,7 @@ def player_text(g):
     if w:
         from damage_preview import description as damage_description
         lines.append(damage_description(g,w))
-        lines += [tr('frontier_ui.0010', v0=max(1,p.mr.shot_damage(w,g.level,-2)), v1=p.mr.shot_damage(w,g.level,2)),
+        lines += [tr('frontier_ui.0010', v0=max(1,p.mr.shot_damage(effective,g.level,-2)), v1=p.mr.shot_damage(effective,g.level,2)),
                   tr('frontier_ui.0011', v0=a.DAMAGE_TYPES[a.damage_type(w)][0]),
                   tr('frontier_ui.0012', v0=min(65, 5 + s.get('crit', 0))+(15 if g.fire_mode()=='aimed' else 0)),
                   tr('frontier_ui.0013', v0=s.get('accuracy', 0), v1=4 * g.rank('marksman')),

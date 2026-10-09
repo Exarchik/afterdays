@@ -110,8 +110,15 @@ class EntityPanel(ttk.Frame):
             ttk.Button(self.form,text='Вибрати зображення…',command=lambda:self.choose_art('sprite_id')).pack(pady=5)
         for field,label,kind in catalog.FIELDS[section]:
             var=self.trophy_value if field=='trophy_value' else tk.StringVar();self.fields[field]=var
-            if field!='trophy_value':row(self.form,label,var,list(kind.values()) if isinstance(kind,dict) else None)
+            if field!='trophy_value' and not (section=='module' and field=='target'):row(self.form,label,var,list(kind.values()) if isinstance(kind,dict) else None)
             var.trace_add('write',lambda *args,f=field:self.field_changed(f))
+        self.module_options=None
+        if section=='module':
+            from module_options_ui import ModuleOptions
+            self.module_options=ModuleOptions(self.form,self.fields['target'],self.schedule_preview)
+            self.module_options.pack(fill='x',pady=8)
+            for tag,color in [('helmet','#fff1a8'),('armor','#c8e8ff'),('protection','#ffffff'),('weapon','#ffd6d6')]:
+                self.list.tag_configure(tag,background=color,foreground='#182126')
         self.resists={}
         if section=='monster':
             ttk.Label(self.form,text='Опори: від −100% (вразливість) до +100%',wraplength=350).pack(anchor='w',pady=8)
@@ -157,14 +164,14 @@ class EntityPanel(ttk.Frame):
 
     def rebuild(self):
         self.loading=True;self.list.delete(*self.list.get_children())
-        level_key='base_level' if self.section=='monster' else 'min_level' if self.section in ('weapon','armor','helmet') else None
+        level_key='base_level' if self.section=='monster' else 'min_level' if self.section in ('weapon','armor','helmet','module') else None
         def sort_key(pair):
             ident,data=pair;name=self.store.data['texts'].get(ident+'.name',ident)
-            return (data[level_key] if level_key else 0,name.casefold(),ident)
+            return (catalog.module_group(data) if self.section=='module' else 0,data.get(level_key,1) if level_key else 0,name.casefold(),ident)
         for ident,data in sorted(self.store.items(self.section),key=sort_key):
             name=self.store.data['texts'].get(ident+'.name',ident)
-            label=(f"Рів. {data[level_key]} · {name}" if level_key else name)
-            if self.query.get().casefold() in (label+' '+ident).casefold():self.list.insert('','end',iid=ident,text=label)
+            label=(f"Рів. {data.get(level_key,1)} · {name}" if level_key else name)
+            if self.query.get().casefold() in (label+' '+ident).casefold():self.list.insert('','end',iid=ident,text=label,tags=(data.get('target','protection'),) if self.section=='module' else ())
         if self.current and self.list.exists(self.current):self.list.selection_set(self.current)
         self.loading=False
         self.status.set(f'{len(self.store.items(self.section))} записів · Зміни застосуються після перезапуску гри')
@@ -185,6 +192,7 @@ class EntityPanel(ttk.Frame):
         for field,_,kind in catalog.FIELDS[self.section]:
             value=self.original.get(field,'pistol' if field=='category' else '')
             self.fields[field].set(kind[value] if isinstance(kind,dict) else str(value))
+        if self.module_options:self.module_options.load(self.original)
         for key,var in self.resists.items():var.set(str(self.original.get('resists',{}).get(key,0)))
         if self.curves:self.curves.set(self.original.get('rarity_stats',{}));self.penalties.set(self.original.get('fixed_penalties',{}))
         self.level.set(str(self.original.get('base_level',self.original.get('min_level',1))))
@@ -210,6 +218,7 @@ class EntityPanel(ttk.Frame):
             try:value=next(k for k,v in kind.items() if v==text) if isinstance(kind,dict) else kind(text)
             except (ValueError,StopIteration):raise ValueError(label+': некоректне значення')
             data[field]=value
+        if self.module_options:self.module_options.apply(data)
         if self.section=='monster':data['resists']={k:int(v.get()) for k,v in self.resists.items()}
         if self.curves:
             data['rarity_stats']=copy.deepcopy(self.curves.rows);data['fixed_penalties']=copy.deepcopy(self.penalties.rows)
@@ -257,7 +266,7 @@ class EntityPanel(ttk.Frame):
             labels=dict(catalog.STATS,weight='Вага, кг',value='Номінал, кр.',slots='Слоти',ap='ОД',shot_damage='Шкода пострілу',hp='Здоров’я',speed='Швидкість',level='Фактичний рівень')
             for key in dict.fromkeys(k for v in values for k in v):
                 self.table.insert('','end',values=[labels.get(key,key)]+[f'{v.get(key,0):g}' for v in values])
-            self.preview_error.set('Недоступний для появи нижче рівня '+str(data['min_level']) if self.section in ('weapon','armor','helmet') and level<data['min_level'] else '')
+            self.preview_error.set('Недоступний для появи нижче рівня '+str(data['min_level']) if self.section in ('weapon','armor','helmet','module') and level<data['min_level'] else '')
         except (ValueError,TypeError,KeyError,OverflowError) as exc:
             self.table.delete(*self.table.get_children());self.preview_error.set(str(exc))
     def new(self):

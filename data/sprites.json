@@ -6561,5 +6561,27 @@
     "editor_render_hash": "3b75b9eb89ea9f18aac5327c9485fa47e671e1b6e08cf6ce52396befe4204e91",
     "inventory_columns": 8,
     "placeholder048": true
+  },
+  "module_custom_001": {
+    "index": 20,
+    "sheet": "expansion029",
+    "columns": 8,
+    "inventory_sheet": "inventory_expansion029"
+  },
+  "module_custom_002": {
+    "index": 32,
+    "source": 2,
+    "source_box": [
+      0,
+      0,
+      222,
+      222
+    ],
+    "trim": [
+      17,
+      46,
+      215,
+      222
+    ]
   }
 }
