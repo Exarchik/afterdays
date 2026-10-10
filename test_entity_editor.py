@@ -10,9 +10,9 @@ import sys
 import tempfile
 import unittest
 from unittest.mock import patch
-import afterdays as game
+
 import content
-import progression
+import game.items as progression
 import module_rules
 import monster_rules
 import entity_catalog as catalog
@@ -28,6 +28,9 @@ def project_copy(folder, with_code=False):
     if with_code:
         for path in catalog.ROOT.glob('*.py'):
             if not path.name.startswith('test_'):shutil.copy2(path,root/path.name)
+        for package in ('game', 'ui'):
+            shutil.copytree(catalog.ROOT/package, root/package,
+                            ignore=shutil.ignore_patterns('__pycache__'))
     return root
 
 
@@ -128,26 +131,7 @@ class EntityEditorTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder:
             store=catalog.Store(project_copy(folder,True))
             ids={section:store.add(section,'Тест '+section) for section in catalog.SECTIONS};store.save()
-            code="""
-import json,random
-import afterdays,progression,content,monster_rules,sprites,economy
-ids=json.loads(__import__('sys').argv[1])
-for section in ('weapon','armor','helmet'):
-    ident=ids[section];item=progression.equipment(ident,level=30)
-    assert item['type_id']==ident and item['name']=='Тест '+section
-    assert sprites.item_key(item) in sprites.MANIFEST
-module=progression.module(index=ids['module'],level=10)
-assert module['type_id']==ids['module']
-enemy=monster_rules.make(random.Random(1),ids['monster'],30,[0,0])
-assert enemy['type_id']==ids['monster'] and enemy['kind'] in monster_rules.eligible(30)
-assert ids['monster'] in sprites.MANIFEST and sprites.corpse_key(enemy) in sprites.MANIFEST
-trophy=economy.trophy(ids['monster']);assert trophy['name']=='Трофей: Тест monster'
-assert sprites.item_key(trophy) in sprites.MANIFEST
-g=afterdays.Game(1)
-g.bag.extend([module,item,trophy]);g.save('check_save.json')
-h=afterdays.Game.load('check_save.json');assert h.bag==g.bag
-print('Fresh runtime OK')
-"""
+            code="\nimport json,random\nimport game.model as afterdays\nimport game.items as progression\nimport content\nimport monster_rules\nimport sprites\nimport game.systems.economy as economy\nids=json.loads(__import__('sys').argv[1])\nfor section in ('weapon','armor','helmet'):\n    ident=ids[section];item=progression.equipment(ident,level=30)\n    assert item['type_id']==ident and item['name']=='Тест '+section\n    assert sprites.item_key(item) in sprites.MANIFEST\nmodule=progression.module(index=ids['module'],level=10)\nassert module['type_id']==ids['module']\nenemy=monster_rules.make(random.Random(1),ids['monster'],30,[0,0])\nassert enemy['type_id']==ids['monster'] and enemy['kind'] in monster_rules.eligible(30)\nassert ids['monster'] in sprites.MANIFEST and sprites.corpse_key(enemy) in sprites.MANIFEST\ntrophy=economy.trophy(ids['monster']);assert trophy['name']=='Трофей: Тест monster'\nassert sprites.item_key(trophy) in sprites.MANIFEST\ng=afterdays.Game(1)\ng.bag.extend([module,item,trophy]);g.save('check_save.json')\nh=afterdays.Game.load('check_save.json');assert h.bag==g.bag\nprint('Fresh runtime OK')\n"
             output=subprocess.check_output([sys.executable,'-B','-X','utf8','-c',code,json.dumps(ids)],cwd=folder,stderr=subprocess.STDOUT,text=True,encoding='utf-8')
             self.assertIn('Fresh runtime OK',output)
 

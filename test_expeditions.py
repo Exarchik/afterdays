@@ -2,10 +2,13 @@ import quest_area
 import copy,json,math,tempfile,unittest
 from pathlib import Path
 from unittest.mock import patch,MagicMock
-import afterdays as r
-import progression as p
-import content,monster_rules,economy
-from expeditions import toggle_cells
+import game.model as r
+import game.catalog as catalog
+import game.items as p
+import content
+import monster_rules
+import game.systems.economy as economy
+from game.systems.expeditions import toggle_cells
 from tests_fixtures.quest_offer import offer_for
 
 class ExpeditionTests(unittest.TestCase):
@@ -52,7 +55,7 @@ class ExpeditionTests(unittest.TestCase):
   self.assertEqual(h.reputation(),1)
  def test_field_armor_and_return_equipped(self):
   """Перевіряє сценарій «field armor and return equipped» та очікувані результати."""
-  g=r.Game(4);offer=offer_for(g,'field_test');item=p.equipment('armor_plate_jacket' if 'armor_plate_jacket' in r.GEAR else next(k for k,v in r.GEAR.items() if v[0]=='armor'),level=1)
+  g=r.Game(4);offer=offer_for(g,'field_test');item=p.equipment('armor_plate_jacket' if 'armor_plate_jacket' in catalog.GEAR else next(k for k,v in catalog.GEAR.items() if v[0]=='armor'),level=1)
   item.update(field_test=True,quest_id=offer['id'],value=0,weight=0,modules=[],slots=0);offer['test_item']=item
   self.assertTrue(g.accept_quest(offer['id']));q=g.quests[-1];gear=g.quest_equipment(q)
   self.assertTrue(g.equip(gear['id'],'armor'));g.test_armor_hit(0);self.assertFalse(g.quest_ready(q));g.test_armor_hit(1);self.assertTrue(g.quest_ready(q))
@@ -108,12 +111,12 @@ class ExpeditionTests(unittest.TestCase):
   self.assertAlmostEqual(economy.loot_rules([dict(grade='normal')])[0],.0375)
  def test_radio_waveform_has_visual_parameters(self):
   """Перевіряє сценарій «radio waveform has visual parameters» та очікувані результати."""
-  from radio_ui import waveform
+  from ui.radio import waveform
   ref=waveform([10,10,10])
   for values in ([11,10,10],[10,11,10],[10,10,11]):self.assertNotEqual(ref,waveform(values))
  def test_metro_single_chain(self):
   """Перевіряє сценарій «metro single chain» та очікувані результати."""
-  from frontier_ui import draw_metro
+  from ui.frontier import draw_metro
   g=r.Game(1);g.quests.extend(dict(metro_city=c,status='done',kind='retrieve') for c in (2,3,7))
   c=MagicMock();draw_metro(c,g,1,0,0,lambda x,y:True)
   lines=c.create_line.call_args_list;self.assertEqual(len(lines),4)
@@ -129,16 +132,16 @@ class ExpeditionTests(unittest.TestCase):
   self.assertLessEqual(sum(i['qty'] for i in g.loot if i['kind']=='ammo'),12)
  def test_unseen_badge_and_green_offers(self):
   """Перевіряє сценарій «unseen badge and green offers» та очікувані результати."""
-  from refinement_ui import QuestCards
+  import ui.refinement as refinement
   from types import SimpleNamespace
   g=r.Game(4);q=offer_for(g,'generator');q.pop('seen',None)
   c=MagicMock();c.winfo_width.return_value=420;c.winfo_height.return_value=424
   panel=SimpleNamespace(canvas=c,entries=[q],app=SimpleNamespace(game=g),open_done=False,selection=None)
-  with patch('refinement_ui.sprites.draw',return_value=False):QuestCards.paint(panel)
+  with patch('sprites.draw',return_value=False):refinement.QuestCards.paint(panel)
   texts=[call.kwargs for call in c.create_text.call_args_list]
   self.assertTrue(any(t.get('text')=='[нове]' for t in texts));self.assertTrue(any(t.get('fill')=='#8fdda0' for t in texts))
   q['seen']=True;c.reset_mock()
-  with patch('refinement_ui.sprites.draw',return_value=False):QuestCards.paint(panel)
+  with patch('sprites.draw',return_value=False):refinement.QuestCards.paint(panel)
   self.assertFalse(any(call.kwargs.get('text')=='[нове]' for call in c.create_text.call_args_list))
   self.assertTrue(any(call.kwargs.get('fill')=='#8fdda0' for call in c.create_text.call_args_list))
   with tempfile.TemporaryDirectory() as td:
@@ -146,7 +149,7 @@ class ExpeditionTests(unittest.TestCase):
   self.assertTrue(next(x for x in h.offers['0'] if x['id']==q['id'])['seen'])
  def test_cache_does_not_reveal_exact_target_on_map(self):
   """Перевіряє сценарій «cache does not reveal exact target on map» та очікувані результати."""
-  from expedition_ui import draw_search_areas
+  from ui.expedition import draw_search_areas
   g,q=self.contract('cache');c=MagicMock();draw_search_areas(c,g,10,0,0)
   self.assertEqual(c.create_line.call_count,18);self.assertEqual(c.create_oval.call_count,0)
   self.assertNotIn(str(tuple(q['cache_pos'])),g.quest_text(q))

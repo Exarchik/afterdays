@@ -2,8 +2,8 @@ import copy
 import random
 import unittest
 from unittest.mock import patch
-import afterdays as r
-import progression as p
+import game.model as r
+import game.items as p
 import content
 import entity_catalog as catalog
 import module_rules as rules

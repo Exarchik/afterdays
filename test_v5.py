@@ -1,16 +1,19 @@
 import copy,json,math,tempfile,unittest
 from pathlib import Path
 from unittest.mock import patch
-import afterdays as r
-import progression as p
-import adventure as a
-from refinement_ui import description
+import game.model as r
+import game.catalog as catalog
+import module_rules
+import game.progression as progression
+import game.items as p
+import game.systems.adventure as a
+from ui.refinement import description
 
 class RefinementTests(unittest.TestCase):
     def test_health_and_medkit(self):
         """Перевіряє сценарій «health and medkit» та очікувані результати."""
         g=r.Game(5);self.assertEqual((g.hp,g.max_hp),(25,25))
-        g.xp=p.xp_for_level(5);self.assertEqual(g.max_hp,45)
+        g.xp=progression.xp_for_level(5);self.assertEqual(g.max_hp,45)
         g.choose_perk('hardy');self.assertEqual(g.max_hp,55)
         g.hp=1;g.perks['medic']=3;self.assertTrue(g.use('med'));self.assertEqual(g.hp,29)
         g.hp=g.max_hp;count=g.count('med');self.assertFalse(g.use('med'));self.assertEqual(g.count('med'),count)
@@ -56,8 +59,8 @@ class RefinementTests(unittest.TestCase):
         self.assertGreater(g.enemy_xp(strong),g.enemy_xp(weak))
         self.assertGreater(g.enemy_xp(dict(weak,grade='rare')),g.enemy_xp(weak))
         self.assertGreater(g.enemy_xp(dict(weak,grade='mythic')),g.enemy_xp(dict(weak,grade='rare')))
-        xp=g.enemy_xp(dict(weak,grade='mythic'));g.xp=p.xp_for_level(5);self.assertLess(g.enemy_xp(dict(weak,grade='mythic')),xp)
-        g.xp=p.xp_for_level(30);self.assertEqual(g.enemy_xp(weak),5)
+        xp=g.enemy_xp(dict(weak,grade='mythic'));g.xp=progression.xp_for_level(5);self.assertLess(g.enemy_xp(dict(weak,grade='mythic')),xp)
+        g.xp=progression.xp_for_level(30);self.assertEqual(g.enemy_xp(weak),5)
 
     def test_monster_grades_have_stats(self):
         """Перевіряє сценарій «monster grades have stats» та очікувані результати."""
@@ -65,7 +68,7 @@ class RefinementTests(unittest.TestCase):
         g=r.Game(2);seen={grade:monster_rules.make(g.rng,0,1,[1,1],grade=grade) for grade in ('normal','rare','mythic')}
         self.assertEqual(set(seen),{'normal','rare','mythic'})
         for grade in ('rare','mythic'):
-            e=seen[grade];self.assertGreater(e['max_hp'],r.MONSTERS[e['kind']][1]);self.assertGreater(e['damage'],r.MONSTERS[e['kind']][2])
+            e=seen[grade];self.assertGreater(e['max_hp'],catalog.MONSTERS[e['kind']][1]);self.assertGreater(e['damage'],catalog.MONSTERS[e['kind']][2])
 
     def test_fog_discovery_and_save(self):
         """Перевіряє сценарій «fog discovery and save» та очікувані результати."""
@@ -110,15 +113,15 @@ class RefinementTests(unittest.TestCase):
 
     def test_preinstalled_modules_and_comparison(self):
         """Перевіряє сценарій «preinstalled modules and comparison» та очікувані результати."""
-        g=r.Game(9);g.xp=p.xp_for_level(12);counts=[]
+        g=r.Game(9);g.xp=progression.xp_for_level(12);counts=[]
         for _ in range(1600):
             item=g.roll_item();self.assertLessEqual(item.get('level',1),g.level)
             if 'modules' in item:
                 counts.append(len(item['modules']));self.assertLessEqual(len(item['modules']),item['slots'])
-                self.assertTrue(all(r.compatible(item,m) for m in item['modules']))
+                self.assertTrue(all(module_rules.compatible(item,m) for m in item['modules']))
         self.assertIn(1,counts);self.assertGreater(counts.count(0),counts.count(1))
         base=p.equipment('Пістолет «Попіл»',tier=3,level=12)
-        with patch.object(p.Game,'roll_item',return_value=base),patch.object(g.rng,'random',side_effect=[1,0,0,.5,.5,.5,.5]):
+        with patch.object(progression.ProgressionGame,'roll_item',return_value=base),patch.object(g.rng,'random',side_effect=[1,0,0,.5,.5,.5,.5]):
             fitted=g.roll_item()
         self.assertEqual(len(fitted['modules']),2)
         item=p.equipment('Пістолет «Попіл»',tier=3);text=description(g,item);self.assertIn('[+]',text);self.assertIn('Постріл\t',text)

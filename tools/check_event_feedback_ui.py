@@ -2,7 +2,7 @@
 import sys
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
-import afterdays
+import ui.application as application
 import event_runtime
 import time
 
@@ -27,5 +27,5 @@ def hook(root,app):
     except Exception as exc:errors.append(exc)
     finally:root.destroy()
 
-afterdays.launch(test_hook=hook)
+application.launch(test_hook=hook)
 if errors:raise errors[0]

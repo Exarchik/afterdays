@@ -2,26 +2,29 @@ from tests_fixtures.quest_offer import offer_for
 import json,math,tempfile,unittest
 from pathlib import Path
 from unittest.mock import patch
-import afterdays as r
-import progression as p
+import game.model as r
+import game.catalog as game_catalog
+import game.catalog as catalog
+import game.progression as progression
+import game.items as p
 import balance
-from refinement_ui import description
+from ui.refinement import description
 
 class BalanceTests(unittest.TestCase):
  def test_xp_curve(self):
   """Перевіряє сценарій «xp curve» та очікувані результати."""
   total=0
   for level in range(1,100):
-   self.assertEqual(p.xp_for_level(level),total);total+=balance.level_cost(level)
-  self.assertEqual(p.xp_for_level(14),22080);self.assertEqual(balance.level_cost(13),4368)
+   self.assertEqual(progression.xp_for_level(level),total);total+=balance.level_cost(level)
+  self.assertEqual(progression.xp_for_level(14),22080);self.assertEqual(balance.level_cost(13),4368)
  def test_monster_scaling_and_weapon_models(self):
   """Перевіряє сценарій «monster scaling and weapon models» та очікувані результати."""
   for kind in range(12):
    e=dict(kind=kind,level=5,grade='mythic');balance.set_monster(e)
    self.assertEqual(e['attack'],balance.MONSTER_STATS[kind][0]+12)
    self.assertEqual(e['defense'],balance.MONSTER_STATS[kind][1]+12)
-  for name,minimum in p.GEAR_MIN_LEVEL.items():
-   if r.GEAR[name][0]!='weapon':continue
+  for name,minimum in catalog.GEAR_MIN_LEVEL.items():
+   if game_catalog.GEAR[name][0]!='weapon':continue
    one=p.equipment(name,level=minimum);two=p.equipment(name,level=minimum+1)
    self.assertEqual(two['stats']['attack']-one['stats']['attack'],2)
   self.assertEqual(p.equipment('Гаус-карабін «Імпульс»',level=10)['stats']['attack'],36)
@@ -38,21 +41,21 @@ class BalanceTests(unittest.TestCase):
   """Перевіряє сценарій «quest reward fixed after level up» та очікувані результати."""
   g=r.Game(4);q=offer_for(g,'retrieve',unique=True)
   g.accept_quest(q['id']);q=g.quests[-1];self.assertEqual(q['level'],1)
-  reward=q['reward'];g.xp=p.xp_for_level(7);g.x,g.y=q['relic_pos'];g.search();g.x,g.y=g.cities[0]
+  reward=q['reward'];g.xp=progression.xp_for_level(7);g.x,g.y=q['relic_pos'];g.search();g.x,g.y=g.cities[0]
   before={i['id'] for i in g.bag+g.stash};xp=g.xp;self.assertTrue(g.turn_in(q['id']))
   awarded=[i for i in g.bag+g.stash if i['id'] not in before];self.assertTrue(awarded)
   self.assertTrue(all(i['level']==1 for i in awarded));self.assertEqual(g.xp-xp,1);self.assertEqual(q['reward'],reward)
   for i in awarded:self.assertTrue(all(m['level']==1 for m in i.get('modules',[])))
  def test_high_level_contract(self):
   """Перевіряє сценарій «high level contract» та очікувані результати."""
-  g=r.Game(2);g.x,g.y=g.cities[2];g.xp=__import__('progression').xp_for_level(g.region_level);q=g.mayor_offers()[0]
+  g=r.Game(2);g.x,g.y=g.cities[2];g.xp=__import__('game.progression', fromlist=['xp_for_level']).xp_for_level(g.region_level);q=g.mayor_offers()[0]
   self.assertEqual(q['level'],g.region_level);self.assertEqual(q['xp_reward'],(25+5*(q['level']-1))*(2 if q['unique'] else 1))
   for _ in range(10):self.assertEqual(g.reward_item(4,1,level=q['level'])['level'],q['level'])
  def test_traveler_distribution(self):
   """Перевіряє сценарій «traveler distribution» та очікувані результати."""
   g=r.Game(9);counts=[0]*5
   for _ in range(1500):
-   p.Game.spawn_traveler(g)
+   progression.ProgressionGame.spawn_traveler(g)
    items=[i for i in g.traveler['items'] if i['kind'] in ('weapon','armor','helmet','module')]
    self.assertEqual(len(items),2)
    for item in items:counts[item['rarity']]+=1

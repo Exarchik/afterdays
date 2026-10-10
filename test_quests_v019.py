@@ -2,11 +2,12 @@ import copy,json,math,tempfile,unittest
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch,MagicMock
-import afterdays as r
-import progression as p
+import game.model as r
+import game.progression as progression
 import sprites
 from tests_fixtures.quest_offer import offer_for
-from advanced_ui import battle_camera,iso_cell
+from ui.advanced import battle_camera
+from ui.advanced import iso_cell
 
 class QuestRevisionTests(unittest.TestCase):
     def test_total_active_plus_offered_across_refresh(self):
@@ -41,7 +42,7 @@ class QuestRevisionTests(unittest.TestCase):
 
     def test_roaming_merchant_uses_nearest_town(self):
         """Перевіряє сценарій «roaming merchant uses nearest town» та очікувані результати."""
-        g=r.Game(3);g.x,g.y=7,5;p.Game.spawn_traveler(g)
+        g=r.Game(3);g.x,g.y=7,5;progression.ProgressionGame.spawn_traveler(g)
         city=g.trading_city(3);self.assertEqual(city,min(range(12),key=lambda n:math.dist((7,5),g.cities[n])))
         item=next(i for i in g.stock(3) if i['kind']=='food');g.local_record(city)['value']=0
         high=g.price(item,3);g.local_record(city)['value']=100;low=g.price(item,3);self.assertGreater(high,low)
@@ -118,7 +119,7 @@ class QuestRevisionTests(unittest.TestCase):
 
     def test_all_trophies_have_distinct_existing_icons(self):
         """Перевіряє сценарій «all trophies have distinct existing icons» та очікувані результати."""
-        import economy
+        import game.systems.economy as economy
         keys=[sprites.item_key(economy.trophy(i)) for i in range(12)]
         self.assertEqual(len(set(keys)),12)
         for key in keys:self.assertEqual(sprites.MANIFEST[key]['sheet'],'trophies')
@@ -129,7 +130,7 @@ class QuestRevisionTests(unittest.TestCase):
 
     def test_confirmation_requires_explicit_commit(self):
         """Перевіряє сценарій «confirmation requires explicit commit» та очікувані результати."""
-        import quest_dialog
+        import ui.quest_dialog as quest_dialog
         g=r.Game(4);q=g.mayor_offers()[0];app=SimpleNamespace(game=g,refresh=MagicMock());panel=SimpleNamespace(app=app,refresh=MagicMock())
         win=MagicMock();win.winfo_exists.return_value=True
         def close():win.winfo_exists.return_value=False
@@ -137,7 +138,7 @@ class QuestRevisionTests(unittest.TestCase):
         buttons=[]
         def button(*a,**kw):buttons.append(kw);return MagicMock()
         canvas=MagicMock();canvas.winfo_width.return_value=600
-        with patch('inspection_ui.window',return_value=win),patch('refinement_ui.Detail'),patch('quest_dialog.tk.Label'),patch('quest_dialog.tk.Canvas',return_value=canvas),patch('quest_dialog.icon'),patch('quest_dialog.ttk.Button',side_effect=button):
+        with patch('ui.inspection.window',return_value=win),patch('ui.refinement.Detail'),patch('tkinter.Label'),patch('tkinter.Canvas',return_value=canvas),patch('visuals.icon'),patch('tkinter.ttk.Button',side_effect=button):
             quest_dialog.confirm(panel,q,'accept')
         self.assertFalse(g.quests)
         buttons[-1]['command']();self.assertTrue(any(t['id']==q['id'] for t in g.quests))
@@ -145,17 +146,17 @@ class QuestRevisionTests(unittest.TestCase):
 
     def test_quest_order_blue_cards_and_inline_button(self):
         """Перевіряє сценарій «quest order blue cards and inline button» та очікувані результати."""
-        from refinement_ui import QuestCards
+        import ui.refinement as refinement
         g=r.Game(4)
         def quest(ident,city,progress,status='active'):
             return dict(id=ident,kind='hunt',city=city,progress=progress,goal=1,status=status,title=ident,reward=1,xp_reward=0)
         g.quests=[quest('away',1,1),quest('unfinished',0,0),quest('done',0,1,'done'),quest('here',0,1)]
         panel=SimpleNamespace(app=SimpleNamespace(game=g),mayor=False,rep_label=MagicMock(),selected=lambda:None,paint=MagicMock(),describe=MagicMock())
-        QuestCards.refresh(panel)
+        refinement.QuestCards.refresh(panel)
         self.assertEqual([q['id'] for q in panel.entries],['here','away','unfinished','done'])
         canvas=MagicMock();canvas.winfo_width.return_value=420;canvas.winfo_height.return_value=424
         panel.canvas=canvas;panel.open_done=False;panel.selection=None
-        with patch('refinement_ui.sprites.draw',return_value=False):QuestCards.paint(panel)
+        with patch('sprites.draw',return_value=False):refinement.QuestCards.paint(panel)
         self.assertEqual([ident for rect,ident in panel.turnin_rects],['here'])
         fills=[c.kwargs.get('fill') for c in canvas.create_rectangle.call_args_list]
         self.assertEqual(fills.count('#102c4a'),2)

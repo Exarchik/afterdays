@@ -1,10 +1,10 @@
 import copy
 import unittest
 from unittest.mock import patch
-import afterdays as r
-import progression as p
+import game.model as r
+import game.items as p
 import module_rules as mr
-import combat033
+import game.systems.combat as combat
 import damage_preview
 
 
@@ -76,7 +76,7 @@ class SharedBonusesTests(unittest.TestCase):
         g,e=self.arena()
         add(g.equipped['helmet'],damage=20,attack=10,ammo_save_percent=100,accuracy=100)
         weapon=g.weapon;before=g.count('ammo',weapon['ammo_type'])
-        expected=sum(combat033.projectile_components(mr.effective_weapon(g,weapon),g.level,e,0,False).values())
+        expected=sum(combat.projectile_components(mr.effective_weapon(g,weapon),g.level,e,0,False).values())
         hp=e['hp']
         with patch.object(g.rng,'randrange',return_value=50),patch.object(g.rng,'randint',return_value=0),patch.object(g.rng,'random',return_value=.5):
             self.assertTrue(g.shoot(e['id']))
@@ -94,7 +94,7 @@ class SharedBonusesTests(unittest.TestCase):
         g=self.game();add(g.equipped['helmet'],damage=10,damage_percent=20,attack=7,damage_electric=8)
         target=dict(defense=5,resists={'electric':25})
         before=copy.deepcopy(g.equipped);rng=g.rng.getstate()
-        expected=[sum(combat033.projectile_components(mr.effective_weapon(g,g.weapon),g.level,target,v,c).values()) for v in range(-2,3) for c in (False,True)]
+        expected=[sum(combat.projectile_components(mr.effective_weapon(g,g.weapon),g.level,target,v,c).values()) for v in range(-2,3) for c in (False,True)]
         self.assertEqual(damage_preview.attack_range(g,g.weapon,target),(min(expected),max(expected)))
         damage_preview.estimate(g,g.weapon)
         self.assertEqual(g.equipped,before);self.assertEqual(g.rng.getstate(),rng)

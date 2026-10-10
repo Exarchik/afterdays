@@ -2,7 +2,8 @@
 import sys
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
-import afterdays
+import ui.application as application
+import game.model as afterdays
 
 errors=[]
 
@@ -45,7 +46,7 @@ def hook(root,app):
             assert app.dialog is None
             # Hero speech uses the opposite side; resizing keeps the overlay on the map.
             import dialogue_system,content
-            from dialogue_overlay import DialogueOverlay
+            from ui.dialogue_overlay import DialogueOverlay
             s=dialogue_system.Session(content.read('dialogues.json'),'demo_crossroads')
             s.choose('refuse');overlay=DialogueOverlay(app.quest_panel,s);root.update_idletasks()
             assert overlay.portrait.pack_info()['side']=='left'
@@ -57,5 +58,5 @@ def hook(root,app):
         finally:root.destroy()
     root.after(200,check)
 
-afterdays.launch(test_hook=hook)
+application.launch(test_hook=hook)
 if errors:raise errors[0]

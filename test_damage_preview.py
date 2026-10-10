@@ -1,7 +1,9 @@
 import copy,tempfile,unittest
 from pathlib import Path
 from unittest.mock import patch
-import afterdays as r,progression as p,content
+import game.model as r
+import game.items as p
+import content
 import damage_preview as dp
 import test_update033 as arena
 
@@ -56,10 +58,10 @@ class DamagePreviewTests(unittest.TestCase):
         self.assertEqual(dp.estimate(g,w)['target'],before)
 
     def test_fallback_all_descriptions_and_no_game_mutation(self):
-        from refinement_ui import description
-        from inspection_ui import item_text
-        from frontier_ui import player_text
-        from terminal034 import snapshot
+        from ui.refinement import description
+        from ui.inspection import item_text
+        from ui.frontier import player_text
+        from ui.hud import snapshot
         g=r.Game(5)
         state=copy.deepcopy({k:v for k,v in vars(g).items() if k!='rng'});rng=g.rng.getstate()
         self.assertFalse(dp.estimate(g,g.weapon)['has_target'])

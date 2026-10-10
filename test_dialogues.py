@@ -1,7 +1,9 @@
 import copy,json,tempfile,unittest,os
 from pathlib import Path
 from unittest.mock import patch
-import afterdays as r,dialogue_system as ds,quest_catalog as qc
+import game.model as r
+import dialogue_system as ds
+import quest_catalog as qc
 from entity_catalog import Store
 from test_entity_editor import project_copy
 

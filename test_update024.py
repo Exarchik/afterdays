@@ -2,10 +2,10 @@ import copy,math,tempfile,unittest
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock,patch
-import afterdays as r
-import progression as p
+import game.model as r
+import game.items as p
 import hexgrid,site_layout
-from route_ui import RouteController
+from ui.route import RouteController
 from tests_fixtures.quest_offer import offer_for
 
 class Update024Tests(unittest.TestCase):
@@ -110,6 +110,6 @@ class Update024Tests(unittest.TestCase):
   controller.pause();controller.toggle()
   with patch.object(g,'start_battle') as combat,patch.object(g,'make_road_event') as event:
    for _ in range(len(choice['route'])):
-    with patch('route_ui.time.monotonic',return_value=controller.started+controller.segment_duration()+.01):controller.advance()
+    with patch('time.monotonic',return_value=controller.started+controller.segment_duration()+.01):controller.advance()
    combat.assert_not_called();event.assert_not_called()
   self.assertEqual([g.x,g.y],g.cities[choice['city']]);self.assertEqual(g.turn,turn+choice['steps']);self.assertEqual(g.money,money-choice['price']);self.assertFalse(controller.running)

@@ -1,12 +1,14 @@
 import copy,json,math,tempfile,unittest
 from pathlib import Path
 from unittest.mock import patch
-import afterdays as r
-import progression as p
-import adventure as a
+import game.model as r
+import game.progression as progression
+import game.items as p
+import game.systems.adventure as a
 import exploration
 import road_additions
-from inspection_ui import item_text,monster_text
+from ui.inspection import item_text
+from ui.inspection import monster_text
 
 class ExplorationTests(unittest.TestCase):
  def test_empty_search_is_final_and_costs_turn(self):
@@ -17,7 +19,7 @@ class ExplorationTests(unittest.TestCase):
  def test_search_loot_boundaries_and_location_level(self):
   """Перевіряє сценарій «search loot boundaries and location level» та очікувані результати."""
   for player in (1,14):
-   g=r.Game(2);g.x,g.y=6,5;g.xp=p.xp_for_level(player)
+   g=r.Game(2);g.x,g.y=6,5;g.xp=progression.xp_for_level(player)
    with patch.object(g.rng,'random',side_effect=[.039,.099]+[.9]*100):self.assertTrue(g.search())
    self.assertEqual(len(g.loot),1);self.assertIn(g.loot[0]['kind'],('weapon','armor','helmet','module'));self.assertEqual(g.loot[0]['level'],1)
   g=r.Game(2);g.x,g.y=6,5
@@ -44,7 +46,7 @@ class ExplorationTests(unittest.TestCase):
  def test_objectives_ignore_player_and_location_levels(self):
   """Перевіряє сценарій «objectives ignore player and location levels» та очікувані результати."""
   for level in (1,10,20):
-   g=r.Game(6);g.xp=p.xp_for_level(level)
+   g=r.Game(6);g.xp=progression.xp_for_level(level)
    for city in (0,2,7):
     g.x,g.y=g.cities[city]
     for q in g.mayor_offers():

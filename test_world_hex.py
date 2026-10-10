@@ -3,8 +3,10 @@ from pathlib import Path
 from collections import deque
 import world_hex as grid
 from world_map import layout
-from journey import world_edge,world_route,route_distance
-import afterdays
+from game.systems.journey import world_edge
+from game.systems.journey import world_route
+from game.systems.journey import route_distance
+import game.model as afterdays
 
 
 class Board:

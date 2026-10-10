@@ -2,10 +2,10 @@ import copy,json,tempfile,unittest,math
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock
-import afterdays as r
+import game.model as r
 import junk_physics as j
 from junk_art import ScrapArt
-from junkyard_ui import Junkyard
+import ui.junkyard as junkyard
 from tests_fixtures.quest_offer import offer_for
 
 class JunkPhysicsTests(unittest.TestCase):
@@ -57,13 +57,13 @@ class JunkPhysicsTests(unittest.TestCase):
   g,q=self.game();target=q['junk_objects'][0]
   for s in list(q['junk_objects']):
    if s['kind']=='debris':g.junk_move(q['id'],s['id'],850,560)
-  ui=Junkyard.__new__(Junkyard);ui.game=g;ui.quest=q;ui.ident=q['id'];ui.scale=1;ui.ox=ui.oy=0
+  ui=junkyard.Junkyard.__new__(junkyard.Junkyard);ui.game=g;ui.quest=q;ui.ident=q['id'];ui.scale=1;ui.ox=ui.oy=0
   ui.drag='debris0';ui.canvas=MagicMock();ui.app=MagicMock();ui.status=MagicMock()
   ui.collect_right(SimpleNamespace(x=target['x']+30,y=target['y']+30))
   self.assertEqual(ui.drag,'debris0');self.assertEqual(q['progress'],1);ui.canvas.delete.assert_called_once_with(target['id'])
  def test_window_destroy_cancels_animation(self):
   """Перевіряє сценарій «window destroy cancels animation» та очікувані результати."""
-  ui=Junkyard.__new__(Junkyard);ui.win=MagicMock();ui.timer='timer1';ui.closed=False;ui.drag='debris1'
+  ui=junkyard.Junkyard.__new__(junkyard.Junkyard);ui.win=MagicMock();ui.timer='timer1';ui.closed=False;ui.drag='debris1'
   ui.destroyed(SimpleNamespace(widget=ui.win));self.assertTrue(ui.closed);self.assertIsNone(ui.timer);self.assertIsNone(ui.drag);ui.win.after_cancel.assert_called_once_with('timer1')
 
 if __name__=='__main__':unittest.main()

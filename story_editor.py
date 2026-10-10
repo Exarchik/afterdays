@@ -2,7 +2,7 @@
 import copy
 import tkinter as tk
 from tkinter import ttk,messagebox,simpledialog
-import story_system
+import game.systems.story as story_system
 
 KINDS={'dialogue':'Діалог','quest':'Авторський квест','visit':'Прибуття до міста'}
 

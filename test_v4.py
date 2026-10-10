@@ -5,16 +5,18 @@ import tempfile
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
-import afterdays as r
-import progression as p
-import adventure as a
+import game.model as r
+import game.catalog as catalog
+import game.items as p
+import game.progression as progression
+import game.systems.adventure as a
 
 
 class AdventureTests(unittest.TestCase):
     def combat(self,kind=0):
         """Готує або імітує операцію «combat» для перевірок AdventureTests."""
         g=r.Game(41);g.start_battle();g.pop_events();g.battle['walls']=[]
-        e=dict(id=0,name=r.MONSTERS[kind][0],kind=kind,hp=100,max_hp=100,damage=9,range=1,
+        e=dict(id=0,name=catalog.MONSTERS[kind][0],kind=kind,hp=100,max_hp=100,damage=9,range=1,
                speed=1,pos=[3,5],armor=0,resists=copy.deepcopy(a.RESISTANCES[kind]),level=1)
         g.battle['enemies']=[e];return g,e
 
@@ -68,10 +70,10 @@ class AdventureTests(unittest.TestCase):
         """Перевіряє сценарій «free switch and ap perks» та очікувані результати."""
         g,e=self.combat();g.equipped['weapon2']=p.equipment('Пістолет «Попіл»')
         g.battle['ap']=0;self.assertTrue(g.switch());self.assertEqual(g.battle['ap'],0)
-        g.xp=p.xp_for_level(2);self.assertTrue(g.choose_perk('tactician'))
+        g.xp=progression.xp_for_level(2);self.assertTrue(g.choose_perk('tactician'))
         self.assertEqual(g.max_ap,7);self.assertEqual(g.battle['max_ap'],7)
         g.end_turn();self.assertEqual(g.battle['ap'],7)
-        g.xp=p.xp_for_level(4);g.choose_perk('adrenaline');g.hp=5;e['pos']=[14,10];e['speed']=0
+        g.xp=progression.xp_for_level(4);g.choose_perk('adrenaline');g.hp=5;e['pos']=[14,10];e['speed']=0
         g.end_turn();self.assertEqual(g.battle['ap'],8)
 
     def test_food_xp_and_quest_world_feedback(self):

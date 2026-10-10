@@ -93,7 +93,7 @@ def draw(app,canvas=None,overview=False):
     draw_borders(c,g,v,visible)
     draw_areas(c,g,v)
     if overview:draw_metro(c,g,v,visible)
-    from recovery_ui import draw_markers
+    from ui.recovery import draw_markers
     draw_markers(c,g,v.radius*2,0,0,visible,point=v.point)
     for cache in g.reputation_state.get('road_caches',[]):
         if not cache['opened'] and visible(*cache['pos']):
@@ -212,7 +212,7 @@ def draw_areas(c,g,v):
     for q in g.quests:
         if q['status']!='active':continue
         if q.get('kind')=='hunt':
-            from expedition_ui import defense_cells
+            from ui.expedition import defense_cells
             cells=defense_cells(g,q);color='#e5b75b'
         elif q.get('area') and not g.quest_ready(q):
             cells=set(quest_area.cells(q))

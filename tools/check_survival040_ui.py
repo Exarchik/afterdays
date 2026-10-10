@@ -2,8 +2,9 @@
 import sys
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
-import afterdays
-from terminal034 import snapshot
+import ui.application as application
+import game.model as afterdays
+from ui.hud import snapshot
 errors=[]
 
 
@@ -38,5 +39,5 @@ def hook(root,app):
     root.after(300,check)
 
 
-afterdays.launch(test_hook=hook)
+application.launch(test_hook=hook)
 if errors:raise errors[0]

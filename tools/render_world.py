@@ -2,7 +2,7 @@
 from pathlib import Path
 import sys
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
-import afterdays
+import game.model as afterdays
 from terrain_tiles import tile_key,INDEX,ROOT
 from PIL import Image,ImageDraw,ImageFont
 

@@ -2,13 +2,18 @@
 import copy,tempfile,unittest
 from pathlib import Path
 from unittest.mock import patch
-import afterdays as r, progression as p, module_rules as mr,combat033,content
-from workshop033 import upgrade_description
+import game.model as r
+import game.items as p
+import game.catalog as catalog
+import module_rules as mr
+import game.systems.combat as combat
+import content
+from ui.workshop import upgrade_description
 
 class Update033Tests(unittest.TestCase):
     def arena(self,key='weapon_ash_pistol',distance=2):
         """Create a deterministic unobstructed arena with two durable targets."""
-        g=r.Game(3);g.start_battle();w=p.equipment(key,level=p.GEAR_MIN_LEVEL[key]);g.equipped[g.active]=w
+        g=r.Game(3);g.start_battle();w=p.equipment(key,level=catalog.GEAR_MIN_LEVEL[key]);g.equipped[g.active]=w
         g.bag.append(p.ammunition(w['ammo_type'],100));b=g.battle
         b.update(pos=[1,2],walls=[],ap=20,w=20,h=12,enemies=[dict(id=str(n),kind=0,pos=[1+distance+n,2],hp=10000,max_hp=10000,defense=0,armor=0,name='Target',level=5,grade='normal',resists={},awake=False) for n in range(2)])
         return g,w,b
@@ -41,7 +46,7 @@ class Update033Tests(unittest.TestCase):
         """Condition bands are exact; total damage including elemental modules approaches one."""
         g,w,b=self.arena();w['modules']=[p.module(index='module_phase_approximator')]
         for state,chance in [(100,0),(75,0),(74,.02),(50,.02),(49,.05),(1,.05)]:
-            w['durability']=state;self.assertEqual(combat033.misfire_chance(w),chance)
+            w['durability']=state;self.assertEqual(combat.misfire_chance(w),chance)
         self.assertEqual(sum(mr.shot_components(w,15,2,'kinetic').values()),1)
         w['durability']=60
         with patch.object(g.rng,'random',return_value=0),patch.object(g.rng,'randrange',return_value=0):self.assertTrue(g.shoot('0'))
@@ -64,7 +69,7 @@ class Update033Tests(unittest.TestCase):
         self.assertTrue(g.technician_dismantle(spare['id']));self.assertEqual(g.money,before-quote[1])
     def test_upgrade_preview_and_quest_xp(self):
         """Upgrade preview compares the exact item, and base quest XP starts at twenty-five."""
-        import update031
+        import game.systems.equipment_upgrades as update031
         g=r.Game(3);w=p.equipment('weapon_watch_rifle',level=2);preview=upgrade_description(w,update031.upgraded(w));self.assertIn('До\tПісля',preview);self.assertIn('Рівень\t2\t3',preview)
         for level in (1,5,15):
             q=dict(kind='hunt',city=0,status='offered',unique=False,level=level);g.price_quest(q);self.assertEqual(q['xp_reward'],25+5*(level-1))
@@ -80,15 +85,15 @@ class Update033Tests(unittest.TestCase):
     def test_weather_persistence_motion_and_immunity(self):
         """Storm motion is one cell per turn, survives reload and ends beyond an edge."""
         g=r.Game(3);g.x,g.y=20,10;g.reputation_state['storm033']=dict(pos=[19,10],radius=1,direction=1,age=0);g.rad_turns=2;hp=g.hp
-        with patch('storm033.random.Random.random',return_value=.2):g._world_time_tick()
+        with patch('random.Random.random',return_value=.2):g._world_time_tick()
         self.assertEqual(g.storm['pos'],[20,10]);self.assertEqual(g.radiation_injury,5);self.assertEqual(g.hp,g.max_hp)
         g.rad_turns=0
-        with patch('storm033.random.Random.random',return_value=.2):g._world_time_tick()
+        with patch('random.Random.random',return_value=.2):g._world_time_tick()
         self.assertEqual(g.radiation_injury,10);self.assertEqual(g.hp,g.max_hp)
         with tempfile.TemporaryDirectory() as td:
             path=Path(td)/'save.json';g.save(path);h=r.Game.load(path);self.assertEqual(g.storm,h.storm)
         g.storm['pos']=[112,10]
-        with patch('storm033.random.Random.random',return_value=.2):g.turn+=1;g.advance_storm()
+        with patch('random.Random.random',return_value=.2):g.turn+=1;g.advance_storm()
         self.assertIsNone(g.storm)
     def test_mayor_strict_thresholds(self):
         """Exactly fifty reputation or five quests is insufficient; the sixth can reveal one town."""
@@ -109,7 +114,7 @@ class Update033Tests(unittest.TestCase):
         """Reveal highlights block travel briefly and render as world cells, not battle effects."""
         from types import SimpleNamespace
         from unittest.mock import MagicMock
-        from adventure_ui import Effects
+        from ui.adventure import Effects
         g=r.Game(2);app=SimpleNamespace(game=g,root=MagicMock(),canvas=MagicMock(),tile=20,ox=0,oy=0,vx=29,vy=9)
         from world_map import layout
         app.world_view=layout(800,600,112,32,(30,10))

@@ -1,9 +1,9 @@
 """Offset-coordinate diagonals are unit-cost hex edges, not square diagonals."""
 import unittest
 from unittest.mock import patch
-import afterdays
+import game.model as afterdays
 import world_hex
-from route_ui import RouteController
+import ui.route as route
 from types import SimpleNamespace
 
 
@@ -38,7 +38,7 @@ class HexStepTests(unittest.TestCase):
         self.assertTrue(g.step(1,1));self.assertEqual(g.radiation_injury,5)
 
     def test_route_animation_has_equal_duration_for_all_directions(self):
-        controller=RouteController.__new__(RouteController)
+        controller=route.RouteController.__new__(route.RouteController)
         controller.app=SimpleNamespace(game=SimpleNamespace(x=5,y=5));controller.guided_city=None
         for pos in world_hex.adjacent((5,5)):
             controller.path=[pos];self.assertAlmostEqual(controller.segment_duration(),2/3)

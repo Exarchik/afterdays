@@ -1,7 +1,7 @@
 import copy,tempfile,unittest
 from pathlib import Path
 from unittest.mock import patch
-import afterdays as r
+import game.model as r
 import debug_config as d
 class View(d.MapVisibility):
  # Ініціалізує об’єкт, його початковий стан і потрібні залежності.

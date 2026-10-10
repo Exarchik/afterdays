@@ -1,17 +1,18 @@
 import copy,json,tempfile,unittest
 from pathlib import Path
 from unittest.mock import patch
-import afterdays as r
-import progression as p
-import consumable_rules
+import game.model as r
+import game.items as p
+import game.progression as progression
+import game.systems.consumables as consumable_rules
 import entity_catalog
-from update046 import credit_item
+from game.systems.credits import credit_item
 
 
 class Update046Tests(unittest.TestCase):
     def test_xp_scale_and_actual_reward(self):
         for delta,expected in [(0,100),(1,100),(2,80),(3,60),(4,25),(5,1),(9,1)]:
-            g=r.Game(5);g.xp=p.xp_for_level(12)
+            g=r.Game(5);g.xp=progression.xp_for_level(12)
             q=dict(id='test',kind='supplies',status='active',city=0,title='Test',level=12-delta,xp_reward=100,reward=0,food_need=0,med_need=0)
             g.quests=[q];g.x,g.y=g.cities[0]
             self.assertEqual(g.quest_xp(q),expected)

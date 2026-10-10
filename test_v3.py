@@ -7,22 +7,25 @@ import tempfile
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
-import afterdays as r
-import progression as p
+import game.model as r
+import game.catalog as catalog
+import game.items as p
+import game.progression as progression
+import game.catalog as game_catalog
 
 
 class ProgressionTests(unittest.TestCase):
     def test_drops_and_all_merchants_never_exceed_player_level(self):
         """Перевіряє сценарій «drops and all merchants never exceed player level» та очікувані результати."""
         for level in (1,2,3,6,10,15):
-            g=r.Game(level);g.xp=p.xp_for_level(level)
+            g=r.Game(level);g.xp=progression.xp_for_level(level)
             generated=[g.roll_item() for _ in range(80)]
             for m in (0,1,2): generated+=g.stock(m)
             g.spawn_traveler();generated+=g.stock(3)
             self.assertTrue(all(i.get('level',1)<=level for i in generated))
             for i in generated:
                 if i['kind'] in ('weapon','armor','helmet'):
-                    self.assertLessEqual(p.GEAR_MIN_LEVEL[i['name']],i['level'])
+                    self.assertLessEqual(game_catalog.GEAR_MIN_LEVEL[i['name']],i['level'])
         self.assertIsNone(r.Game(0).equipped['weapon2'])
 
     def test_higher_level_item_can_be_collected_but_not_equipped(self):
@@ -43,7 +46,7 @@ class ProgressionTests(unittest.TestCase):
         g.x=44;self.assertGreater(g.region_level,a)
         g.start_battle()
         for e in g.battle['enemies']:
-            base=r.MONSTERS[e['kind']]
+            base=catalog.MONSTERS[e['kind']]
             self.assertLessEqual(e['level'],g.region_level)
             self.assertEqual(e['level'],e['base_level']-int(e.get('weak',False)))
             self.assertGreaterEqual(e['hp'],base[1])
@@ -53,13 +56,13 @@ class ProgressionTests(unittest.TestCase):
         """Перевіряє сценарій «perk choices every two levels are persistent» та очікувані результати."""
         g=r.Game(2)
         self.assertEqual(g.pending_perks,0)
-        g.xp=p.xp_for_level(2);self.assertEqual(g.pending_perks,1)
-        g.xp=p.xp_for_level(3);self.assertEqual(g.pending_perks,1)
+        g.xp=progression.xp_for_level(2);self.assertEqual(g.pending_perks,1)
+        g.xp=progression.xp_for_level(3);self.assertEqual(g.pending_perks,1)
         cap=g.capacity
         self.assertTrue(g.choose_perk('carrier'))
         self.assertEqual(g.capacity,cap+5)
         self.assertFalse(g.choose_perk('carrier'))
-        g.xp=p.xp_for_level(7);self.assertEqual(g.pending_perks,2)
+        g.xp=progression.xp_for_level(7);self.assertEqual(g.pending_perks,2)
         self.assertTrue(g.choose_perk('carrier'))
         self.assertTrue(g.choose_perk('medic'))
         with tempfile.TemporaryDirectory() as d:
@@ -198,12 +201,12 @@ class ProgressionTests(unittest.TestCase):
             g=r.Game(11);g.x,g.y=6,6;g.world[6][6]=biome;g.start_battle();b=g.battle
             self.assertEqual(b['biome'],biome)
             walls=set(map(tuple,b['walls']))
-            for e in b['enemies']:self.assertTrue(r.path_to(tuple(b['pos']),tuple(e['pos']),15,11,walls))
+            for e in b['enemies']:self.assertTrue(catalog.path_to(tuple(b['pos']),tuple(e['pos']),15,11,walls))
             if biome=='road':self.assertTrue(all(not 4<=y<=6 for x,y in walls))
 
     def test_iso_coordinate_roundtrip(self):
         """Перевіряє сценарій «iso coordinate roundtrip» та очікувані результати."""
-        from advanced_ui import iso_cell
+        from ui.advanced import iso_cell
         app=SimpleNamespace(iso=dict(u=23,ox=350,oy=50,sprites=[]))
         for x in range(15):
             for y in range(11):

@@ -62,7 +62,8 @@ def run(capture=False):
             choice=ChoiceDialog(root,edited['choices'][0]); root.update(); assert choice.read()['id']=='help'; choice.destroy()
             outcome=OutcomeDialog(root); root.update(); assert outcome.read()['chance']==1; outcome.destroy()
             if capture:
-                import afterdays,adventure_ui
+                import game.model as afterdays
+                import ui.adventure as adventure_ui
                 from types import SimpleNamespace
                 game=afterdays.Game(1);game.make_road_event('wounded')
                 def popup(title,size):

@@ -3,9 +3,11 @@ import copy,json,math,random,tempfile,unittest
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock,patch
-import afterdays as r
-import progression as p
-import frontier,metro_routes,refinement_ui,settlements
+import game.model as r
+import game.items as p
+import game.systems.frontier as frontier
+import metro_routes
+import ui.refinement as refinement_ui
 from radio_interference import Interference
 from tests_fixtures.quest_offer import offer_for
 
@@ -44,7 +46,8 @@ class SettlementTests(unittest.TestCase):
   for _ in range(10):g.stock(0)
   self.assertEqual(item,snapshot)
   for discount in (30,50,75):
-   item['promotion']['discount']=discount;base=super(settlements.Game,g).price(item,0,True)
+   regular=copy.deepcopy(item);regular.pop('promotion');base=g.price(regular,0,True)
+   item['promotion']['discount']=discount
    self.assertEqual(g.price(item,0),max(2,round(base*(1-discount/100))))
    self.assertLess(g.price(item,0,False),g.price(item,0,True))
   cost=g.price(item,0);before=g.money;self.assertTrue(g.buy(item['id'],0));self.assertEqual(before-g.money,cost);item=next(i for i in g.bag if i.get('paid_sale_cap')==cost-1);self.assertNotIn('promotion',item)
@@ -83,11 +86,11 @@ class SettlementTests(unittest.TestCase):
   self.assertFalse(noise.advance(noise.next))
  def test_trade_price_next_to_title_and_colors(self):
   """Перевіряє сценарій «trade price next to title and colors» та очікувані результати."""
-  from advanced_ui import TradingPanel
+  import ui.advanced as advanced
   g=r.Game(4);item=p.equipment('weapon_ash_pistol');panel=SimpleNamespace(app=SimpleNamespace(game=g,description=lambda i:refinement_ui.description(g,i)),merchant=0,source='stock',item=lambda:item,amount=lambda i:1,preview=MagicMock(),detail=MagicMock())
-  with patch('advanced_ui.icon'),patch('advanced_ui.sprites.draw'):
-   g.money=0;TradingPanel.describe(panel);self.assertEqual(panel.detail.text.insert.call_args.args[0],'1.end');self.assertEqual(panel.detail.text.insert.call_args.args[-1],'bad')
-   g.money=100000;TradingPanel.describe(panel);self.assertEqual(panel.detail.text.insert.call_args.args[-1],'good')
-   panel.source='bag';item['quest_id']='test';TradingPanel.describe(panel);self.assertEqual(panel.detail.text.insert.call_args.args[-1],'bad')
+  with patch('visuals.icon'),patch('sprites.draw'):
+   g.money=0;advanced.TradingPanel.describe(panel);self.assertEqual(panel.detail.text.insert.call_args.args[0],'1.end');self.assertEqual(panel.detail.text.insert.call_args.args[-1],'bad')
+   g.money=100000;advanced.TradingPanel.describe(panel);self.assertEqual(panel.detail.text.insert.call_args.args[-1],'good')
+   panel.source='bag';item['quest_id']='test';advanced.TradingPanel.describe(panel);self.assertEqual(panel.detail.text.insert.call_args.args[-1],'bad')
 
 if __name__=='__main__':unittest.main()

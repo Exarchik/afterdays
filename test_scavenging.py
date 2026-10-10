@@ -2,11 +2,17 @@ import quest_area
 import copy,json,math,tempfile,unittest
 from pathlib import Path
 from unittest.mock import patch,MagicMock
-import afterdays as r
-import progression as p
-import monster_rules,economy,frontier_ui,sprites
+import game.model as r
+import game.catalog as catalog
+import game.items as p
+import game.progression as progression
+import game.catalog as game_catalog
+import monster_rules
+import game.systems.economy as economy
+import ui.frontier as frontier_ui
+import sprites
 from tests_fixtures.quest_offer import offer_for
-from expedition_ui import draw_search_areas
+from ui.expedition import draw_search_areas
 
 class ScavengingTests(unittest.TestCase):
  def quest(self,kind,seed=4):
@@ -31,7 +37,7 @@ class ScavengingTests(unittest.TestCase):
   """Перевіряє сценарій «kits all equipment and save» та очікувані результати."""
   g=r.Game(2);p.add_to(g.bag,p.supply('repairkit',3))
   for category in ('weapon','armor','helmet'):
-   key=next(k for k,v in r.GEAR.items() if v[0]==category and p.GEAR_MIN_LEVEL[k]==1)
+   key=next(k for k,v in catalog.GEAR.items() if v[0]==category and game_catalog.GEAR_MIN_LEVEL[k]==1)
    item=p.equipment(key);item['durability']=25;g.bag.append(item)
    self.assertTrue(g.repair_with_kit(item['id']));self.assertEqual(item['durability'],60)
   self.assertEqual(g.count('repairkit'),0);h=self.save_reload(g);self.assertEqual(g.bag,h.bag)
@@ -70,7 +76,7 @@ class ScavengingTests(unittest.TestCase):
   self.assertTrue(g.craft_module('parts',150));self.assertEqual(g.count('parts'),840)
   p.add_to(g.bag,p.fragments(1000));self.assertTrue(g.craft_module('fragments',1000));self.assertEqual(g.count('fragments'),0)
   for n in (10,75,150,500,1000):self.assertAlmostEqual(sum(g.craft_odds(n)),100)
-  g.xp=__import__('progression').xp_for_level(7);self.assertLess(g.craft_odds(150)[4],g.craft_odds(1000)[4])
+  g.xp=__import__('game.progression', fromlist=['xp_for_level']).xp_for_level(7);self.assertLess(g.craft_odds(150)[4],g.craft_odds(1000)[4])
  def test_scout_visits_seven_distinct_cells(self):
   """Перевіряє сценарій «scout visits nine distinct cells» та очікувані результати."""
   g,q=self.quest('scout');x,y,xx,yy=q['area'];self.assertEqual(q['goal'],7)
@@ -138,7 +144,7 @@ class ScavengingTests(unittest.TestCase):
   self.assertFalse(any(i['kind'] in ('ammo','weapon','armor','helmet','module') for i in g.loot))
  def test_xp_and_area_rendering(self):
   """Перевіряє сценарій «xp and area rendering» та очікувані результати."""
-  g,q=self.quest('scout');text=frontier_ui.player_text(g);self.assertIn(str(p.xp_for_level(g.level+1)-g.xp)+' XP',text)
+  g,q=self.quest('scout');text=frontier_ui.player_text(g);self.assertIn(str(progression.xp_for_level(g.level+1)-g.xp)+' XP',text)
   canvas=MagicMock();draw_search_areas(canvas,g,20,0,0);self.assertEqual(canvas.create_line.call_count,18)
  def test_old_generator_and_quests_migrate_without_losing_rewards(self):
   """Перевіряє сценарій «old generator and quests migrate without losing rewards» та очікувані результати."""

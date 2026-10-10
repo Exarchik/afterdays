@@ -4,7 +4,10 @@ import unittest
 from unittest.mock import MagicMock
 
 import world_hex
-from journey import world_route, world_edge, route_terrain_cost, route_distance
+from game.systems.journey import world_route
+from game.systems.journey import world_edge
+from game.systems.journey import route_terrain_cost
+from game.systems.journey import route_distance
 from world_map import View, draw_roads
 
 

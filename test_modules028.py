@@ -2,10 +2,14 @@ import copy,json,tempfile,unittest
 from pathlib import Path
 from unittest.mock import patch
 from PIL import Image
-import afterdays as r
-import progression as p
-import adventure,balance,content,sprites,module_rules as mr
-from refinement_ui import description
+import game.model as r
+import game.items as p
+import game.systems.adventure as adventure
+import balance
+import content
+import sprites
+import module_rules as mr
+from ui.refinement import description
 
 class NewModulesTests(unittest.TestCase):
     # Готує або імітує операцію «mod» для перевірок NewModulesTests.

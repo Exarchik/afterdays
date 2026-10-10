@@ -6,7 +6,7 @@ import content
 import terrain_tiles
 import tkinter as tk
 from tkinter import ttk, messagebox
-import afterdays as rules
+import game.catalog as catalog
 
 BG, PANEL, TEXT, MUTED, GOLD = '#141c1a', '#202b27', '#e4e8d9', '#9baa9e', '#d7b77a'
 
@@ -20,10 +20,10 @@ def icon(c, item, x, y, size=48, badge=True):
             badge_size=32 if size>=96 else 24
             sprites.weapon_badge(c,item,x+size-badge_size,y,badge_size)
         for n,mod in enumerate(item.get('modules',[])):
-            c.create_rectangle(x+size*(.08+n*.17),y+size*.90,x+size*(.20+n*.17),y+size*.97,fill=rules.RARITIES[mod['rarity']][1],outline='#18251c')
+            c.create_rectangle(x+size*(.08+n*.17),y+size*.90,x+size*(.20+n*.17),y+size*.97,fill=catalog.RARITIES[mod['rarity']][1],outline='#18251c')
         return
     k, name = item['kind'], item['name']
-    color = rules.RARITIES[item.get('rarity', 0)][1]
+    color = catalog.RARITIES[item.get('rarity', 0)][1]
     metal, dark = '#a5b2a6', '#293b34'
     scale = size/64
     def coords(points):
@@ -70,7 +70,7 @@ def icon(c, item, x, y, size=48, badge=True):
         for n, mod in enumerate(item.get('modules', [])):
             mx = x+size*(.10+.17*n)
             c.create_rectangle(mx, y+size*.90, mx+size*.12, y+size*.96,
-                               fill=rules.RARITIES[mod['rarity']][1], outline='')
+                               fill=catalog.RARITIES[mod['rarity']][1], outline='')
     elif k == 'armor':
         heavy = any(s in name for s in (tr('visuals.0013'), tr('visuals.0014'), tr('visuals.0015'), tr('visuals.0016')))
         if tr('visuals.0017') in name or tr('visuals.0018') in name:
@@ -164,7 +164,7 @@ def icon(c, item, x, y, size=48, badge=True):
         sprites.weapon_badge(c,item,x+size-badge_size,y,badge_size)
     if k in ('armor','helmet'):
         for n,mod in enumerate(item.get('modules',[])):
-            rect(6+n*11,58,14+n*11,63,fill=rules.RARITIES[mod['rarity']][1],outline='')
+            rect(6+n*11,58,14+n*11,63,fill=catalog.RARITIES[mod['rarity']][1],outline='')
 
 
 def monster(c, enemy, x, y, size):
@@ -177,8 +177,8 @@ def monster(c, enemy, x, y, size):
         return
     if enemy.get('grade','normal')!='normal':
         c.create_oval(x,y,x+size,y+size,outline='#dc8ef5' if enemy['grade']=='mythic' else '#eac863',width=3)
-    kind = enemy.get('kind', 0) % len(rules.MONSTERS)
-    color = rules.MONSTERS[kind][-1]
+    kind = enemy.get('kind', 0) % len(catalog.MONSTERS)
+    color = catalog.MONSTERS[kind][-1]
     s = size
     def oval(a, b, d, e, **kw):
         c.create_oval(x+a*s, y+b*s, x+d*s, y+e*s, **kw)
@@ -252,7 +252,7 @@ def terrain(c, kind, x, y, t, gx, gy, game, battle=False):
         c.create_line(x+t*.14, y+t*.9, x+t*.8, y+t*.88, fill='#827960')
     elif kind == 'road':
         cx, cy = x+t/2, y+t/2
-        for nx, ny in rules.neighbors(gx, gy, len(game.world[0]), len(game.world)):
+        for nx, ny in catalog.neighbors(gx, gy, len(game.world[0]), len(game.world)):
             if game.world[ny][nx] in ('road', 'city'):
                 c.create_line(cx, cy, cx+(nx-gx)*t/2, cy+(ny-gy)*t/2, fill='#9b8967', width=max(2, int(t*.23)))
                 c.create_line(cx, cy, cx+(nx-gx)*t/2, cy+(ny-gy)*t/2, fill='#c1ae7c', dash=(2, 4))
@@ -273,7 +273,7 @@ TYPE_COLORS['repairkit']='#4d4935'
 TYPE_COLORS['trophy']='#503e32'
 def item_sort_key(item):
     if item['kind']=='credits':return (-1,0,0,0,0,item['name'],item['id'])
-    kind=item['kind'];category=('pistol','rifle','shotgun','automatic','sniper').index(__import__('combat033').category(item)) if kind=='weapon' else 0
+    kind=item['kind'];category=('pistol','rifle','shotgun','automatic','sniper').index(__import__('game.systems.combat', fromlist=['category']).category(item)) if kind=='weapon' else 0
     return (0 if item.get('promotion') else 1,TYPE_ORDER.index(kind) if kind in TYPE_ORDER else 99,category,-item.get('rarity',0),-item.get('level',1),item['name'],item['id'])
 
 def condition_color(value):
@@ -308,7 +308,7 @@ class ItemGrid(tk.Frame):
     def inspect_event(self,event):
         """Відкриває контекстні дії предмета під курсором."""
         item=next((i for i in self.items if i['id']==self.hit(event.x,event.y)),None)
-        import item_actions
+        import ui.item_actions as item_actions
         app,owner=item_actions.locate(self)
         return item_actions.show(app,item,event,owner,self)
 
@@ -343,14 +343,14 @@ class ItemGrid(tk.Frame):
             x, y = (n % self.columns)*cell, (n//self.columns)*h
             r = (x+2, y+2, x+cell-3, y+h-3)
             self.rects[item['id']] = r
-            color = rules.RARITIES[item.get('rarity', 0)][1]
+            color = catalog.RARITIES[item.get('rarity', 0)][1]
             c.create_rectangle(*r, fill=TYPE_COLORS.get(item['kind'],'#233229'),outline=color,width=3 if item['id']==self.selection else 1)
             art=sprites.inventory_photo(c,item,int(cell-6))
             if art:c.create_image(x+cell/2,y+3,image=art,anchor='n')
             else:icon(c,item,x+(cell-min(cell-8,72))/2,y+3,min(cell-8,72),badge=False)
             if item['kind']=='weapon':sprites.weapon_badge(c,item,x+cell-28,y+20,24)
             for slot,mod in enumerate(item.get('modules',[])):
-                c.create_rectangle(x+7+slot*9,y+46,x+13+slot*9,y+49,fill=rules.RARITIES[mod['rarity']][1],outline='#14201b')
+                c.create_rectangle(x+7+slot*9,y+46,x+13+slot*9,y+49,fill=catalog.RARITIES[mod['rarity']][1],outline='#14201b')
             if item['kind'] in ('weapon','armor','helmet','module'):
                 c.create_rectangle(x+4,y+3,x+28,y+17,fill='#17201c',outline='')
                 c.create_text(x+6,y+9,text=f'L{item.get("level",1)}',fill=TEXT,font=('Segoe UI',8,'bold'),anchor='w')
@@ -360,7 +360,7 @@ class ItemGrid(tk.Frame):
                 c.create_text(x+14,y+10,text='?' if broken else '✓',fill='#f2cb62' if broken else '#76e89a',font=('Segoe UI',11,'bold'))
             if item['kind']=='weapon' or item.get('qty',1)>1:
                 c.create_rectangle(x+cell-36,y+3,x+cell-4,y+17,fill='#17201c',outline='')
-            if item['kind']=='weapon':c.create_text(x+cell-6,y+9,text=tr('visuals.0022', v0=__import__('combat033').shot_cost(item)),fill=TEXT,font=('Segoe UI',8,'bold'),anchor='e')
+            if item['kind']=='weapon':c.create_text(x+cell-6,y+9,text=tr('visuals.0022', v0=__import__('game.systems.combat', fromlist=['shot_cost']).shot_cost(item)),fill=TEXT,font=('Segoe UI',8,'bold'),anchor='e')
             elif item.get('qty',1)>1:c.create_text(x+cell-6,y+9,text=f'×{item["qty"]}',fill=TEXT,font=('Segoe UI',8,'bold'),anchor='e')
             if item['id']==self.selection:c.create_rectangle(x+5,y+16,x+9,y+20,fill='#ffffff',outline='')
             if item.get('promotion'):
@@ -430,7 +430,7 @@ class EquipmentPanel(tk.Frame):
         tk.Label(self, text=tr('visuals.0023'), bg=PANEL, fg=MUTED, font=('Segoe UI', 8)).pack(pady=2)
         self.grid = ItemGrid(self, self.select, height=104)
         self.grid.pack(fill='both', expand=True, padx=6)
-        from refinement_ui import Detail
+        from ui.refinement import Detail
         self.details = Detail(self,height=7)
         self.details.pack(fill='x', padx=8, pady=3)
         self.drag = Drag(self, self.drop)
@@ -478,7 +478,7 @@ class EquipmentPanel(tk.Frame):
         for slot, (x,y,d,e) in self.slots.items():
             item = g.equipped[slot]
             selected = item and item['id'] == self.selection
-            color = rules.RARITIES[item['rarity']][1] if item else '#526352'
+            color = catalog.RARITIES[item['rarity']][1] if item else '#526352'
             c.create_rectangle(x,y,d,e, outline=GOLD if selected else color, width=2, dash=() if item else (3,3))
             if item:
                 size = min(d-x-5, e-y-5)
@@ -488,13 +488,13 @@ class EquipmentPanel(tk.Frame):
             else:
                 c.create_text((x+d)/2, (y+e)/2, text='+', fill='#708573', font=('Segoe UI', 20))
             if slot.startswith('weapon'):
-                c.create_text((x+d)/2, e+12, text=('▶ ' if g.active == slot else '')+rules.SLOTS[slot], fill=color, font=('Segoe UI', 9))
+                c.create_text((x+d)/2, e+12, text=('▶ ' if g.active == slot else '')+catalog.SLOTS[slot], fill=color, font=('Segoe UI', 9))
         c.create_text(mid, 215, text=tr('visuals.0030', v0=g.defense, v1=g.weight, v2=g.capacity), fill=MUTED, font=('Segoe UI', 8))
 
     def inspect_paper(self,event):
         """Відкриває дії спорядження на силуеті персонажа."""
         slot=next((s for s,(a,b,d,e) in self.slots.items() if a<=event.x<=d and b<=event.y<=e),None)
-        import item_actions
+        import ui.item_actions as item_actions
         return item_actions.show(self.app,self.app.game.equipped.get(slot),event,self)
 
     def press_paper(self, event):
@@ -553,7 +553,7 @@ class ModificationPanel(tk.Frame):
         self.top.pack(fill='x', padx=10, pady=8)
         self.top.bind('<Configure>', lambda e: self.draw())
         self.top.bind('<Button-3>',self.inspect_top)
-        from refinement_ui import Detail
+        from ui.refinement import Detail
         self.summary = Detail(self,height=4)
         self.summary.pack(fill='x', padx=12, pady=5)
         tk.Label(self, text=tr('visuals.0032'), bg=PANEL, fg=GOLD).pack(pady=6)
@@ -600,7 +600,7 @@ class ModificationPanel(tk.Frame):
             r = (x+4, y, x+94, y+80)
             self.slot_rects.append(r)
             mod = item['modules'][n] if n < len(item['modules']) else None
-            color = rules.RARITIES[mod['rarity']][1] if mod else '#617363'
+            color = catalog.RARITIES[mod['rarity']][1] if mod else '#617363'
             c.create_line(w/2, 135, x+49, y, fill='#465946')
             c.create_rectangle(*r, fill='#26382d', outline=color, dash=() if mod else (4,3), width=2)
             if mod:
@@ -617,7 +617,9 @@ class ModificationPanel(tk.Frame):
         if not mod:
             mod = next((m for m in self.item['modules'] if m['id'] == item_id), None)
         if mod:
-            import copy,progression as p
+            import copy
+            import game.items as p
+            import module_rules
             candidate=copy.deepcopy(self.item)
             if sign>0:
                 candidate['modules'].append(copy.deepcopy(mod))
@@ -625,15 +627,15 @@ class ModificationPanel(tk.Frame):
                 candidate['modules']=[m for m in candidate['modules'] if m['id']!=mod['id']]
             old,new=p.stats(self.item),p.stats(candidate)
             keys=[k for k in dict.fromkeys([*old,*new]) if old.get(k,0)!=new.get(k,0)]
-            rows=[f"{rules.STAT_NAMES.get(k,k)}: {old.get(k,0):g} → {new.get(k,0):g}" for k in keys]
-            rows.append(tr('update031.wear_preview',before=100*max(.1,1-p.mr.aggregate(self.item).get('strength',0)/100),after=100*max(.1,1-p.mr.aggregate(candidate).get('strength',0)/100)))
+            rows=[f"{catalog.STAT_NAMES.get(k,k)}: {old.get(k,0):g} → {new.get(k,0):g}" for k in keys]
+            rows.append(tr('update031.wear_preview',before=100*max(.1,1-module_rules.aggregate(self.item).get('strength',0)/100),after=100*max(.1,1-module_rules.aggregate(candidate).get('strength',0)/100)))
             self.preview.config(text=mod['name']+(' · '+tr('update033.from_stash') if mod in self.app.game.stash else '')+'\n'+' · '.join(rows))
 
     def inspect_top(self,event):
         """Відкриває контекстні дії предмета в меню модифікацій."""
         n=next((n for n,(x,y,d,f) in enumerate(self.slot_rects) if x<=event.x<=d and y<=event.y<=f),None)
         item=self.item['modules'][n] if n is not None and n<len(self.item['modules']) else self.item if n is None else None
-        import item_actions
+        import ui.item_actions as item_actions
         return item_actions.show(self.app,item,event,self)
 
     def press_bag(self, e):

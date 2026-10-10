@@ -2,9 +2,13 @@
 import copy,json,tempfile,unittest,math
 from pathlib import Path
 from unittest.mock import patch
-import afterdays as r,progression as p,adventure,road_additions
-from update032 import level_limit
-from loot032 import halve_new_loot
+import game.model as r
+import game.progression as progression
+import game.items as p
+import game.systems.adventure as adventure
+import road_additions
+from game.systems.leveled_contracts import level_limit
+from game.systems.loot import halve_new_loot
 
 class Update032Tests(unittest.TestCase):
     def test_capacity_table(self):
@@ -12,20 +16,20 @@ class Update032Tests(unittest.TestCase):
         g=r.Game(3);g.record_at(g.cities[0])['value']=100
         with patch.object(type(g),'region_at',return_value=7):
             for level,expected in [(1,0),(4,0),(5,1),(6,2),(7,5),(8,5),(9,3),(10,2),(11,1),(15,1)]:
-                g.xp=p.xp_for_level(level);self.assertEqual(g.quest_capacity(0),expected)
+                g.xp=progression.xp_for_level(level);self.assertEqual(g.quest_capacity(0),expected)
     def test_actual_offer_limits_and_medal(self):
         """Mayors expose no more than the computed ceiling, and medal level is snapshotted."""
         g=r.Game(4);g.record_at(g.cities[0])['value']=100
         for level in (1,2,3,4,5,10):
-            g.xp=p.xp_for_level(level)
+            g.xp=progression.xp_for_level(level)
             self.assertLessEqual(len(g.mayor_offers()),g.quest_capacity(0))
         g.quests.append(dict(id='thanks',kind='thanks',status='done',city=0,progress=1,goal=1))
         q=g.mayor_offers()[0];self.assertEqual(q['level'],2)
-        saved=copy.deepcopy(q);g.xp=p.xp_for_level(3);g.price_quest(q);self.assertEqual(q['level'],2)
+        saved=copy.deepcopy(q);g.xp=progression.xp_for_level(3);g.price_quest(q);self.assertEqual(q['level'],2)
     def test_upgrade_and_known_guides(self):
         """Items cannot upgrade beyond player level and guides only offer known destinations."""
         g=r.Game(2);g.money=999999;self.assertIsNone(g.upgrade_quote(g.weapon['id']))
-        g.xp=p.xp_for_level(2);self.assertTrue(g.upgrade_item(g.weapon['id']));self.assertIsNone(g.upgrade_quote(g.weapon['id']))
+        g.xp=progression.xp_for_level(2);self.assertTrue(g.upgrade_item(g.weapon['id']));self.assertIsNone(g.upgrade_quote(g.weapon['id']))
         g.reputation_state['border_open']=True
         with patch.object(type(g),'city_guide',new_callable=__import__('unittest').mock.PropertyMock,return_value=True):
             g.known_cities=[0,2,3];choices=g.guide_destinations();self.assertTrue(all(x['city'] in (2,3) for x in choices));self.assertLessEqual(len(choices),2)
@@ -69,7 +73,7 @@ class Update032Tests(unittest.TestCase):
         """Rewards, shops, sealed contents and crafting respect unlock thresholds."""
         g=r.Game(1)
         for level,cap in [(1,2),(4,2),(5,3),(6,3),(7,4)]:
-            g.xp=p.xp_for_level(level);self.assertEqual(g.rarity_cap,cap)
+            g.xp=progression.xp_for_level(level);self.assertEqual(g.rarity_cap,cap)
             for _ in range(10):self.assertLessEqual(g.reward_item(4,4)['rarity'],cap)
             for m in (0,1,2):
                 for item in g.stock(m):self.assertLessEqual(item.get('contents',item).get('rarity',0),cap)

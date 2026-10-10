@@ -2,8 +2,8 @@ import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
-import afterdays as r
-import progression as p
+import game.model as r
+import game.items as p
 import battle_results as results
 import event_results
 
@@ -19,19 +19,19 @@ class BattleResultsTests(unittest.TestCase):
     def test_projectile_caps_overkill_and_records_before_kill(self):
         g=self.game();e=dict(id='enemy',hp=6,pos=[2,1],name='Enemy',awake=True)
         g.battle['enemies']=[e]
-        with patch('combat033.projectile_components',return_value={'kinetic':10}),patch.object(g,'_finish_enemy'):
+        with patch('game.systems.combat.projectile_components',return_value={'kinetic':10}),patch.object(g,'_finish_enemy'):
             g._projectile_damage(e,g.weapon,'single')
         self.assertEqual(g.battle['result_stats']['dealt'],6)
 
     def test_incoming_npc_combat_and_reflection(self):
         g=self.game();actor=dict(id='e',name='Enemy',hp=100,damage=7,range=1,pos=[2,1])
         player=dict(id='player',pos=[1,1]);target=dict(id='npc',name='NPC',hp=30,pos=[3,1])
-        with patch.object(g.rng,'randrange',return_value=99),patch('update047.balance.damage',return_value=7),patch.object(g,'incoming_combat_damage',return_value=7),patch.object(g,'protection_stat',return_value=0):
+        with patch.object(g.rng,'randrange',return_value=99),patch('balance.damage',return_value=7),patch.object(g,'incoming_combat_damage',return_value=7),patch.object(g,'protection_stat',return_value=0):
             g.faction_attack(actor,player,True)
             g.faction_attack(actor,target,False)
         self.assertEqual(g.battle['result_stats']['received'],7)
         self.assertEqual(g.battle['result_stats']['dealt'],0)
-        with patch.object(g.rng,'randrange',return_value=99),patch('update047.balance.damage',return_value=7),patch.object(g.rng,'random',return_value=0),patch.object(g,'protection_stat',side_effect=lambda k:100 if k=='reflect_percent' else 0):
+        with patch.object(g.rng,'randrange',return_value=99),patch('balance.damage',return_value=7),patch.object(g.rng,'random',return_value=0),patch.object(g,'protection_stat',side_effect=lambda k:100 if k=='reflect_percent' else 0):
             g.faction_attack(actor,player,True)
         self.assertEqual(g.battle['result_stats']['dealt'],7)
         self.assertEqual(g.battle['result_stats']['received'],7)

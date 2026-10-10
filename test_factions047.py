@@ -5,12 +5,12 @@ import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
-import afterdays
+import game.model as afterdays
 import content
 import entity_catalog
 import faction_rules as rules
 import monster_rules
-import progression as p
+import module_rules
 
 
 class FactionTests(unittest.TestCase):
@@ -39,7 +39,7 @@ class FactionTests(unittest.TestCase):
                 for item in e['equipment'].values():
                     self.assertLessEqual(item['level'],level);self.assertLessEqual(content.EQUIPMENT[item['type_id']]['min_level'],level)
                     for mod in item['modules']:
-                        seen+=1;self.assertTrue(p.mr.compatible(item,mod));self.assertLessEqual(mod['level'],level)
+                        seen+=1;self.assertTrue(module_rules.compatible(item,mod));self.assertLessEqual(mod['level'],level)
         self.assertGreater(seen,0)
 
     def test_drop_threshold_each_item_and_no_trophy(self):

@@ -5,7 +5,15 @@ import tempfile
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
-from afterdays import Game, LegacyGame, GEAR, MODULES, MONSTERS, equipment, module, item_value, stats
+from game.model import Game
+from game.base import BaseGame
+from game.catalog import GEAR
+from game.catalog import MODULES
+from game.catalog import MONSTERS
+from game.items import equipment
+from game.items import module
+from game.items import item_value
+from game.items import stats
 
 
 class ExpansionTests(unittest.TestCase):
@@ -36,8 +44,8 @@ class ExpansionTests(unittest.TestCase):
         g = Game(1)
         g.x,g.y=6,5
         # Test the regular merchant explicitly, not a seed-dependent hunter/cartographer.
-        from progression import Game as ProgressionGame
-        ProgressionGame.spawn_traveler(g)
+        import game.progression as progression
+        progression.ProgressionGame.spawn_traveler(g)
         stock = g.stock(3)
         self.assertEqual(len([i for i in stock if i['kind'] in ('weapon','armor','helmet','module')]),1)
         self.assertTrue({'food','med'}.issubset({i['kind'] for i in stock}))
@@ -134,7 +142,7 @@ class ExpansionTests(unittest.TestCase):
         before=list(g.bag)
         self.assertFalse(g.turn_in(q['id']))
         self.assertEqual(g.bag,before)
-        from afterdays import supply
+        from game.items import supply
         g.bag.extend([supply('med'),supply('med')])
         self.assertTrue(g.turn_in(q['id']))
         self.assertEqual(sum(i['kind'] in ('med','food') for i in g.bag),0)
@@ -195,7 +203,7 @@ class ExpansionTests(unittest.TestCase):
 
     def test_v1_migration_preserves_items_and_adds_cities(self):
         """Перевіряє сценарій «v1 migration preserves items and adds cities» та очікувані результати."""
-        old=LegacyGame(10)
+        old=BaseGame(10)
         old.money=733
         old.start_battle()
         with tempfile.TemporaryDirectory() as d:

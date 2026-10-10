@@ -1,7 +1,8 @@
 import copy,json,tempfile,unittest,os
 from pathlib import Path
 from unittest.mock import patch
-import afterdays as r,quest_catalog as catalog
+import game.model as r
+import quest_catalog as catalog
 from entity_catalog import Store
 from test_entity_editor import project_copy
 

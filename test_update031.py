@@ -2,15 +2,20 @@
 import copy,math,tempfile,unittest
 from pathlib import Path
 from unittest.mock import MagicMock
-import afterdays as r
-import progression as p
+import game.model as r
+import game.progression as progression
+import game.items as p
 import module_rules as mr
-import content,world_layout,frontier,expedition_ui,item_actions
+import content
+import world_layout
+import game.systems.frontier as frontier
+import ui.expedition as expedition_ui
+import ui.item_actions as item_actions
 
 class Update031Tests(unittest.TestCase):
     def test_upgrade_cost_limit_and_save(self):
         """Upgrades preserve identity/modules/condition and cannot be bought a fourth time."""
-        g=r.Game(1);g.xp=p.xp_for_level(4);g.money=999999;w=g.weapon;w['durability']=43
+        g=r.Game(1);g.xp=progression.xp_for_level(4);g.money=999999;w=g.weapon;w['durability']=43
         mod=p.module(index=0);w['modules']=[mod];uid=w['id'];before=copy.deepcopy(w)
         for n in range(1,4):
             old=w['value'];cash=g.money;self.assertTrue(g.upgrade_item(uid))
@@ -25,7 +30,7 @@ class Update031Tests(unittest.TestCase):
             self.assertEqual(h.weapon,w)
     def test_upgrade_restrictions_and_module_bonus(self):
         """Invalid purchases are atomic; a module retains its rarity and tradeoff."""
-        g=r.Game(2);g.xp=p.xp_for_level(5);m=p.module(2,index=0,level=4);g.bag.append(m)
+        g=r.Game(2);g.xp=progression.xp_for_level(5);m=p.module(2,index=0,level=4);g.bag.append(m)
         g.money=0;before=copy.deepcopy(m);self.assertFalse(g.upgrade_item(m['id']));self.assertEqual(m,before)
         g.money=100000;self.assertTrue(g.upgrade_item(m['id']))
         self.assertEqual(m['stats'],mr.module_stats(m['type_id'],2,5,m['tradeoff']))
@@ -33,7 +38,7 @@ class Update031Tests(unittest.TestCase):
         g.start_battle();self.assertIsNone(g.upgrade_quote(g.weapon['id']))
     def test_craft_location_level(self):
         """Successful crafts inherit workshop location level, not player level."""
-        g=r.Game(4);g.xp=p.xp_for_level(12);g.bag=[p.parts(150)]
+        g=r.Game(4);g.xp=progression.xp_for_level(12);g.bag=[p.parts(150)]
         self.assertTrue(g.craft_module('parts',150));self.assertEqual(g.bag[-1]['level'],g.region_level)
         self.assertNotEqual(g.bag[-1]['level'],g.level)
     def test_remove_all_atomic(self):

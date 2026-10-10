@@ -6,7 +6,8 @@ import sys
 import tempfile
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
-import afterdays
+import ui.application as application
+import game.model as afterdays
 from tkinter import messagebox
 messagebox.showinfo=lambda *args,**kwargs: None
 
@@ -59,6 +60,6 @@ def check(root,app):
     finally:
         root.destroy()
 
-afterdays.launch(test_hook=check)
+application.launch(test_hook=check)
 if errors:
     print('\n'.join(errors));raise SystemExit(1)

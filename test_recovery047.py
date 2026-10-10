@@ -1,11 +1,11 @@
 import copy,math,random,tempfile,unittest
 from pathlib import Path
 from unittest.mock import patch
-import afterdays as r
-import progression as p
+import game.model as r
+import game.items as p
 import faction_rules as f
 import monster_rules
-from update046 import credit_item
+from game.systems.credits import credit_item
 
 class RecoveryTests(unittest.TestCase):
     def test_successful_rest_changes_checkpoint_even_at_full_health(self):

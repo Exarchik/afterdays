@@ -5,6 +5,8 @@ import re
 import uuid
 from pathlib import Path
 import json
+import module_rules as mr
+from game import items as p
 
 ROOT=Path(__file__).resolve().parent
 MIXED_CHANCE=.20
@@ -101,16 +103,9 @@ def validate(doc,monsters,art):
 def human_values(d,level):
     return dict(hp=d['hp']+d['hp_per_level']*(level-1),attack=d['attack']+2*(level-1),defense=d['defense']+2*(level-1))
 
-def _progression():
-    # The legacy model must initialize through afterdays before progression.
-    # Keep this lazy so catalog validation does not load the game model.
-    import afterdays
-    import progression
-    return progression
 
 def make_human(rng,ident,faction,level,pos,document=None):
     import content
-    p=_progression()
     doc=document or catalog();d=doc['humans'][ident];gear={}
     level=max(1,int(level))
     for slot in ('weapon','armor','helmet'):
@@ -118,11 +113,11 @@ def make_human(rng,ident,faction,level,pos,document=None):
         pool=[k for k,v in content.EQUIPMENT.items() if v['kind']==slot and v['min_level']<=level]
         if not pool:continue
         item=p.equipment(rng.choice(pool),rng.randint(0,d['max_rarity']),rng,level)
-        candidates=p.mr.eligible_modules(item)
+        candidates=mr.eligible_modules(item)
         for _ in range(item.get('slots',0)):
             if candidates and rng.random()*100<d['module_chance']:
                 mod=p.module(rng.randint(0,item['rarity']),rng,content.MODULE_IDS.index(rng.choice(candidates)),level)
-                if p.mr.compatible(item,mod):item['modules'].append(mod)
+                if mr.compatible(item,mod):item['modules'].append(mod)
         gear[slot]=item
     values=human_values(d,level)
     values['hp']+=sum(p.stats(i).get('vitality',0) for i in gear.values())
@@ -133,13 +128,12 @@ def make_human(rng,ident,faction,level,pos,document=None):
     values['defense']=max(0,round(values['defense']*(1+sum(p.stats(i).get('defense_percent',0) for k,i in gear.items() if k!='weapon')/100)))
     return dict(id=uuid.uuid4().hex,kind='human',human=True,type_id=ident,faction=faction,name=d['name'],description=d['description'],
                 level=level,grade='normal',pos=list(pos),max_hp=values['hp'],**values,armor=values['defense'],
-                damage=p.mr.shot_damage(weapon,level) if weapon else max(1,3+level),range=stats.get('range',1),speed=d['speed'],
+                damage=mr.shot_damage(weapon,level) if weapon else max(1,3+level),range=stats.get('range',1),speed=d['speed'],
                 regen=d['regen']+sum(p.stats(i).get('regen',0) for i in gear.values()),resists={},equipment=gear,
                 sprite_id=d['sprite_id'],corpse_sprite_id=d['corpse_sprite_id'],awake=True)
 
 def human_loot(rng,actor):
-    p=_progression()
-    from update046 import credit_item
+    from game.systems.credits import credit_item
     items=[copy.deepcopy(item) for item in actor.get('equipment',{}).values() if rng.random()<.25]
     weapon=actor.get('equipment',{}).get('weapon')
     if weapon and rng.random()<.5:items.append(p.ammunition(weapon.get('ammo_type','pistol'),rng.randint(2,12)))

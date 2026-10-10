@@ -3,9 +3,11 @@ import unittest
 from collections import Counter
 from types import SimpleNamespace
 from unittest.mock import MagicMock,patch
-import spread048,quest_navigation,world_map
+import game.systems.weapon_spread as spread048
+import quest_navigation
+import world_map
 import test_update033,test_journey
-from adventure_ui import Effects
+from ui.adventure import Effects
 
 
 class Update048Tests(unittest.TestCase):
@@ -34,7 +36,7 @@ class Update048Tests(unittest.TestCase):
         other['faction']='bandits';other['pos']=[15,2];self.assertEqual(spread048.candidates(g,target),[])
         other['pos']=[0,2];self.assertEqual(spread048.candidates(g,target),[])
         other['pos']=[3,3]
-        with patch('spread048.hexgrid.visible',return_value=False):self.assertEqual(spread048.candidates(g,target),[])
+        with patch('hexgrid.visible',return_value=False):self.assertEqual(spread048.candidates(g,target),[])
 
     def test_two_secondary_enemies_share_fixed_budget(self):
         g,w,b=self.arena();extra=copy.deepcopy(b['enemies'][1]);extra.update(id='2',pos=[3,1]);b['enemies'].append(extra)
@@ -60,7 +62,7 @@ class Update048Tests(unittest.TestCase):
             with patch.object(g.rng,'randrange',return_value=99):g.shoot('0')
             app=SimpleNamespace(game=g,root=MagicMock(),dialog=None)
             fx=Effects(app)
-            with patch('adventure_ui.time.monotonic',return_value=100):fx.ingest()
+            with patch('time.monotonic',return_value=100):fx.ingest()
             shots=[e for e in fx.active if e['kind']=='attack']
             self.assertEqual(len(shots),5 if burst else 6)
             starts=[e['start'] for e in shots]
@@ -69,12 +71,12 @@ class Update048Tests(unittest.TestCase):
 
     def test_plan_waits_for_move_button(self):
         g,app,route=test_journey.RouteTests().controller();app.route_button=MagicMock()
-        with patch('route_ui.time.monotonic',return_value=0):self.assertTrue(route.set_target((3,0)))
-        with patch('route_ui.time.monotonic',return_value=5):route.advance()
+        with patch('time.monotonic',return_value=0):self.assertTrue(route.set_target((3,0)))
+        with patch('time.monotonic',return_value=5):route.advance()
         self.assertFalse(route.running);self.assertEqual((g.x,g.turn),(0,0))
         self.assertEqual(app.route_button.config.call_args.kwargs['style'],'RouteReady048.TButton')
-        with patch('route_ui.time.monotonic',return_value=5):route.toggle()
-        with patch('route_ui.time.monotonic',return_value=6):route.advance()
+        with patch('time.monotonic',return_value=5):route.toggle()
+        with patch('time.monotonic',return_value=6):route.advance()
         self.assertEqual((g.x,g.turn),(1,1))
 
     def test_quest_destination_and_hidden_target(self):

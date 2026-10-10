@@ -4,7 +4,7 @@ import tkinter as tk
 import tkinter.font as tkfont
 from tkinter import ttk, messagebox
 from event_editor import ArtDialog
-import consumable_rules as rules
+import game.systems.consumables as rules
 import sprites
 
 

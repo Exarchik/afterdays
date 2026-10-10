@@ -3,8 +3,11 @@ import sys,random
 from pathlib import Path
 from types import SimpleNamespace
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
-import afterdays,faction_rules,progression as p
-from update046 import credit_item
+import ui.application as application
+import game.model as afterdays
+import faction_rules
+import game.items as p
+from game.systems.credits import credit_item
 errors=[]
 def screenshot(root,name):
     from PIL import ImageGrab
@@ -23,7 +26,7 @@ def hook(root,app):
             assert app.canvas.find_withtag('respawn_flag');assert app.canvas.find_withtag('grave_marker')
             screenshot(root,'recovery047-map.png')
             g.x+=1;assert g.search()
-            import recovery_ui
+            import ui.recovery as recovery_ui
             recovery_ui.show(app);root.update();assert app.dialog
             screenshot(app.dialog,'recovery047-grave.png')
             app.dialog.close_dialog();g._grave_request=False
@@ -31,7 +34,8 @@ def hook(root,app):
             g.start_battle();b=g.battle
             actor=faction_rules.make_human(random.Random(1),'human_bandit','bandits',1,[8,5]);actor['awake']=False;b['enemies']=[actor]
             app.refresh();root.update()
-            from inspection_ui import inspect_monster,monster_text
+            from ui.inspection import inspect_monster
+            from ui.inspection import monster_text
             assert 'Відпочиває' in monster_text(g,actor)
             assert 'Спорядження (кожен предмет' not in monster_text(g,actor)
             old_cell=app.cell;app.cell=lambda event:tuple(actor['pos'])
@@ -42,5 +46,5 @@ def hook(root,app):
         except Exception as exc:errors.append(exc)
         finally:root.destroy()
     root.after(300,check)
-afterdays.launch(test_hook=hook)
+application.launch(test_hook=hook)
 if errors:raise errors[0]

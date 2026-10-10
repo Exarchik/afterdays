@@ -1,7 +1,9 @@
 import unittest,copy,tempfile,json
 from pathlib import Path
 from unittest.mock import patch
-import afterdays as r,progression as p,adventure as a
+import game.model as r
+import game.items as p
+import game.systems.adventure as a
 from visuals import item_sort_key,TYPE_COLORS
 class RevisionTests(unittest.TestCase):
  def test_radial(self):

@@ -1,10 +1,13 @@
 import copy,math,tempfile,unittest
 from pathlib import Path
 from unittest.mock import Mock,patch
-import afterdays as r
-import adventure,hexgrid,progression as p
-from cache_events import CACHE_TYPES
-from advanced_ui import battle_camera
+import game.model as r
+import game.systems.adventure as adventure
+import hexgrid
+import game.items as p
+import game.progression as progression
+from game.systems.cache_events import CACHE_TYPES
+from ui.advanced import battle_camera
 from visuals import condition_bar,condition_color
 
 class Update025Tests(unittest.TestCase):
@@ -57,7 +60,7 @@ class Update025Tests(unittest.TestCase):
   g.x+=1;self.assertIsNone(g.unlock_cache(c['id'],c['lock_target']));self.assertEqual(g.count('parts'),2);self.assertEqual(c,before)
  def test_rewards_use_location_not_player_level(self):
   """Перевіряє сценарій «rewards use location not player level» та очікувані результати."""
-  g=r.Game(8);g.xp=p.xp_for_level(20)
+  g=r.Game(8);g.xp=progression.xp_for_level(20)
   for level in (1,4,9):
    for theme in CACHE_TYPES:
     with patch.object(g.rng,'random',return_value=0):items=g.cache_contents(theme,level)

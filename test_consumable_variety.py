@@ -1,9 +1,10 @@
 import copy,math,tempfile,unittest
 from pathlib import Path
 from unittest.mock import patch
-import afterdays as r
+import game.model as r
 import content
-import progression as p
+import game.progression as progression
+import game.items as p
 import event_catalog as catalog
 import event_runtime
 from test_event_catalog import custom
@@ -23,7 +24,7 @@ class VarietyTests(unittest.TestCase):
         self.assertNotEqual(g.stock(1),baseline)
 
     def test_traveler_variety(self):
-        g=r.Game(5);p.Game.spawn_traveler(g)
+        g=r.Game(5);progression.ProgressionGame.spawn_traveler(g)
         items=g.stock(3)
         self.assertTrue(any(i.get('type_id','').startswith('item_custom_') for i in items))
         before=copy.deepcopy(items);self.assertEqual(g.stock(3),before)

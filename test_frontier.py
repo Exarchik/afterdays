@@ -1,9 +1,9 @@
 from tests_fixtures.quest_offer import offer_for
 import copy,json,tempfile,unittest
 from pathlib import Path
-import afterdays as r
-import progression as p
-from frontier_ui import player_text
+import game.model as r
+import game.progression as progression
+from ui.frontier import player_text
 
 class FrontierTests(unittest.TestCase):
  def dungeon(self,seed=71):
@@ -30,7 +30,7 @@ class FrontierTests(unittest.TestCase):
   """Перевіряє сценарій «market level and purchase» та очікувані результати."""
   g=r.Game(13);g.x,g.y=g.cities[9];g.record_at(g.cities[9])['value']=100;level=g.region_level;items=g.stock(0);self.assertTrue(items)
   item=next(i for i in items if i['kind']=='weapon');self.assertEqual(item['level'],level);self.assertGreater(level,g.level)
-  ids=[i['id'] for i in items];g.xp=p.xp_for_level(2);self.assertEqual(ids,[i['id'] for i in g.stock(0)])
+  ids=[i['id'] for i in items];g.xp=progression.xp_for_level(2);self.assertEqual(ids,[i['id'] for i in g.stock(0)])
   g.money=10**8;self.assertTrue(g.buy(item['id'],0));self.assertFalse(g.equip(item['id'],'weapon1'))
  def test_cartographer_atomic_exact_square(self):
   """Перевіряє сценарій «cartographer atomic exact square» та очікувані результати."""

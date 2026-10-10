@@ -1,7 +1,9 @@
 """Quest radius and flat-top projection regression checks."""
 import math,unittest
 from unittest.mock import patch
-import afterdays as r,hexgrid,quest_limits
+import game.model as r
+import hexgrid
+import quest_limits
 from organic_arenas import boundary_edges
 
 class Update0331Tests(unittest.TestCase):

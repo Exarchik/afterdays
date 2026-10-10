@@ -3,7 +3,7 @@ import world_hex
 import math
 
 def station_order(game):
-    from frontier import METRO_CITIES
+    from game.systems.frontier import METRO_CITIES
     order=[0];remaining=set(METRO_CITIES)-{0}
     while remaining:
         nxt=min(remaining,key=lambda n:(world_hex.distance(game.cities[order[-1]],game.cities[n]),n))

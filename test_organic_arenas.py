@@ -2,8 +2,10 @@ import copy,random,tempfile,unittest
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock,patch
-import afterdays as r
-import hexgrid,organic_arenas as o,advanced_ui
+import game.model as r
+import hexgrid
+import organic_arenas as o
+import ui.advanced as advanced_ui
 from tests_fixtures.quest_offer import offer_for
 
 class OrganicTests(unittest.TestCase):

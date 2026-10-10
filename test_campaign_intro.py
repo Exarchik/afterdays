@@ -1,7 +1,7 @@
 import tempfile
 import unittest
 from pathlib import Path
-import afterdays as r
+import game.model as r
 import campaign_intro as intro
 from entity_catalog import Store
 

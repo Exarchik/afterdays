@@ -3,10 +3,10 @@ import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
-import afterdays as r
+import game.model as r
 import quest_catalog as qc
 import dialogue_system as ds
-import story_system as ss
+import game.systems.story as ss
 
 
 class StoryTests(unittest.TestCase):

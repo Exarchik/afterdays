@@ -1,8 +1,8 @@
 import copy,json,re,tempfile,unittest
 from pathlib import Path
 from unittest.mock import patch
-import afterdays as r
-import progression as p
+import game.model as r
+import game.items as p
 import content,i18n,sprites,balance
 ROOT=Path(__file__).resolve().parent
 class ContentTests(unittest.TestCase):
@@ -25,7 +25,7 @@ class ContentTests(unittest.TestCase):
    b=p.equipment(key,level=3);self.assertEqual(b['name'],'Test renamed weapon')
    self.assertEqual(a['stats'],b['stats']);self.assertEqual(sprite,sprites.item_key(b))
    content.identify_item(a);self.assertEqual(a['name'],b['name'])
-   from refinement_ui import description
+   from ui.refinement import description
    self.assertIn('Custom description',description(r.Game(4),b))
  def test_legacy_item_migration_preserves_state(self):
   """Перевіряє сценарій «legacy item migration preserves state» та очікувані результати."""

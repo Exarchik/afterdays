@@ -13,7 +13,7 @@ WEAPON_BADGE_TYPES=('kinetic','piercing','energy','electric','thermal')
 
 def weapon_badge_key(item):
     if item.get('kind')!='weapon':return None
-    from adventure import damage_type
+    from game.systems.adventure import damage_type
     return f'weapon_badge:{damage_type(item)}:{max(0,min(4,int(item.get("rarity",0))))}'
 
 def weapon_badge(canvas,item,x,y,size=24):

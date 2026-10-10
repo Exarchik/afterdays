@@ -1,6 +1,8 @@
 import copy,random,unittest
 from unittest.mock import patch
-import afterdays,content,faction_rules as f
+import game.model as afterdays
+import content
+import faction_rules as f
 
 class WeightTests(unittest.TestCase):
     def test_exact_mixed_boundary_and_distinct_groups(self):

@@ -3,7 +3,11 @@ import sys,copy,random,tempfile,tkinter as tk
 from pathlib import Path
 from unittest.mock import patch
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
-import afterdays,content_editor,entity_catalog,faction_rules
+import ui.application as application
+import game.model as afterdays
+import content_editor
+import entity_catalog
+import faction_rules
 from test_entity_editor import project_copy
 from PIL import ImageGrab
 
@@ -43,7 +47,7 @@ def hook(root,app):
             b['walls']=[p for p in b['walls'] if p not in [[8,5],[6,5]]]
             app.refresh();root.update();capture(root,'factions047-battle.png')
             for e in b['enemies']:
-                from inspection_ui import monster_text
+                from ui.inspection import monster_text
                 assert 'Фракція:' in monster_text(g,e)
             g._finish_enemy(b['enemies'][0]);g.check_faction_victory();app.refresh();root.update()
             assert b['safe_exit047'];assert 'безпечний' in app.hint.cget('text').lower()
@@ -52,6 +56,6 @@ def hook(root,app):
         except Exception as exc:errors.append(exc)
         finally:root.destroy()
     root.after(300,check)
-afterdays.launch(test_hook=hook)
+application.launch(test_hook=hook)
 if errors:raise errors[0]
 print('PASS: human/faction editor, mutual relations, new membership, save/reload, battle rendering and safe exit.')

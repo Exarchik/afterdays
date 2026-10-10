@@ -25,7 +25,8 @@ def display_choices(event):
     return [(key, labels.get(key, label)) for key, label in event['choices']]
 
 def item(game, effect, level):
-    import progression as p
+    import game.items as p
+    import game.catalog as game_catalog
     kind = effect['kind']
     if kind == 'gear':
         gear = game.reward_item(cap=min(3, 1+level//4), level=game.rng.randint(max(1, level-2), level))
@@ -41,7 +42,7 @@ def item(game, effect, level):
         return p.supply(ident,n)
     if kind == 'ammo':
         ammo = effect.get('ammo', 'random')
-        if ammo == 'random': ammo = game.rng.choice(list(p.AMMO))
+        if ammo == 'random': ammo = game.rng.choice(list(game_catalog.AMMO))
         return p.ammunition(ammo, n)
     return p.parts(n) if kind == 'parts' else p.fragments(n) if kind == 'fragments' else p.supply(kind, n)
 
@@ -50,7 +51,7 @@ def cache_contents(game, effects, level):
 
 def grant_item(game, effect, reward):
     """Announce direct inventory rewards, including additions to an existing stack."""
-    import progression as p
+    import game.items as p
     destination='loot' if reward['kind']=='credits' else effect.get('destination','loot')
     quantity=reward.get('qty',1)
     name=reward['name']
@@ -73,7 +74,8 @@ def apply(game, effect, spec):
 
 
 def _apply(game, effect, spec):
-    import progression as p
+    import game.items as p
+    import game.catalog as game_catalog_2
     import module_rules
     kind = effect['kind']; level = game.region_level
     if kind == 'fence_hole':return game.open_fence_hole()
@@ -98,11 +100,11 @@ def _apply(game, effect, spec):
                     if not remaining:break
                 return
             ammo = effect.get('ammo', 'random')
-            if kind == 'ammo' and ammo == 'random': ammo = game.rng.choice(list(p.AMMO))
+            if kind == 'ammo' and ammo == 'random': ammo = game.rng.choice(list(game_catalog_2.AMMO))
             removed=min(game.count('ammo',ammo) if kind=='ammo' else game.count(kind),-n)
             if kind == 'ammo': game.consume('ammo',removed,ammo)
             else: game.consume(kind,removed)
-            if removed:game.emit(f'−{removed} '+(p.AMMO[ammo][0] if kind=='ammo' else catalog.EFFECTS[kind][0]))
+            if removed:game.emit(f'−{removed} '+(game_catalog_2.AMMO[ammo][0] if kind=='ammo' else catalog.EFFECTS[kind][0]))
         elif n:
             resolved = dict(effect, amount=n, per_level=0, step=0); resolved.pop('maximum', None)
             grant_item(game, effect, item(game, resolved, level))

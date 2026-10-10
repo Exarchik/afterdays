@@ -1,7 +1,7 @@
 import copy,json,tempfile,unittest
 from pathlib import Path
 from unittest.mock import patch
-import afterdays as r
+import game.model as r
 import event_catalog as ec
 import event_runtime as er
 import test_survival040 as survival_tests

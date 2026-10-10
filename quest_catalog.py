@@ -66,7 +66,7 @@ def validate(doc):
         visiting.remove(ident);done.add(ident);return True
     if not all(visit(n) for n in graph):errors.append('Циклічна залежність між квестами.')
     if not errors:
-        import story_system
+        import game.systems.story as story_system
         errors+=story_system.validate(doc)
     return errors
 

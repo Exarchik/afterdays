@@ -146,13 +146,13 @@ class Store:
 
     def validate(self):
         import quest_catalog
-        import consumable_rules
+        import game.systems.consumables as consumable_rules
         import faction_rules
         errors=faction_rules.validate(self.data['factions'],self.data['monsters'],self.art)
         errors+=consumable_rules.validate(self.data['consumables'],self.art)
         errors+=quest_catalog.validate(self.data['quests'])
         if not errors:
-            import story_system
+            import game.systems.story as story_system
             errors+=story_system.validate(self.data['quests'],self.data['dialogues'])
         import dialogue_system
         errors+=dialogue_system.validate(self.data['dialogues'],self.art,{q['id']:q for q in self.data['quests']['quests']})

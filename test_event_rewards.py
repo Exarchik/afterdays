@@ -1,12 +1,12 @@
 import unittest
 from unittest.mock import patch
-import afterdays as r
+import game.model as r
 import event_runtime as runtime
 import event_catalog as catalog
 
 class EventRewardTests(unittest.TestCase):
     def test_event_costs_and_all_gains_are_logged_with_colors(self):
-        import progression as p
+        import game.items as p
         g=r.Game(5);p.add_to(g.bag,p.parts(1));p.add_to(g.bag,p.fragments(1))
         g.road_event=dict(kind='test',definition=dict(title='Test',choices=[dict(id='yes',costs=[dict(kind='parts',amount=1),dict(kind='fragments',amount=1)],outcomes=[dict(chance=1,effects=[dict(kind='money',amount=45),dict(kind='xp',amount=5),dict(kind='parts',amount=2,destination='loot')])])]))
         g.pop_events();self.assertTrue(runtime.resolve(g,'yes'))

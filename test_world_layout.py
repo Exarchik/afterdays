@@ -1,7 +1,7 @@
 import world_hex
 import unittest,tempfile
 from pathlib import Path
-import afterdays as r
+import game.model as r
 class WorldLayoutTests(unittest.TestCase):
  def test_random_positions_roads_and_reachability(self):
   """Перевіряє сценарій «random positions roads and reachability» та очікувані результати."""

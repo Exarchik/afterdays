@@ -1,13 +1,13 @@
 """Deterministic weapon damage against the last enemy fired at; never consumes RNG."""
 import copy
-import combat033
+import game.systems.combat as combat
 import module_rules as mr
 
 
 def remember_target(game,enemy):
-    from adventure import RESISTANCES
+    import game.systems.adventure as adventure
     target=dict(name=enemy.get('name','Монстр'),defense=enemy.get('defense',enemy.get('armor',0)),
-                resists=copy.deepcopy(enemy.get('resists',RESISTANCES.get(enemy.get('kind'),{}))))
+                resists=copy.deepcopy(enemy.get('resists',adventure.RESISTANCES.get(enemy.get('kind'),{}))))
     # This extensible state is already persisted, including in older saves.
     if hasattr(game,'reputation_state'):game.reputation_state['last_damage_target']=target
     else:game._last_damage_target=target
@@ -19,10 +19,10 @@ def attack_range(game,weapon,target):
     weapon=mr.effective_weapon(game,weapon)
     crit=min(65,5+mr.gear_stats(weapon).get('crit',0))+(15 if mode=='aimed' else 0)
     criticals=([False] if crit<100 else [])+([True] if crit>0 else [])
-    pellets=range(6) if combat033.category(weapon)=='shotgun' else [None]*(5 if mode=='burst' else 1)
+    pellets=range(6) if combat.category(weapon)=='shotgun' else [None]*(5 if mode=='burst' else 1)
     low=high=0
     for pellet in pellets:
-        amounts=[sum(combat033.projectile_components(weapon,game.level,target,v,c,pellet,getattr(game,'outgoing_damage_multiplier',1)).values())
+        amounts=[sum(combat.projectile_components(weapon,game.level,target,v,c,pellet,getattr(game,'outgoing_damage_multiplier',1)).values())
                  for v in range(-2,3) for c in criticals]
         low+=min(amounts);high+=max(amounts)
     return low,high

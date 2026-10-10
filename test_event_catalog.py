@@ -5,8 +5,8 @@ from pathlib import Path
 import tempfile
 import unittest
 from unittest.mock import patch
-import afterdays as r
-import progression as p
+import game.model as r
+import game.items as p
 import event_catalog as c
 import event_runtime
 

@@ -1,17 +1,19 @@
 """Data and hit-area regression checks for the field terminal."""
 import unittest
 from types import SimpleNamespace
-import afterdays as r
-import progression as p
-from terminal034 import snapshot,sections,StatusBar
+import game.model as r
+import game.progression as progression
+from ui.hud import snapshot
+from ui.hud import sections
+from ui.hud import StatusBar
 
 class TerminalTests(unittest.TestCase):
     def test_data_after_progression_and_weapon_change(self):
         """HUD derives XP from the current level and follows the active hand."""
-        g=r.Game(3);g.xp=p.xp_for_level(5)+7
+        g=r.Game(3);g.xp=progression.xp_for_level(5)+7
         d=snapshot(g)
         self.assertEqual(d['level'],5);self.assertEqual(d['xp'],7)
-        self.assertEqual(d['xp_goal'],p.xp_for_level(6)-p.xp_for_level(5))
+        self.assertEqual(d['xp_goal'],progression.xp_for_level(6)-progression.xp_for_level(5))
         self.assertEqual(d['rounds'],g.count('ammo',g.weapon['ammo_type']))
         g.active='weapon2';d=snapshot(g)
         self.assertIsNone(d['weapon']);self.assertEqual(d['cost'],0)
@@ -45,7 +47,7 @@ class TerminalTests(unittest.TestCase):
                 self.create_line=Mock();self.create_polygon=Mock();self.create_rectangle=Mock();self.create_oval=Mock();self.create_text=Mock();self.delete=Mock()
             def winfo_width(self):return self.width
         g=r.Game(7)
-        with patch('terminal034.tkfont.Font') as font,patch('terminal034.sprites.draw'),patch('terminal034.icon'):
+        with patch('tkinter.font.Font') as font,patch('sprites.draw'),patch('visuals.icon'):
             font.return_value.measure.side_effect=lambda text:len(text)*7
             for width in (1044,1224,1884):
                 for combat in (False,True):

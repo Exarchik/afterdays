@@ -1,5 +1,5 @@
 import unittest
-import afterdays as r
+import game.model as r
 
 
 class StartRoadTests(unittest.TestCase):

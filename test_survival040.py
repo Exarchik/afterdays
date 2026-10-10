@@ -1,10 +1,10 @@
 import copy,json,math,tempfile,unittest
 from pathlib import Path
 from unittest.mock import patch
-import afterdays as r
-import progression as p
+import game.model as r
+import game.items as p
 import damage_preview
-import combat033
+import game.systems.combat as combat
 import test_update033 as arena
 
 
@@ -110,7 +110,7 @@ class SurvivalTests(unittest.TestCase):
             g,w,b=arena.Update033Tests().arena(weapon,2 if weapon=='weapon_thunder_shotgun' else 4);w['fire_mode']=mode
             g.add_radiation(50);enemy=b['enemies'][0];damage_preview.remember_target(g,enemy)
             expected=damage_preview.estimate(g,w)['minimum'];hp=enemy['hp']
-            count=6 if combat033.category(w)=='shotgun' else 5 if mode=='burst' else 1
+            count=6 if combat.category(w)=='shotgun' else 5 if mode=='burst' else 1
             with patch.object(g.rng,'randrange',side_effect=[0,99]*count),patch.object(g.rng,'randint',return_value=-2),patch.object(g.rng,'random',return_value=.99):self.assertTrue(g.shoot(enemy['id']))
             self.assertEqual(hp-enemy['hp'],expected)
 
@@ -120,7 +120,7 @@ class SurvivalTests(unittest.TestCase):
         self.assertEqual(g.regenerate(999),0)
         b['enemies']=b['enemies'][:1];b['enemies'][0].update(pos=[b['pos'][0]+1,b['pos'][1]],speed=0,range=20,damage=10)
         original=g.hp
-        with patch('adventure.balance.damage',return_value=10),patch.object(g.rng,'randrange',return_value=99),patch.object(g,'protection_stat',return_value=0):g.end_turn()
+        with patch('balance.damage',return_value=10),patch.object(g.rng,'randrange',return_value=99),patch.object(g,'protection_stat',return_value=0):g.end_turn()
         self.assertEqual(original-g.hp,13)
 
     def test_save_load_remainder_and_legacy_defaults(self):

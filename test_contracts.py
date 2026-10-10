@@ -3,9 +3,10 @@ import json,tempfile,unittest
 from pathlib import Path
 from unittest.mock import patch
 import content
-import afterdays as r
-import progression as p
-from refinement_ui import description
+import game.model as r
+import game.progression as progression
+import game.items as p
+from ui.refinement import description
 class NewContractTests(unittest.TestCase):
  # Готує або імітує операцію «offer» для перевірок NewContractTests.
  def offer(self,g,kind):return offer_for(g,kind)
@@ -29,7 +30,7 @@ class NewContractTests(unittest.TestCase):
     q['unique']=True
     gift=p.equipment('Пістолет «Попіл»',level=1)
     q.update(reward_items=[gift],reward_unique=True)
-    g.xp=p.xp_for_level(q['level']+5)
+    g.xp=progression.xp_for_level(q['level']+5)
     if legacy:
      g.bag[:]=[i for i in g.bag if i.get('quest_id')!=q['id']]
      q['progress']=q['goal']
@@ -66,14 +67,14 @@ class NewContractTests(unittest.TestCase):
   """Перевіряє сценарій «monster level limits not player» та очікувані результати."""
   g=r.Game(3)
   for player in (1,20):
-   g.xp=p.xp_for_level(player)
+   g.xp=progression.xp_for_level(player)
    for level in (1,3,12):
     for _ in range(30):
      item=g.reward_item(level=g.monster_loot_level([dict(level=level)]))
      self.assertLessEqual(item['level'],level);self.assertGreaterEqual(item['level'],max(1,level-2))
  def test_victory_preserves_faction_loot_level(self):
   """Prepared equipment keeps its level regardless of the player's level."""
-  g=r.Game(3);g.xp=p.xp_for_level(20);g.start_battle();g.battle['kills']=[dict(kind=0,grade='normal',level=2)]
+  g=r.Game(3);g.xp=progression.xp_for_level(20);g.start_battle();g.battle['kills']=[dict(kind=0,grade='normal',level=2)]
   item=p.equipment('Пістолет «Попіл»',level=2)
   g.battle['enemies']=[];g.battle['faction_loot']=[item]
   g.victory()

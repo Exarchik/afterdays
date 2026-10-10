@@ -1,5 +1,5 @@
 import unittest
-import afterdays as r
+import game.model as r
 from terrain_tiles import tile_key,INDEX
 class TerrainTests(unittest.TestCase):
  def test_road_connections(self):

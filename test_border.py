@@ -3,8 +3,8 @@ import math
 import tempfile
 import unittest
 from pathlib import Path
-import afterdays as r
-from border_ui import draw_border
+import game.model as r
+from ui.border import draw_border
 
 class BorderTests(unittest.TestCase):
     def test_hidden_reputation_radius_no_cascade(self):
@@ -109,7 +109,7 @@ class BorderTests(unittest.TestCase):
         """Великі іконки вміщаються в картках; усі квести доступні прокручуванням."""
         from types import SimpleNamespace
         from unittest.mock import patch
-        from refinement_ui import QuestCards
+        import ui.refinement as refinement
         class Canvas:
             # Готує або імітує операцію «delete» для перевірок Canvas.
             def delete(self,*a):pass
@@ -126,7 +126,7 @@ class BorderTests(unittest.TestCase):
         g=r.Game(4)
         quests=[dict(id=str(i),kind='hunt',status='active',title='Quest',city=0,progress=0,goal=1,level=1,reward=10) for i in range(8)]
         panel=SimpleNamespace(canvas=Canvas(),entries=quests,open_done=False,selection=None,app=SimpleNamespace(game=g))
-        with patch('refinement_ui.sprites.draw',return_value=False) as draw:QuestCards.paint(panel)
+        with patch('sprites.draw',return_value=False) as draw:refinement.QuestCards.paint(panel)
         cards=[(a,b) for a,b,key in panel.rects if key!='done']
         self.assertEqual(len(cards),8)
         self.assertGreater(cards[-1][1],424)

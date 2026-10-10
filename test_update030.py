@@ -2,11 +2,13 @@ import copy,json,math,random,tempfile,unittest
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch,MagicMock
-import afterdays as r
-import progression as p
+import game.model as r
+import game.progression as progression
+import game.items as p
 import monster_rules,content
-from update030 import event_xp,kill_xp
-from item_actions import personal_actions
+from game.systems.experience_scaling import event_xp
+from game.systems.experience_scaling import kill_xp
+from ui.item_actions import personal_actions
 
 class Update030Tests(unittest.TestCase):
     def test_world_size_cap_and_east_reachability(self):
@@ -38,7 +40,7 @@ class Update030Tests(unittest.TestCase):
 
     def test_exploration_and_path_to_far_east(self):
         """Перевіряє сценарій «exploration and path to far east» та очікувані результати."""
-        from journey import world_route
+        from game.systems.journey import world_route
         from site_layout import road_path
         g=r.Game(4);g.reputation_state['border_open']=True
         g.reveal(61,15,2);self.assertTrue(g.revealed(61,15))
@@ -65,7 +67,7 @@ class Update030Tests(unittest.TestCase):
             for grade in ('normal','rare','mythic'):
                 e=monster_rules.make(g.rng,ident,15,[1,1],grade=grade)
                 self.assertEqual(g.enemy_xp(e)%5,0);self.assertGreaterEqual(g.enemy_xp(e),5)
-        g.xp=p.xp_for_level(100);self.assertEqual(g.enemy_xp(e),5)
+        g.xp=progression.xp_for_level(100);self.assertEqual(g.enemy_xp(e),5)
 
     def test_discovered_town_does_not_enable_settler_but_visit_does(self):
         """Перевіряє сценарій «discovered town does not enable settler but visit does» та очікувані результати."""
@@ -125,12 +127,12 @@ class Update030Tests(unittest.TestCase):
 
     def test_hud_points_colors_and_weapon_switch_cost(self):
         """Перевіряє сценарій «hud points colors and weapon switch cost» та очікувані результати."""
-        from combat_hud import CombatHUD
+        import ui.combat_hud as combat_hud
         g=r.Game(4);g.equipped['weapon2']=p.equipment('weapon_ash_pistol',level=1);g.start_battle()
         before=g.battle['ap'];g.switch();self.assertEqual(g.battle['ap'],before)
         g.battle['ap']=2;canvas=MagicMock();canvas.winfo_width.return_value=220
         panel=SimpleNamespace(app=SimpleNamespace(game=g),points=canvas)
-        CombatHUD.paint_points(panel)
+        combat_hud.CombatHUD.paint_points(panel)
         colors=[call.kwargs['fill'] for call in canvas.create_rectangle.call_args_list]
         self.assertEqual(colors.count('#69ce85'),2);self.assertEqual(colors.count('#59615e'),g.battle['max_ap']-2)
 

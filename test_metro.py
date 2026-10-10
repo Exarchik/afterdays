@@ -3,15 +3,15 @@ import copy,math,tempfile,unittest
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
-import afterdays as r
-from frontier import METRO_CITIES
-from adventure_ui import Effects
-from frontier_ui import draw_metro
+import game.model as r
+from game.systems.frontier import METRO_CITIES
+from ui.adventure import Effects
+from ui.frontier import draw_metro
 
 class MetroTests(unittest.TestCase):
  def repair(self,g,city):
   """Виконує платний ремонт до вибраного рівня стану."""
-  g.x,g.y=g.cities[city];g.xp=__import__('progression').xp_for_level(g.region_level);offers=g.mayor_offers();q=next(q for q in offers if q.get('metro_city')==city)
+  g.x,g.y=g.cities[city];g.xp=__import__('game.progression', fromlist=['xp_for_level']).xp_for_level(g.region_level);offers=g.mayor_offers();q=next(q for q in offers if q.get('metro_city')==city)
   self.assertTrue(q['unique']);self.assertIsNone(q['pos']);self.assertTrue(g.accept_quest(q['id']))
   q=g.quests[-1];self.assertNotIn(city,g.metro_unlocked)
   self.assertFalse(g.turn_in(q['id']))
@@ -19,7 +19,7 @@ class MetroTests(unittest.TestCase):
   case=ChainTests()
   while q['metro_chain']['index']<len(q['metro_chain']['steps']):case.solve(g,q)
   item=g.metro_part(q);self.assertEqual(item['name'],q['part_name'])
-  import progression as p
+  import game.items as p
   p.add_to(g.bag,p.supply('repairkit',3))
   while item['durability']<100:self.assertTrue(g.repair_with_kit(item['id']))
   self.assertFalse(g.quest_ready(q));g.x,g.y=g.cities[city]
@@ -48,7 +48,7 @@ class MetroTests(unittest.TestCase):
   self.assertFalse(g.metro_travel(0));self.assertFalse(g.metro_travel(3))
  def test_active_contract_and_unlocked_save(self):
   """Перевіряє сценарій «active contract and unlocked save» та очікувані результати."""
-  g=r.Game(27);self.repair(g,2);g.x,g.y=g.cities[3];g.xp=__import__('progression').xp_for_level(g.region_level);q=next(q for q in g.mayor_offers() if 'metro_city' in q);g.accept_quest(q['id'])
+  g=r.Game(27);self.repair(g,2);g.x,g.y=g.cities[3];g.xp=__import__('game.progression', fromlist=['xp_for_level']).xp_for_level(g.region_level);q=next(q for q in g.mayor_offers() if 'metro_city' in q);g.accept_quest(q['id'])
   g.turn+=100;self.assertFalse(any(q.get('metro_city')==3 for q in g.mayor_offers()))
   with tempfile.TemporaryDirectory() as td:
    path=Path(td)/'save.json';g.save(path);other=r.Game.load(path)
@@ -79,11 +79,11 @@ class MetroTests(unittest.TestCase):
   fx=Effects(app)
   g.emit_move([[1,1],[2,1],[2,2]],'player')
   g.emit_move([[8,8],[8,7]],'enemy')
-  with patch('adventure_ui.time.monotonic',return_value=100):
+  with patch('time.monotonic',return_value=100):
    fx.ingest();self.assertTrue(fx.blocked);self.assertEqual(fx.position('player',[2,2]),[1,1]);self.assertEqual(fx.position('enemy',[8,7]),[8,8])
-  with patch('adventure_ui.time.monotonic',return_value=100.105):
+  with patch('time.monotonic',return_value=100.105):
    x,y=fx.position('player',[2,2]);self.assertAlmostEqual(x,2);self.assertAlmostEqual(y,1.5)
-  with patch('adventure_ui.time.monotonic',return_value=101):
+  with patch('time.monotonic',return_value=101):
    self.assertFalse(fx.blocked);self.assertEqual(fx.position('player',[2,2]),[2,2])
  def test_monster_motion_records_actual_path(self):
   """Перевіряє сценарій «monster motion records actual path» та очікувані результати."""

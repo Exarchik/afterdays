@@ -1,15 +1,17 @@
 """End-to-end metro chains, persistence, repair and dungeon gates."""
 import copy,math,tempfile,unittest
 from pathlib import Path
-import afterdays as r
-import frontier,progression as p
+import game.model as r
+import game.systems.frontier as frontier
+import game.progression as progression
+import game.items as p
 
 class MetroTests(unittest.TestCase):
     def make(self,seed=2):
         """Accept a real generated metro offer at the station's appropriate level."""
         g=r.Game(seed);g.reputation_state['border_open']=True
         city=frontier.METRO_CITIES[1];g.x,g.y=g.cities[city]
-        g.xp=p.xp_for_level(g.region_level);g.record_at(g.cities[city])['value']=100
+        g.xp=progression.xp_for_level(g.region_level);g.record_at(g.cities[city])['value']=100
         offer=next(q for q in g.mayor_offers() if 'metro_city' in q)
         self.assertTrue(g.accept_quest(offer['id']))
         return g,next(q for q in g.quests if q['id']==offer['id'])

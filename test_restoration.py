@@ -1,6 +1,6 @@
 import tempfile,unittest
 from pathlib import Path
-import afterdays as r
+import game.model as r
 from tests_fixtures.quest_offer import offer_for
 
 class RestorationTests(unittest.TestCase):
@@ -71,7 +71,10 @@ class RestorationTests(unittest.TestCase):
 class RestorationArtTests(unittest.TestCase):
     def test_coverage_for_quests_events_and_species(self):
         """Перевіряє сценарій «coverage for quests events and species» та очікувані результати."""
-        import sprites,event_art,adventure,content
+        import sprites
+        import event_art
+        import game.systems.adventure as adventure
+        import content
         from tools.build_expansion029 import QUESTS,KEYS
         for kind in QUESTS:self.assertIn('quest:'+kind,sprites.MANIFEST)
         self.assertFalse({e[0] for e in adventure.ROAD_EVENTS}-event_art.EVENT_ART.keys())

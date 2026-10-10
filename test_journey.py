@@ -2,15 +2,16 @@ import tempfile,unittest
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock,patch
-import afterdays as r
-import progression as p
-from journey import world_route
-from route_ui import RouteController
+import game.model as r
+import game.progression as progression
+import game.items as p
+from game.systems.journey import world_route
+from ui.route import RouteController
 
 class JourneyTests(unittest.TestCase):
  def test_turnover_and_repair(self):
   """Перевіряє сценарій «turnover and repair» та очікувані результати."""
-  g=r.Game(23);g.xp=p.xp_for_level(4);g.money=100000
+  g=r.Game(23);g.xp=progression.xp_for_level(4);g.money=100000
   city=next(i for i in range(12) if g.region_at(*g.cities[i])>=3)
   g.x,g.y=g.cities[city];threshold=50*g.region_at(*g.cities[city])
   g.add_reputation(turnover=threshold-1);self.assertEqual(g.reputation(),0)
@@ -24,14 +25,14 @@ class JourneyTests(unittest.TestCase):
   record=dict(g.local_record());self.assertFalse(g.repair(item['id'],100));self.assertEqual(record,g.local_record())
  def test_saved_remainder_and_guide(self):
   """Перевіряє сценарій «saved remainder and guide» та очікувані результати."""
-  g=r.Game(23);g.xp=p.xp_for_level(8);g.add_reputation(turnover=49);g.traveler=dict(guide=True,pos=[g.x,g.y],items=[])
+  g=r.Game(23);g.xp=progression.xp_for_level(8);g.add_reputation(turnover=49);g.traveler=dict(guide=True,pos=[g.x,g.y],items=[])
   with tempfile.TemporaryDirectory() as td:
    path=Path(td)/'save.json';g.save(path);h=r.Game.load(path)
   self.assertTrue(h.guide);self.assertFalse(h.available_merchant(3));self.assertEqual(h.local_record()['turnover'],49)
-  h.xp=p.xp_for_level(15);h.add_reputation(turnover=1);self.assertEqual(h.reputation(),1)
+  h.xp=progression.xp_for_level(15);h.add_reputation(turnover=1);self.assertEqual(h.reputation(),1)
  def test_traveler_uses_home_city_level(self):
   """Перевіряє сценарій «traveler uses home city level» та очікувані результати."""
-  g=r.Game(23);g.xp=p.xp_for_level(15);g.money=10000
+  g=r.Game(23);g.xp=progression.xp_for_level(15);g.money=10000
   city=next(i for i in range(12) if g.region_at(*g.cities[i])>=3)
   g.x,g.y=g.cities[city];g.x+=1
   item=p.supply('food',1);g.traveler=dict(pos=[g.x,g.y],items=[item])
@@ -90,36 +91,36 @@ class RouteTests(unittest.TestCase):
  def test_speed_pause_resume(self):
   """Перевіряє сценарій «speed pause resume» та очікувані результати."""
   g,app,c=self.controller()
-  with patch('route_ui.time.monotonic',return_value=0):self.assertTrue(c.set_target((3,0),start=True))
-  with patch('route_ui.time.monotonic',return_value=.3):
+  with patch('time.monotonic',return_value=0):self.assertTrue(c.set_target((3,0),start=True))
+  with patch('time.monotonic',return_value=.3):
    c.advance();self.assertEqual(g.turn,0);self.assertAlmostEqual(c.position()[0],.45);c.pause()
   self.assertEqual(c.position(),(0,0));self.assertEqual(g.turn,0)
-  with patch('route_ui.time.monotonic',return_value=1):c.toggle()
-  with patch('route_ui.time.monotonic',return_value=1.67):c.advance()
+  with patch('time.monotonic',return_value=1):c.toggle()
+  with patch('time.monotonic',return_value=1.67):c.advance()
   self.assertEqual((g.x,g.turn),(1,1))
-  with patch('route_ui.time.monotonic',return_value=2.34):c.advance()
-  with patch('route_ui.time.monotonic',return_value=3.01):c.advance()
+  with patch('time.monotonic',return_value=2.34):c.advance()
+  with patch('time.monotonic',return_value=3.01):c.advance()
   self.assertEqual((g.x,g.turn),(3,3));self.assertFalse(c.running);self.assertEqual(c.path,[])
  def test_interruptions(self):
   """Перевіряє сценарій «interruptions» та очікувані результати."""
   for attr in ('dialog','battle','road_event'):
    g,app,c=self.controller()
-   with patch('route_ui.time.monotonic',return_value=0):c.set_target((3,0),start=True)
+   with patch('time.monotonic',return_value=0):c.set_target((3,0),start=True)
    setattr(app if attr=='dialog' else g,attr,True)
-   with patch('route_ui.time.monotonic',return_value=1):c.advance()
+   with patch('time.monotonic',return_value=1):c.advance()
    self.assertFalse(c.running);self.assertEqual(g.turn,0);self.assertEqual(len(c.path),3)
   g,app,c=self.controller()
-  with patch('route_ui.time.monotonic',return_value=0):c.set_target((3,0),start=True)
+  with patch('time.monotonic',return_value=0):c.set_target((3,0),start=True)
   def encounter(dx,dy):g.step(dx,dy);g.traveler={'guide':True};return True
   app.world_step=encounter
-  with patch('route_ui.time.monotonic',return_value=1):c.advance()
+  with patch('time.monotonic',return_value=1):c.advance()
   self.assertFalse(c.running);self.assertEqual(g.turn,1);self.assertEqual(len(c.path),2)
  def test_stale_and_failed_routes(self):
   """Перевіряє сценарій «stale and failed routes» та очікувані результати."""
   g,app,c=self.controller();c.set_target((3,0),start=True);app.game=FakeGame();c.advance();self.assertFalse(c.path)
   c.set_target((3,0),start=True);app.game.x=4;c.advance();self.assertFalse(c.path)
   g,app,c=self.controller()
-  with patch('route_ui.time.monotonic',return_value=0):c.set_target((3,0),start=True)
+  with patch('time.monotonic',return_value=0):c.set_target((3,0),start=True)
   app.world_step=lambda dx,dy:False
-  with patch('route_ui.time.monotonic',return_value=1):c.advance()
+  with patch('time.monotonic',return_value=1):c.advance()
   self.assertEqual(g.turn,0);self.assertFalse(c.running)

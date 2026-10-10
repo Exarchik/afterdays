@@ -3,7 +3,8 @@ import sys,traceback,tempfile
 from pathlib import Path
 from types import SimpleNamespace
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
-import afterdays,world_hex
+import ui.application as application
+import world_hex
 from tkinter import messagebox
 messagebox.showinfo=lambda *a,**k:None
 errors=[]
@@ -15,7 +16,7 @@ def check(root,app):
         app.game=g;app.refresh();g.pop_events();app.fx.active=[];app._notice_open=False
         if app.dialog:app.dialog.close_dialog()
         assert 'v0.48' in root.title()
-        from action_ui048 import ActionButton
+        from ui.actions import ActionButton
         buttons=[w for w in app.route_button.master.winfo_children() if isinstance(w,ActionButton)]
         assert len(buttons)==6
         assert all(w.art is None and w.cget('text') for w in buttons)
@@ -40,5 +41,5 @@ def check(root,app):
         print('PASS: icon placeholders, tooltip, map click waits, highlighted move, quest route, edge arrow',flush=True)
     except Exception:errors.append(traceback.format_exc())
     finally:root.destroy()
-afterdays.launch(test_hook=check)
+application.launch(test_hook=check)
 if errors:print('\n'.join(errors));raise SystemExit(1)

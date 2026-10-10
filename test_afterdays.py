@@ -3,7 +3,12 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
-from afterdays import Game, equipment, module, stats, item_weight, item_value, path_to, visible
+from game.model import Game
+from game.items import equipment
+from game.items import module
+from game.items import stats
+from game.items import item_value
+from game.catalog import visible
 
 
 class AfterdaysTests(unittest.TestCase):

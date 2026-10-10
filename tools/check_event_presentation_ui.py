@@ -3,8 +3,8 @@ from pathlib import Path
 import sys
 import traceback
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
-import afterdays
-import game_dialogs
+import ui.application as application
+import ui.dialogs as game_dialogs
 import tkinter as tk
 from tkinter import ttk
 
@@ -51,7 +51,7 @@ def check(root,app):
             ImageGrab.grab(bbox=(win.winfo_rootx(),win.winfo_rooty(),win.winfo_rootx()+win.winfo_width(),win.winfo_rooty()+win.winfo_height())).save(sys.argv[1])
         app.dialog.close_dialog()
         app.dialog.lift();root.after(250,root.quit);root.mainloop()
-        from adventure_ui import Storage
+        from ui.adventure import Storage
         storage=next(w for w in descendants(app.dialog) if isinstance(w,Storage))
         assert storage.source=='loot'
         item=next(i for i in g.loot if i['kind']=='med');storage.select(item['id'],'withdraw');storage.qty.set('2');storage.transfer()
@@ -70,7 +70,8 @@ def check(root,app):
         root.after(100,dismiss)
         assert game_dialogs.askyesno('Перевірка','Залишити предмети?',parent=root) is False
         assert app.dialog is None
-        import battle_results,progression as p
+        import battle_results
+        import game.items as p
         g.battle=dict(w=10,h=10,walls=[],pos=[1,1],enemies=[],ap=6,max_ap=6,round=1,
                       corpses=[],kills=[],region_level=1,biome='waste',entrance047=[1,1],faction_loot=[p.supply('credits',6)])
         battle_results.begin(g);battle_results.hit(g,'dealt',12,30);battle_results.hit(g,'received',5,30)
@@ -84,6 +85,6 @@ def check(root,app):
         root.destroy()
     root.after(150,opened)
 
-afterdays.launch(test_hook=check)
+application.launch(test_hook=check)
 if errors:raise AssertionError('\n'.join(errors))
 print('PASS: one event window for loading, choices and grouped result; local credits and loot transfer; combat result; themed confirmation.')

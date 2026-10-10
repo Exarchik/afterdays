@@ -1,16 +1,17 @@
 from tests_fixtures.quest_offer import offer_for
 import tempfile,unittest
 from pathlib import Path
-import afterdays as r
+import game.model as r
+import game.catalog as catalog
 class QuestLocationTests(unittest.TestCase):
  def test_all_destination_types_and_cities(self):
   """Перевіряє сценарій «all destination types and cities» та очікувані результати."""
   for seed in range(10):
    g=r.Game(seed)
    for city in (0,2,3,7):
-    g.x,g.y=g.cities[city];g.xp=__import__('progression').xp_for_level(g.region_level);g.quests=[];g.local_record()['value']=75
+    g.x,g.y=g.cities[city];g.xp=__import__('game.progression', fromlist=['xp_for_level']).xp_for_level(g.region_level);g.quests=[];g.local_record()['value']=75
     for kind in ('retrieve','scout','purge'):
-     q=dict(id=r.uid(),kind=kind,city=city,status='offered',title='Test',progress=0,goal=1,target_kind=None,pos=None,unique=False)
+     q=dict(id=catalog.uid(),kind=kind,city=city,status='offered',title='Test',progress=0,goal=1,target_kind=None,pos=None,unique=False)
      g.price_quest(q);q['rep_elite_roll']=1;g.offers[str(city)]=[q]
      g.reputation_state['boards'][str(city)]=dict(turn=g.turn,ids=[q['id']])
      self.assertTrue(g.accept_quest(q['id']))

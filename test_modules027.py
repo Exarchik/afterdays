@@ -1,11 +1,13 @@
 import copy,json,tempfile,unittest
 from pathlib import Path
 from unittest.mock import patch
-import afterdays as r
-import progression as p
+import game.model as r
+import module_rules
+import game.progression as progression
+import game.items as p
 import module_rules as mr
 import content,balance
-from refinement_ui import description
+from ui.refinement import description
 
 class ModuleBalanceTests(unittest.TestCase):
     def test_rarity_arrays_and_fixed_penalties(self):
@@ -49,15 +51,15 @@ class ModuleBalanceTests(unittest.TestCase):
         """Перевіряє сценарій «compatibility all gear categories» та очікувані результати."""
         for name,idx in [('weapon_ash_pistol',0),('armor_plated_jacket',3),('helmet_seeker',3)]:
             gear=p.equipment(name,2,level=5)
-            self.assertTrue(r.compatible(gear,p.module(2,index=idx,level=5)))
-            self.assertTrue(r.compatible(gear,p.module(0,index=idx,level=1)))
-            self.assertFalse(r.compatible(gear,p.module(3,index=idx,level=5)))
-            self.assertFalse(r.compatible(gear,p.module(2,index=idx,level=6)))
-            self.assertFalse(r.compatible(gear,p.module(0,index=3 if idx==0 else 0)))
+            self.assertTrue(module_rules.compatible(gear,p.module(2,index=idx,level=5)))
+            self.assertTrue(module_rules.compatible(gear,p.module(0,index=idx,level=1)))
+            self.assertFalse(module_rules.compatible(gear,p.module(3,index=idx,level=5)))
+            self.assertFalse(module_rules.compatible(gear,p.module(2,index=idx,level=6)))
+            self.assertFalse(module_rules.compatible(gear,p.module(0,index=3 if idx==0 else 0)))
 
     def test_install_replace_reject_without_mutation(self):
         """Перевіряє сценарій «install replace reject without mutation» та очікувані результати."""
-        g=r.Game(42);g.xp=p.xp_for_level(10)
+        g=r.Game(42);g.xp=progression.xp_for_level(10)
         good=p.module(0,index=0);rare=p.module(1,index=0);high=p.module(0,index=0,level=2)
         g.bag.extend([good,rare,high]);self.assertTrue(g.install(g.weapon['id'],good['id']))
         before=copy.deepcopy((g.bag,g.equipped))
@@ -97,7 +99,7 @@ class ModuleBalanceTests(unittest.TestCase):
 
     def test_percentage_damage_in_actual_combat(self):
         """Перевіряє сценарій «percentage damage in actual combat» та очікувані результати."""
-        g=r.Game(15);g.xp=p.xp_for_level(5)
+        g=r.Game(15);g.xp=progression.xp_for_level(5)
         g.equipped['weapon1']=p.equipment('weapon_ash_pistol',4,level=5);w=g.weapon
         w['modules']=[p.module(4,index=9),p.module(0,index=5)]
         self.assertAlmostEqual(mr.damage_factor(w),1.15)
@@ -127,10 +129,10 @@ class ModuleBalanceTests(unittest.TestCase):
 
     def test_generated_loot_is_compatible(self):
         """Перевіряє сценарій «generated loot is compatible» та очікувані результати."""
-        g=r.Game(18);g.xp=p.xp_for_level(10)
+        g=r.Game(18);g.xp=progression.xp_for_level(10)
         for _ in range(250):
             for item in (g.roll_item(),g.reward_item(level=10)):
-                for mod in item.get('modules',[]):self.assertTrue(r.compatible(item,mod))
+                for mod in item.get('modules',[]):self.assertTrue(module_rules.compatible(item,mod))
                 if 'durability' in item:self.assertLessEqual(mr.condition(item),mr.max_condition(item))
 
     def test_descriptions_expose_caps_percentages_and_restrictions(self):
