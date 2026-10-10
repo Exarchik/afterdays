@@ -1,6 +1,7 @@
 """Compact status bars, location menus and travelling scribe quest cards."""
 import tkinter as tk
-from tkinter import ttk,messagebox
+from tkinter import ttk
+import game_dialogs as messagebox
 import progression as p
 from i18n import t as tr
 from visuals import PANEL,TEXT,GOLD

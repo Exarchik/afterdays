@@ -63,10 +63,10 @@
     "rarity_stats": {
       "damage": [
         3,
-        6,
-        9,
-        12,
-        15
+        5,
+        8,
+        10,
+        12
       ]
     },
     "fixed_penalties": {
@@ -106,56 +106,89 @@
     "legacy_index": 6,
     "target": "weapon",
     "stat": "pierce",
-    "base": 2,
+    "base": 2.0,
     "sprite_id": "module_accelerator",
     "rarity_stats": {
       "attack": [
-        1,
         2,
         3,
         4,
-        5
+        5,
+        6
       ]
-    }
+    },
+    "weight": 0.3,
+    "min_level": 1,
+    "min_equipment_rarity": 0,
+    "weapon_categories": [
+      "pistol",
+      "rifle",
+      "automatic",
+      "shotgun",
+      "sniper"
+    ],
+    "fixed_penalties": {}
   },
   "module_critical_processor": {
     "legacy_index": 7,
     "target": "weapon",
     "stat": "crit",
-    "base": 5,
+    "base": 5.0,
     "sprite_id": "module_critical_processor",
     "rarity_stats": {
       "crit": [
-        2,
         4,
         7,
         10,
-        12
+        14,
+        18
       ]
-    }
+    },
+    "weight": 0.3,
+    "min_level": 1,
+    "min_equipment_rarity": 0,
+    "weapon_categories": [
+      "pistol",
+      "rifle",
+      "automatic",
+      "shotgun",
+      "sniper"
+    ],
+    "fixed_penalties": {}
   },
   "module_focusing_lens": {
     "legacy_index": 8,
     "target": "weapon",
     "stat": "range",
-    "base": 1,
+    "base": 1.0,
     "sprite_id": "module_focusing_lens",
     "rarity_stats": {
       "range": [
         1,
         1,
         1,
-        2,
+        1,
         2
       ],
       "attack": [
         1,
         1,
+        1,
         2,
-        2,
-        3
+        2
       ]
-    }
+    },
+    "weight": 0.3,
+    "min_level": 1,
+    "min_equipment_rarity": 0,
+    "weapon_categories": [
+      "pistol",
+      "rifle",
+      "automatic",
+      "shotgun",
+      "sniper"
+    ],
+    "fixed_penalties": {}
   },
   "module_magnetic_coil": {
     "legacy_index": 9,
@@ -194,15 +227,24 @@
       "accuracy": [
         4,
         8,
-        12,
-        16,
-        20
+        10,
+        13,
+        16
       ]
     },
     "fixed_penalties": {
       "strength": -15
     },
-    "weight": 0.3
+    "weight": 0.3,
+    "min_level": 1,
+    "min_equipment_rarity": 0,
+    "weapon_categories": [
+      "pistol",
+      "rifle",
+      "automatic",
+      "shotgun",
+      "sniper"
+    ]
   },
   "module_tungsten_channel": {
     "legacy_index": 11,
@@ -242,7 +284,15 @@
       "strength": -15
     },
     "weight": 0.3,
-    "rarity_stats": {},
+    "rarity_stats": {
+      "defense": [
+        2,
+        4,
+        5,
+        6,
+        8
+      ]
+    },
     "min_level": 1,
     "min_equipment_rarity": 0,
     "weapon_categories": [
@@ -303,17 +353,28 @@
     "legacy_index": 15,
     "target": "protection",
     "stat": "evasion",
-    "base": 3,
+    "base": 3.0,
     "sprite_id": "module_camouflage",
     "rarity_stats": {
       "evasion": [
         2,
-        4,
+        3,
+        5,
         6,
-        8,
-        10
+        8
       ]
-    }
+    },
+    "weight": 0.3,
+    "min_level": 1,
+    "min_equipment_rarity": 0,
+    "weapon_categories": [
+      "pistol",
+      "rifle",
+      "automatic",
+      "shotgun",
+      "sniper"
+    ],
+    "fixed_penalties": {}
   },
   "module_regenerator": {
     "legacy_index": 16,
@@ -338,7 +399,7 @@
       ]
     },
     "fixed_penalties": {
-      "local_defense_percent": -20
+      "local_defense_percent": -15
     },
     "weight": 0.3,
     "min_level": 1,
@@ -376,13 +437,21 @@
     "legacy_index": 19,
     "target": "armor",
     "stat": "defense",
-    "base": 3.0,
+    "base": 2.0,
     "sprite_id": "module_reactive_plates",
     "fixed_penalties": {
       "strength": -30
     },
     "weight": 0.3,
-    "rarity_stats": {},
+    "rarity_stats": {
+      "defense": [
+        2,
+        4,
+        7,
+        10,
+        12
+      ]
+    },
     "min_level": 1,
     "min_equipment_rarity": 0,
     "weapon_categories": [
@@ -397,7 +466,7 @@
     "legacy_index": 20,
     "target": "weapon",
     "stat": "weight_percent",
-    "base": -8,
+    "base": -8.0,
     "sprite_id": "module_carbon_grip",
     "rarity_stats": {
       "weight_percent": [
@@ -409,13 +478,23 @@
       ],
       "attack": [
         1,
+        1,
         2,
-        3,
-        4,
-        5
+        2,
+        3
       ]
     },
-    "weight": 0.1
+    "weight": 0.1,
+    "min_level": 1,
+    "min_equipment_rarity": 0,
+    "weapon_categories": [
+      "pistol",
+      "rifle",
+      "automatic",
+      "shotgun",
+      "sniper"
+    ],
+    "fixed_penalties": {}
   },
   "module_tactical_grip": {
     "legacy_index": 21,
@@ -514,7 +593,7 @@
     "legacy_index": 25,
     "target": "protection",
     "stat": "weight_percent",
-    "base": -8,
+    "base": -8.0,
     "sprite_id": "module_polyfiber",
     "rarity_stats": {
       "weight_percent": [
@@ -526,13 +605,23 @@
       ],
       "defense": [
         1,
+        1,
         2,
-        3,
-        4,
-        5
+        2,
+        3
       ]
     },
-    "weight": 0.05
+    "weight": 0.05,
+    "min_level": 1,
+    "min_equipment_rarity": 0,
+    "weapon_categories": [
+      "pistol",
+      "rifle",
+      "automatic",
+      "shotgun",
+      "sniper"
+    ],
+    "fixed_penalties": {}
   },
   "module_quantum_mirror": {
     "legacy_index": 26,
@@ -571,16 +660,16 @@
       "weight_percent": [
         -5,
         -7,
-        -9,
-        -12,
-        -15
+        -10,
+        -13,
+        -16
       ],
       "evasion": [
-        1,
         2,
-        4,
-        6,
-        8
+        2,
+        3,
+        3,
+        4
       ]
     },
     "weight": 0.05,
@@ -603,15 +692,24 @@
     "sprite_id": "module_lead_fibers",
     "rarity_stats": {
       "defense": [
-        3,
-        6,
-        9,
-        12,
-        15
+        2,
+        4,
+        7,
+        10,
+        12
       ]
     },
     "weight": 1.25,
-    "fixed_penalties": {}
+    "fixed_penalties": {},
+    "min_level": 1,
+    "min_equipment_rarity": 0,
+    "weapon_categories": [
+      "pistol",
+      "rifle",
+      "automatic",
+      "shotgun",
+      "sniper"
+    ]
   },
   "module_custom_001": {
     "legacy_index": 29,
@@ -621,11 +719,11 @@
     "sprite_id": "junk_component",
     "rarity_stats": {
       "crit": [
+        1,
+        2,
         3,
         5,
-        8,
-        12,
-        15
+        7
       ]
     },
     "fixed_penalties": {
@@ -639,6 +737,96 @@
       "rifle",
       "automatic",
       "shotgun",
+      "sniper"
+    ]
+  },
+  "module_custom_002": {
+    "legacy_index": 30,
+    "target": "weapon",
+    "stat": "strength",
+    "base": 10.0,
+    "sprite_id": "Підсилювач",
+    "rarity_stats": {
+      "strength": [
+        15,
+        20,
+        25,
+        30,
+        35
+      ]
+    },
+    "weight": 0.3,
+    "min_level": 1,
+    "min_equipment_rarity": 0,
+    "weapon_categories": [
+      "pistol",
+      "rifle",
+      "automatic",
+      "shotgun",
+      "sniper"
+    ],
+    "fixed_penalties": {}
+  },
+  "module_custom_003": {
+    "legacy_index": 31,
+    "target": "weapon",
+    "stat": "pierce",
+    "base": 3.0,
+    "sprite_id": "junk_component",
+    "rarity_stats": {
+      "damage": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "crit": [
+        2,
+        2,
+        2,
+        3,
+        3
+      ]
+    },
+    "fixed_penalties": {
+      "range": 1
+    },
+    "weight": 0.3,
+    "min_level": 1,
+    "min_equipment_rarity": 2,
+    "weapon_categories": [
+      "pistol"
+    ]
+  },
+  "module_custom_004": {
+    "legacy_index": 32,
+    "target": "weapon",
+    "stat": "pierce",
+    "base": 3.0,
+    "sprite_id": "junk_component",
+    "rarity_stats": {
+      "crit": [
+        2,
+        2,
+        2,
+        3,
+        3
+      ],
+      "damage_piercing": [
+        3,
+        3,
+        4,
+        5,
+        7
+      ]
+    },
+    "fixed_penalties": {},
+    "weight": 0.3,
+    "min_level": 1,
+    "min_equipment_rarity": 2,
+    "weapon_categories": [
+      "rifle",
       "sniper"
     ]
   }

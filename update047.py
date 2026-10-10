@@ -190,10 +190,13 @@ class Game(Recovery,update046.Game):
         if is_player:
             reflected=p.mr.chance(self.protection_stat('reflect_percent'))
             if reflected and self.rng.random()*100<reflected:
+                __import__('battle_results').hit(self,'dealt',damage,actor['hp'])
                 actor['hp']-=damage;self.emit(f'Відбиття: −{damage}',pos=actor['pos'])
                 if actor['hp']<=0:self._finish_enemy(actor)
                 return
-            damage=self.incoming_combat_damage(damage);self.hp-=damage
+            damage=self.incoming_combat_damage(damage)
+            __import__('battle_results').hit(self,'received',damage,self.hp)
+            self.hp-=damage
             self.test_armor_hit(damage)
             self.wear(self.equipped['armor'],.5);self.wear(self.equipped['helmet'],.25)
         else:

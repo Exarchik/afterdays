@@ -200,7 +200,10 @@ def draw_borders(c,g,v,visible):
         if not (visible(*a) or visible(*b)):continue
         line=v.edge(a,b)
         c.create_line(*line,fill='#111511',width=2,dash=(4,3),tags='border')
-        if g.checkpoint(a,b):
+        if getattr(g,'fence_hole',lambda a,b:False)(a,b):
+            x,y=(line[0]+line[2])/2,(line[1]+line[3])/2;s=max(3,v.radius*.3)
+            c.create_polygon(x,y-s,x-s,y+s,x+s,y+s,fill='#79bd83',outline='#111111',tags='checkpoint')
+        elif g.checkpoint(a,b):
             x,y=(line[0]+line[2])/2,(line[1]+line[3])/2;s=max(2,v.radius*.25)
             c.create_rectangle(x-s,y-s,x+s,y+s,fill='#79bd83' if g.border_open else '#d47554',outline='#111111',tags='checkpoint')
 

@@ -5,10 +5,11 @@ from tkinter import ttk
 from i18n import t as tr
 from visuals import PANEL,TEXT,GOLD
 
-def show(app,ident):
+def show(app,ident,win=None):
     g=app.game;q=g.lock_context(ident)
     if not q or 'lock_target' not in q:return
-    win=app.popup(tr('update024.lock_title'),'580x490')
+    win=win or app.popup(tr('update024.lock_title'),'580x490')
+    __import__('event_ui').clear(win)
     tk.Label(win,text=tr('update024.lock_info'),bg=PANEL,fg=TEXT,wraplength=530,justify='left').pack(padx=20,pady=15)
     c=tk.Canvas(win,width=540,height=250,bg='#17221d',highlightthickness=0);c.pack(fill='both',expand=True,padx=15)
     angle=tk.DoubleVar(value=90);busy=[False];closed=[False]
@@ -42,6 +43,10 @@ def show(app,ident):
             busy[0]=False;closed[0]=bool(result)
             status.config(text=tr('update024.lock_ok') if result else tr('update024.lock_fail')+' '+tr('update024.lock_parts',qty=g.count('parts')))
             if not result:slider.state(['!disabled']);button.config(state='normal')
+            else:
+                reports=getattr(g,'_event_results',[])
+                if reports:__import__('event_ui').show_result(app,reports.pop(0),win=win)
+                else:win.close_dialog()
             app.refresh()
         frame()
     button=ttk.Button(win,text=tr('update024.lock_try'),command=attempt);button.pack(fill='x',padx=25,pady=10)

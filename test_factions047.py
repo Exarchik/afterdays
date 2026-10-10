@@ -79,8 +79,8 @@ class FactionTests(unittest.TestCase):
         item=copy.deepcopy(enemy['equipment']['weapon'])
         with patch('faction_rules.human_loot',return_value=[item]):g._finish_enemy(enemy)
         g.check_faction_victory();self.assertTrue(g.battle['safe_exit047']);self.assertNotIn(item,g.loot)
-        g.battle['pos']=[2,1];self.assertFalse(g.flee());self.assertEqual(g.coward_turns,0)
-        self.assertTrue(g.battle_move((1,1)));self.assertIsNone(g.battle);self.assertEqual(g.coward_turns,0)
+        self.assertFalse(g.flee());self.assertEqual(g.coward_turns,0)
+        self.assertTrue(g.battle_move(g.battle['exit']));self.assertIsNone(g.battle);self.assertEqual(g.coward_turns,0)
         self.assertEqual(sum(i['id']==item['id'] for i in g.loot),1);self.assertFalse(any(i['kind']=='trophy' for i in g.loot))
         self.assertFalse(g.flee())
 
@@ -90,12 +90,13 @@ class FactionTests(unittest.TestCase):
 
     def test_friendly_encounter_without_kills_has_no_free_loot(self):
         g=self.game();g.battle['enemies']=[self.human('settlers')];money=g.money;loot=copy.deepcopy(g.loot)
-        self.assertTrue(g.flee());self.assertEqual(g.money,money);self.assertEqual(g.loot,loot)
+        g.check_faction_victory();self.assertTrue(g.battle_move(g.battle['exit']));self.assertIsNone(g.battle)
+        self.assertEqual(g.money,money);self.assertEqual(g.loot,loot)
 
     def test_dungeon_with_surviving_friend_safe_exit(self):
         g=self.game();g.battle.update(dungeon=True,cleared=False,exit=[1,1],chest=[8,8],chest_open=False)
         g.battle['enemies']=[self.human('settlers')]
-        self.assertTrue(g.flee());self.assertIsNone(g.battle);self.assertEqual(g.coward_turns,0)
+        g.check_faction_victory();self.assertTrue(g.battle_move(g.battle['exit']));self.assertIsNone(g.battle);self.assertEqual(g.coward_turns,0)
 
     def test_npc_kill_has_loot_without_player_xp(self):
         g=self.game();killer=self.human('settlers');victim=self.human();g.battle['enemies']=[killer,victim];victim['hp']=1
@@ -109,7 +110,7 @@ class FactionTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder:
             path=Path(folder)/'game.json';g.save(path);state=g.rng.getstate();loaded=afterdays.Game.load(path)
             self.assertEqual(g.battle,loaded.battle);self.assertEqual(state,loaded.rng.getstate())
-            self.assertTrue(loaded.flee());self.assertEqual(loaded.coward_turns,0)
+            self.assertTrue(loaded.battle_move(loaded.battle['exit']));self.assertIsNone(loaded.battle);self.assertEqual(loaded.coward_turns,0)
 
     def test_catalog_validation(self):
         store=entity_catalog.Store();self.assertEqual(rules.validate(store.data['factions'],store.data['monsters'],store.art),[])

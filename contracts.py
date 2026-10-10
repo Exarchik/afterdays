@@ -91,10 +91,7 @@ class Game(Guides, QuestSystem, Border, Reputation, frontier.Game):
         q=self.destination_quest()
         if not q:return super().search()
         if q['kind']=='delivery':
-            parcel=next((i for i in self.bag if i.get('quest_id')==q['id']),None)
-            if not parcel:self.log(tr('contracts.0009'));return False
-            if not self.turn_in(q['id']):return False
-            self.emit(tr('contracts.0011'),color='#99dca5')
+            self.log('Здайте доставку через мера, дошку оголошень або список квестів.');return False
         else:self._radio_request=q['id']
         return True
 

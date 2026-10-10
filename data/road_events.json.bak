@@ -1245,6 +1245,34 @@
       ]
     },
     {
+      "id": "fence_hole",
+      "category": "exploration",
+      "terrain": "any",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Дірка в паркані",
+      "description": "Серед пошкоджених секцій паркану ви помічаєте отвір. Його можна розчистити й використовувати як прохід в обидва боки.",
+      "art": "event_theme:toll",
+      "choices": [
+        {
+          "id": "open",
+          "text": "Розчистити прохід",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1.0,
+              "effects": [
+                {
+                  "kind": "fence_hole",
+                  "amount": 1
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
       "id": "event_014",
       "category": "exploration",
       "terrain": "any",
@@ -2237,7 +2265,7 @@
       "enabled": true,
       "weight": 1.0,
       "title": "Подарунок каравану",
-      "description": "Караванники залишили вам 60 кредитів.",
+      "description": "Караванники залишили вам трохи ресурсів.",
       "art": "art_custom_034",
       "choices": [
         {

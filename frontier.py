@@ -191,6 +191,7 @@ class Game(economy.Game):
                 if getattr(self,'coward_turns',0):
                     from loot032 import halve_new_loot
                     halve_new_loot(self,before_loot)
+                __import__('battle_results').capture_loot(self,b,before_loot)
                 self.log(tr('frontier.0031'));return True
             if b['pos']==b['exit']:super().victory();return True
             self.log(tr('frontier.0032'));return False

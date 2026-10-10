@@ -1,10 +1,12 @@
 import hexgrid
 from i18n import t as tr
 import sprites
+import arena_tiles
 """Isometric arena, grid-based trading, technicians and perk selection."""
 import math
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk
+import game_dialogs as messagebox
 from collections import deque
 import afterdays as r
 import progression as p
@@ -26,6 +28,10 @@ def battle_camera(b,width,height,fx=None):
         x,y=hexgrid.center(pos,u)
         return u,width/2-x,height*.55-y
     left,top,right,bottom=hexgrid.bounds(w,h)
+    if b.get('hex_arena') and b.get('floor'):
+        points=[hexgrid.polygon(*hexgrid.center(p,1),1) for p in b['floor']]
+        left=min(min(p[::2]) for p in points);right=max(max(p[::2]) for p in points)
+        top=min(min(p[1::2]) for p in points);bottom=max(max(p[1::2]) for p in points)
     u=min((width-30)/(right-left),(height-65)/(bottom-top+1.6))
     return u,width/2-(left+right)*u/2,(height+40)/2-(top+bottom)*u/2
 
@@ -33,17 +39,14 @@ def battle_camera(b,width,height,fx=None):
 def draw_battle(app):
     c,g=app.canvas,app.game
     b=g.battle
+    biome=b.get('biome','waste')
     c.delete('all')
+    c._arena_refs=[]
     width,height=max(c.winfo_width(),200),max(c.winfo_height(),200)
     w,h=b['w'],b['h']
     u,ox,oy=battle_camera(b,width,height,getattr(app,'fx',None))
     app.iso=dict(u=u,ox=ox,oy=oy,sprites=[])
     def center(pos): return hexgrid.center(pos,u,ox,oy)
-    kind=b.get('biome','waste')
-    palette={'waste':('#555642','#444835'),'forest':('#304a37','#293e30'),
-             'ruin':('#54574f','#434a43'),'road':('#665e49','#494e3a'),
-             'city':('#585c4c','#444d41')}
-    colors=palette.get(kind,palette['waste'])
     walls=set(map(tuple,b['walls']))
     occupied=walls|{tuple(e['pos']) for e in b['enemies']}
     costs={tuple(b['pos']):0};queue=deque(costs)
@@ -54,6 +57,11 @@ def draw_battle(app):
             if q not in occupied and q not in costs:
                 costs[q]=costs[pos]+1;queue.append(q)
     floor=set(map(tuple,b.get('floor',[(x,y) for y in range(h) for x in range(w)])))
+    directions=arena_tiles.road_directions(g,b)
+    road_key=(w,h,frozenset(floor),frozenset(walls),directions)
+    if getattr(app,'_arena_road_key',None)!=road_key:
+        app._arena_road_key=road_key
+        app._arena_roads=arena_tiles.road_cells(b,directions)
     cells=sorted(floor,key=lambda a:(hexgrid.center(a,1)[1],hexgrid.center(a,1)[0]))
     from organic_arenas import boundary_edges
     # Cache unit geometry in the UI only; it never changes game RNG or save data.
@@ -69,11 +77,9 @@ def draw_battle(app):
     for x,y in cells:
         px,py=center((x,y))
         if px < -2*u or px > width+2*u or py < -2*u or py > height+2*u:continue
-        color=colors[0]
-        if kind=='road' and 4<=y<=6:color='#918060'
-        c.create_polygon(*hexgrid.polygon(px,py,u),fill=color,outline=color,width=1)
-        if (x*13+y*7)%9==0 and (x,y) not in walls:
-            c.create_line(px-u*.3,py,px+u*.14,py+u*.1,fill='#a69e78' if kind!='forest' else '#698663')
+        arena_tiles.draw(c,arena_tiles.terrain(g,b,(x,y),app._arena_roads),px,py,u,x,y)
+        if [x,y] in b.get('water_cells',[]):
+            c.create_polygon(*hexgrid.polygon(px,py,u),fill='#405f4c',stipple='gray50',outline='#596c50')
     for a,bp in rim:
         c.create_line(ox+a[0]*u,oy+a[1]*u,ox+bp[0]*u,oy+bp[1]*u,fill='#8c9479',width=1)
     hovered=getattr(app,'battle_hover',None)
@@ -94,7 +100,8 @@ def draw_battle(app):
                 if not sprites.draw(c,sprites.corpse_key(corpse),px-size/2,py+u*.1-size/2,size) and corpse.get('human'):
                     c.create_line(px-u*.5,py,px+u*.4,py+u*.12,fill='#87917c',width=max(3,int(u*.22)))
                     c.create_oval(px-u*.7,py-u*.13,px-u*.4,py+u*.12,fill='#b5b79e',outline='')
-        if pos in walls:
+        if pos in walls and list(pos) not in b.get('water_cells',[]):
+            kind=arena_tiles.terrain(g,b,pos)
             if sprites.draw(c,'obstacle:forest' if kind=='forest' else 'obstacle:ruin' if kind in ('ruin','city') else 'obstacle:cliff',px-2*u,py+1.2*u-4*u,4*u):pass
             elif kind=='forest':
                 c.create_line(px,py,px,py-u*1.5,fill='#8a7f5d',width=max(2,int(u*.18)))
@@ -152,7 +159,7 @@ def draw_battle(app):
         if box:
             background=c.create_rectangle(box[0]-5,box[1]-3,box[2]+5,box[3]+3,fill='#15251c',outline='#60876b',tags='hit_chance')
             c.tag_lower(background,text)
-    app.map_title.config(text=tr('advanced_ui.0003', v0=r.TERRAINS[kind][1].upper(), v1=b.get('region_level', 1), v2=b['ap'], v3=b.get('max_ap', 6)))
+    app.map_title.config(text=tr('advanced_ui.0003', v0=r.TERRAINS.get(biome,r.TERRAINS['waste'])[1].upper(), v1=b.get('region_level', 1), v2=b['ap'], v3=b.get('max_ap', 6)))
     weapon=g.weapon
     ammo=p.AMMO[weapon.get('ammo_type','pistol')][0] if weapon else '—'
     count=g.count('ammo',weapon.get('ammo_type','pistol')) if weapon else 0

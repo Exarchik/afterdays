@@ -42,7 +42,8 @@ class CatalogTests(unittest.TestCase):
                 g.road_event['choices'][0][1]=c.choice_text(g.road_event['definition']['choices'][0])
                 path=Path(folder)/'save.json'; g.save(path); h=r.Game.load(path)
             self.assertEqual(event_runtime.display_choices(h.road_event),[('act','Дослідити')])
-            before=h.money; self.assertTrue(h.resolve_event('act')); self.assertEqual(h.money-before,43)
+            before=h.money; self.assertTrue(h.resolve_event('act')); self.assertEqual(h.money,before)
+            self.assertEqual(sum(i['qty'] for i in h.loot if i['kind']=='credits'),43)
 
     def test_old_active_event_without_definition(self):
         g=r.Game(1); g.road_event=dict(kind='wounded',title='Old title',body='Old text',choices=[['help','Help'],['leave','Leave']],pos=[g.x,g.y])
@@ -69,7 +70,8 @@ class CatalogTests(unittest.TestCase):
         with patch.dict(c.BY_ID,{spec['id']:spec}):
             g=r.Game(1); g.make_road_event(spec['id']); before=g.money
             with patch.object(g.rng,'random',side_effect=[.8,.2]): self.assertTrue(g.resolve_event('act'))
-            self.assertEqual(g.money-before,7)
+            self.assertEqual(g.money,before)
+            self.assertEqual(sum(i['qty'] for i in g.loot if i['kind']=='credits'),7)
 
     def test_custom_cache_persists_contents_and_rewards_once(self):
         spec=custom(); spec['choices'][0]['outcomes'][0]['effects']=[dict(kind='cache')]

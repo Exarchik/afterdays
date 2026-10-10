@@ -1,6 +1,7 @@
 """Canvas-only map puzzle; no generated minigame artwork."""
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk
+import game_dialogs as messagebox
 import sprites
 from i18n import t as tr
 from visuals import PANEL,TEXT,GOLD
@@ -17,8 +18,8 @@ def choice(app,title,entries):
         frame=tk.Frame(win,bg=PANEL);frame.pack(fill='x',padx=15,pady=8)
         image=sprites.photo(frame,key,48)
         if image:tk.Label(frame,image=image,bg=PANEL).pack(side='left',padx=8)
-        def invoke(action=action,description=description):
-            if messagebox.askyesno(title,description,parent=win):
+        def invoke(action=action,description=description,key=key):
+            if messagebox.askyesno(title,description,parent=win,art=key):
                 app.act(action)
                 if win.winfo_exists():win.close_dialog()
         ttk.Button(frame,text=label,command=invoke).pack(fill='x')

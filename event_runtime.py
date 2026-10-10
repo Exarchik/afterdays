@@ -7,7 +7,7 @@ def make(game, key=None):
     if key is not None:
         spec = catalog.BY_ID.get(key)
     else:
-        pool = [e for e in catalog.EVENTS if e['enabled'] and e['terrain'] in ('any', game.world[game.y][game.x])]
+        pool = [e for e in catalog.EVENTS if e['enabled'] and e['id']!='fence_hole' and e['terrain'] in ('any', game.world[game.y][game.x])]
         if not pool: return False
         spec = game.rng.choices(pool, weights=[e['weight'] for e in pool])[0]
     if not spec or not spec['enabled']: return False
@@ -51,26 +51,32 @@ def cache_contents(game, effects, level):
 def grant_item(game, effect, reward):
     """Announce direct inventory rewards, including additions to an existing stack."""
     import progression as p
-    destination=effect.get('destination','loot')
+    destination='loot' if reward['kind']=='credits' else effect.get('destination','loot')
     quantity=reward.get('qty',1)
     name=reward['name']
     p.add_to(getattr(game,destination),reward)
     suffix=' (здобич)' if destination=='loot' else ' (сховище)' if destination=='stash' else ''
     game.emit(f'+{quantity} {name}'+suffix,color='#9cdda8')
+    game._events[-1].update(item=copy.deepcopy(reward),destination=destination)
 
 
 def apply(game, effect, spec):
+    import event_results
+    start=len(getattr(game,'_events',[]))
     previous=getattr(game,'_event_feedback_color',None)
     negative=effect['kind'] in ('damage','radiation','satiety_loss','wear','wear_armor') or effect.get('amount',0)<0
     game._event_feedback_color='#e56860' if negative else '#9cdda8'
     try:return _apply(game,effect,spec)
-    finally:game._event_feedback_color=previous
+    finally:
+        game._event_feedback_color=previous
+        event_results.decorate(game._events[start:],effect['kind'])
 
 
 def _apply(game, effect, spec):
     import progression as p
     import module_rules
     kind = effect['kind']; level = game.region_level
+    if kind == 'fence_hole':return game.open_fence_hole()
     if effect.get('chance', 1) < 1 and game.rng.random() >= effect['chance']: return
     if kind == 'cache':
         game.begin_event_cache(spec); return
@@ -86,7 +92,9 @@ def _apply(game, effect, spec):
                 remaining=-n
                 for owned in pool:
                     count=min(remaining,owned.get('qty',1));p.extract(game.bag,owned,count);remaining-=count
-                    if count:game.emit(f"−{count} {owned['name']}")
+                    if count:
+                        game.emit(f"−{count} {owned['name']}")
+                        game._events[-1]['item']=copy.deepcopy(owned)
                     if not remaining:break
                 return
             ammo = effect.get('ammo', 'random')
@@ -100,6 +108,8 @@ def _apply(game, effect, spec):
             grant_item(game, effect, item(game, resolved, level))
         return
     if kind == 'money':
+        if n>0:
+            grant_item(game,dict(destination='loot'),p.supply('credits',n));return
         before=game.money;game.money=max(0,game.money+n)
         if game.money!=before:game.emit(f'{game.money-before:+g} кредитів')
     elif kind == 'xp': game.gain_xp(n)
@@ -140,6 +150,7 @@ def resolve(game, choice_id):
     # Sum repeated costs before checking to prevent partial payment.
     costs = {}
     for cost in choice.get('costs', []): costs[cost['kind']] = costs.get(cost['kind'], 0)+cost['amount']
+    result_start=len(getattr(game,'_events',[]))
     for kind, n in costs.items():
         if (game.money if kind == 'money' else game.count(kind)) < n:
             game.log('Недостатньо ресурсів для цієї дії.'); return False
@@ -153,6 +164,7 @@ def resolve(game, choice_id):
         else: game.consume(kind, n)
         text=f'−{n} '+catalog.EFFECTS[kind][0]
         game.log(text,color='#e56860');game.emit(text,color='#e56860')
+        game._events[-1]['effect_kind']=kind
     outcomes = choice['outcomes']; selected = outcomes[0]
     if len(outcomes) > 1:
         roll = game.rng.random(); cumulative = 0
@@ -164,4 +176,10 @@ def resolve(game, choice_id):
         # defeat() restores HP, so use hurt_world's result to stop after lethal damage.
         if apply(game, effect, spec) is False: break
     game.log('Подія завершена: '+spec['title']+'.')
+    if getattr(game,'_lock_request',None):
+        context=game.lock_context(game._lock_request)
+        if context is not None:context['event_feedback']=copy.deepcopy(game._events[result_start:])
+    else:
+        import event_results
+        event_results.finish(game,spec['title'],event.get('art',spec.get('art','event_theme:camp')),result_start)
     return True

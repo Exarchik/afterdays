@@ -82,7 +82,9 @@ class Combat:
         effective=p.mr.effective_weapon(self,weapon)
         stats=p.stats(effective);critical=self.rng.randrange(100)<(min(65,5+stats.get('crit',0))+(15 if mode=='aimed' else 0))
         dealt=projectile_components(effective,self.level,enemy,self.rng.randint(-2,2),critical,pellet,getattr(self,'outgoing_damage_multiplier',1))
-        amount=sum(dealt.values());enemy['hp']-=amount;enemy['awake']=True
+        amount=sum(dealt.values())
+        __import__('battle_results').hit(self,'dealt',amount,enemy['hp'])
+        enemy['hp']-=amount;enemy['awake']=True
         self.emit((tr('adventure.0217') if critical else '')+f'−{amount}',pos=enemy['pos'],color='#ffbf82' if critical else '#ff9d84')
         self.log(f'{enemy["name"]}: −{amount} HP ('+', '.join(f'{DAMAGE_TYPES[k][0]}: {v}' for k,v in dealt.items())+').')
         if enemy['hp']<=0:self._finish_enemy(enemy,weapon)

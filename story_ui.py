@@ -1,6 +1,7 @@
 """Story journal and playable dialogue presentation."""
 import tkinter as tk
-from tkinter import ttk,messagebox
+from tkinter import ttk
+import game_dialogs as messagebox
 import quest_catalog
 import sprites
 

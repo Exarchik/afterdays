@@ -17,7 +17,8 @@ class NewContractTests(unittest.TestCase):
   self.assertFalse(g.buys_kind(parcel,2));self.assertFalse(g.can_turn_in(q));self.assertFalse(g.turn_in(q['id']))
   self.assertTrue(next(s for s in g.special_sites if s['id']==q['destination'])['found'])
   self.assertEqual(list(g.quest_return_pos(q)),list(q['pos']))
-  money=g.money;g.x,g.y=q['pos'];self.assertTrue(g.search());self.assertNotIn(parcel,g.bag)
+  money=g.money;g.x,g.y=q['pos'];self.assertFalse(g.search());self.assertIn(parcel,g.bag)
+  self.assertTrue(g.turn_in(q['id']));self.assertNotIn(parcel,g.bag)
   # The recipient closes the quest immediately; no return to the quest giver.
   self.assertEqual(q['status'],'done');self.assertEqual(g.money,money+q['reward'])
   self.assertFalse(g.turn_in(q['id']));g.x,g.y=g.cities[q['city']];self.assertFalse(g.turn_in(q['id']))

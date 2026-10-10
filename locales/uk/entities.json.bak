@@ -67,7 +67,7 @@
   "module_stabilizer.description": "",
   "module_armor_plate.name": "Бронепластина",
   "module_armor_plate.description": "",
-  "module_burst_core.name": "Розривний осердок",
+  "module_burst_core.name": "Розривне осердя",
   "module_burst_core.description": "Збільшує шкоду, але зменшує міцність зброї на 30: знос зростає на 30%.",
   "module_rangefinder.name": "Далекомір",
   "module_rangefinder.description": "Підвищує точність, але зменшує шкоду лише цієї зброї на 15%, не зачіпаючи бонус рівня гравця.",
@@ -184,5 +184,9 @@
   "weapon_custom_003.name": "Револьвер «Жартівник»",
   "weapon_custom_003.description": "",
   "module_custom_001.name": "Система корегування",
-  "module_custom_001.description": "Вміло підвищує критичний шанс пострілу і зменшує зношення зброї"
+  "module_custom_001.description": "Вміло підвищує критичний шанс пострілу і зменшує зношення зброї",
+  "module_custom_002.name": "Вирівнювач",
+  "module_custom_002.description": "Зменшує знос зброї",
+  "module_custom_003.name": "Система \"Embrasure\"",
+  "module_custom_003.description": "Особливий модуль для пістолетів"
 }

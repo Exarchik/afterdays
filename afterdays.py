@@ -1054,13 +1054,14 @@ class ExpansionGame(LegacyGame):
 
 
 from progression import equipment, module, supply, stats, item_weight, item_value
-from update047 import Game
+from update049 import Game
 from reputation import buy_factor, sell_factor
 
 # GUI imports are delayed so the model and tests work without a display.
 def launch(test_hook=None):
     import tkinter as tk
-    from tkinter import ttk, messagebox
+    from tkinter import ttk
+    import game_dialogs as messagebox
     import visuals
     import advanced_ui
     import progression
@@ -1212,6 +1213,7 @@ def launch(test_hook=None):
             self.loot_detail.pack(fill='x',padx=8)
             ttk.Button(self.loot_tab, text=tr('afterdays.0148'), command=self.collect_selected).pack(fill='x', padx=10, pady=5)
             ttk.Button(self.loot_tab, text=tr('afterdays.0149'), command=self.collect_all).pack(fill='x', padx=10, pady=5)
+            ttk.Button(self.loot_tab,text='Відкрити сховок на локації',command=lambda:__import__('event_ui').show_loot(self)).pack(fill='x',padx=10,pady=5)
             tk.Label(self.loot_tab, text=tr('afterdays.0150'), bg=PANEL, fg=MUTED, justify='left').pack(padx=10, pady=12)
             logframe = tk.Frame(root, bg=PANEL)
             logframe.pack(fill='x', padx=18, pady=(0, 12))
@@ -1224,6 +1226,7 @@ def launch(test_hook=None):
                     bind_keys(child)
             bind_keys(root)
             root.protocol('WM_DELETE_WINDOW', self.close)
+            root._afterdays_app=self
             self.fx=adventure_ui.Effects(self)
             self.refresh()
 
@@ -1246,7 +1249,15 @@ def launch(test_hook=None):
             if self.fx.blocked:
                 return
             before_battle = self.game.battle is not None
+            import event_results
+            before_items=event_results.snapshot(self.game)
+            before_events=len(self.game._events)
+            before_reports=len(getattr(self.game,'_event_results',[]))
             fn()
+            if (getattr(fn,'__name__','')=='search' and not before_battle and not self.game.battle and
+                len(getattr(self.game,'_event_results',[]))==before_reports and
+                any(i.get('qty',1)>before_items['loot'].get(i['id'],0) for i in self.game.loot)):
+                event_results.finish(self.game,'Знахідка на локації','stash',before_events,before_items)
             self.refresh()
             map_request=getattr(self.game,'_metro_map_request',None)
             if map_request:
@@ -1291,8 +1302,8 @@ def launch(test_hook=None):
                 notice_key=next((key for key in ('_border_notice','_mayor_notice','_reputation_notice','_settler_notice') if getattr(g,key,None)),None)
                 if notice_key:
                     notice=getattr(g,notice_key);setattr(g,notice_key,None);self._notice_open=True
-                    def show_notice(text=notice):
-                        try:messagebox.showinfo('Afterdays',text,parent=root)
+                    def show_notice(text=notice,key=notice_key):
+                        try:__import__('event_ui').show_notice(self,text,key)
                         finally:self._notice_open=False;self.refresh()
                     root.after_idle(show_notice)
             weapon = g.weapon
@@ -1336,8 +1347,16 @@ def launch(test_hook=None):
 
         def offer_notices(self):
             """Показує нові повідомлення про доступні події й завдання."""
-            if self.dialog or self.fx.blocked:
+            if self.dialog or getattr(self,'_notice_open',False):
                 return
+            reports=getattr(self.game,'_event_results',[])
+            if reports:
+                __import__('event_ui').show_result(self,reports.pop(0))
+                return
+            if self.game.road_event:
+                self.road_dialog()
+                return
+            if self.fx.blocked:return
             from campaign_intro import pending
             story=pending(self.game)
             if story:
@@ -1345,16 +1364,14 @@ def launch(test_hook=None):
                 from story_ui import show
                 show(self.quest_panel,story)
                 return
-            if self.game.road_event:
-                self.road_dialog()
-            elif self.game.pending_perks and self.perk_prompted != self.game.level//2:
+            if self.game.pending_perks and self.perk_prompted != self.game.level//2:
                 self.perk_prompted = self.game.level//2
                 self.perks()
 
         def road_dialog(self):
             """Відкриває варіанти дії для поточної дорожньої події."""
             if not self.dialog and self.game.road_event:
-                adventure_ui.road_window(self)
+                __import__('event_ui').loading(self,lambda win:adventure_ui.road_window(self,win))
 
         def storage(self):
             """Відкриває інтерфейс власного сховища."""
@@ -1482,7 +1499,8 @@ def launch(test_hook=None):
 
         def mayor(self):
             """Відкриває список пропозицій місцевого квестодавця."""
-            if (self.game.city not in self.game.mayors and not self.game.regular_city) or self.game.battle:return
+            recipient=any(q['status']=='active' and self.game.can_turn_in(q) for q in self.game.quests)
+            if (self.game.city not in self.game.mayors and not self.game.regular_city and not recipient) or self.game.battle:return
             win=self.popup(tr('afterdays.0178')+self.game.city_name(self.game.city),'750x670')
             refinement_ui.QuestCards(win,self,mayor=True).pack(fill='both',expand=True)
 

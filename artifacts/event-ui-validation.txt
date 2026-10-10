@@ -1,0 +1,20 @@
+Event UI validation
+
+PASS: python -m unittest test_battle_results test_event_presentation test_event_catalog test_update049 test_factions047 test_recovery047 -q
+56 tests, including result snapshots, real capped gains, costs, chance=0,
+cache deferral, partial stacks, combat damage/reflection, NPC damage exclusion,
+combat save/reload, defeat/retreat, dungeon exit, and actual loot grants.
+
+PASS: python tools/check_event_presentation_ui.py
+Actual Tkinter application: the SAME event window shows loading, choices and
+grouped results; local credits, quantity transfer, drag/drop, collect all;
+combat result with damage and XP; themed confirmation restores modal state.
+
+Broader exploratory run: 47 tests, 7 failures reproduced independently of
+the relevant changes using pre-change event-runtime/collect implementations:
+- test_event_rewards: 2 wreck expectations conflict with the current edited event (also deals damage).
+- test_event_notices: expects 2-4 seconds; current settings use 1-2 seconds.
+- test_v3: valid shot, armor wear, merchant worn-gear ratio and old 15x11 arena expectations.
+These unrelated gameplay/content settings were not changed for this task.
+
+Player save was not written by UI tests.

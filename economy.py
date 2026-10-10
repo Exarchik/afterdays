@@ -101,6 +101,7 @@ class Game(a.Game):
    q=next((q for q in self.quests if q['id']==qid and q['status']=='active'),None)
    if q:q['progress']=1;self.emit(tr('economy.0004'),color='#c7a0f1')
   self.log('Бій завершено. Доступну здобич можна забрати у вкладці «Здобич».')
+  __import__('battle_results').capture_loot(self,b,before_loot)
  def price_quest(self,q):
   """Розраховує винагороду завдання з урахуванням його рівня."""
   zone=q.get('level',q.get('zone',self.region_at(*self.cities[q['city']])))

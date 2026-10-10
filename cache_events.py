@@ -21,8 +21,9 @@ class Game(settlements.Game):
     def start_battle(self):
         """Створює бойовий стан, ворогів та арену поточної зустрічі."""
         super().start_battle()
-        from organic_arenas import arena
-        arena(self)
+        from arena_layout import build
+        build(self)
+        __import__('battle_results').begin(self,fresh=True)
 
     def road_cache(self,ident=None):
         """Знаходить дорожній сховок на поточній клітинці."""
@@ -45,7 +46,7 @@ class Game(settlements.Game):
         cache=self.road_cache()
         if cache is None:
             level=self.region_level
-            cache=dict(id=r.uid(),kind='road_cache',title=spec['title'],theme=spec['id'].removeprefix('locked_'),pos=[self.x,self.y],level=level,
+            cache=dict(id=r.uid(),kind='road_cache',title=spec['title'],art=spec.get('art','stash'),theme=spec['id'].removeprefix('locked_'),pos=[self.x,self.y],level=level,
                        lock_target=self.rng.randint(15,165),opened=False,
                        contents=event_runtime.cache_contents(self,spec['cache'],level))
             self.reputation_state.setdefault('road_caches',[]).append(cache)

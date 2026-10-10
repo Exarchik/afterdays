@@ -20,7 +20,7 @@ class OrganicTests(unittest.TestCase):
   """Перевіряє сценарій «arena reachable and escape preserved» та очікувані результати."""
   for seed in range(24):
    g=r.Game(seed);g.start_battle();b=g.battle;floor=set(map(tuple,b['floor']));walls=set(map(tuple,b['walls']));walk=floor-walls
-   self.assertEqual(o.connected(walk,tuple(b['pos'])),walk);self.assertIn((0,5),walk)
+   self.assertEqual(o.connected(walk,tuple(b['pos'])),walk);self.assertIn(tuple(b['entrance047']),walk)
    self.assertLess(len(floor),b['w']*b['h']);self.assertTrue(all(tuple(e['pos']) in walk for e in b['enemies']))
    blocked=(set((x,y) for x in range(b['w']) for y in range(b['h']))-floor);self.assertTrue(blocked<=walls)
  def test_void_move_rejected(self):
@@ -34,7 +34,10 @@ class OrganicTests(unittest.TestCase):
    self.assertEqual(set(map(tuple,b['walls'])),{(x,y) for y in range(b['h']) for x in range(b['w'])}-floor)
    self.assertEqual(len(b['enemies']),len({tuple(e['pos']) for e in b['enemies']}))
    for e in b['enemies']:self.assertTrue(hexgrid.path_to(tuple(b['pos']),tuple(e['pos']),b['w'],b['h'],b['walls']))
-   b['enemies']=[];g.victory();b['ap']=0;self.assertTrue(g.battle_move(b['chest']));self.assertTrue(g.search());self.assertTrue(g.battle_move(b['exit']));self.assertTrue(g.flee());self.assertIsNone(g.battle)
+   b['enemies']=[];g.victory();self.assertLessEqual(hexgrid.distance(b['pos'],b['exit']),1)
+   b['ap']=0;self.assertTrue(g.battle_move(b['chest']));self.assertTrue(g.search());self.assertTrue(g.battle_move(b['exit']))
+   if g.battle:self.assertTrue(g.flee())
+   self.assertIsNone(g.battle)
  def test_rim_removes_shared_edges(self):
   """Перевіряє сценарій «rim removes shared edges» та очікувані результати."""
   self.assertEqual(len(o.boundary_edges({(2,2)})),6)
@@ -44,7 +47,7 @@ class OrganicTests(unittest.TestCase):
   g=r.Game(7);g.start_battle();before=copy.deepcopy(g.battle)
   canvas=Mock();canvas.winfo_width.return_value=800;canvas.winfo_height.return_value=600
   app=SimpleNamespace(game=g,canvas=canvas,map_title=Mock(),hint=Mock(),battle_hover=(1,5))
-  with patch('sprites.draw',return_value=True):advanced_ui.draw_battle(app)
+  with patch('sprites.draw',return_value=True),patch('arena_tiles.draw'):advanced_ui.draw_battle(app)
   self.assertTrue(canvas.create_polygon.called);self.assertEqual(g.battle,before)
   with tempfile.TemporaryDirectory() as td:
    path=Path(td)/'save.json';g.save(path);h=r.Game.load(path)

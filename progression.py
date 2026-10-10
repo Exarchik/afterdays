@@ -441,12 +441,13 @@ class Game(r.ExpansionGame):
             return True
         return False
 
-    def collect(self,item_id):
+    def collect(self,item_id,qty=None):
         """Переносить доступний предмет зі здобичі до сумки."""
         if self.battle and not (self.battle.get('dungeon') and self.battle.get('cleared')): return False
         item=next((i for i in self.loot if i['id']==item_id),None)
         if not item: return False
-        qty=item.get('qty',1)
+        if qty is not None and (type(qty) is not int or qty<1):return False
+        qty=min(item.get('qty',1),qty) if qty is not None else item.get('qty',1)
         if stack_key(item) and item['weight']>0:
             qty=min(qty,max(0,int((self.capacity-self.weight+.00001)/item['weight'])))
         if qty<1:

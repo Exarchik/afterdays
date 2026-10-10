@@ -1,6 +1,6 @@
 """Context-aware item menus shared by inventories, shops, storage and equipment."""
 import tkinter as tk
-from tkinter import messagebox
+import game_dialogs as messagebox
 import progression as p
 from i18n import t as tr
 

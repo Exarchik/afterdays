@@ -48,7 +48,7 @@ class Effects:
                             for e in self.active if e['kind']=='text' and e['scene']=='world'])
         for event in g.pop_events():
             event=dict(event);kind=event['kind']
-            duration=min(.55,max(.12,.07*(len(event.get('path',[]))-1))) if kind=='move' else .65 if event.get('fire_mode')=='aimed' else .4 if kind in ('attack','slash') else 2.8 if kind=='reveal' else 1.0
+            duration=min(1.10, max(.24, .14 * (len(event.get('path', [])) - 1))) if kind=='move' else .65 if event.get('fire_mode')=='aimed' else .4 if kind in ('attack','slash') else 2.8 if kind=='reveal' else 1.0
             if kind in ('move','attack','slash'):
                 if kind=='attack' and event.get('volley'):
                     ident=event['volley']
@@ -223,13 +223,13 @@ class Services(tk.Frame):
             if g.city in g.technicians:items.append(('tech',tr('adventure_ui.0014'),app.technician))
             if g.city in g.mayors:items.append(('mayor',g.current_site['npc'] if g.current_site else tr('adventure_ui.0015'),app.mayor))
             if g.regular_city and g.city not in g.mayors:items.append(('board',tr('quests.board'),app.mayor))
-            if any(q['kind'] in ('repair_delivery','delivery') and q['status']=='active' and g.quest_return_city(q)==g.city for q in g.quests):items.append(('board',tr('quests.recipient'),lambda:app.tabs.select(app.quest_tab)))
+            if g.city not in g.mayors and not g.regular_city and any(q['kind'] in ('repair_delivery','delivery') and q['status']=='active' and g.quest_return_city(q)==g.city for q in g.quests):items.append(('board',tr('quests.board'),app.mayor))
             if g.regular_city:
                 items.extend([('stash',tr('adventure_ui.0016'),app.storage),('rest',tr('adventure_ui.0017'),lambda:app.act(g.rest))])
             elif g.city is None:
                 items.append(('search',tr('adventure_ui.0018'),lambda:app.act(g.search)))
             if not g.regular_city and g.can_access_stash:items.append(('stash',tr('adventure_ui.0016'),app.storage))
-            if hasattr(g,'destination_quest') and g.destination_quest():
+            if hasattr(g,'destination_quest') and g.destination_quest() and g.destination_quest()['kind']=='radio':
                 q=g.destination_quest();items.append(('action_delivery' if q['kind']=='delivery' else 'action_radio',tr('adventure_ui.0019') if q['kind']=='delivery' else tr('adventure_ui.0020'),lambda:app.act(g.search)))
             if getattr(g,'local_expedition',lambda:None)() and g.city is not None:items.append(('search',tr('adventure_ui.0018'),lambda:app.act(g.search)))
             if g.road_event:items.append(('traveler',tr('adventure_ui.0021'),app.road_dialog))
@@ -255,15 +255,16 @@ class Services(tk.Frame):
 
 
 class Storage(tk.Frame):
-    def __init__(self,parent,app):
+    def __init__(self,parent,app,source='stash'):
         """Ініціалізує об’єкт, його початковий стан і потрібні залежності."""
-        super().__init__(parent,bg=PANEL);self.app=app;self.selection=None;self.direction='withdraw'
+        super().__init__(parent,bg=PANEL);self.app=app;self.selection=None;self.direction='withdraw';self.source=source
         self.label=tk.Label(self,bg=PANEL,fg=GOLD,font=('Segoe UI',13,'bold'));self.label.pack(pady=12)
-        tk.Label(self,text=tr('adventure_ui.0024'),bg=PANEL,fg=MUTED).pack()
+        tk.Label(self,text=('Перетягніть предмет між сховком на локації та рюкзаком.' if source=='loot' else tr('adventure_ui.0024')),bg=PANEL,fg=MUTED).pack()
+        if source=='loot':tk.Label(self,text='Залишена здобич втрачається після виходу з локації.',bg=PANEL,fg='#eaa58c').pack()
         body=tk.Frame(self,bg=PANEL);body.pack(fill='both',expand=True,padx=8,pady=10)
         left,right=tk.Frame(body,bg=PANEL),tk.Frame(body,bg=PANEL)
         left.pack(side='left',fill='both',expand=True);right.pack(side='left',fill='both',expand=True)
-        tk.Label(left,text=tr('adventure_ui.0025'),bg=PANEL,fg=TEXT).pack()
+        tk.Label(left,text='СХОВОК НА ЛОКАЦІЇ' if source=='loot' else tr('adventure_ui.0025'),bg=PANEL,fg=TEXT).pack()
         tk.Label(right,text=tr('adventure_ui.0026'),bg=PANEL,fg=TEXT).pack()
         self.stored=ItemGrid(left,lambda i:self.select(i,'withdraw'),height=310);self.stored.pack(fill='both',expand=True,padx=4)
         self.bag=ItemGrid(right,lambda i:self.select(i,'deposit'),height=310);self.bag.pack(fill='both',expand=True,padx=4)
@@ -274,6 +275,7 @@ class Storage(tk.Frame):
         ttk.Label(bar,text=tr('adventure_ui.0027')).pack(side='left')
         ttk.Spinbox(bar,from_=1,to=999999,width=8,textvariable=self.qty).pack(side='left',padx=6)
         ttk.Button(bar,text=tr('adventure_ui.0028'),command=self.all).pack(side='left',padx=5)
+        if source=='loot':ttk.Button(bar,text='Забрати все',command=self.collect_all).pack(side='left',padx=5)
         ttk.Button(bar,text=tr('adventure_ui.0029'),command=self.transfer).pack(side='right')
         self.drag=Drag(self,self.drop)
         for grid,direction in ((self.stored,'withdraw'),(self.bag,'deposit')):
@@ -281,9 +283,14 @@ class Storage(tk.Frame):
             grid.canvas.bind('<B1-Motion>',self.drag.move);grid.canvas.bind('<ButtonRelease-1>',self.drag.end)
         self.refresh()
 
+    def collect_all(self):
+        for item in list(self.app.game.loot):self.app.game.collect(item['id'])
+        self.refresh()
+        self.detail.config(text='Частина предметів залишилась: перевірте місткість рюкзака.' if self.app.game.loot else 'Усі предмети перенесено до рюкзака.')
+
     def item(self):
         """Знаходить предмет, обраний у поточній панелі."""
-        source=self.app.game.stash if self.direction=='withdraw' else self.app.game.bag
+        source=getattr(self.app.game,self.source) if self.direction=='withdraw' else self.app.game.bag
         return next((i for i in source if i['id']==self.selection),None)
 
     def select(self,item_id,direction):
@@ -299,7 +306,7 @@ class Storage(tk.Frame):
 
     def refresh(self):
         """Оновлює віджети відповідно до поточного стану гри."""
-        g=self.app.game;self.stored.set_items(g.stash);self.bag.set_items(g.bag)
+        g=self.app.game;self.stored.set_items(getattr(g,self.source));self.bag.set_items(g.bag)
         self.label.config(text=tr('adventure_ui.0030', v0=g.weight, v1=g.capacity))
         self.app.refresh()
 
@@ -309,9 +316,12 @@ class Storage(tk.Frame):
         if not item:return
         try:qty=max(1,min(int(self.qty.get()),item.get('qty',1)))
         except ValueError:qty=1
-        ok=self.app.game.stash_transfer(item['id'],self.direction,qty)
+        if self.source=='loot':
+            g=self.app.game
+            ok=g.collect(item['id'],qty) if self.direction=='withdraw' else g.drop_item(item['id'],qty)
+        else:ok=self.app.game.stash_transfer(item['id'],self.direction,qty)
         self.refresh()
-        self.detail.config(text=self.app.game.messages[-1] if ok else tr('adventure_ui.0031'))
+        self.detail.config(text=('Предмет перенесено.' if self.source=='loot' else self.app.game.messages[-1]) if ok else tr('adventure_ui.0031'))
 
     def press(self,e,grid,direction):
         """Запам’ятовує початок натискання чи перетягування."""
@@ -327,10 +337,10 @@ class Storage(tk.Frame):
         if inside(target,xr,yr):self.select(payload['item']['id'],direction);self.transfer()
 
 
-def road_window(app):
+def road_window(app,win=None):
     event=app.game.road_event
     if not event:return
-    win=app.popup(event['title'],'760x620')
+    win=win or app.popup(event['title'],'760x650')
     scroll=tk.Canvas(win,bg=PANEL,highlightthickness=0)
     bar=ttk.Scrollbar(win,orient='vertical',command=scroll.yview);bar.pack(side='right',fill='y')
     scroll.pack(fill='both',expand=True);scroll.configure(yscrollcommand=bar.set)
@@ -357,12 +367,16 @@ def road_window(app):
     result=tk.Label(body,bg=PANEL,fg='#eaa58c',wraplength=690);result.pack()
     def choose(key):
         if app.game.resolve_event(key):
-            app.dialog=None;win.destroy();app.refresh()
             ident=getattr(app.game,'_lock_request',None)
             if ident:
                 app.game._lock_request=None
                 import lock_ui
-                lock_ui.show(app,ident)
+                lock_ui.show(app,ident,win=win)
+            else:
+                reports=getattr(app.game,'_event_results',[])
+                if reports:__import__('event_ui').show_result(app,reports.pop(0),win=win)
+                else:win.close_dialog()
+            app.refresh()
         else:result.config(text=app.game.messages[-1])
     from event_runtime import display_choices
     for key,label in display_choices(event):

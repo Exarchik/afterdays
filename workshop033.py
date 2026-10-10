@@ -1,6 +1,7 @@
 """Direct upgrade comparisons and the technician's paid dismantling panel."""
 import tkinter as tk
-from tkinter import ttk,messagebox
+from tkinter import ttk
+import game_dialogs as messagebox
 import progression as p
 import afterdays as r
 from i18n import t as tr
