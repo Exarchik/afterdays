@@ -1,0 +1,10 @@
+{
+  "servers": {
+    "basedpyright": {
+      "command": "basedpyright-langserver",
+      "args": ["--stdio"],
+      "fileTypes": [".py"],
+      "rootMarkers": ["afterdays.py"]
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "venvPath": ".",
+  "venv": ".venv",
+  "typeCheckingMode": "basic",
+  "exclude": [
+    ".venv",
+    "__pycache__",
+    "backups"
+  ]
+}
