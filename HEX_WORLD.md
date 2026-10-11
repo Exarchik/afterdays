@@ -26,7 +26,7 @@
 
 Це перша інтеграція. Арт ще не має узгоджених безшовних переходів усіх біомів;
 їх можна доробляти незалежно від правил пересування. Перевірка:
-`python -m unittest test_world_hex test_diagonal test_journey test_border`.
+`python -m unittest tests.test_world_hex tests.test_diagonal tests.test_journey tests.test_border`.
 Візуальна перевірка без запису сейву: `python tools/check_world_hex_ui.py`.
 
 

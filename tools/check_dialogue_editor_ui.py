@@ -6,7 +6,7 @@ import tkinter as tk
 from tkinter import ttk
 from unittest.mock import patch
 from content_editor import ContentEditor
-from test_entity_editor import project_copy
+from tests.test_entity_editor import project_copy
 from entity_catalog import Store
 from dialogue_editor import ReplyDialog,RuleDialog,VariableDialog,ActorDialog
 

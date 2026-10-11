@@ -22,7 +22,7 @@ def check(root,*args,**kwargs):
         editor.factions.open('bandits');editor.factions.weight.set('60,5')
         assert editor.factions.commit()
         import copy,tempfile,entity_catalog
-        from test_entity_editor import project_copy
+        from tests.test_entity_editor import project_copy
         with tempfile.TemporaryDirectory() as folder:
             store=entity_catalog.Store(project_copy(folder));store.data=copy.deepcopy(editor.store.data)
             store._save()

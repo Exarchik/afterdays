@@ -25,6 +25,13 @@
 - Валідатор контенту як до, так і після перенесення знаходить 16 відсутніх назв/описів
   для `item_credits` і `item_custom_001`–`item_custom_007`. Дані не змінювалися.
 
+### Тести
+
+- Усі `test_*.py` перенесено до пакета `tests/`, фікстури — з `tests_fixtures/` до `tests/fixtures/`.
+  Взаємні імпорти тестів і `tools/check_*_ui.py` оновлено (`from tests.test_entity_editor import project_copy`).
+- Запуск без змін: `python -B -m unittest discover -q`; окремий модуль — `python -B -m unittest tests.test_contracts`.
+- Результат до й після перенесення збігається: 585 тестів, ті самі успішні й невдалі перевірки.
+
 ## Ігрові зміни
 
 

@@ -38,5 +38,5 @@
 його новий арт замінить символ. Заглушки посилаються на наявні ресурси,
 нові дублікати зображень не створюються. Формат сейву не змінюється.
 
-Перевірки: `python -m unittest test_update048 test_journey test_damage_preview`.
+Перевірки: `python -m unittest tests.test_update048 tests.test_journey tests.test_damage_preview`.
 Реальний інтерфейс без запису сейву: `python tools/check_update048_ui.py`.

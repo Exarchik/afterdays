@@ -7,8 +7,8 @@ import tkinter as tk
 from tkinter import ttk
 from types import SimpleNamespace
 from unittest.mock import patch
-from test_entity_editor import project_copy
-from test_art_editor import fixture
+from tests.test_entity_editor import project_copy
+from tests.test_art_editor import fixture
 from content_editor import ContentEditor
 from event_editor import ArtDialog
 import art_editor

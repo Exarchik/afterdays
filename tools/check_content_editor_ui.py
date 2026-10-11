@@ -6,7 +6,7 @@ import tempfile
 import tkinter as tk
 from tkinter import ttk
 from unittest.mock import patch
-from test_entity_editor import project_copy
+from tests.test_entity_editor import project_copy
 from content_editor import ContentEditor
 import entity_catalog as catalog
 

@@ -11,7 +11,7 @@ errors=[]
 def check(root,app):
     try:
         root.report_callback_exception=lambda *args:errors.append(str(args))
-        from test_scavenging import ScavengingTests
+        from tests.test_scavenging import ScavengingTests
         g,q=ScavengingTests().quest('scout')
         app.game=g;app.refresh();g.pop_events();app.fx.active=[];app._notice_open=False
         if app.dialog:app.dialog.close_dialog()

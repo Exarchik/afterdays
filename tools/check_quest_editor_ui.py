@@ -5,7 +5,7 @@ sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 import tkinter as tk
 from tkinter import ttk
 from unittest.mock import patch
-from test_entity_editor import project_copy
+from tests.test_entity_editor import project_copy
 from content_editor import ContentEditor
 from entity_catalog import Store
 

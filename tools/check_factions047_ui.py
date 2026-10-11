@@ -8,7 +8,7 @@ import game.model as afterdays
 import content_editor
 import entity_catalog
 import faction_rules
-from test_entity_editor import project_copy
+from tests.test_entity_editor import project_copy
 from PIL import ImageGrab
 
 def capture(root,name):

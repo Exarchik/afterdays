@@ -24,5 +24,5 @@
 - Шкоди променевої хвороби та штраф ОД голоду враховуються в описі
   «Розрахункова шкода». Опис розхідників і довідку оновлено.
 
-Перевірки: `python -m unittest test_survival040` та
+Перевірки: `python -m unittest tests.test_survival040` та
 `python tools/check_survival040_ui.py`.

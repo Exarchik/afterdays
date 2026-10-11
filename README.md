@@ -20,7 +20,7 @@
 | `ui/` | Вікна, панелі, HUD, діалоги та контролери гри |
 | `*_editor.py`, `*_catalog.py` | Редактори й каталоги контенту |
 | `data/`, `locales/`, `assets/` | Дані, переклади та графіка; шляхи ресурсів не змінено |
-| `test_*.py`, `tools/` | Поведінкові тести та інструменти перевірки |
+| `tests/`, `tools/` | Поведінкові тести (`tests/test_*.py`, фікстури в `tests/fixtures/`) та інструменти перевірки |
 
 Модель не імпортує Tkinter або `ui`. Для роботи без вікна:
 
@@ -44,7 +44,8 @@ weapon = equipment("weapon_ash_pistol", level=game.level)
 
 Формат сейву й імена полів не змінено; версійні ключі всередині JSON
 та ідентифікатори перекладів збережені навмисно.
-Тести: `python -B -m unittest discover -q`.
+Тести лежать у `tests/`: `python -B -m unittest discover -q` з кореня проєкту.
+Окремий модуль: `python -B -m unittest tests.test_contracts`.
 Перевірка справжнього UI без запису сейву:
 `python -B tools/check_event_presentation_ui.py`;
 редактора — `python -B tools/check_editor_startup047.py`.
