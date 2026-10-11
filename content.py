@@ -79,7 +79,7 @@ def identify_monster(enemy):
 
 def migrate(game):
     """Preserve rolled stats, IDs, durability, RNG and progress; only add identity/name data."""
-    items=game.bag+game.loot+game.stash+[i for i in game.equipped.values() if i]
+    items=game.bag+game.loot+game.stash+getattr(game,'provisions',[])+[i for i in game.equipped.values() if i]
     for shop in game.shops.values():items+=shop['items']+shop.get('rep_reserve',[])
     if game.traveler:items+=game.traveler.get('items',[])+game.traveler.get('rep_reserve',[])
     for q in game.quests+[q for offers in game.offers.values() for q in offers]:

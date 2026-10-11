@@ -347,7 +347,9 @@ def road_window(app,win=None):
     win=win or app.popup(event['title'],'760x650')
     scroll=tk.Canvas(win,bg=PANEL,highlightthickness=0)
     bar=ttk.Scrollbar(win,orient='vertical',command=scroll.yview);bar.pack(side='right',fill='y')
-    scroll.pack(fill='both',expand=True);scroll.configure(yscrollcommand=bar.set)
+    scroll.pack(fill='both',expand=True)
+    from ui.scrolling import auto_scrollbar
+    auto_scrollbar(scroll,bar)
     body=tk.Frame(scroll,bg=PANEL);body_id=scroll.create_window(0,0,window=body,anchor='nw')
     body.bind('<Configure>',lambda e:scroll.configure(scrollregion=scroll.bbox('all')))
     scroll.bind('<Configure>',lambda e:scroll.itemconfigure(body_id,width=e.width))

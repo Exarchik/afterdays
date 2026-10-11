@@ -424,10 +424,11 @@ class EquipmentPanel(tk.Frame):
         self.app = app
         self.selection = None
         self.slots = {}
+        self.provision_slots = {}
         self.paper = tk.Canvas(self, height=218, bg='#17221d', highlightthickness=0)
         self.paper.pack(fill='x', padx=6, pady=(5, 0))
         self.paper.bind('<Configure>', lambda e: self.draw())
-        tk.Label(self, text=tr('visuals.0023'), bg=PANEL, fg=MUTED, font=('Segoe UI', 8)).pack(pady=2)
+        tk.Label(self, text='Перетягніть їжу в провізію по 1 шт. • Автохарчування згори вниз', bg=PANEL, fg=MUTED, font=('Segoe UI', 8)).pack(pady=2)
         self.grid = ItemGrid(self, self.select, height=104)
         self.grid.pack(fill='both', expand=True, padx=6)
         from ui.refinement import Detail
@@ -463,6 +464,8 @@ class EquipmentPanel(tk.Frame):
         c, g = self.paper, self.app.game
         c.delete('all')
         w = max(340, c.winfo_width())
+        full_width = w
+        w -= 94
         mid = w/2
         if not sprites.draw(c,'player',mid-99,4,198):
             # Anatomical silhouette beneath actual helmet, torso armor and carried weapons.
@@ -489,16 +492,44 @@ class EquipmentPanel(tk.Frame):
                 c.create_text((x+d)/2, (y+e)/2, text='+', fill='#708573', font=('Segoe UI', 20))
             if slot.startswith('weapon'):
                 c.create_text((x+d)/2, e+12, text=('▶ ' if g.active == slot else '')+catalog.SLOTS[slot], fill=color, font=('Segoe UI', 9))
-        c.create_text(mid, 215, text=tr('visuals.0030', v0=g.defense, v1=g.weight, v2=g.capacity), fill=MUTED, font=('Segoe UI', 8))
+        x = full_width-84
+        c.create_text(x+36, 10, text='Провізія', fill=MUTED, font=('Segoe UI', 9))
+        self.provision_slots = {}
+        for n in range(3):
+            y = 25+n*62
+            self.provision_slots[n] = (x,y,x+72,y+50)
+            item = g.provisions[n] if n < len(g.provisions) else None
+            c.create_rectangle(x,y,x+72,y+50,outline=GOLD if item and item['id']==self.selection else '#82917a',fill='#1d2b22')
+            if item:
+                icon(c,item,x+12,y+1,48)
+                c.create_text(x+69,y+3,text='×'+str(item.get('qty',1)),anchor='ne',fill=TEXT,font=('Segoe UI',9,'bold'))
+            else:
+                c.create_text(x+36,y+25,text='+',fill=MUTED,font=('Segoe UI',23))
+            if n<2:c.create_text(x+36,y+56,text='▲',fill=MUTED,font=('Segoe UI',8))
+        c.create_text(mid, 209, text=tr('visuals.0030', v0=g.defense, v1=g.weight, v2=g.capacity), fill=MUTED, font=('Segoe UI', 8))
+
+    def provision_at(self, x, y):
+        return next((n for n,(a,b,d,e) in self.provision_slots.items() if a<=x<=d and b<=y<=e),None)
 
     def inspect_paper(self,event):
         """Відкриває дії спорядження на силуеті персонажа."""
+        n=self.provision_at(event.x,event.y)
+        if n is not None:
+            item=self.app.game.provisions[n] if n<len(self.app.game.provisions) else None
+            import ui.item_actions as item_actions
+            return item_actions.show(self.app,item,event,self)
         slot=next((s for s,(a,b,d,e) in self.slots.items() if a<=event.x<=d and b<=event.y<=e),None)
         import ui.item_actions as item_actions
         return item_actions.show(self.app,self.app.game.equipped.get(slot),event,self)
 
     def press_paper(self, event):
         """Починає перетягування предмета із силуету."""
+        n=self.provision_at(event.x,event.y)
+        if n is not None:
+            item=self.app.game.provisions[n] if n<len(self.app.game.provisions) else None
+            self.select(item['id'] if item else None)
+            if item:self.drag.begin(event,dict(item=item,slot='provision'))
+            return
         slot = next((s for s,(a,b,d,e) in self.slots.items() if a <= event.x <= d and b <= event.y <= e), None)
         item = self.app.game.equipped.get(slot)
         self.select(item['id'] if item else None)
@@ -517,6 +548,14 @@ class EquipmentPanel(tk.Frame):
         g = self.app.game
         if g.battle:
             self.app.act(lambda: g.log(tr('visuals.0031')))
+            return
+        if inside(self.paper,xr,yr):
+            n=self.provision_at(xr-self.paper.winfo_rootx(),yr-self.paper.winfo_rooty())
+            if n is not None:
+                self.app.act(lambda:g.pack_provision(payload['item']['id'],n,qty=1))
+                return
+        if payload['slot']=='provision':
+            if inside(self.grid.canvas,xr,yr):self.app.act(lambda:g.unpack_provision(payload['item']['id']))
             return
         if payload['item'].get('kind')=='module':
             target_item=None

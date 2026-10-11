@@ -78,6 +78,11 @@ def show(app,item,event,owner=None,grid=None):
         if g.can_access_stash and not item.get('quest_id'):
             for qty in sorted({1,item.get('qty',1)}):menu.add_command(label=tr('update030.withdraw',qty=qty),command=lambda qty=qty:run(lambda:g.stash_transfer(ident,'withdraw',qty)))
     else:
+        if not g.battle:
+            if any(i['id']==ident for i in g.provisions):
+                menu.add_command(label='Повернути в рюкзак',command=lambda:run(lambda:g.unpack_provision(ident)))
+            elif any(i['id']==ident for i in g.bag) and item['kind']=='food' and not item.get('quest_id') and len(g.provisions)<3:
+                menu.add_command(label='Додати до провізії 1 шт.',command=lambda:run(lambda:g.pack_provision(ident,qty=1)))
         for code,args in personal_actions(g,item):
             label=tr('update030.'+code)
             if code=='equip':label=tr('update030.equip_slot',slot=catalog.SLOTS[args[0]])

@@ -42,11 +42,31 @@ def clear(win):
     for child in win.winfo_children():child.destroy()
 
 
+# Result semantics differ from the art IDs used by the content editor.
+EFFECT_ART = {
+    'damage_dealt':'damage_to_enemies', 'damage':'damage_to_player',
+    'xp':'get_xp', 'heal':'healed',
+    'radiation_heal':'radiation_heal', 'radiation':'radiation_damage',
+    'satiety_gain':'food_full', 'satiety_loss':'food_eat',
+    'reveal':'open_map', 'discover':'open_location',
+    'repair_armor':'repair_armor', 'wear_armor':'damage_armor',
+    'repair_weapon':'repair_weapon', 'wear':'damage_weapon',
+    'fence_hole':'fence_shortcut', 'buff_stealth':'invisibility',
+    'buff_regen':'regeneration', 'buff_satiety':'food_full',
+    'ambush':'ambush',
+}
+
+
 def reward_icon(canvas,row):
+    kind=row.get('effect_kind','')
+    art=EFFECT_ART.get(kind)
+    # Granted items retain their own art; these state rows describe spending/loss.
+    if not row.get('destination'):
+        if kind in ('money','credits'):art='lost_money'
+        elif kind=='food':art='lost_food'
+    if art and sprites.draw(canvas,'effects:'+art,0,0,48):return
     if row.get('item'):
         icon(canvas,row['item'],0,0,48);return
-    kind=row.get('effect_kind','')
-    import game.items as p
     if kind in ('money','credits','food','med','rad','repairkit','parts','fragments','ammo'):
         sample=(items.supply('credits') if kind in ('money','credits') else
                 items.parts(1) if kind=='parts' else items.fragments(1) if kind=='fragments' else
@@ -59,6 +79,34 @@ def reward_icon(canvas,row):
     canvas.create_text(24,24,text=symbol,fill=GOLD,font=('Segoe UI',13,'bold'))
 
 
+class ResultGroup(tk.Frame):
+    """Responsive rows of icon/label pairs, shared by states and loot."""
+    def __init__(self,parent,rows):
+        super().__init__(parent,bg=PANEL)
+        self.cards=[]
+        self.columns=0
+        for row in rows:
+            card=tk.Frame(self,bg=PANEL)
+            card.columnconfigure(1,weight=1)
+            art=tk.Canvas(card,width=48,height=48,bg=PANEL,highlightthickness=0)
+            art.grid(row=0,column=0,padx=(0,10));reward_icon(art,row)
+            label=tk.Label(card,text=row['text'],bg=PANEL,fg=row.get('color',TEXT),
+                           width=1,justify='left',anchor='w')
+            label.grid(row=0,column=1,sticky='ew')
+            self.cards.append((card,label))
+        self.bind('<Configure>',self.reflow)
+
+    def reflow(self,event):
+        columns=max(1,min(len(self.cards),event.width//220))
+        for column in range(max(self.columns,columns)):
+            self.columnconfigure(column,weight=1 if column<columns else 0,
+                                 uniform='result' if column<columns else '')
+        self.columns=columns
+        for index,(card,label) in enumerate(self.cards):
+            label.configure(wraplength=max(1,event.width//columns-74))
+            card.grid(row=index//columns,column=index%columns,sticky='ew',padx=(0,12),pady=6)
+
+
 def show_result(app,report,win=None):
     win=win or app.popup(report['title'],'760x650')
     clear(win);win.title(report['title'])
@@ -69,21 +117,38 @@ def show_result(app,report,win=None):
     tk.Label(head,text='Результати битви' if report.get('battle') else 'Результати події',bg=PANEL,fg=TEXT).pack(anchor='w')
     if report.get('partial'):tk.Label(head,text='Статистика від першої дії після оновлення гри.',bg=PANEL,fg=TEXT,wraplength=420).pack(anchor='w',pady=6)
     footer=tk.Frame(win,bg=PANEL);footer.pack(side='bottom',fill='x',padx=18,pady=12)
-    scroll=tk.Canvas(win,bg=PANEL,highlightthickness=0)
-    bar=ttk.Scrollbar(win,command=scroll.yview);bar.pack(side='right',fill='y')
-    scroll.pack(fill='both',expand=True,padx=18);scroll.configure(yscrollcommand=bar.set)
+    viewport=tk.Frame(win,bg=PANEL);viewport.pack(fill='both',expand=True,padx=18)
+    viewport.rowconfigure(0,weight=1);viewport.columnconfigure(0,weight=1)
+    scroll=tk.Canvas(viewport,bg=PANEL,highlightthickness=0)
+    bar=ttk.Scrollbar(viewport,orient='vertical',command=scroll.yview)
+    scroll.grid(row=0,column=0,sticky='nsew');bar.grid(row=0,column=1,sticky='ns')
+    from ui.scrolling import auto_scrollbar
+    auto_scrollbar(scroll,bar,grid=True)
     body=tk.Frame(scroll,bg=PANEL);node=scroll.create_window(0,0,window=body,anchor='nw')
+    body.columnconfigure(0,weight=1)
     body.bind('<Configure>',lambda e:scroll.configure(scrollregion=scroll.bbox('all')))
-    scroll.bind('<Configure>',lambda e:scroll.itemconfigure(node,width=e.width))
+    def resize(event):
+        scroll.itemconfigure(node,width=event.width)
+    scroll.bind('<Configure>',resize)
+    def wheel(event):
+        if event.num==4:step=-1
+        elif event.num==5:step=1
+        else:step=-1 if event.delta>0 else 1
+        scroll.yview_scroll(step,'units')
+        return 'break'
+    # A reused event window still has bindings to its destroyed narrative canvas.
+    for sequence in ('<MouseWheel>','<Button-4>','<Button-5>'):win.bind(sequence,wheel)
     from event_results import groups
+    index=0
     for title,rows in zip(('Стани','Предмети'),groups(report)):
-        tk.Label(body,text=title,bg=PANEL,fg=GOLD,font=('Segoe UI',13,'bold')).pack(anchor='w',pady=(12,4))
-        if not rows:tk.Label(body,text='Немає змін' if title=='Стани' else 'Немає предметів',bg=PANEL,fg=TEXT).pack(anchor='w',pady=5)
-        for row in rows:
-            line=tk.Frame(body,bg=PANEL);line.pack(fill='x',pady=4)
-            art=tk.Canvas(line,width=48,height=48,bg=PANEL,highlightthickness=0);art.pack(side='left',padx=(0,12));reward_icon(art,row)
-            label=tk.Label(line,text=row['text'],bg=PANEL,fg=row.get('color',TEXT),wraplength=570,justify='left',anchor='w');label.pack(side='left',fill='x',expand=True)
-            label.bind('<Configure>',lambda e:e.widget.configure(wraplength=max(80,e.width)))
+        tk.Label(body,text=title,bg=PANEL,fg=GOLD,font=('Segoe UI',13,'bold')).grid(row=index,column=0,sticky='w',pady=(12,4))
+        index+=1
+        if not rows:
+            tk.Label(body,text='Немає змін' if title=='Стани' else 'Немає предметів',bg=PANEL,fg=TEXT).grid(row=index,column=0,sticky='w',pady=5)
+            index+=1
+        else:
+            ResultGroup(body,rows).grid(row=index,column=0,sticky='ew',pady=(0,16))
+            index+=1
     local=any(row.get('destination')=='loot' for row in report['rows'])
     def close():
         if not win.winfo_exists():return

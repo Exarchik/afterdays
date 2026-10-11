@@ -13,12 +13,15 @@ def show(app,ident,win=None):
     event_ui.clear(win)
     tk.Label(win,text=tr('update024.lock_info'),bg=PANEL,fg=TEXT,wraplength=530,justify='left').pack(padx=20,pady=15)
     c=tk.Canvas(win,width=540,height=250,bg='#17221d',highlightthickness=0);c.pack(fill='both',expand=True,padx=15)
-    angle=tk.DoubleVar(value=90);busy=[False];closed=[False]
+    angle=tk.DoubleVar(value=90);busy=[False];closed=[False];pose=[0,False]
     slider=ttk.Scale(win,from_=0,to=180,variable=angle,command=lambda value:paint());slider.pack(fill='x',padx=30,pady=10)
     status=tk.Label(win,bg=PANEL,fg=GOLD);status.pack(pady=6)
     def paint(rotation=0,broken=False):
         if not win.winfo_exists():return
-        c.delete('all');x=max(270,c.winfo_width()/2);y=140
+        pose[0]=rotation;pose[1]=broken
+        width=c.winfo_width();height=c.winfo_height()
+        if width<=1 or height<=1:return
+        c.delete('all');x=width/2;y=height/2
         c.create_arc(x-100,y-115,x+100,y+85,start=0,extent=180,outline='#6f8777',style='arc',width=2)
         for a in range(0,181,15):
             r=math.radians(a);c.create_line(x+94*math.cos(r),y-15-94*math.sin(r),x+101*math.cos(r),y-15-101*math.sin(r),fill='#a9b5a2')
@@ -28,6 +31,7 @@ def show(app,ident,win=None):
         c.create_line(x-23*math.sin(r),y-23*math.cos(r),x+23*math.sin(r),y+23*math.cos(r),fill='#d4d0a4',width=7)
         r=math.radians(angle.get());length=55 if broken else 112
         c.create_line(x,y,x+length*math.cos(r),y-length*math.sin(r),fill='#e48969' if broken else '#d5e3cf',width=4)
+    c.bind('<Configure>',lambda event:paint(*pose))
     def attempt():
         if busy[0] or closed[0]:return
         if g.count('parts')<1:status.config(text=tr('update024.lock_need'));return

@@ -51,13 +51,13 @@ class Consumables:
         item=self.consumable_candidate(token)
         return bool(item and (not self.battle or self.battle['ap']>=definition(item)['ap_cost']))
 
-    def apply_consumable(self,item,automatic=False,target=None):
+    def apply_consumable(self,item,automatic=False,target=None,source=None):
         
         import module_rules
         d=definition(item)
         if self.battle and not automatic and self.battle['ap']<d['ap_cost']:return False
         if target is None and not self.consumable_useful(item):return False
-        item_rules.extract(self.bag,item,1)
+        if item_rules.extract(self.bag if source is None else source,item,1) is None:return False
         if self.battle and not automatic:self.battle['ap']-=d['ap_cost']
         if d['radiation_heal']:self.cure_radiation(d['radiation_heal'])
         if d['heal'] or d['heal_percent']:self.regenerate(d['heal']+math.ceil(self.max_hp*d['heal_percent']/100))

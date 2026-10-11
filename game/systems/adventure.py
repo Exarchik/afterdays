@@ -588,6 +588,7 @@ class AdventureMixin:
             expected={k for k in vars(game) if k!='rng' and not k.startswith('_')}
             # Saves made before directional arena entry have no previous step.
             if 'last_world_entry' in expected:data.setdefault('last_world_entry',None)
+            if 'provisions' in expected:data.setdefault('provisions',[])
             if version<16 and 'world_distance_remainder' not in data:expected.discard('world_distance_remainder')
             if version<13 and 'reputation_state' not in data:expected.discard('reputation_state')
             if version==4:expected-= {'explored','known_cities','map_rewards','rad_turns'}

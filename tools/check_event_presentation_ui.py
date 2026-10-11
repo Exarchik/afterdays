@@ -65,11 +65,26 @@ def check(root,app):
         app.dialog.close_dialog()
         # Synchronous confirmation must block keys and restore dialog state.
         def dismiss():
-            assert isinstance(app.dialog,tk.Frame)
+            assert app.dialog.winfo_width()<root.winfo_width()
+            assert app.dialog.winfo_height()<root.winfo_height()
+            assert root.grab_current() is app.dialog
             next(w for w in descendants(app.dialog) if isinstance(w,ttk.Button) and w.cget('text')=='Ні').invoke()
         root.after(100,dismiss)
         assert game_dialogs.askyesno('Перевірка','Залишити предмети?',parent=root) is False
         assert app.dialog is None
+        storage_window=app.popup('Власне сховище','940x680')
+        Storage(storage_window,app).pack(fill='both',expand=True)
+        def cancel_exit():
+            prompt=app.dialog
+            assert str(prompt.transient())==str(storage_window)
+            assert root.grab_current() is prompt
+            order=list(map(str,root.tk.splitlist(root.tk.call('wm','stackorder',root))))
+            assert order.index(str(prompt))>order.index(str(storage_window))
+            next(w for w in descendants(prompt) if isinstance(w,ttk.Button) and w.cget('text')=='Скасувати').invoke()
+        root.after(150,cancel_exit)
+        app.close()
+        assert app.dialog is storage_window and root.grab_current() is storage_window
+        storage_window.close_dialog()
         import battle_results
         import game.items as p
         g.battle=dict(w=10,h=10,walls=[],pos=[1,1],enemies=[],ap=6,max_ap=6,round=1,

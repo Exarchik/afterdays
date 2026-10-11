@@ -1,5 +1,6 @@
 """Explicit gameplay composition; systems cooperate in established dispatch order."""
 from game.progression import ProgressionGame
+from game.systems.provisions import ProvisionsMixin
 
 from game.systems.adventure import AdventureMixin
 from game.systems.economy import EconomyMixin
@@ -48,6 +49,7 @@ from game.systems.arena_exits import ArenaExitsMixin
 
 
 class Game(
+    ProvisionsMixin,
     FencePassagesMixin,
     CacheFeedbackMixin,
     BattleFeedbackMixin,

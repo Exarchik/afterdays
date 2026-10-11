@@ -36,10 +36,14 @@ class SurvivalTests(unittest.TestCase):
         self.assertEqual(g.hp,g.max_hp);self.assertEqual(g.radiation_injury,50)
 
     def test_hunger_twenty_steps_autoeat_and_ten_satiety(self):
-        g=self.game();before=g.count('food');g.hp=5
+        g=self.game();g.hp=5
+        food=next(i for i in g.bag if i['kind']=='food')
+        g.pack_provision(food['id']);before=food['qty'];bag_count=g.count('food')
         for _ in range(19):g.step(1,0)
-        self.assertEqual(g.hunger,1);self.assertEqual(g.count('food'),before)
-        g.step(1,0);self.assertEqual(g.hunger,10);self.assertEqual(g.count('food'),before-1)
+        self.assertEqual(g.hunger,1);self.assertEqual(food['qty'],before)
+        g.step(1,0);self.assertEqual(g.hunger,10)
+        self.assertEqual(sum(i.get('qty',1) for i in g.provisions),before-1)
+        self.assertEqual(g.count('food'),bag_count)
         self.assertEqual(g.hp,5)
 
     def test_starvation_ap_threshold_and_death(self):
