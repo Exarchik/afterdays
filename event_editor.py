@@ -58,7 +58,15 @@ class EffectDialog(Dialog):
         self.consumables=library.store.data['consumables'] if library else catalog.consumable_catalog()
         self.item_choice=tk.StringVar();self.item_choices={};self.item_kind=None
         if not cost:self.item_field=row(self.body,'Їжа / препарат',self.item_choice,[])
-        self.values = {}
+        if not cost and not cache:
+            factions,monsters=catalog.ambush_catalog()
+            self.ambush_choices={'Змішана група':('faction','mixed')}
+            self.ambush_choices.update({'Фракція: '+d['name']+' ['+k+']':('faction',k) for k,d in factions['factions'].items() if d['members']})
+            self.ambush_choices.update({'Монстр: '+d.get('name',k)+' ['+k+']':('monster_id',k) for k,d in monsters.items()})
+            selected=('monster_id',self.original['monster_id']) if self.original.get('monster_id') else ('faction',self.original.get('faction','mixed'))
+            self.ambush_choice=tk.StringVar(value=next((label for label,value in self.ambush_choices.items() if value==selected),'Змішана група'))
+            self.ambush_field=row(self.body,'Учасники засідки',self.ambush_choice,list(self.ambush_choices))
+        self.values = {};self.value_fields={}
         self.duration = tk.StringVar(value=str(self.original.get('duration',10)))
         fields = [('amount', 'Кількість / мінімум', 1)]
         if not cost: fields += [('maximum', 'Максимум (необов’язково)', ''), ('per_level', 'Додати за кожен рівень L', 0),
@@ -67,7 +75,7 @@ class EffectDialog(Dialog):
         for key, label, default in fields:
             value = self.original.get(key, default)
             if key == 'chance': value = self.original.get('chance', 1)*100
-            var = tk.StringVar(value=str(value)); self.values[key] = var; row(self.body, label, var)
+            var = tk.StringVar(value=str(value)); self.values[key] = var; self.value_fields[key]=row(self.body, label, var)
         self.ammo = tk.StringVar(value=self.original.get('ammo', 'random'))
         self.destination = tk.StringVar(value='Рюкзак' if self.original.get('destination') == 'bag' else 'Здобич')
         if not cost:
@@ -95,11 +103,21 @@ class EffectDialog(Dialog):
             self.item_kind=kind
         self.help.configure(text='Стос кредитів усередині сейфа. Задайте додатну кількість або діапазон; можна налаштувати шанс і добавку за рівень.' if self.cache and kind=='money' else catalog.EFFECTS[kind][1])
         if hasattr(self,'duration_field'):self.duration_field.configure(state='normal' if kind in catalog.TIMED_EFFECTS else 'disabled')
+        if hasattr(self,'ambush_field'):self.ambush_field.configure(state='readonly' if kind=='ambush' else 'disabled')
+        for key in ('maximum','per_level','step','step_cap'):
+            if key in self.value_fields:self.value_fields[key].configure(state='disabled' if kind=='ambush' else 'normal')
 
     def read(self):
         result = {'kind': self.labels[self.kind.get()], 'amount': int(self.values['amount'].get())}
         if self.cost:
             if result['amount'] <= 0: raise ValueError('Витрата має бути додатною.')
+            return result
+        if result['kind']=='ambush':
+            key,value=self.ambush_choices[self.ambush_choice.get()];result[key]=value
+            result['chance']=float(self.values['chance'].get())/100
+            error=catalog.ambush_error(result)
+            if error:raise ValueError(error)
+            if not 0<=result['chance']<=1:raise ValueError('Шанс має бути від 0 до 100%.')
             return result
         if result['kind'] in ('food','med','rad','repairkit'):
             ident=self.item_choices[self.item_choice.get()]
@@ -269,7 +287,11 @@ class Editor(ttk.Frame):
         right = ttk.Frame(split, padding=(12,0,0,0)); split.add(right, weight=3)
         self.query = tk.StringVar(); ttk.Entry(left, textvariable=self.query).pack(fill='x', pady=(0,6))
         ttk.Label(left, text='Пошук за назвою, ID або описом').pack(anchor='w')
-        self.tree = ttk.Treeview(left, show='tree', selectmode='browse'); self.tree.pack(fill='both', expand=True, pady=6)
+        listing=ttk.Frame(left);listing.pack(fill='both',expand=True,pady=6)
+        self.tree = ttk.Treeview(listing, show='tree', selectmode='browse')
+        tree_scroll=ttk.Scrollbar(listing,orient='vertical',command=self.tree.yview)
+        tree_scroll.pack(side='right',fill='y');self.tree.pack(fill='both',expand=True)
+        self.tree.configure(yscrollcommand=tree_scroll.set)
         self.tree.bind('<<TreeviewSelect>>', self.select); self.query.trace_add('write', self.filter)
         self.book = ttk.Notebook(right); self.book.pack(fill='both', expand=True)
         general = ttk.Frame(self.book, padding=12); actions = ttk.Frame(self.book, padding=12)

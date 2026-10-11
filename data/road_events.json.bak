@@ -144,90 +144,6 @@
       "legacy_group": "basic"
     },
     {
-      "id": "wounded",
-      "category": "help",
-      "terrain": "any",
-      "enabled": true,
-      "weight": 1.0,
-      "title": "Поранений біля дороги",
-      "description": "Під уламком дорожнього знака сидить поранений розвідник.",
-      "art": "event_theme:wounded",
-      "choices": [
-        {
-          "id": "help",
-          "text": "Дати аптечку",
-          "costs": [
-            {
-              "kind": "med",
-              "amount": 1
-            }
-          ],
-          "outcomes": [
-            {
-              "chance": 1,
-              "effects": [
-                {
-                  "kind": "xp",
-                  "amount": 20
-                },
-                {
-                  "kind": "money",
-                  "amount": 60
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "id": "alt_help",
-          "text": "Зробити бинт з 2х фрагментів тканини",
-          "costs": [
-            {
-              "kind": "fragments",
-              "amount": 2
-            }
-          ],
-          "outcomes": [
-            {
-              "chance": 1.0,
-              "effects": [
-                {
-                  "kind": "xp",
-                  "amount": 12,
-                  "per_level": 0,
-                  "step": 0,
-                  "step_cap": 0,
-                  "chance": 1.0,
-                  "destination": "loot"
-                },
-                {
-                  "kind": "money",
-                  "amount": 35,
-                  "per_level": 0,
-                  "step": 0,
-                  "step_cap": 0,
-                  "chance": 1.0,
-                  "destination": "loot"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "id": "leave",
-          "text": "Побажати удачі й піти",
-          "costs": [],
-          "outcomes": [
-            {
-              "chance": 1,
-              "effects": []
-            }
-          ]
-        }
-      ],
-      "legacy_group": "basic"
-    },
-    {
       "id": "snare",
       "category": "help",
       "terrain": "forest",
@@ -243,7 +159,7 @@
           "costs": [],
           "outcomes": [
             {
-              "chance": 1,
+              "chance": 1.0,
               "effects": [
                 {
                   "kind": "xp",
@@ -253,6 +169,12 @@
                   "kind": "damage",
                   "amount": 3,
                   "chance": 0.25
+                },
+                {
+                  "kind": "ambush",
+                  "amount": 1,
+                  "faction": "monsters",
+                  "chance": 0.4
                 }
               ]
             }
@@ -489,6 +411,90 @@
         }
       ],
       "legacy_group": "terrain"
+    },
+    {
+      "id": "wounded",
+      "category": "help",
+      "terrain": "road",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Поранений біля дороги",
+      "description": "Під уламком дорожнього знака сидить поранений розвідник.",
+      "art": "event_theme:wounded",
+      "choices": [
+        {
+          "id": "help",
+          "text": "Дати аптечку",
+          "costs": [
+            {
+              "kind": "med",
+              "amount": 1
+            }
+          ],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "xp",
+                  "amount": 20
+                },
+                {
+                  "kind": "money",
+                  "amount": 60
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "alt_help",
+          "text": "Зробити бинт з 2х фрагментів тканини",
+          "costs": [
+            {
+              "kind": "fragments",
+              "amount": 2
+            }
+          ],
+          "outcomes": [
+            {
+              "chance": 1.0,
+              "effects": [
+                {
+                  "kind": "xp",
+                  "amount": 12,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "money",
+                  "amount": 35,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Побажати удачі й піти",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "basic"
     },
     {
       "id": "event_001",
@@ -1252,7 +1258,7 @@
       "weight": 1.0,
       "title": "Дірка в паркані",
       "description": "Серед пошкоджених секцій паркану ви помічаєте отвір. Його можна розчистити й використовувати як прохід в обидва боки.",
-      "art": "event_theme:toll",
+      "art": "art_custom_031",
       "choices": [
         {
           "id": "open",
@@ -1394,50 +1400,6 @@
         }
       ],
       "legacy_group": "basic"
-    },
-    {
-      "id": "event_015",
-      "category": "exploration",
-      "terrain": "any",
-      "enabled": true,
-      "weight": 1.0,
-      "title": "Смоляна яма",
-      "description": "Ви не помітили під ногами смоляну яму. Що ж, можна використати це проти ворогів",
-      "art": "art_custom_087",
-      "choices": [
-        {
-          "id": "leave",
-          "text": "Піднятись і продовжити шлях",
-          "costs": [],
-          "outcomes": [
-            {
-              "chance": 1.0,
-              "effects": [
-                {
-                  "kind": "damage",
-                  "amount": 10,
-                  "per_level": 0,
-                  "step": 0,
-                  "step_cap": 0,
-                  "chance": 1.0,
-                  "destination": "loot"
-                },
-                {
-                  "kind": "buff_stealth",
-                  "amount": 0,
-                  "maximum": 0,
-                  "per_level": 0,
-                  "step": 0,
-                  "step_cap": 0,
-                  "chance": 1.0,
-                  "duration": 15,
-                  "destination": "loot"
-                }
-              ]
-            }
-          ]
-        }
-      ]
     },
     {
       "id": "broken_radio",
@@ -2037,6 +1999,50 @@
                   "step": 0,
                   "step_cap": 0,
                   "chance": 0.5,
+                  "destination": "loot"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "event_015",
+      "category": "exploration",
+      "terrain": "waste",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Смоляна яма",
+      "description": "Ви не помітили під ногами смоляну яму. Що ж, можна використати це проти ворогів",
+      "art": "art_custom_087",
+      "choices": [
+        {
+          "id": "leave",
+          "text": "Піднятись і продовжити шлях",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1.0,
+              "effects": [
+                {
+                  "kind": "damage",
+                  "amount": 10,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "buff_stealth",
+                  "amount": 0,
+                  "maximum": 0,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "duration": 15,
                   "destination": "loot"
                 }
               ]
@@ -3259,7 +3265,7 @@
           "costs": [],
           "outcomes": [
             {
-              "chance": 0.7,
+              "chance": 0.5,
               "effects": [
                 {
                   "kind": "parts",
@@ -3294,6 +3300,17 @@
                 {
                   "kind": "damage",
                   "amount": 8
+                }
+              ]
+            },
+            {
+              "chance": 0.2,
+              "effects": [
+                {
+                  "kind": "ambush",
+                  "amount": 2,
+                  "faction": "monsters",
+                  "chance": 1.0
                 }
               ]
             }
@@ -3432,6 +3449,17 @@
                 {
                   "kind": "parts",
                   "amount": 7
+                },
+                {
+                  "kind": "ammo",
+                  "amount": 10,
+                  "maximum": 15,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "ammo": "random",
+                  "destination": "loot"
                 }
               ]
             },
@@ -4214,44 +4242,6 @@
       "legacy_group": "simple"
     },
     {
-      "id": "sand_lock",
-      "category": "hazards",
-      "terrain": "any",
-      "enabled": true,
-      "weight": 1.0,
-      "title": "Пісок у механізмі",
-      "description": "Активна зброя і броня пошкоджені.",
-      "art": "art_custom_065",
-      "choices": [
-        {
-          "id": "leave",
-          "text": "Продовжити",
-          "costs": [],
-          "outcomes": [
-            {
-              "chance": 1.0,
-              "effects": [
-                {
-                  "kind": "wear",
-                  "amount": 8
-                },
-                {
-                  "kind": "wear_armor",
-                  "amount": 8,
-                  "per_level": 0,
-                  "step": 0,
-                  "step_cap": 0,
-                  "chance": 1.0,
-                  "destination": "loot"
-                }
-              ]
-            }
-          ]
-        }
-      ],
-      "legacy_group": "simple"
-    },
-    {
       "id": "event_013",
       "title": "Радіаційний ангар",
       "description": "Невідомий сказав Вам, що всередині ангару з радіоактивними відходами, точно є шось корисне, але він не ризикне власним життям заради цього",
@@ -4370,182 +4360,6 @@
       ]
     },
     {
-      "id": "mines",
-      "category": "hazards",
-      "terrain": "any",
-      "enabled": true,
-      "weight": 1.0,
-      "title": "Старе мінне поле",
-      "description": "Ви помітили дріт під пилом. Можна обійти або ризикнути.",
-      "art": "event_theme:mines",
-      "choices": [
-        {
-          "id": "careful",
-          "text": "Обережно обійти",
-          "costs": [],
-          "outcomes": [
-            {
-              "chance": 1,
-              "effects": [
-                {
-                  "kind": "xp",
-                  "amount": 10
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "id": "rush",
-          "text": "Ризикнути заради припасів",
-          "costs": [],
-          "outcomes": [
-            {
-              "chance": 0.5,
-              "effects": [
-                {
-                  "kind": "wear_armor",
-                  "amount": 5,
-                  "maximum": 9,
-                  "per_level": 0,
-                  "step": 0,
-                  "step_cap": 0,
-                  "chance": 1.0,
-                  "destination": "loot"
-                },
-                {
-                  "kind": "damage",
-                  "amount": 6,
-                  "maximum": 14
-                }
-              ]
-            },
-            {
-              "chance": 0.5,
-              "effects": [
-                {
-                  "kind": "med",
-                  "amount": 2
-                },
-                {
-                  "kind": "rad",
-                  "amount": 1,
-                  "per_level": 0,
-                  "step": 0,
-                  "step_cap": 0,
-                  "chance": 0.5,
-                  "destination": "loot"
-                },
-                {
-                  "kind": "money",
-                  "amount": 10,
-                  "maximum": 30,
-                  "per_level": 5,
-                  "step": 0,
-                  "step_cap": 0,
-                  "chance": 0.5,
-                  "destination": "loot"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "id": "leave",
-          "text": "Відступити від небезпечного місця",
-          "costs": [],
-          "outcomes": [
-            {
-              "chance": 1,
-              "effects": []
-            }
-          ]
-        }
-      ],
-      "legacy_group": "basic"
-    },
-    {
-      "id": "event_002",
-      "title": "Яма з радіоактивними відходами",
-      "description": "Ви випадково впали у яму з радіоактивними відходами, прийміть радіопротектор",
-      "category": "hazards",
-      "terrain": "any",
-      "enabled": true,
-      "weight": 1.0,
-      "art": "art_custom_097",
-      "choices": [
-        {
-          "id": "act",
-          "text": "Прийняти радіопротектор",
-          "costs": [
-            {
-              "kind": "rad",
-              "amount": 1
-            }
-          ],
-          "outcomes": [
-            {
-              "chance": 1.0,
-              "effects": [
-                {
-                  "kind": "xp",
-                  "amount": 12,
-                  "maximum": 20,
-                  "per_level": 0,
-                  "step": 0,
-                  "step_cap": 0,
-                  "chance": 1.0,
-                  "destination": "loot"
-                },
-                {
-                  "kind": "radiation",
-                  "amount": 5,
-                  "maximum": 10,
-                  "per_level": 0,
-                  "step": 0,
-                  "step_cap": 0,
-                  "chance": 1.0,
-                  "destination": "loot"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "id": "leave",
-          "text": "Проігнорувати і піти далі",
-          "costs": [],
-          "outcomes": [
-            {
-              "chance": 1.0,
-              "effects": [
-                {
-                  "kind": "damage",
-                  "amount": 8,
-                  "maximum": 15,
-                  "per_level": 2,
-                  "step": 0,
-                  "step_cap": 0,
-                  "chance": 1.0,
-                  "destination": "loot"
-                },
-                {
-                  "kind": "radiation",
-                  "amount": 40,
-                  "maximum": 60,
-                  "per_level": 0,
-                  "step": 0,
-                  "step_cap": 0,
-                  "chance": 1.0,
-                  "destination": "loot"
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    {
       "id": "thorn_patch",
       "category": "hazards",
       "terrain": "forest",
@@ -4634,6 +4448,12 @@
             {
               "chance": 1.0,
               "effects": [
+                {
+                  "kind": "ambush",
+                  "amount": 3,
+                  "faction": "bandits",
+                  "chance": 1.0
+                },
                 {
                   "kind": "xp",
                   "amount": 10
@@ -4838,6 +4658,260 @@
       ],
       "legacy_group": "additional",
       "legacy_release": "0.32"
+    },
+    {
+      "id": "event_017",
+      "category": "hazards",
+      "terrain": "waste",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Дика пустка",
+      "description": "Схоже ви натрапили на зграю диких монстрів, що терзають тіло загиблого мандрівника",
+      "art": "art_custom_017",
+      "choices": [
+        {
+          "id": "fight",
+          "text": "До бою!",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1.0,
+              "effects": [
+                {
+                  "kind": "ambush",
+                  "amount": 3,
+                  "faction": "infected",
+                  "chance": 1.0
+                },
+                {
+                  "kind": "gear",
+                  "amount": 1,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "legacy_release": "0.32"
+    },
+    {
+      "id": "sand_lock",
+      "category": "hazards",
+      "terrain": "waste",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Пісок у механізмі",
+      "description": "Активна зброя і броня пошкоджені.",
+      "art": "art_custom_065",
+      "choices": [
+        {
+          "id": "leave",
+          "text": "Продовжити",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1.0,
+              "effects": [
+                {
+                  "kind": "wear",
+                  "amount": 8
+                },
+                {
+                  "kind": "wear_armor",
+                  "amount": 8,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "legacy_group": "simple"
+    },
+    {
+      "id": "mines",
+      "category": "hazards",
+      "terrain": "waste",
+      "enabled": true,
+      "weight": 1.0,
+      "title": "Старе мінне поле",
+      "description": "Ви помітили дріт під пилом. Можна обійти або ризикнути.",
+      "art": "event_theme:mines",
+      "choices": [
+        {
+          "id": "careful",
+          "text": "Обережно обійти",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": [
+                {
+                  "kind": "xp",
+                  "amount": 10
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "rush",
+          "text": "Ризикнути заради припасів",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 0.5,
+              "effects": [
+                {
+                  "kind": "wear_armor",
+                  "amount": 5,
+                  "maximum": 9,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "damage",
+                  "amount": 6,
+                  "maximum": 14
+                }
+              ]
+            },
+            {
+              "chance": 0.5,
+              "effects": [
+                {
+                  "kind": "med",
+                  "amount": 2
+                },
+                {
+                  "kind": "rad",
+                  "amount": 1,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 0.5,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "money",
+                  "amount": 10,
+                  "maximum": 30,
+                  "per_level": 5,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 0.5,
+                  "destination": "loot"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Відступити від небезпечного місця",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "legacy_group": "basic"
+    },
+    {
+      "id": "event_002",
+      "title": "Яма з радіоактивними відходами",
+      "description": "Ви випадково впали у яму з радіоактивними відходами, прийміть радіопротектор",
+      "category": "hazards",
+      "terrain": "waste",
+      "enabled": true,
+      "weight": 1.0,
+      "art": "art_custom_097",
+      "choices": [
+        {
+          "id": "act",
+          "text": "Прийняти радіопротектор",
+          "costs": [
+            {
+              "kind": "rad",
+              "amount": 1
+            }
+          ],
+          "outcomes": [
+            {
+              "chance": 1.0,
+              "effects": [
+                {
+                  "kind": "xp",
+                  "amount": 12,
+                  "maximum": 20,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "radiation",
+                  "amount": 5,
+                  "maximum": 10,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Проігнорувати і піти далі",
+          "costs": [],
+          "outcomes": [
+            {
+              "chance": 1.0,
+              "effects": [
+                {
+                  "kind": "damage",
+                  "amount": 8,
+                  "maximum": 15,
+                  "per_level": 2,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                },
+                {
+                  "kind": "radiation",
+                  "amount": 40,
+                  "maximum": 60,
+                  "per_level": 0,
+                  "step": 0,
+                  "step_cap": 0,
+                  "chance": 1.0,
+                  "destination": "loot"
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "event_011",

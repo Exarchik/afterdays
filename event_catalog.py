@@ -44,6 +44,7 @@ EFFECTS = {
     'discover': ('Відкрити локацію', 'Відкрити найближчу невідому локацію; кількість — XP, якщо всі вже відкриті.'),
     'gear': ('Спорядження', 'Випадковий предмет рівня місцевості (від L−2 до L), стан 30–90.'),
     'cache': ('Відкрити замок', 'Створити постійний сховок із вмістом на вкладці «Сховок» і відкрити мінігру.'),
+    'ambush': ('Засідка', 'Напад вибраної фракції, змішаної групи або конкретного монстра. Кількість: 1–30. Учасники засідки ворожі до гравця лише в цьому бою.'),
 }
 TIMED_EFFECTS = {'buff_regen','buff_satiety','buff_stealth'}
 ITEM_KINDS = {'food', 'med', 'rad', 'repairkit', 'parts', 'fragments', 'ammo'}
@@ -62,6 +63,26 @@ def ordered(events):
 
 def consumable_catalog():
     return json.loads((ROOT/'data/consumables.json').read_text(encoding='utf-8'))
+
+
+def ambush_catalog():
+    factions=json.loads((ROOT/'data/factions.json').read_text(encoding='utf-8'))
+    monsters=json.loads((ROOT/'data/monsters.json').read_text(encoding='utf-8'))
+    from i18n import t
+    for key,value in monsters.items():value.setdefault('name',t(key+'.name'))
+    return factions,monsters
+
+
+def ambush_error(effect):
+    factions,monsters=ambush_catalog()
+    count=effect.get('amount',1)
+    if type(count) is not int or not 1<=count<=30:return 'Кількість учасників засідки: 1–30.'
+    if any(effect.get(k) for k in ('maximum','per_level','step','step_cap')):return 'Для засідки задайте точну кількість без діапазону та добавок.'
+    monster=effect.get('monster_id');faction=effect.get('faction')
+    if monster:
+        if faction or monster not in monsters:return 'Невідомий монстр або одночасно вибрана фракція.'
+    elif faction!='mixed' and (faction not in factions['factions'] or not factions['factions'][faction]['members']):return 'Виберіть фракцію з учасниками.'
+    if faction=='mixed' and count<2:return 'Для змішаної засідки потрібно щонайменше 2 учасники.'
 
 def validate(document, art=None, consumables=None):
     """Reject malformed content before writing or applying any game effects."""
@@ -95,6 +116,9 @@ def validate(document, art=None, consumables=None):
                 if not isinstance(effect, dict): errors.append(label+'ефект має бути об’єктом'); continue
                 kind = effect.get('kind')
                 need(kind in EFFECTS, label+'невідомий ефект '+str(kind))
+                if kind=='ambush':
+                    error=ambush_error(effect)
+                    need(not error,label+str(error))
                 if 'item_id' in effect:
                     item_id=effect['item_id']
                     need(kind in ('food','med','rad','repairkit') and isinstance(item_id,str) and (item_id=='random' or consumables.get(item_id,{}).get('kind')==kind),label+'предмет не відповідає категорії нагороди')
@@ -138,6 +162,11 @@ def validate(document, art=None, consumables=None):
                 need(number(chance) and 0 <= chance <= 1, label+'шанс результату має бути 0–1')
                 if number(chance): total += chance
                 effects(outcome.get('effects', []))
+                entries=outcome.get('effects',[])
+                if isinstance(entries,list):
+                    kinds=[e.get('kind') for e in entries if isinstance(e,dict)]
+                    need(kinds.count('ambush')<=1,label+'лише одна засідка в результаті')
+                    need(not ('ambush' in kinds and 'cache' in kinds),label+'засідка та відкриття замка мають бути в окремих результатах')
             need(abs(total - 1) < 1e-8, label+'сума шансів результатів має бути 100%')
         if 'cache' in event: effects(event['cache'], True)
     return errors
@@ -172,6 +201,11 @@ def amount(effect, level, rng):
 
 def describe(effect):
     kind = effect['kind']; n = str(effect.get('amount', 1))
+    if kind=='ambush':
+        factions,monsters=ambush_catalog()
+        target=(monsters.get(effect['monster_id'],{}).get('name',effect['monster_id']) if effect.get('monster_id') else
+                'Змішана група' if effect.get('faction')=='mixed' else factions['factions'].get(effect.get('faction'),{}).get('name',effect.get('faction','?')))
+        return f'Засідка: {target}, {n} учасників ({effect.get("chance",1)*100:g}%)'
     if 'maximum' in effect: n += '…'+str(effect['maximum'])
     if effect.get('per_level'): n += f" + {effect['per_level']}×L"
     if effect.get('step'): n += f" + min({effect.get('step_cap', 0)}, ⌊(L−1)/{effect['step']}⌋)"

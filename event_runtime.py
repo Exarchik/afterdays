@@ -65,7 +65,7 @@ def apply(game, effect, spec):
     import event_results
     start=len(getattr(game,'_events',[]))
     previous=getattr(game,'_event_feedback_color',None)
-    negative=effect['kind'] in ('damage','radiation','satiety_loss','wear','wear_armor') or effect.get('amount',0)<0
+    negative=effect['kind'] in ('ambush','damage','radiation','satiety_loss','wear','wear_armor') or effect.get('amount',0)<0
     game._event_feedback_color='#e56860' if negative else '#9cdda8'
     try:return _apply(game,effect,spec)
     finally:
@@ -80,6 +80,15 @@ def _apply(game, effect, spec):
     kind = effect['kind']; level = game.region_level
     if kind == 'fence_hole':return game.open_fence_hole()
     if effect.get('chance', 1) < 1 and game.rng.random() >= effect['chance']: return
+    if kind=='ambush':
+        error=catalog.ambush_error(effect)
+        if error:raise ValueError(error)
+        if game.battle:return
+        game._event_ambush=effect
+        try:game.start_battle()
+        finally:game._event_ambush=None
+        game.emit(catalog.describe(effect),color='#e56860')
+        return
     if kind == 'cache':
         if game.begin_event_cache(spec):game.emit('Знайдено сховок',color='#9cdda8')
         return
@@ -175,7 +184,8 @@ def resolve(game, choice_id):
             cumulative += outcome['chance']
             if roll < cumulative: selected = outcome; break
     game.road_event = None
-    for effect in selected['effects']:
+    # Apply event rewards before creating combat counters; event XP is not battle XP.
+    for effect in sorted(selected['effects'],key=lambda e:e['kind']=='ambush'):
         # defeat() restores HP, so use hurt_world's result to stop after lethal damage.
         if apply(game, effect, spec) is False: break
     game.log('Подія завершена: '+spec['title']+'.')

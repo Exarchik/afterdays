@@ -15,6 +15,10 @@ class FactionCombatMixin:
         super().start_battle()
         b=self.battle
         if not b:return
+        if getattr(self,'_event_ambush',None):
+            from game.systems.event_ambush import populate
+            populate(self,self._event_ambush)
+            return
         if self.quest_battle or b.get('dungeon'):
             self.prepare_factions();return
         import monster_rules
@@ -47,7 +51,7 @@ class FactionCombatMixin:
                 actor['faction']='infected' if self.rng.random()<.15 else 'monsters'
             else:actor['faction']=self.rng.choice(choices) if choices else 'monsters'
 
-    def hostile_to_player(self,actor):return rules.hostile(rules.faction_of(actor),'player')
+    def hostile_to_player(self,actor):return actor.get('ambush_hostile',False) or rules.hostile(rules.faction_of(actor),'player')
 
     def shot_info(self,enemy):
         if not self.hostile_to_player(enemy):return False,'Дружня фракція',0
