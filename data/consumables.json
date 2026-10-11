@@ -187,7 +187,7 @@
     "damage_percent": 0
   },
   "item_custom_004": {
-    "value": 60,
+    "value": 150,
     "weight": 0.4,
     "ap_cost": 2,
     "heal": 0,

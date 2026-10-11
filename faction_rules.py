@@ -110,13 +110,14 @@ def make_human(rng,ident,faction,level,pos,document=None):
     level=max(1,int(level))
     for slot in ('weapon','armor','helmet'):
         if slot=='armor' and rng.random()<.5:continue
-        pool=[k for k,v in content.EQUIPMENT.items() if v['kind']==slot and v['min_level']<=level]
+        gear_level=rng.randint(1,level)
+        pool=[k for k,v in content.EQUIPMENT.items() if v['kind']==slot and v['min_level']<=gear_level]
         if not pool:continue
-        item=p.equipment(rng.choice(pool),rng.randint(0,d['max_rarity']),rng,level)
+        item=p.equipment(rng.choice(pool),rng.randint(0,d['max_rarity']),rng,gear_level)
         candidates=mr.eligible_modules(item)
         for _ in range(item.get('slots',0)):
             if candidates and rng.random()*100<d['module_chance']:
-                mod=p.module(rng.randint(0,item['rarity']),rng,content.MODULE_IDS.index(rng.choice(candidates)),level)
+                mod=p.module(rng.randint(0,item['rarity']),rng,content.MODULE_IDS.index(rng.choice(candidates)),gear_level)
                 if mr.compatible(item,mod):item['modules'].append(mod)
         gear[slot]=item
     values=human_values(d,level)

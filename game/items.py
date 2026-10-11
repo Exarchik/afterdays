@@ -49,6 +49,7 @@ def module(tier=0,rng=None,index=None,level=1):
     if index is None:
         eligible=[k for k in content.MODULE_IDS if content.MODULE_DATA[k].get('min_level',1)<=level]
         index=(rng or random).choice(eligible or content.MODULE_IDS)
+    tier=max(tier,content.MODULE_DATA[content.module_id(index)].get('min_equipment_rarity',0))
     item=_base_module(tier,rng,index)
     item['level']=max(level,content.MODULE_DATA[item['type_id']].get('min_level',1))
     item['value']=round(30*(tier+1)**2*item['level']**1.3)

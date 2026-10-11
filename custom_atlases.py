@@ -3,6 +3,7 @@ import copy
 import hashlib
 import json
 import math
+import os
 from pathlib import Path
 from art_library import SIZES, WIDTHS, Library, encode, pillow
 
@@ -10,14 +11,14 @@ COLUMNS=8
 PAGE_SIZE=64
 
 
-def pack(store):
+def pack(store, *, force=False):
     """Prepare current and rollback catalogs together, without touching disk."""
     current=copy.deepcopy(store.data['sprites'])
     previous=copy.deepcopy(store.baseline['sprites'])
     entries=[entry for catalog in (current,previous) for entry in catalog.values()
              if entry.get('sheet','').startswith('custom/') and entry.get('inventory_sheet')]
     if not entries:return current,previous,dict(store.pending_assets)
-    if all(e['sheet'].startswith('custom/atlases/') for e in entries) and not any(is_render(Path(p)) for p in store.pending_assets):
+    if not force and all(e['sheet'].startswith('custom/atlases/') for e in entries) and not any(is_render(Path(p)) for p in store.pending_assets):
         return current,previous,dict(store.pending_assets)
     Image,_=pillow();library=Library(store);bundles={};locations={};images={}
     def crop(entry,field,size,height,columns):
@@ -72,9 +73,12 @@ def cleanup(root):
         elif isinstance(value,list):
             for child in value:references(child)
     # An unreadable backup is a reason to retain files, never to guess that they are unused.
-    for path in root.rglob('*.json*'):
-        if '.git' in path.parts or not path.is_file() or not (path.name.endswith('.json') or path.name.endswith('.json.bak')):continue
-        references(json.loads(path.read_text(encoding='utf-8')))
+    ignored={'.git','.venv','venv','env','node_modules','__pycache__','.pytest_cache','.mypy_cache','.codex','.agents'}
+    for folder,dirs,files in os.walk(root,followlinks=False):
+        dirs[:]=[d for d in dirs if d not in ignored and not (Path(folder)/d).is_symlink()]
+        for name in files:
+            if not (name.endswith('.json') or name.endswith('.json.bak')):continue
+            references(json.loads((Path(folder)/name).read_text(encoding='utf-8')))
     removed=0
     for path in custom.rglob('*.png'):
         if not is_render(path) or path.resolve() in keep:continue

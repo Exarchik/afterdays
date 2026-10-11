@@ -16,7 +16,7 @@ def icon(c, item, x, y, size=48, badge=True):
     if item is None:
         return
     if sprites.draw(c,sprites.item_key(item),x,y,size):
-        if badge and item.get('kind')=='weapon' and size>=48:
+        if badge and item.get('kind') in ('weapon','armor','helmet') and size>=48:
             badge_size=32 if size>=96 else 24
             sprites.weapon_badge(c,item,x+size-badge_size,y,badge_size)
         for n,mod in enumerate(item.get('modules',[])):
@@ -159,7 +159,7 @@ def icon(c, item, x, y, size=48, badge=True):
         line(22, 32, 30, 21, 40, 30, fill='#bfd38e', width=2)
         oval(28, 46, 36, 53, fill=GOLD, outline='')
 
-    if badge and k=='weapon' and size>=48:
+    if badge and k in ('weapon','armor','helmet') and size>=48:
         badge_size=32 if size>=96 else 24
         sprites.weapon_badge(c,item,x+size-badge_size,y,badge_size)
     if k in ('armor','helmet'):
@@ -348,7 +348,7 @@ class ItemGrid(tk.Frame):
             art=sprites.inventory_photo(c,item,int(cell-6))
             if art:c.create_image(x+cell/2,y+3,image=art,anchor='n')
             else:icon(c,item,x+(cell-min(cell-8,72))/2,y+3,min(cell-8,72),badge=False)
-            if item['kind']=='weapon':sprites.weapon_badge(c,item,x+cell-28,y+20,24)
+            if item['kind'] in ('weapon','armor','helmet'):sprites.weapon_badge(c,item,x+cell-28,y+3,24)
             for slot,mod in enumerate(item.get('modules',[])):
                 c.create_rectangle(x+7+slot*9,y+46,x+13+slot*9,y+49,fill=catalog.RARITIES[mod['rarity']][1],outline='#14201b')
             if item['kind'] in ('weapon','armor','helmet','module'):
@@ -358,9 +358,11 @@ class ItemGrid(tk.Frame):
                 c.create_rectangle(x+4,y+3,x+24,y+18,fill='#17201c',outline='')
                 broken=item.get('quest_repair') and item.get('durability',0)<100
                 c.create_text(x+14,y+10,text='?' if broken else '✓',fill='#f2cb62' if broken else '#76e89a',font=('Segoe UI',11,'bold'))
-            if item['kind']=='weapon' or item.get('qty',1)>1:
+            if item['kind']=='weapon':
+                c.create_rectangle(x+cell-36,y+29,x+cell-4,y+43,fill='#17201c',outline='')
+            elif item.get('qty',1)>1:
                 c.create_rectangle(x+cell-36,y+3,x+cell-4,y+17,fill='#17201c',outline='')
-            if item['kind']=='weapon':c.create_text(x+cell-6,y+9,text=tr('visuals.0022', v0=__import__('game.systems.combat', fromlist=['shot_cost']).shot_cost(item)),fill=TEXT,font=('Segoe UI',8,'bold'),anchor='e')
+            if item['kind']=='weapon':c.create_text(x+cell-6,y+35,text=tr('visuals.0022', v0=__import__('game.systems.combat', fromlist=['shot_cost']).shot_cost(item)),fill=TEXT,font=('Segoe UI',8,'bold'),anchor='e')
             elif item.get('qty',1)>1:c.create_text(x+cell-6,y+9,text=f'×{item["qty"]}',fill=TEXT,font=('Segoe UI',8,'bold'),anchor='e')
             if item['id']==self.selection:c.create_rectangle(x+5,y+16,x+9,y+20,fill='#ffffff',outline='')
             if item.get('promotion'):

@@ -43,6 +43,9 @@ class AtlasTests(unittest.TestCase):
                 d=custom/name;d.mkdir();(d/'sprite_16.png').write_bytes(b'image')
             (custom/'original.png').write_bytes(b'original')
             (root/'data/sprites.json.bak').write_text(json.dumps({'art':{'sheet':'custom/kept/sprite'}}))
+            for ignored in ('.venv','node_modules'):
+                (root/ignored).mkdir()
+                (root/ignored/'broken.json').write_text('{broken dependency fixture')
             self.assertEqual(atlas.cleanup(root),1)
             self.assertTrue((custom/'kept/sprite_16.png').exists())
             self.assertTrue((custom/'original.png').exists())

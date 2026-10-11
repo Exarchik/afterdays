@@ -22,6 +22,16 @@ def region_color(color,x):
     return '#'+''.join(f'{round(v*(1-ratio)+t*ratio):02x}' for v,t in zip(rgb,tint))
 
 
+def actor_health(canvas,x,y,hp,maximum,defense,color,label=''):
+    """Readable numeric health and defense beside each arena health bar."""
+    x=max(66,min(canvas.winfo_width()-66,x));y=max(30,y)
+    ratio=max(0,min(1,hp/max(1,maximum)))
+    canvas.create_rectangle(x-34,y,x+34,y+4,fill='#23392d',outline='')
+    canvas.create_rectangle(x-34,y,x-34+68*ratio,y+4,fill=color,outline='')
+    canvas.create_text(x,y+12,text=f'{hp:g}/{maximum:g} HP · Зах {defense:g}',fill=TEXT,font=('Segoe UI',8,'bold'))
+    if label:canvas.create_text(x,y-8,text=label,fill=color,font=('Segoe UI',7))
+
+
 def battle_camera(b,width,height,fx=None):
     w,h=b['w'],b['h']
     if b.get('dungeon'):
@@ -129,6 +139,7 @@ def draw_battle(app):
             if hasattr(getattr(app,'fx',None),'position'):px,py=center(app.fx.position('player',b['pos']))
             from visuals import human
             human(c,px,py,u)
+            actor_health(c,px,py-u*2.2,g.hp,g.max_hp,g.defense,'#9cdda8',f'L{g.level}')
         if pos in enemies:
             e=enemies[pos];valid,_,_=g.shot_info(e)
             px,py=center(app.fx.position(e['id'],e['pos'])) if hasattr(getattr(app,'fx',None),'position') else center(pos)
@@ -142,14 +153,14 @@ def draw_battle(app):
             sprite_top=py-size+0.5*u
             monster(c,e,px-size/2,sprite_top,size)
             import faction_rules
-            friendly=not faction_rules.hostile(faction_rules.faction_of(e),'player')
+            friendly=not g.hostile_to_player(e)
             c.create_oval(px-u*.5,py-u*.1,px+u*.5,py+u*.3,outline='#80e3b4' if friendly else '#ed846e',width=2)
             app.iso['sprites'].append((px-size/2,py-size,px+size/2,py+.18*u,pos))
             top=py-size-u*.18
-            c.create_rectangle(px-u*.5,top,px+u*.5,top+3,fill='#23392d',outline='')
-            c.create_rectangle(px-u*.5,top,px-u*.5+u*e['hp']/e['max_hp'],top+3,fill='#d88667',outline='')
             faction_name=faction_rules.catalog()['factions'].get(faction_rules.faction_of(e),{}).get('name','')
-            c.create_text(px,top-7,text=f'L{e.get("level",1)} · {faction_name}'+(' · z' if not e.get('awake',not b.get('dungeon')) else ''),fill='#9cdda8' if friendly else '#e6c18d',font=('Segoe UI',7))
+            actor_health(c,px,top,e['hp'],e['max_hp'],e.get('defense',e.get('armor',0)),
+                         '#9cdda8' if friendly else '#d88667',
+                         f'L{e.get("level",1)} · {faction_name}'+(' · z' if not e.get('awake',not b.get('dungeon')) else ''))
     target=enemies.get(hovered)
     if target:
         valid,reason,chance=g.shot_info(target)

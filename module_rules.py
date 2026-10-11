@@ -172,6 +172,11 @@ def migrate_game(game):
             return
         if obj.get('kind')=='module':
             ident=content.module_id(obj.get('type_id',obj.get('name','')))
+            minimum=content.MODULE_DATA.get(ident,{}).get('min_equipment_rarity',0)
+            if obj.get('rarity',0)<minimum:
+                obj['rarity']=minimum
+                obj['value']=round(30*(minimum+1)**2*obj.get('level',1)**1.3)
+                obj.pop('module_balance_version',None)
             if ident in content.MODULE_DATA and obj.get('module_balance_version')!=VERSION:
                 obj['stats']=module_stats(ident,obj.get('rarity',0),obj.get('level',1),obj.get('tradeoff',False))
                 obj['module_balance_version']=VERSION

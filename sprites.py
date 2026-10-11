@@ -12,9 +12,10 @@ SIZES=(16,24,32,48,64,96,144,192)
 WEAPON_BADGE_TYPES=('kinetic','piercing','energy','electric','thermal')
 
 def weapon_badge_key(item):
-    if item.get('kind')!='weapon':return None
+    if item.get('kind') not in ('weapon','armor','helmet'):return None
     from game.systems.adventure import damage_type
-    return f'weapon_badge:{damage_type(item)}:{max(0,min(4,int(item.get("rarity",0))))}'
+    category=damage_type(item) if item['kind']=='weapon' else item['kind']
+    return f'weapon_badge:{category}:{max(0,min(4,int(item.get("rarity",0))))}'
 
 def weapon_badge(canvas,item,x,y,size=24):
     return draw(canvas,weapon_badge_key(item),x,y,size)
