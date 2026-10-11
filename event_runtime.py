@@ -81,7 +81,8 @@ def _apply(game, effect, spec):
     if kind == 'fence_hole':return game.open_fence_hole()
     if effect.get('chance', 1) < 1 and game.rng.random() >= effect['chance']: return
     if kind == 'cache':
-        game.begin_event_cache(spec); return
+        if game.begin_event_cache(spec):game.emit('Знайдено сховок',color='#9cdda8')
+        return
     if kind == 'gear':
         grant_item(game, effect, item(game, effect, level)); return
     n = catalog.amount(effect, level, game.rng)
@@ -166,7 +167,7 @@ def resolve(game, choice_id):
         else: game.consume(kind, n)
         text=f'−{n} '+catalog.EFFECTS[kind][0]
         game.log(text,color='#e56860');game.emit(text,color='#e56860')
-        game._events[-1]['effect_kind']=kind
+        game._events[-1]['effect_kind']='money_paid' if kind=='money' else kind
     outcomes = choice['outcomes']; selected = outcomes[0]
     if len(outcomes) > 1:
         roll = game.rng.random(); cumulative = 0

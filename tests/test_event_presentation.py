@@ -21,7 +21,7 @@ class EventPresentationTests(unittest.TestCase):
         self.assertTrue(g.resolve_event('yes'))
         report=g._event_results[0]
         self.assertEqual(report['title'],'Тестова подія')
-        self.assertEqual([row['effect_kind'] for row in report['rows']],['money','money','xp','heal','med'])
+        self.assertEqual([row['effect_kind'] for row in report['rows']],['money_paid','money','xp','heal','med'])
         self.assertEqual(report['rows'][3]['text'],'+1 HP')
         self.assertEqual(report['rows'][-1]['item']['type_id'],'item_med')
         self.assertEqual(report['rows'][-1]['item']['qty'],2)
@@ -53,7 +53,8 @@ class EventPresentationTests(unittest.TestCase):
         ident=g._lock_request;g._lock_request=None;cache=g.lock_context(ident)
         self.assertTrue(g.unlock_cache(ident,cache['lock_target']))
         rows=g._event_results[0]['rows']
-        self.assertEqual(rows[0]['effect_kind'],'money')
+        self.assertEqual(rows[0]['effect_kind'],'money_paid')
+        self.assertTrue(any(row.get('effect_kind')=='cache' for row in rows))
         items=[row for row in rows if row.get('item')]
         self.assertEqual(len(items),1);self.assertEqual(items[0]['item']['qty'],3)
         self.assertEqual(items[0]['destination'],'loot')
