@@ -12,6 +12,7 @@ from art_editor import ArtPanel
 from quest_editor import QuestPanel
 from dialogue_editor import DialoguePanel
 from faction_editor import FactionPanel, HumanPanel
+from site_editor import SitePanel
 
 
 class ContentEditor(ttk.Frame):
@@ -36,6 +37,7 @@ class ContentEditor(ttk.Frame):
                 self.items=ConsumablePanel(self.tabs,self.store,self.save_all);self.tabs.add(self.items,text='Предмети')
         self.humans=HumanPanel(self.tabs,self.store,self.save_all);self.tabs.add(self.humans,text='Люди')
         self.factions=FactionPanel(self.tabs,self.store,self.save_all);self.tabs.add(self.factions,text='Фракції')
+        self.sites=SitePanel(self.tabs,self.store,self.save_all);self.tabs.add(self.sites,text='Особливі локації')
         self.tabs.bind('<<NotebookTabChanged>>',lambda e:self.factions.refresh_choices() if self.tabs.select()==str(self.factions) else None)
         self.arts=ArtPanel(self.tabs,self.library,self.commit,self.refresh_assets,self.save_all,lambda:self.events.document['events'])
         self.tabs.add(self.arts,text='Арти')
@@ -43,6 +45,7 @@ class ContentEditor(ttk.Frame):
         root.protocol('WM_DELETE_WINDOW',self.close)
 
     def refresh_assets(self):
+        self.sites.show_art()
         self.humans.show_art()
         self.items.refresh_preview()
         self.events.refresh_art()
@@ -51,6 +54,7 @@ class ContentEditor(ttk.Frame):
             if panel.current:panel.open(panel.current)
 
     def commit(self):
+        if not self.sites.commit():self.tabs.select(self.sites);return False
         if not self.humans.commit():self.tabs.select(self.humans);return False
         self.factions.refresh_choices()
         if not self.factions.commit():self.tabs.select(self.factions);return False
@@ -83,6 +87,7 @@ class ContentEditor(ttk.Frame):
             messagebox.showerror('Зміни не збережено',str(exc),parent=self.root);return False
         for panel in self.panels.values():panel.rebuild();panel.status.set('Збережено · Перезапустіть гру; уже створені предмети в сейві зберігають свої характеристики')
         self.items.rebuild()
+        self.sites.rebuild();self.sites.status.set('Збережено · Перезапустіть гру')
         self.humans.rebuild();self.factions.rebuild()
         self.humans.status.set('Збережено · Перезапустіть гру')
         self.factions.status.set('Збережено · Перезапустіть гру')

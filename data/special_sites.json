@@ -1,0 +1,602 @@
+{
+  "site_001": {
+    "name": "Обсерваторія «Луна»",
+    "legacy_name": "Обсерваторія «Луна»",
+    "npc": "Астроном",
+    "npc_art": "art_custom_124",
+    "role": "quest",
+    "refresh_turns": 100,
+    "stock": []
+  },
+  "site_002": {
+    "name": "Станція Козача",
+    "legacy_name": "Вагон №13",
+    "npc": "Пан Любомир",
+    "npc_art": "art_custom_110",
+    "role": "merchant",
+    "refresh_turns": 100,
+    "stock": [
+      {
+        "kind": "equipment",
+        "amount": 1,
+        "rarity_min": 3,
+        "rarity_max": 3,
+        "chance": 1
+      },
+      {
+        "kind": "module",
+        "amount": 1,
+        "rarity_min": 4,
+        "rarity_max": 4,
+        "chance": 1
+      },
+      {
+        "kind": "food",
+        "item_id": "item_food",
+        "amount": 8,
+        "chance": 1
+      },
+      {
+        "kind": "med",
+        "item_id": "item_med",
+        "amount": 5,
+        "chance": 1
+      }
+    ]
+  },
+  "site_003": {
+    "name": "Стара насосна",
+    "legacy_name": "Стара насосна",
+    "npc": "Інженер Лев",
+    "npc_art": "art_custom_133",
+    "role": "quest",
+    "refresh_turns": 100,
+    "stock": []
+  },
+  "site_004": {
+    "name": "Бункер Залізоголового",
+    "legacy_name": "Бункер «Кедр»",
+    "npc": "Залізоголовий",
+    "npc_art": "art_custom_109",
+    "role": "merchant",
+    "refresh_turns": 100,
+    "stock": [
+      {
+        "kind": "module",
+        "amount": 1,
+        "chance": 1.0,
+        "rarity_min": 0,
+        "rarity_max": 4
+      },
+      {
+        "kind": "food",
+        "item_id": "item_food",
+        "amount": 8,
+        "chance": 1
+      },
+      {
+        "kind": "med",
+        "item_id": "item_med",
+        "amount": 5,
+        "chance": 1
+      },
+      {
+        "kind": "parts",
+        "amount": 3,
+        "chance": 1,
+        "rarity_min": 0,
+        "rarity_max": 4
+      },
+      {
+        "kind": "fragments",
+        "amount": 3,
+        "chance": 1,
+        "rarity_min": 0,
+        "rarity_max": 4
+      },
+      {
+        "kind": "repairkit",
+        "amount": 3,
+        "chance": 1,
+        "rarity_min": 0,
+        "rarity_max": 4
+      },
+      {
+        "kind": "ammo",
+        "amount": 3,
+        "chance": 1,
+        "rarity_min": 0,
+        "rarity_max": 4
+      }
+    ]
+  },
+  "site_005": {
+    "name": "Самотня радіовежа",
+    "legacy_name": "Самотня радіовежа",
+    "npc": "Радистка Ніка",
+    "npc_art": "art_custom_134",
+    "role": "quest",
+    "refresh_turns": 100,
+    "stock": []
+  },
+  "site_006": {
+    "name": "Скляна оранжерея",
+    "legacy_name": "Скляна оранжерея",
+    "npc": "Садівниця Софі",
+    "npc_art": "art_custom_130",
+    "role": "merchant",
+    "refresh_turns": 100,
+    "stock": [
+      {
+        "kind": "equipment",
+        "amount": 1,
+        "rarity_min": 3,
+        "rarity_max": 3,
+        "chance": 1
+      },
+      {
+        "kind": "module",
+        "amount": 1,
+        "rarity_min": 4,
+        "rarity_max": 4,
+        "chance": 1
+      },
+      {
+        "kind": "food",
+        "item_id": "item_food",
+        "amount": 8,
+        "chance": 1
+      },
+      {
+        "kind": "med",
+        "item_id": "item_med",
+        "amount": 5,
+        "chance": 1
+      }
+    ]
+  },
+  "site_007": {
+    "name": "Підземна друкарня",
+    "legacy_name": "Підземна друкарня",
+    "npc": "Друкар",
+    "npc_art": "art_custom_128",
+    "role": "quest",
+    "refresh_turns": 100,
+    "stock": []
+  },
+  "site_008": {
+    "name": "Затоплена станція",
+    "legacy_name": "Затоплена станція",
+    "npc": "Водолаз",
+    "npc_art": "art_custom_115",
+    "role": "merchant",
+    "refresh_turns": 100,
+    "stock": [
+      {
+        "kind": "equipment",
+        "amount": 1,
+        "rarity_min": 3,
+        "rarity_max": 3,
+        "chance": 1
+      },
+      {
+        "kind": "module",
+        "amount": 1,
+        "rarity_min": 4,
+        "rarity_max": 4,
+        "chance": 1
+      },
+      {
+        "kind": "food",
+        "item_id": "item_food",
+        "amount": 8,
+        "chance": 1
+      },
+      {
+        "kind": "med",
+        "item_id": "item_med",
+        "amount": 5,
+        "chance": 1
+      }
+    ]
+  },
+  "site_009": {
+    "name": "Купол метеорологів",
+    "legacy_name": "Купол метеорологів",
+    "npc": "Метеоролог Мікі",
+    "npc_art": "art_custom_116",
+    "role": "quest",
+    "refresh_turns": 100,
+    "stock": []
+  },
+  "site_010": {
+    "name": "Старий елеватор",
+    "legacy_name": "Старий елеватор",
+    "npc": "Дід Панас",
+    "npc_art": "art_custom_135",
+    "role": "merchant",
+    "refresh_turns": 100,
+    "stock": [
+      {
+        "kind": "equipment",
+        "amount": 1,
+        "rarity_min": 3,
+        "rarity_max": 3,
+        "chance": 1
+      },
+      {
+        "kind": "module",
+        "amount": 1,
+        "rarity_min": 4,
+        "rarity_max": 4,
+        "chance": 1
+      },
+      {
+        "kind": "food",
+        "item_id": "item_food",
+        "amount": 8,
+        "chance": 1
+      },
+      {
+        "kind": "med",
+        "item_id": "item_med",
+        "amount": 5,
+        "chance": 1
+      }
+    ]
+  },
+  "site_011": {
+    "name": "Польовий шпиталь",
+    "legacy_name": "Польовий шпиталь",
+    "npc": "Сестричка Марфа",
+    "npc_art": "art_custom_127",
+    "role": "both",
+    "refresh_turns": 100,
+    "stock": [
+      {
+        "kind": "food",
+        "amount": 3,
+        "chance": 1,
+        "rarity_min": 0,
+        "rarity_max": 4
+      },
+      {
+        "kind": "med",
+        "amount": 3,
+        "chance": 1,
+        "rarity_min": 0,
+        "rarity_max": 4
+      },
+      {
+        "kind": "rad",
+        "amount": 3,
+        "chance": 1,
+        "rarity_min": 0,
+        "rarity_max": 4
+      }
+    ]
+  },
+  "site_012": {
+    "name": "Забутий радар",
+    "legacy_name": "Забутий радар",
+    "npc": "Зв’язківиця Ганна",
+    "npc_art": "art_custom_118",
+    "role": "quest",
+    "refresh_turns": 100,
+    "stock": []
+  },
+  "site_013": {
+    "name": "Тунель караванників",
+    "legacy_name": "Тунель караванників",
+    "npc": "Караванщик",
+    "npc_art": "art_custom_139",
+    "role": "merchant",
+    "refresh_turns": 100,
+    "stock": [
+      {
+        "kind": "equipment",
+        "amount": 1,
+        "rarity_min": 3,
+        "rarity_max": 3,
+        "chance": 1
+      },
+      {
+        "kind": "module",
+        "amount": 1,
+        "rarity_min": 4,
+        "rarity_max": 4,
+        "chance": 1
+      },
+      {
+        "kind": "food",
+        "item_id": "item_food",
+        "amount": 8,
+        "chance": 1
+      },
+      {
+        "kind": "med",
+        "item_id": "item_med",
+        "amount": 5,
+        "chance": 1
+      }
+    ]
+  },
+  "site_014": {
+    "name": "Сонячна ферма",
+    "legacy_name": "Сонячна ферма",
+    "npc": "Енергетик",
+    "npc_art": "art_custom_121",
+    "role": "merchant",
+    "refresh_turns": 100,
+    "stock": [
+      {
+        "kind": "equipment",
+        "amount": 1,
+        "rarity_min": 3,
+        "rarity_max": 3,
+        "chance": 1
+      },
+      {
+        "kind": "module",
+        "amount": 1,
+        "rarity_min": 4,
+        "rarity_max": 4,
+        "chance": 1
+      },
+      {
+        "kind": "food",
+        "item_id": "item_food",
+        "amount": 8,
+        "chance": 1
+      },
+      {
+        "kind": "med",
+        "item_id": "item_med",
+        "amount": 5,
+        "chance": 1
+      }
+    ]
+  },
+  "site_015": {
+    "name": "Архів під мостом",
+    "legacy_name": "Архів під мостом",
+    "npc": "Картограф",
+    "npc_art": "art_custom_112",
+    "role": "quest",
+    "refresh_turns": 100,
+    "stock": []
+  },
+  "site_016": {
+    "name": "Майстерня в кар’єрі",
+    "legacy_name": "Майстерня в кар’єрі",
+    "npc": "Майстер",
+    "npc_art": "art_custom_117",
+    "role": "merchant",
+    "refresh_turns": 100,
+    "stock": [
+      {
+        "kind": "equipment",
+        "amount": 1,
+        "rarity_min": 3,
+        "rarity_max": 3,
+        "chance": 1
+      },
+      {
+        "kind": "module",
+        "amount": 1,
+        "rarity_min": 4,
+        "rarity_max": 4,
+        "chance": 1
+      },
+      {
+        "kind": "food",
+        "item_id": "item_food",
+        "amount": 8,
+        "chance": 1
+      },
+      {
+        "kind": "med",
+        "item_id": "item_med",
+        "amount": 5,
+        "chance": 1
+      }
+    ]
+  },
+  "site_017": {
+    "name": "Руїни офісів",
+    "legacy_name": "Тиха обсерваторія",
+    "npc": "Бухгалтер Антоніна",
+    "npc_art": "art_custom_111",
+    "role": "quest",
+    "refresh_turns": 100,
+    "stock": []
+  },
+  "site_018": {
+    "name": "Станція очищення",
+    "legacy_name": "Станція очищення",
+    "npc": "Чистильник",
+    "npc_art": "art_custom_122",
+    "role": "merchant",
+    "refresh_turns": 100,
+    "stock": [
+      {
+        "kind": "equipment",
+        "amount": 1,
+        "rarity_min": 3,
+        "rarity_max": 3,
+        "chance": 1
+      },
+      {
+        "kind": "module",
+        "amount": 1,
+        "rarity_min": 4,
+        "rarity_max": 4,
+        "chance": 1
+      },
+      {
+        "kind": "food",
+        "item_id": "item_food",
+        "amount": 8,
+        "chance": 1
+      },
+      {
+        "kind": "med",
+        "item_id": "item_med",
+        "amount": 5,
+        "chance": 1
+      }
+    ]
+  },
+  "site_019": {
+    "name": "Закинутий архів",
+    "legacy_name": "Затоплений архів",
+    "npc": "Архіваріус",
+    "npc_art": "art_custom_114",
+    "role": "quest",
+    "refresh_turns": 100,
+    "stock": []
+  },
+  "site_020": {
+    "name": "Майстерня під мостом",
+    "legacy_name": "Майстерня під мостом",
+    "npc": "Слюсар",
+    "npc_art": "art_custom_126",
+    "role": "merchant",
+    "refresh_turns": 100,
+    "stock": [
+      {
+        "kind": "equipment",
+        "amount": 1,
+        "rarity_min": 3,
+        "rarity_max": 3,
+        "chance": 1
+      },
+      {
+        "kind": "module",
+        "amount": 1,
+        "rarity_min": 4,
+        "rarity_max": 4,
+        "chance": 1
+      },
+      {
+        "kind": "food",
+        "item_id": "item_food",
+        "amount": 8,
+        "chance": 1
+      },
+      {
+        "kind": "med",
+        "item_id": "item_med",
+        "amount": 5,
+        "chance": 1
+      }
+    ]
+  },
+  "site_021": {
+    "name": "Будинок зв’язківців",
+    "legacy_name": "Будинок зв’язківців",
+    "npc": "Зв’язківець Редіохед",
+    "npc_art": "art_custom_113",
+    "role": "quest",
+    "refresh_turns": 100,
+    "stock": []
+  },
+  "site_022": {
+    "name": "Роботизований Ангар",
+    "legacy_name": "Соляний караван-сарай",
+    "npc": "Робо торговець",
+    "npc_art": "art_custom_131",
+    "role": "merchant",
+    "refresh_turns": 100,
+    "stock": [
+      {
+        "kind": "equipment",
+        "amount": 1,
+        "rarity_min": 3,
+        "rarity_max": 3,
+        "chance": 1
+      },
+      {
+        "kind": "module",
+        "amount": 1,
+        "rarity_min": 4,
+        "rarity_max": 4,
+        "chance": 1
+      },
+      {
+        "kind": "food",
+        "item_id": "item_food",
+        "amount": 8,
+        "chance": 1
+      },
+      {
+        "kind": "med",
+        "item_id": "item_med",
+        "amount": 5,
+        "chance": 1
+      }
+    ]
+  },
+  "site_023": {
+    "name": "Сигнальна вежа",
+    "legacy_name": "Сигнальна вежа",
+    "npc": "Дозорний",
+    "npc_art": "art_custom_119",
+    "role": "quest",
+    "refresh_turns": 100,
+    "stock": []
+  },
+  "site_024": {
+    "name": "Склад «Останній резерв»",
+    "legacy_name": "Склад «Останній резерв»",
+    "npc": "Інтендант",
+    "npc_art": "art_custom_129",
+    "role": "merchant",
+    "refresh_turns": 100,
+    "stock": [
+      {
+        "kind": "equipment",
+        "amount": 1,
+        "rarity_min": 3,
+        "rarity_max": 3,
+        "chance": 1
+      },
+      {
+        "kind": "module",
+        "amount": 1,
+        "rarity_min": 4,
+        "rarity_max": 4,
+        "chance": 1
+      },
+      {
+        "kind": "food",
+        "item_id": "item_food",
+        "amount": 8,
+        "chance": 1
+      },
+      {
+        "kind": "med",
+        "item_id": "item_med",
+        "amount": 5,
+        "chance": 1
+      }
+    ]
+  },
+  "site_custom_001": {
+    "name": "Хижа Олафа",
+    "npc": "Рибак Олаф",
+    "npc_art": "art_custom_108",
+    "role": "both",
+    "refresh_turns": 100,
+    "stock": [
+      {
+        "kind": "food",
+        "amount": 20,
+        "chance": 1.0,
+        "rarity_min": 0,
+        "rarity_max": 4,
+        "item_id": "item_custom_002"
+      }
+    ]
+  }
+}

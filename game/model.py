@@ -97,3 +97,9 @@ class Game(
     ProgressionGame,
 ):
     """The complete game model, independent of launchers and presentation."""
+    @classmethod
+    def load(cls,path):
+        game=super().load(path)
+        import special_sites
+        special_sites.sync_saved(game)
+        return game

@@ -249,7 +249,9 @@ class Services(tk.Frame):
             x,y=n%3*cell,n//3*h
             rect=(x+4,y+4,x+cell-4,y+h-4);self.rects.append((rect,fn))
             c.create_rectangle(*rect,fill='#2b3b30',outline='#63745a',width=1)
-            service_picture(c,key,x+cell/2-26,y+7,self.app.game.current_site['npc'] if self.app.game.current_site and key in ('smith','mayor') else None)
+            site=self.app.game.current_site
+            if not (site and key in ('smith','mayor') and sprites.draw(c,site.get('npc_art'),x+cell/2-26,y+7,52)):
+                service_picture(c,key,x+cell/2-26,y+7,site['npc'] if site and key in ('smith','mayor') else None)
             c.create_text(x+cell/2,y+74,text=label,fill=GOLD if key in ('mayor','stash') else TEXT,font=('Segoe UI',9),width=cell-12)
 
     def click(self,e):

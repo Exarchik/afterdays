@@ -95,7 +95,7 @@ class AdventureMixin:
     def merchant_title(self,m):
         """Повертає назву торговця для інтерфейсу."""
         site=self.current_site
-        return site['npc'] if site and site['role']=='merchant' else game_catalog.MERCHANTS[m]
+        return site['npc'] if site and site['role'] in ('merchant','both') else game_catalog.MERCHANTS[m]
 
     # Обчислює кількість ще не витрачених виборів перків.
     @property
@@ -166,18 +166,14 @@ class AdventureMixin:
 
     def add_sites(self):
         """Розміщує особливі локації та під’єднує їх до доріг."""
+        import special_sites
+        definitions=special_sites.load()
         if self.special_sites:
-            reachable=self.reachable_world((5,5));existing={s['name'] for s in self.special_sites}
-            for name,npc,role in SITES[:16]:
-                if name in existing:continue
-                pool=[p for p in sorted(reachable) if 1<=p[0]<len(self.world[0])-1 and 1<=p[1]<len(self.world)-1 and self.world[p[1]][p[0]] not in ('city','road','site') and all(world_hex.distance(p,c)>2 for c in self.cities) and all(world_hex.distance(p,s['pos'])>=7 for s in self.special_sites)]
-                if not pool:break
-                pos=self.rng.choice(pool)
-                self.special_sites.append(dict(id=game_catalog.uid(),name=name,npc=npc,role=role,pos=list(pos),found=False,city_id=None))
+            special_sites.sync_saved(self)
             return
         from site_layout import place
-        for (name,npc,role),pos in zip(SITES,place(self,len(SITES))):
-            self.special_sites.append(dict(id=game_catalog.uid(),name=name,npc=npc,role=role,pos=list(pos),found=False,city_id=None))
+        for (ident,d),pos in zip(definitions.items(),place(self,len(definitions)) if definitions else []):
+            self.special_sites.append(dict(id=game_catalog.uid(),definition_id=ident,name=d['name'],npc=d['npc'],npc_art=d['npc_art'],role=d['role'],pos=list(pos),found=False,city_id=None))
 
     # Перевіряє прохідність клітинки місцевості.
     def passable(self,x,y):return 0<=x<len(self.world[0]) and 0<=y<32 and self.world[y][x] not in BLOCKED
@@ -202,8 +198,8 @@ class AdventureMixin:
         if not site:return False
         site['found']=True;site['city_id']=len(self.cities)
         self.cities.append(site['pos'][:]);self.city_names.append(site['name'])
-        self.city_merchants.append([0] if site['role']=='merchant' else [])
-        if site['role']=='quest':self.mayors.append(site['city_id'])
+        self.city_merchants.append([0] if site['role'] in ('merchant','both') else [])
+        if site['role'] in ('quest','both'):self.mayors.append(site['city_id'])
         from site_layout import road_path
         route=road_path(self,site['pos'])
         self.trails=[list(p) for p in sorted(set(map(tuple,self.trails))|set(route)|{tuple(site['pos'])})]
@@ -307,18 +303,20 @@ class AdventureMixin:
     def stock(self,merchant):
         """Повертає або оновлює асортимент торговця."""
         site=self.current_site
-        if site and site['role']=='merchant' and merchant==0 and not self.battle:
+        if site and site['role'] in ('merchant','both') and merchant==0 and not self.battle:
+            import special_sites
+            definition=special_sites.definition_for(site)
             key=f'site:{site["id"]}'
             entry=self.shops.get(key)
-            if entry is None or entry.get('level')!=self.region_level or self.turn-entry['turn']>=100:
-                items=[item_rules.equipment(tier=3,rng=self.rng,level=self.region_level),item_rules.module(4,self.rng,level=self.region_level),item_rules.supply('food',8),item_rules.supply('med',5)]
-                self.shops[key]=entry=dict(level=self.region_level,turn=self.turn,items=items)
+            if entry is None or entry.get('level')!=self.region_level or self.turn-entry['turn']>=(definition or {}).get('refresh_turns',100) or entry.get('site_definition')!=definition:
+                items=special_sites.generate_stock(self,definition) if definition else [item_rules.equipment(tier=3,rng=self.rng,level=self.region_level),item_rules.module(4,self.rng,level=self.region_level),item_rules.supply('food',8),item_rules.supply('med',5)]
+                self.shops[key]=entry=dict(level=self.region_level,turn=self.turn,items=items,site_definition=copy.deepcopy(definition),consumables_variety=bool(definition),repairkit_stocked=bool(definition))
             return entry['items']
         return super().stock(merchant)
 
     def buys_kind(self,item,merchant):
         """Перевіряє, чи приймає торговець цей предмет."""
-        if self.current_site and self.current_site['role']=='merchant' and item['kind'] in ('food','med'):return True
+        if self.current_site and self.current_site['role'] in ('merchant','both') and item['kind'] in ('food','med'):return True
         return super().buys_kind(item,merchant)
 
     def rest(self):
