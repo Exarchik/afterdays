@@ -39,7 +39,8 @@ def loading(app,build):
 
 
 def clear(win):
-    for child in win.winfo_children():child.destroy()
+    from ui.window_skin import clear_content
+    clear_content(win)
 
 
 # Result semantics differ from the art IDs used by the content editor.
@@ -111,45 +112,7 @@ class ResultGroup(tk.Frame):
 def show_result(app,report,win=None):
     win=win or app.popup(report['title'],'760x650')
     clear(win);win.title(report['title'])
-    head=tk.Frame(win,bg=PANEL);head.pack(fill='x',padx=18,pady=14)
-    picture=tk.Canvas(head,width=144,height=144,bg=PANEL,highlightthickness=0);picture.pack(side='left',padx=(0,18))
-    if not sprites.draw(picture,report.get('art'),0,0,144):sprites.draw(picture,'stash',0,0,144)
-    tk.Label(head,text=report['title'],bg=PANEL,fg=GOLD,font=('Segoe UI',17,'bold'),wraplength=440,justify='left').pack(anchor='w',pady=12)
-    tk.Label(head,text='Результати битви' if report.get('battle') else 'Результати події',bg=PANEL,fg=TEXT).pack(anchor='w')
-    if report.get('partial'):tk.Label(head,text='Статистика від першої дії після оновлення гри.',bg=PANEL,fg=TEXT,wraplength=420).pack(anchor='w',pady=6)
-    footer=tk.Frame(win,bg=PANEL);footer.pack(side='bottom',fill='x',padx=18,pady=12)
-    viewport=tk.Frame(win,bg=PANEL);viewport.pack(fill='both',expand=True,padx=18)
-    viewport.rowconfigure(0,weight=1);viewport.columnconfigure(0,weight=1)
-    scroll=tk.Canvas(viewport,bg=PANEL,highlightthickness=0)
-    bar=ttk.Scrollbar(viewport,orient='vertical',command=scroll.yview)
-    scroll.grid(row=0,column=0,sticky='nsew');bar.grid(row=0,column=1,sticky='ns')
-    from ui.scrolling import auto_scrollbar
-    auto_scrollbar(scroll,bar,grid=True)
-    body=tk.Frame(scroll,bg=PANEL);node=scroll.create_window(0,0,window=body,anchor='nw')
-    body.columnconfigure(0,weight=1)
-    body.bind('<Configure>',lambda e:scroll.configure(scrollregion=scroll.bbox('all')))
-    def resize(event):
-        scroll.itemconfigure(node,width=event.width)
-    scroll.bind('<Configure>',resize)
-    def wheel(event):
-        if event.num==4:step=-1
-        elif event.num==5:step=1
-        else:step=-1 if event.delta>0 else 1
-        scroll.yview_scroll(step,'units')
-        return 'break'
-    # A reused event window still has bindings to its destroyed narrative canvas.
-    for sequence in ('<MouseWheel>','<Button-4>','<Button-5>'):win.bind(sequence,wheel)
-    from event_results import groups
-    index=0
-    for title,rows in zip(('Стани','Предмети'),groups(report)):
-        tk.Label(body,text=title,bg=PANEL,fg=GOLD,font=('Segoe UI',13,'bold')).grid(row=index,column=0,sticky='w',pady=(12,4))
-        index+=1
-        if not rows:
-            tk.Label(body,text='Немає змін' if title=='Стани' else 'Немає предметів',bg=PANEL,fg=TEXT).grid(row=index,column=0,sticky='w',pady=5)
-            index+=1
-        else:
-            ResultGroup(body,rows).grid(row=index,column=0,sticky='ew',pady=(0,16))
-            index+=1
+    win.minsize(min(560,win.winfo_screenwidth()-40),min(480,win.winfo_screenheight()-80))
     local=any(row.get('destination')=='loot' for row in report['rows'])
     def close():
         if not win.winfo_exists():return
@@ -157,7 +120,8 @@ def show_result(app,report,win=None):
         if local and app.game.loot and not app.game.battle:show_loot(app)
         app.refresh()
     win.close_dialog=close;win.protocol('WM_DELETE_WINDOW',close);win.bind('<Escape>',lambda e:close())
-    ttk.Button(footer,text='До сховку на локації' if local else 'Продовжити',command=close).pack(side='right')
+    from ui.result_skin import ResultView
+    ResultView(win,report,close).pack(fill='both',expand=True)
 
 
 def show_loot(app):

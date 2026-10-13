@@ -15,6 +15,8 @@ class Tooltip:
     def show(self,event=None):
         """Display the current explanation next to the hovered widget."""
         self.hide();self.win=tk.Toplevel(self.widget);self.win.overrideredirect(True)
+        from ui.window_skin import apply
+        apply(self.win, compact=True)
         self.win.geometry(f'+{self.widget.winfo_rootx()+8}+{self.widget.winfo_rooty()+self.widget.winfo_height()+3}')
         tk.Label(self.win,text=self.text() if callable(self.text) else self.text,bg='#15241d',fg=TEXT,padx=8,pady=5).pack()
     def hide(self,event=None):

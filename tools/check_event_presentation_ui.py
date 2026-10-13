@@ -9,6 +9,15 @@ import tkinter as tk
 from tkinter import ttk
 
 errors=[]
+
+def displayed_text(win):
+    result=[]
+    for w in descendants(win):
+        if isinstance(w,tk.Label):result.append(w.cget('text'))
+        elif isinstance(w,tk.Canvas):
+            result.extend(w.itemcget(i,'text') for i in w.find_all() if w.type(i)=='text')
+    return result
+
 def descendants(widget):
     for child in widget.winfo_children():
         yield child
@@ -39,7 +48,7 @@ def check(root,app):
     def result():
         assert app.dialog and app.dialog.title()=='Покинутий сховок'
         assert app.dialog is event_window
-        labels=[w.cget('text') for w in descendants(app.dialog) if isinstance(w,tk.Label)]
+        labels=displayed_text(app.dialog)
         assert 'Результати події' in labels
         assert 'Стани' in labels and 'Предмети' in labels
         assert any('XP' in text for text in labels)
@@ -93,7 +102,7 @@ def check(root,app):
         g.gain_xp(4);g.victory();app.refresh()
         root.after(150,battle_result)
     def battle_result():
-        labels=[w.cget('text') for w in descendants(app.dialog) if isinstance(w,tk.Label)]
+        labels=displayed_text(app.dialog)
         assert 'Результати битви' in labels and 'Стани' in labels and 'Предмети' in labels
         assert 'Нанесено шкоди: 12' in labels and 'Отримано шкоди: 5' in labels
         assert 'Отримано досвіду: 4 XP' in labels

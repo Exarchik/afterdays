@@ -419,6 +419,8 @@ class App(MapVisibility):
         self.route.pause()
         self.root.after_idle(lambda:sprites.decorate(self.root))
         win = tk.Toplevel(self.root)
+        from ui.window_skin import apply
+        apply(win)
         win.title(title)
         width,height=map(int,geometry.split('x'))
         sw,sh=win.winfo_screenwidth(),win.winfo_screenheight()

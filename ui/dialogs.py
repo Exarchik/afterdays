@@ -12,7 +12,9 @@ def _show(title,message,choices,parent=None,art='journal',default=None,**kwargs)
     active=grab or previous
     if active is not None and active.winfo_exists():owner=active.winfo_toplevel()
     overlay=tk.Toplevel(owner);overlay.withdraw();overlay.title(title)
-    overlay.configure(bg=PANEL);overlay.transient(owner);overlay.resizable(False,False)
+    from ui.window_skin import apply
+    apply(overlay)
+    overlay.transient(owner);overlay.resizable(False,False)
     panel=tk.Frame(overlay,bg=PANEL,highlightthickness=1,highlightbackground=GOLD)
     panel.pack(fill='both',expand=True)
     width=min(540,owner.winfo_screenwidth()-40)

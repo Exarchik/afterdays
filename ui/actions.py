@@ -19,6 +19,8 @@ class ActionButton(ttk.Button):
     config=configure
     def show_tip(self,event=None):
         self.hide_tip();self.tip=tk.Toplevel(self);self.tip.wm_overrideredirect(True)
+        from ui.window_skin import apply
+        apply(self.tip, compact=True)
         self.tip.wm_geometry(f'+{self.winfo_rootx()}+{self.winfo_rooty()-30}')
         tk.Label(self.tip,text=self.label,bg='#172a32',fg='#e4f3f7',padx=7,pady=4).pack()
     def hide_tip(self,event=None):

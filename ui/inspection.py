@@ -43,7 +43,9 @@ def monster_text(g,e):
 
 def window(app,title):
     previous=app.dialog;parent=previous if previous and previous.winfo_exists() else app.root
-    win=tk.Toplevel(parent);win.title(title);win.configure(bg=PANEL)
+    win=tk.Toplevel(parent);win.title(title)
+    from ui.window_skin import apply
+    apply(win)
     w,h=min(650,win.winfo_screenwidth()-40),min(720,win.winfo_screenheight()-80)
     win.geometry(f'{w}x{h}+{max(0,(win.winfo_screenwidth()-w)//2)}+{max(0,(win.winfo_screenheight()-h)//2)}')
     win.transient(parent);win.grab_set();app.dialog=win
