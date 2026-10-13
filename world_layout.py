@@ -35,6 +35,6 @@ def build(rng_state):
     extra.sort(key=lambda pair:world_hex.distance(cities[pair[0]],cities[pair[1]]))
     edges+=rng.sample(extra[:20],2)
     for a,b in edges:
-        for x,y in world_hex.line_path(cities[a],cities[b]):world[y][x]='road'
+        for x,y in world_hex.line_path(cities[a],cities[b],bounds=(WIDTH,HEIGHT)):world[y][x]='road'
     for x,y in cities:world[y][x]='city'
     return cities,world

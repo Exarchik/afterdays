@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "quests": [],
+  "stories": [
+    {
+      "id": "noise_in_the_wind",
+      "title": "Шум у Вітрі",
+      "enabled": true,
+      "start_after_moves": 2,
+      "stages": [
+        {
+          "kind": "dialogue",
+          "ref": "noise_in_the_wind_radio"
+        },
+        {
+          "kind": "visit",
+          "ref": 0
+        }
+      ]
+    }
+  ],
+  "native": {
+    "recruit_mayor": {
+      "normal": {
+        "title": "Поселення мера",
+        "art": "art_custom_140",
+        "min_level": 1,
+        "reward": 90,
+        "money_power": 1.3,
+        "xp_reward": 25,
+        "xp_step": 5,
+        "description": "Видається під час зустрічі з кандидатом; прив’язане до поселення."
+      }
+    }
+  }
+}

@@ -184,7 +184,8 @@ class Reputation:
         visible = []
         elite_count = 0
         by_id = {q['id']:q for q in pool}
-        for ident in board['ids'][:limit]:
+        for ident in board['ids']:
+            if len(visible)>=limit:break
             q = by_id.get(ident)
             if q is None:continue
             if 'metro_city' not in q:
@@ -195,7 +196,8 @@ class Reputation:
                 if q.get('unique'):elite_count += 1
             if q['status']=='offered':
                 q['reward'] = max(1,round(q['base_reward']*reward_factor(rep)))
-            visible.append(q)
+            from quest_profiles import allowed
+            if allowed(self,q):visible.append(q)
         return visible
 
     def turn_in(self, quest_id):

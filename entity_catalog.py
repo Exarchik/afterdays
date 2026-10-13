@@ -154,6 +154,12 @@ class Store:
         errors+=special_sites.validate(self.data['special_sites'],self.art,self.data['equipment'],self.data['modules'],self.data['consumables'])
         errors+=consumable_rules.validate(self.data['consumables'],self.art)
         errors+=quest_catalog.validate(self.data['quests'])
+        quest_specs=list(self.data['quests'].get('quests',[]))
+        for variants in self.data['quests'].get('native',{}).values():
+            if isinstance(variants,dict):quest_specs.extend(variants.values())
+        for spec in quest_specs:
+            if isinstance(spec,dict) and spec.get('art') and spec['art'] not in self.art:
+                errors.append('Квест: невідомий арт '+str(spec['art']))
         if not errors:
             import game.systems.story as story_system
             errors+=story_system.validate(self.data['quests'],self.data['dialogues'])

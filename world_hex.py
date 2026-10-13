@@ -73,11 +73,17 @@ def disk(pos,radius):
             for a in range(x-radius,x+radius+1) if distance(pos,(a,b))<=radius]
 
 
-def line_path(start,end):
+def line_path(start,end,bounds=None):
     """Shortest connected hex route, preferring a continuing heading on ties."""
     current=tuple(start);end=tuple(end);result=[current];heading=None
+    if bounds is not None:
+        width,height=bounds
+        if not all(0<=x<width and 0<=y<height for x,y in (current,end)):
+            raise ValueError('Route endpoints must be inside the world bounds')
     while current!=end:
-        choices=[(n,p) for n,p in enumerate(adjacent(current)) if distance(p,end)<distance(current,end)]
+        choices=[(n,p) for n,p in enumerate(adjacent(current))
+                 if (bounds is None or 0<=p[0]<width and 0<=p[1]<height)
+                 and distance(p,end)<distance(current,end)]
         heading,current=min(choices,key=lambda pair:(pair[0]!=heading,pair[0]))
         result.append(current)
     return result

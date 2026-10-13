@@ -116,7 +116,7 @@ class AdventureMixin:
             self.battle['max_ap']=self.battle.get('max_ap',6)+change
         return ok
 
-    def emit(self,text='',kind='text',pos=None,scene=None,color='#ecd598',source=None,entity=None):
+    def emit(self,text='',kind='text',pos=None,scene=None,color='#ecd598',source=None,entity=None,effect_kind=None):
         """Ставить коротке повідомлення або ефект у чергу відображення."""
         if not hasattr(self,'_events'):self._events=[]
         if kind=='text' and getattr(self,'_event_feedback_color',None):
@@ -128,6 +128,7 @@ class AdventureMixin:
             entity='player'
         self._events.append(dict(text=text,kind=kind,pos=list(pos),scene=scene,color=color,
                                  source=list(source) if source else None,entity=entity))
+        if effect_kind is not None:self._events[-1]['effect_kind']=effect_kind
 
     def emit_move(self,path,entity):
         """Додає подію руху для плавної анімації."""
@@ -626,7 +627,7 @@ class AdventureMixin:
         self.explored=sorted(known)
         for n,pos in enumerate(self.cities):
             if self.revealed(*pos) and n not in self.known_cities:
-                self.known_cities.append(n);self.emit(tr('adventure.0228'),color='#d8c38e')
+                self.known_cities.append(n);self.emit(tr('adventure.0228'),color='#d8c38e',effect_kind='discover')
 
     def enemy_xp(self,enemy):
         """Обчислює досвід за конкретного ворога."""

@@ -126,6 +126,7 @@ def inventory_photo(widget,item,width):
 
 
 def quest_key(q):
+    if q.get("quest_art"):return q["quest_art"]
     if q.get("kind")=="recruit_mayor":return "quest:recruit_tech"
     return "quest:metro" if "metro_city" in q else "quest:"+q["kind"]
 

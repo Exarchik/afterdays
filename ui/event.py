@@ -56,6 +56,7 @@ EFFECT_ART = {
     'fence_hole':'fence_shortcut', 'buff_stealth':'invisibility',
     'buff_regen':'regeneration', 'buff_satiety':'food_full',
     'ambush':'ambush',
+    'metro_stage':'metro_stage',
 }
 
 
@@ -67,6 +68,8 @@ def reward_icon(canvas,row):
         if kind in ('money','credits'):art='lost_money'
         elif kind=='food':art='lost_food'
     if art and sprites.draw(canvas,'effects:'+art,0,0,48):return
+    # Use the existing metro component until a dedicated stage-completion art is added.
+    if kind=='metro_stage' and sprites.draw(canvas,'metro_component',0,0,48):return
     if row.get('item'):
         icon(canvas,row['item'],0,0,48);return
     if kind in ('money','credits','food','med','rad','repairkit','parts','fragments','ammo'):

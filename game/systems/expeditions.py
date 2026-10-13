@@ -156,7 +156,7 @@ class ExpeditionsMixin:
         if self.rng.random()<.05:
             names=[k for k,v in game_catalog.GEAR.items() if v[0] in ('weapon','armor','helmet') and game_catalog.GEAR_MIN_LEVEL[k]<=q['level']]
             item_rules.add_to(self.loot,item_rules.equipment(self.rng.choice(names),self.rng.choice([0,1]),self.rng,q['level']))
-        self.log(tr('exp.cache_found'));self.emit(tr('exp.cache_found'));return True
+        self.log(tr('exp.cache_found'));self.emit(tr('exp.cache_found'),effect_kind='cache');return True
 
     def search(self):
         """Виконує пошук на місцевості та перевіряє квестові цілі."""

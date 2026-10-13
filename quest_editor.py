@@ -9,12 +9,13 @@ FIELDS=[('title','Назва',str),('min_level','Рівень героя: від
 ('min_turn','Не раніше ходу',int),('cities','ID міст через кому (порожньо = усі)',list),
 ('requires','Попередні квести: ID через кому',list),('cooldown','Повтор через ходів після здачі/скасування',int),
 ('goal','Кількість для полювання / трофеїв',int),('food_need','Їжа для постачання',int),('med_need','Аптечки для постачання',int),
-('reward','Нагорода: гроші',int),('xp_reward','Нагорода: досвід',int)]
+('reward','Базові кредити (рівень 1)',int),('xp_reward','Базовий XP (рівень 1)',int),
+('art','ID арту',str),('money_power','Степінь рівня для кредитів (0 = фіксовано)',float),('xp_step','XP за наступний рівень',int)]
 
 class QuestPanel(ttk.Frame):
     def __init__(self,parent,store,on_save):
         super().__init__(parent);self.store=store;self.on_save=on_save;self.current=None;self.loading=False
-        self.status=tk.StringVar(value='Авторські квести з’являються у пропозиціях мера за заданими умовами. Сюжетні типи наведені як довідка.')
+        self.status=tk.StringVar(value='Оберіть вбудований тип або авторський квест. Звичайні й елітні варіанти мають окремі нагороди та умови.')
         bar=ttk.Frame(self);bar.pack(fill='x',padx=8,pady=6)
         ttk.Button(bar,text='Сюжетні лінії',command=self.stories).pack(side='left',padx=3)
         for label,command in [('Новий квест',self.add),('Дублювати',self.duplicate),('Видалити',self.delete),('Зберегти всі зміни',on_save)]:
@@ -43,11 +44,21 @@ class QuestPanel(ttk.Frame):
             entry.grid(row=row,column=1,sticky='ew',padx=4,pady=4);self.inputs[key]=entry
         self.editor.columnconfigure(1,weight=1)
         row=len(FIELDS)+2
-        for key,label in [('enabled','Увімкнено'),('repeatable','Повторюваний (інакше одноразовий)')]:
+        for key,label in [('enabled','Увімкнено'),('repeatable','Повторюваний (інакше одноразовий)'),('elite','Елітний квест (нагороди задаються вище без прихованого множника)')]:
             self.vars[key]=tk.BooleanVar();ttk.Checkbutton(self.editor,text=label,variable=self.vars[key]).grid(row=row,column=0,columnspan=2,sticky='w',pady=5);row+=1
         ttk.Label(self.editor,text='Опис квесту').grid(row=row,column=0,sticky='w');row+=1
         self.description=tk.Text(self.editor,height=6,wrap='word');self.description.grid(row=row,column=0,columnspan=2,sticky='ew')
         ttk.Label(self,textvariable=self.status,wraplength=1200).pack(fill='x',padx=8,pady=5)
+        from quest_profile_editor import NativeQuestForm
+        self.native=NativeQuestForm(self.form,store)
+        self.author_preview=ttk.Label(self.editor,wraplength=650,justify='left')
+        self.author_preview.grid(row=row+1,column=0,columnspan=2,sticky='w',pady=8)
+        ttk.Button(self.editor,text='Вибрати арт…',command=self.pick_art).grid(row=row+2,column=0,sticky='w')
+        self.author_art=tk.Canvas(self.editor,width=96,height=96,highlightthickness=0)
+        self.author_art.grid(row=row+2,column=1,sticky='w')
+        self.vars['art'].trace_add('write',lambda *_:self.preview_art())
+        for key in ('reward','xp_reward','money_power','xp_step'):
+            self.vars[key].trace_add('write',lambda *_:self.preview_rewards())
         self.rebuild();self.editor.pack_forget()
 
     @property
@@ -65,7 +76,7 @@ class QuestPanel(ttk.Frame):
         try:
             self.tree.delete(*self.tree.get_children())
             query=self.search.get().casefold()
-            for group,title,items in [('types','Типи звичайних квестів',catalog.TYPES),('special','Сюжетні / автоматичні типи',catalog.SPECIAL)]:
+            for group,title,items in [('types','Вбудовані квести: звичайні / елітні',catalog.TYPES),('special','Сюжетні / автоматичні типи',catalog.SPECIAL)]:
                 self.tree.insert('', 'end',iid=group,text=title,open=True)
                 for key,(name,help_text) in items.items():
                     if query in (key+' '+name).casefold():self.tree.insert(group,'end',iid='type:'+key,text=name)
@@ -83,36 +94,39 @@ class QuestPanel(ttk.Frame):
         if not self.commit():
             if self.current and self.tree.exists('quest:'+self.current):self.tree.selection_set('quest:'+self.current)
             return
-        self.current=None;self.editor.pack_forget()
+        self.current=None;self.editor.pack_forget();self.native.pack_forget();self.native.kind=None
         if key.startswith('quest:'):self.open(key[6:])
         elif key.startswith('type:'):
             ident=key[5:];name,help_text={**catalog.TYPES,**catalog.SPECIAL}[ident]
             self.heading.config(text=name)
-            self.help.config(text=help_text+'\n'+('Можна створити окремий квест цього типу.' if ident in catalog.TYPES else 'Створюється сюжетною механікою гри; не є окремим контрактом мера.'))
-        else:self.heading.config(text='Квести');self.help.config(text='Оберіть тип для довідки або створіть окремий квест.')
+            self.native.open(ident);self.native.pack(fill='both',expand=True)
+            self.help.config(text=help_text+'\n'+('Налаштування всіх нових квестів цього типу.' if ident in catalog.TYPES else 'Створюється сюжетною механікою гри; не є окремим контрактом мера.'))
+        else:self.heading.config(text='Квести');self.help.config(text='Оберіть тип для редагування або створіть окремий квест.')
 
     def open(self,ident):
+        self.native.pack_forget();self.native.kind=None
         q=next(q for q in self.document['quests'] if q['id']==ident);self.current=ident
         self.heading.config(text=q['title']);self.help.config(text='Усі умови діють одночасно. Міста мають ID від 0. Попередники — завершені авторські квести. Для появи також потрібні одержувач, придатна місцевість та інші передумови відповідного типу. Змінені нагороди не впливають на вже прийняті квести.')
         self.editor.pack(fill='both',expand=True)
         for key,var in self.vars.items():
-            value=q[key]
+            value=q.get(key,{'art':'','money_power':0,'xp_step':0,'elite':False}.get(key,''))
             if key=='kind':value=value+' — '+catalog.TYPES[value][0]
             elif isinstance(value,list):value=', '.join(map(str,value))
             var.set(value)
         self.description.delete('1.0','end');self.description.insert('1.0',q['description'])
 
     def commit(self):
+        if not self.native.commit():return False
         if not self.current:return True
         try:
             q=copy.deepcopy(next(q for q in self.document['quests'] if q['id']==self.current))
             for key,label,kind in FIELDS:
                 text=self.vars[key].get().strip()
-                if kind is int:q[key]=int(text)
+                if kind in (int,float):q[key]=kind(text)
                 elif kind is list:q[key]=[int(v.strip()) if key=='cities' else v.strip() for v in text.split(',') if v.strip()]
                 else:q[key]=text
             q['kind']=self.vars['kind'].get().split(' — ')[0]
-            for key in ('enabled','repeatable'):q[key]=self.vars[key].get()
+            for key in ('enabled','repeatable','elite'):q[key]=self.vars[key].get()
             q['description']=self.description.get('1.0','end-1c')
             doc=copy.deepcopy(self.document);index=next(i for i,v in enumerate(doc['quests']) if v['id']==self.current);doc['quests'][index]=q
             errors=catalog.validate(doc)
@@ -122,6 +136,26 @@ class QuestPanel(ttk.Frame):
             return True
         except (ValueError,StopIteration) as exc:
             messagebox.showerror('Некоректний квест',str(exc),parent=self);return False
+
+    def pick_art(self):
+        from event_editor import ArtDialog
+        value=ArtDialog(self.winfo_toplevel(),self.vars['art'].get()).show()
+        if value:self.vars['art'].set(value)
+
+    def preview_art(self):
+        import sprites
+        self.author_art.delete('all')
+        self.author_photo=sprites.photo(self.author_art,self.vars['art'].get(),96)
+        if self.author_photo:self.author_art.create_image(48,48,image=self.author_photo)
+
+    def preview_rewards(self):
+        try:
+            from quest_profiles import rewards
+            spec={key:float(self.vars[key].get()) for key in ('reward','xp_reward','money_power','xp_step')}
+            if not 0<=spec['money_power']<=3:raise ValueError()
+            self.author_preview.config(text='Кредити = база × рівень^степінь; XP = база + приріст × (рівень − 1).\n'+
+                '  |  '.join(f'L{level}: {rewards(spec,level)[0]} кр. / {rewards(spec,level)[1]} XP' for level in (1,2,5,10)))
+        except (ValueError,OverflowError):self.author_preview.config(text='Введіть коректні значення нагород.')
 
     def new_id(self):
         ids={q['id'] for q in self.document['quests']};n=1

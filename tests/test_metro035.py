@@ -52,6 +52,28 @@ class MetroTests(unittest.TestCase):
         b['pos']=b['chest'][:];self.assertTrue(g.search())
         b['pos']=b['exit'][:];self.assertTrue(g.flee());self.assertIsNone(g.battle)
 
+    def test_cache_result_has_cache_and_metro_stage_icons(self):
+        for seed in range(8):
+            g,q=self.make(seed)
+            stages=q['metro_chain']['steps']
+            index=next((i for i,s in enumerate(stages) if s['metro_role']=='cache'),None)
+            if index is not None:break
+        else:self.fail('No cache stage generated for test seeds')
+        q['metro_chain']['index']=index;g.metro_sync(q)
+        self.solve(g,q)
+        rows=g._event_results[-1]['rows']
+        self.assertEqual([row.get('effect_kind') for row in rows if not row.get('item')],
+                         ['cache','discover','metro_stage'])
+        from unittest.mock import patch
+        from ui.event import reward_icon
+        from types import SimpleNamespace
+        with patch('ui.event.sprites.draw',return_value=True) as draw:
+            reward_icon(SimpleNamespace(),next(row for row in rows if row.get('effect_kind')=='cache'))
+            self.assertEqual(draw.call_args.args[1],'effects:find_hideout')
+        with patch('ui.event.sprites.draw',side_effect=[False,True]) as draw:
+            reward_icon(SimpleNamespace(),next(row for row in rows if row.get('effect_kind')=='metro_stage'))
+            self.assertEqual([call.args[1] for call in draw.call_args_list],['effects:metro_stage','metro_component'])
+
     def test_all_stage_types_and_save_reload(self):
         """Generated chains survive reload at each stage and cannot finish early."""
         seen=set()

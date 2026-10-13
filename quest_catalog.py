@@ -30,16 +30,20 @@ SPECIAL={
 def draft(ident):
     return dict(id=ident,title='Новий квест',description='',kind='hunt',enabled=True,repeatable=False,cooldown=100,
                 min_level=1,max_level=100,min_reputation=0,max_reputation=100,min_turn=0,cities=[],requires=[],
-                goal=4,food_need=3,med_need=2,reward=150,xp_reward=40)
+                goal=4,food_need=3,med_need=2,reward=150,xp_reward=40,art='',elite=False,money_power=0,xp_step=0)
 
 
 def validate(doc):
     errors=[]
     if not isinstance(doc,dict) or doc.get('version')!=1 or not isinstance(doc.get('quests'),list):return ['Некоректний каталог квестів.']
+    import quest_profiles
+    errors+=quest_profiles.validate(doc)
     ids=[q.get('id') for q in doc['quests'] if isinstance(q,dict)]
     for q in doc['quests']:
         if not isinstance(q,dict):errors.append('Квест має бути об’єктом.');continue
         ident=q.get('id');prefix=str(ident)+': '
+        errors+=quest_profiles.validate_spec(dict(q,art=q.get('art',''),money_power=q.get('money_power',0),xp_step=q.get('xp_step',0)),prefix)
+        if type(q.get('elite',False)) is not bool:errors.append(prefix+'Некоректний елітний варіант')
         def need(ok,msg):
             if not ok:errors.append(prefix+msg)
         need(isinstance(ident,str) and bool(re.fullmatch('[a-z][a-z0-9_]*',ident)),'ID: латинські літери, цифри, підкреслення.')

@@ -48,7 +48,11 @@ from game.systems.battle_feedback import BattleFeedbackMixin
 from game.systems.arena_exits import ArenaExitsMixin
 
 
+from quest_profiles import QuestProfilesMixin
+
+
 class Game(
+    QuestProfilesMixin,
     ProvisionsMixin,
     FencePassagesMixin,
     CacheFeedbackMixin,

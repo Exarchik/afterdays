@@ -8,7 +8,10 @@ import quest_catalog as catalog
 class AuthoredQuestsMixin:
     def price_quest(self,q):
         if q.get('authored_definition'):
-            s=q['authored_definition'];q.update(reward=s['reward'],base_reward=s['reward'],xp_reward=s['xp_reward']);return
+            s=q['authored_definition']
+            from quest_profiles import rewards
+            money,xp=rewards(s,q.get('level',1))
+            q.update(reward=money,base_reward=money,xp_reward=xp,quest_art=s.get('art',''));return
         return super().price_quest(q)
 
     def mayor_offers(self):
@@ -33,7 +36,7 @@ class AuthoredQuestsMixin:
                 for field in ('test_item','repair_item'):
                     if field in entry:entry[field]['quest_id']=ident;entry[field]['id']=game_catalog.uid()
                 entry.update(id=ident,authored_id=spec['id'],authored_definition=copy.deepcopy(spec),title=spec['title'],
-                             status='offered',progress=0,unique=False,reward_items=[],reward_unique=False)
+                             status='offered',progress=0,unique=spec.get('elite',False),reward_items=[],reward_unique=False)
                 if spec['kind'] in ('hunt','trophies'):entry['goal']=spec['goal']
                 if spec['kind']=='supplies':entry.update(food_need=spec['food_need'],med_need=spec['med_need'])
                 self.price_quest(entry);cache[key]=entry

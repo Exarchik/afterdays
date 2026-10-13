@@ -31,11 +31,30 @@ class HexCompletionTests(unittest.TestCase):
         rng=random.Random(18)
         for _ in range(100):
             a=(rng.randrange(112),rng.randrange(32));b=(rng.randrange(112),rng.randrange(32))
-            path=grid.line_path(a,b)
+            path=grid.line_path(a,b,bounds=(112,32))
             self.assertEqual(len(path)-1,grid.distance(a,b))
             self.assertEqual((path[0],path[-1]),(a,b))
             self.assertTrue(all(q in grid.adjacent(p) for p,q in zip(path,path[1:])))
             self.assertTrue(all(0<=x<112 and 0<=y<32 for x,y in path))
+
+    def test_road_at_right_edge_does_not_leave_map(self):
+        for a,b in (((109,12),(109,25)),((111,0),(111,31)),((0,31),(0,0))):
+            for start,end in ((a,b),(b,a)):
+                path=grid.line_path(start,end,bounds=(112,32))
+                self.assertEqual((path[0],path[-1]),(start,end))
+                self.assertEqual(len(path)-1,grid.distance(start,end))
+                self.assertTrue(all(0<=x<112 and 0<=y<32 for x,y in path))
+                self.assertTrue(all(q in grid.adjacent(p) for p,q in zip(path,path[1:])))
+
+    def test_seed_152_roads_connect_all_cities(self):
+        import world_layout
+        cities,world=world_layout.build(random.Random(152).getstate())
+        seen={tuple(cities[0])};queue=list(seen)
+        for pos in queue:
+            for x,y in grid.neighbors(*pos,112,32):
+                if (x,y) not in seen and world[y][x] in ('road','city'):
+                    seen.add((x,y));queue.append((x,y))
+        self.assertTrue(set(map(tuple,cities))<=seen)
 
     def test_overlay_reuses_and_updates_items_without_recreation(self):
         canvas=MagicMock();canvas.create_text.return_value=11

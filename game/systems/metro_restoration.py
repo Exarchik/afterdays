@@ -97,7 +97,7 @@ class MetroRestorationMixin:
             part=dict(id=game_catalog.uid(),type_id='quest_item',kind='quest',quest_id=q['id'],metro_component=True,quest_repair=True,name=q['part_name'],art_id='metro_component',rarity=1,weight=0,value=max(50,round(70*q['level']**1.3)),durability=float(self.rng.randint(0,50) if chain['broken'] else 100))
             self.bag.append(part);self.log(tr('metro035.found',name=part['name'],condition=round(part['durability'])))
         else:self.log(tr('metro035.next',number=chain['index']+1,count=len(chain['steps'])))
-        self.metro_sync(q);self.emit(tr('metro035.stage_done'),color='#99dca5')
+        self.metro_sync(q);self.emit(tr('metro035.stage_done'),color='#99dca5',effect_kind='metro_stage')
 
     def local_expedition(self):
         """Let existing generator and lock logic operate on nested metro stages."""

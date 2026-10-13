@@ -18,5 +18,29 @@
         }
       ]
     }
-  ]
+  ],
+  "native": {
+    "recruit_mayor": {
+      "normal": {
+        "title": "Поселення мера",
+        "art": "art_custom_140",
+        "min_level": 1,
+        "reward": 90,
+        "money_power": 1.3,
+        "xp_reward": 25,
+        "xp_step": 5,
+        "description": "Видається під час зустрічі з кандидатом; прив’язане до поселення."
+      },
+      "elite": {
+        "title": "Поселення мера",
+        "art": "art_custom_140",
+        "min_level": 1,
+        "reward": 180,
+        "money_power": 1.3,
+        "xp_reward": 50,
+        "xp_step": 10,
+        "description": "Видається під час зустрічі з кандидатом; прив’язане до поселення."
+      }
+    }
+  }
 }
