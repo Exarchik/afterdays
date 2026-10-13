@@ -225,7 +225,7 @@
     "damage_percent": 0
   },
   "item_custom_006": {
-    "value": 50,
+    "value": 40,
     "weight": 0.0,
     "ap_cost": 2,
     "heal": 0,
@@ -260,6 +260,44 @@
     "name": "Старий пластир",
     "description": "",
     "sprite_id": "art_custom_085",
+    "damage_percent": 0
+  },
+  "item_custom_008": {
+    "value": 7,
+    "weight": 0.4,
+    "ap_cost": 2,
+    "heal": 10,
+    "heal_percent": 0.0,
+    "satiety": 0,
+    "radiation_heal": 2,
+    "repair": 0,
+    "regen": 0,
+    "regen_duration": 0,
+    "satiety_duration": 0,
+    "stealth_duration": 0,
+    "kind": "med",
+    "name": "Травний збір",
+    "description": "",
+    "sprite_id": "art_custom_141",
+    "damage_percent": 0
+  },
+  "item_custom_009": {
+    "value": 100,
+    "weight": 0.1,
+    "ap_cost": 0,
+    "heal": 0,
+    "heal_percent": 60.0,
+    "satiety": 0,
+    "radiation_heal": 0,
+    "repair": 0,
+    "regen": 0,
+    "regen_duration": 0,
+    "satiety_duration": 0,
+    "stealth_duration": 0,
+    "kind": "med",
+    "name": "Військовий стимулятор",
+    "description": "В бою важлива кожна секунда",
+    "sprite_id": "art_custom_142",
     "damage_percent": 0
   }
 }

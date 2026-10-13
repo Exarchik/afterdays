@@ -158,9 +158,9 @@ class Survival:
         return super().use(kind)
 
     def rest(self):
-        if self.radiation_injury or self.starving:
-            message=tr('survival040.no_sleep_rad' if self.radiation_injury else 'survival040.no_sleep_hunger')
-            self.log(message);self.emit(message,color='#e56860');return False
+        if self.radiation_sickness or self.starving:
+            message=tr('survival040.no_sleep_rad' if self.radiation_sickness else 'survival040.no_sleep_hunger')
+            self.log(message);self.emit(message, color='#e56860');return False
         ok=super().rest()
         if ok:self.change_satiety(5)
         return ok

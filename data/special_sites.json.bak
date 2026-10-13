@@ -3,10 +3,27 @@
     "name": "Обсерваторія «Луна»",
     "legacy_name": "Обсерваторія «Луна»",
     "npc": "Астроном",
-    "npc_art": "npc:Астроном",
+    "npc_art": "art_custom_124",
     "role": "quest",
     "refresh_turns": 100,
     "stock": []
+  },
+  "site_custom_001": {
+    "name": "Хижа Олафа",
+    "npc": "Рибак Олаф",
+    "npc_art": "art_custom_108",
+    "role": "both",
+    "refresh_turns": 100,
+    "stock": [
+      {
+        "kind": "food",
+        "amount": 20,
+        "chance": 1.0,
+        "rarity_min": 0,
+        "rarity_max": 4,
+        "item_id": "item_custom_002"
+      }
+    ]
   },
   "site_002": {
     "name": "Станція Козача",
@@ -48,7 +65,7 @@
     "name": "Стара насосна",
     "legacy_name": "Стара насосна",
     "npc": "Інженер Лев",
-    "npc_art": "npc:Інженер Лев",
+    "npc_art": "art_custom_133",
     "role": "quest",
     "refresh_turns": 100,
     "stock": []
@@ -114,7 +131,7 @@
     "name": "Самотня радіовежа",
     "legacy_name": "Самотня радіовежа",
     "npc": "Радистка Ніка",
-    "npc_art": "npc:Радистка Ніка",
+    "npc_art": "art_custom_134",
     "role": "quest",
     "refresh_turns": 100,
     "stock": []
@@ -122,8 +139,8 @@
   "site_006": {
     "name": "Скляна оранжерея",
     "legacy_name": "Скляна оранжерея",
-    "npc": "Садівник",
-    "npc_art": "npc:Садівник",
+    "npc": "Садівниця Софі",
+    "npc_art": "art_custom_130",
     "role": "merchant",
     "refresh_turns": 100,
     "stock": [
@@ -159,7 +176,7 @@
     "name": "Підземна друкарня",
     "legacy_name": "Підземна друкарня",
     "npc": "Друкар",
-    "npc_art": "npc_printer",
+    "npc_art": "art_custom_128",
     "role": "quest",
     "refresh_turns": 100,
     "stock": []
@@ -168,7 +185,7 @@
     "name": "Затоплена станція",
     "legacy_name": "Затоплена станція",
     "npc": "Водолаз",
-    "npc_art": "npc_diver",
+    "npc_art": "art_custom_115",
     "role": "merchant",
     "refresh_turns": 100,
     "stock": [
@@ -203,8 +220,8 @@
   "site_009": {
     "name": "Купол метеорологів",
     "legacy_name": "Купол метеорологів",
-    "npc": "Метеоролог",
-    "npc_art": "npc_meteorologist",
+    "npc": "Метеоролог Мікі",
+    "npc_art": "art_custom_116",
     "role": "quest",
     "refresh_turns": 100,
     "stock": []
@@ -212,8 +229,8 @@
   "site_010": {
     "name": "Старий елеватор",
     "legacy_name": "Старий елеватор",
-    "npc": "Комірник",
-    "npc_art": "npc_storekeeper",
+    "npc": "Дід Панас",
+    "npc_art": "art_custom_135",
     "role": "merchant",
     "refresh_turns": 100,
     "stock": [
@@ -248,8 +265,8 @@
   "site_011": {
     "name": "Польовий шпиталь",
     "legacy_name": "Польовий шпиталь",
-    "npc": "Лікарка",
-    "npc_art": "npc_doctor",
+    "npc": "Сестричка Марфа",
+    "npc_art": "art_custom_127",
     "role": "both",
     "refresh_turns": 100,
     "stock": [
@@ -279,8 +296,8 @@
   "site_012": {
     "name": "Забутий радар",
     "legacy_name": "Забутий радар",
-    "npc": "Зв’язківець",
-    "npc_art": "npc_communications",
+    "npc": "Зв’язківиця Ганна",
+    "npc_art": "art_custom_118",
     "role": "quest",
     "refresh_turns": 100,
     "stock": []
@@ -288,8 +305,8 @@
   "site_013": {
     "name": "Тунель караванників",
     "legacy_name": "Тунель караванників",
-    "npc": "Провідник",
-    "npc_art": "npc_guide",
+    "npc": "Караванщик",
+    "npc_art": "art_custom_139",
     "role": "merchant",
     "refresh_turns": 100,
     "stock": [
@@ -325,7 +342,7 @@
     "name": "Сонячна ферма",
     "legacy_name": "Сонячна ферма",
     "npc": "Енергетик",
-    "npc_art": "npc_energy_engineer",
+    "npc_art": "art_custom_121",
     "role": "merchant",
     "refresh_turns": 100,
     "stock": [
@@ -370,7 +387,7 @@
     "name": "Майстерня в кар’єрі",
     "legacy_name": "Майстерня в кар’єрі",
     "npc": "Майстер",
-    "npc_art": "npc_master",
+    "npc_art": "art_custom_117",
     "role": "merchant",
     "refresh_turns": 100,
     "stock": [
@@ -403,10 +420,10 @@
     ]
   },
   "site_017": {
-    "name": "Тиха обсерваторія",
+    "name": "Руїни офісів",
     "legacy_name": "Тиха обсерваторія",
-    "npc": "Астроном",
-    "npc_art": "npc:Астроном",
+    "npc": "Бухгалтер Антоніна",
+    "npc_art": "art_custom_111",
     "role": "quest",
     "refresh_turns": 100,
     "stock": []
@@ -414,8 +431,8 @@
   "site_018": {
     "name": "Станція очищення",
     "legacy_name": "Станція очищення",
-    "npc": "Комірник",
-    "npc_art": "npc_storekeeper",
+    "npc": "Чистильник",
+    "npc_art": "art_custom_122",
     "role": "merchant",
     "refresh_turns": 100,
     "stock": [
@@ -448,10 +465,10 @@
     ]
   },
   "site_019": {
-    "name": "Затоплений архів",
+    "name": "Закинутий архів",
     "legacy_name": "Затоплений архів",
     "npc": "Архіваріус",
-    "npc_art": "npc:Архіваріус",
+    "npc_art": "art_custom_114",
     "role": "quest",
     "refresh_turns": 100,
     "stock": []
@@ -460,7 +477,7 @@
     "name": "Майстерня під мостом",
     "legacy_name": "Майстерня під мостом",
     "npc": "Слюсар",
-    "npc_art": "npc_locksmith",
+    "npc_art": "art_custom_126",
     "role": "merchant",
     "refresh_turns": 100,
     "stock": [
@@ -502,10 +519,10 @@
     "stock": []
   },
   "site_022": {
-    "name": "Соляний караван-сарай",
+    "name": "Роботизований Ангар",
     "legacy_name": "Соляний караван-сарай",
-    "npc": "Міняйло",
-    "npc_art": "npc_money_changer",
+    "npc": "Робо торговець",
+    "npc_art": "art_custom_131",
     "role": "merchant",
     "refresh_turns": 100,
     "stock": [
@@ -541,7 +558,7 @@
     "name": "Сигнальна вежа",
     "legacy_name": "Сигнальна вежа",
     "npc": "Дозорний",
-    "npc_art": "npc_guard",
+    "npc_art": "art_custom_119",
     "role": "quest",
     "refresh_turns": 100,
     "stock": []
@@ -550,7 +567,7 @@
     "name": "Склад «Останній резерв»",
     "legacy_name": "Склад «Останній резерв»",
     "npc": "Інтендант",
-    "npc_art": "npc_quartermaster",
+    "npc_art": "art_custom_129",
     "role": "merchant",
     "refresh_turns": 100,
     "stock": [
