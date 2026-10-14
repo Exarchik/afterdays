@@ -48,7 +48,7 @@ class Detail(tk.Frame):
 def description(game,item):
     if not item:return tr('refinement_ui.0002')
     if item['kind']=='sealed':return tr('refinement_ui.0003', v0=items.item_weight(item))
-    kind=item['kind'];lines=[item['name'],(f'L{item.get("level",1)} · ' if kind in ('weapon','armor','helmet','module') else '')+RARITIES[item['rarity']][0]]
+    kind=item['kind'];lines=[(f'{tr("update033.level")} {item.get("level",1)} · ' if kind in ('weapon','armor','helmet','module') else '')+RARITIES[item['rarity']][0]]
     if item.get('field_test'):lines.append(tr('exp.quest_equipment'))
     ident=item.get('type_id')
     if ident:

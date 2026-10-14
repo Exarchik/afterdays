@@ -60,16 +60,31 @@ def window(app,title):
 def inspect_item(app,item):
     if not item:return
     win=window(app,tr('inspection_ui.0029')+item['name'])
-    art=tk.Canvas(win,bg=PANEL,height=94,highlightthickness=0);art.pack(fill='x')
+
+    # Назва зверху: 18 — розмір шрифту в пунктах.
+    tk.Label(
+        win,
+        text=item['name'],
+        bg=PANEL,
+        fg=GOLD,
+        font=('Segoe UI',16,'bold'),
+        wraplength=600,
+        justify='left',
+    ).pack(fill='x',padx=2,pady=(2,2))
+
+    # Зображення під назвою.
+    art=tk.Canvas(win,bg=PANEL,height=144,highlightthickness=0)
+    art.pack(fill='x')
+
     from visuals import icon
-    icon(art,item,18,5,80)
+    icon(art,item,18,5,144)
     detail=Detail(win,height=20);detail.pack(fill='both',expand=True,padx=12,pady=8);detail.config(text=item_text(app.game,item))
 
 def inspect_monster(app,event):
     if not app.game.battle:return
     pos=app.cell(event);enemy=next((e for e in app.game.battle['enemies'] if tuple(e['pos'])==pos),None)
     if not enemy:return
-    win=window(app,('Персонаж: ' if enemy.get('human') else tr('inspection_ui.0030'))+enemy['name']);art=tk.Canvas(win,bg=PANEL,height=96,highlightthickness=0);art.pack(fill='x')
+    win=window(app,(tr('update024.person')+': ' if enemy.get('human') else tr('inspection_ui.0030'))+enemy['name']);art=tk.Canvas(win,bg=PANEL,height=96,highlightthickness=0);art.pack(fill='x')
     from visuals import monster
     monster(art,enemy,18,5,86)
     if enemy.get('human'):equipment_cards(win,enemy)
