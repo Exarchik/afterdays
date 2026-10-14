@@ -11,6 +11,35 @@ from ui.widgets import Tooltip
 GOOD, BAD, MUTED = '#91d9aa', '#ef9690', '#a5aa99'
 
 
+def module_compatibility(item):
+    from i18n import t as tr
+    rules=mr.restrictions(item);target=rules.get('target',item.get('target'))
+    if target=='weapon':
+        categories=tuple(dict.fromkeys(rules.get('weapon_categories',mr.WEAPON_CATEGORIES)))
+        value='Універсальний' if set(mr.WEAPON_CATEGORIES)<=set(categories) else ', '.join(tr('update033.category_'+c) for c in categories)
+        return 'Сумісна зброя',value or 'Немає'
+    return 'Сумісна броня',{'armor':'Броня','helmet':'Шоломи','protection':'Універсальний'}.get(target,str(target))
+
+
+def summary_color(item,label,value):
+    """Color effects by benefit; metadata such as price and weight stays neutral."""
+    if item['kind'] in ('food','med','rad','repairkit'):
+        from game.systems import consumables
+        effects=consumables.definition(item)
+        for key,(name,_,_) in consumables.FIELDS.items():
+            if name==label and key not in ('value','weight'):
+                amount=effects.get(key,0)
+                return (GOOD if (amount<0 if key in ('damage_percent','ap_cost') else amount>0) else BAD) if amount else TEXT
+    if label in ('Шкода пострілу','За повну шкалу ОД'):return GOOD
+    if label=='Витрата ОД':return BAD
+    if label in ('Захист','Дальність','Критичний шанс') or label in catalog.STAT_NAMES.values():
+        try:amount=float(str(value).rstrip('%'))
+        except ValueError:return TEXT
+        lower=label==catalog.STAT_NAMES.get('weight_percent')
+        return (GOOD if (amount<0 if lower else amount>0) else BAD) if amount else TEXT
+    return TEXT
+
+
 def owned(game,item):
     return any(i and i.get('id')==item.get('id') for i in [*game.bag,*game.equipped.values()])
 
@@ -49,10 +78,11 @@ def summary(game,item):
         for key in ('vitality','regen','evasion','capacity','defense_percent','reflect_percent'):
             if s.get(key):rows.append((catalog.STAT_NAMES.get(key,key),f"{s[key]:+g}"+('%' if key.endswith('_percent') or key=='evasion' else ''),None,False))
     elif kind=='module':
+        label,value=module_compatibility(item)
+        rows.insert(0,(label,value,None,False))
         for key,value in items.stats(item).items():
             if value:rows.append((catalog.STAT_NAMES.get(key,key),f'{value:+g}'+('%' if key in mr.PERCENT_STATS or key in ('accuracy','crit','evasion') else ''),None,False))
         rules=mr.restrictions(item)
-        rows.append(('Сумісність',{'weapon':'Зброя','armor':'Броня','helmet':'Шоломи','protection':'Броня та шоломи'}.get(rules.get('target'),''),None,False))
         rows.append(('Рідкість спорядження','Від '+catalog.RARITIES[rules.get('min_equipment_rarity',0)][0].lower(),None,False))
     elif kind in ('food','med','rad','repairkit'):
         from game.systems import consumables
@@ -149,8 +179,10 @@ class ItemCard(ttk.Frame):
                 c.create_rectangle(x+1,y+5,x+1+max(0,end-x-2)*value/100,y+15,fill='#899349' if value>25 else '#b67552',outline='')
                 self.text(main_right,y,f'{value:g}%',anchor='ne');y+=31
                 c.create_line(left,y-5,main_right,y-5,fill='#796039');continue
-            end_label=self.text(left,y,label,width=main_width*.56)
-            end_value=self.text(vx,y,str(value),width=max(50,main_width*.26))
+            color=summary_color(self.item,label,value)
+            end_label=self.text(left,y,label,color=color,width=main_width*.56)
+            value_width=main_right-vx if label in ('Сумісна зброя','Сумісна броня') else max(50,main_width*.26)
+            end_value=self.text(vx,y,str(value),color=color,width=value_width)
             if diff and (not isinstance(diff,tuple) or any(diff)):
                 if isinstance(diff,tuple):
                     label_diff=f'{diff[0]:+g} / {diff[1]:+g}'
