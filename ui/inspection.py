@@ -41,7 +41,7 @@ def monster_text(g,e):
         lines += [tr('inspection_ui.0025', v0=balance.multiplier(mr.weapon_stats(g,g.weapon).get('attack', 0), e.get('defense', 0))),tr('inspection_ui.0026', v0=chance) if valid else tr('inspection_ui.0027')+why]
     return '\n'.join(lines)
 
-def window(app,title):
+def window(app,title,close_button=True):
     previous=app.dialog;parent=previous if previous and previous.winfo_exists() else app.root
     win=tk.Toplevel(parent);win.title(title)
     from ui.window_skin import apply
@@ -54,31 +54,18 @@ def window(app,title):
         if app.dialog:app.dialog.grab_set()
     win.close_dialog=close
     win.protocol('WM_DELETE_WINDOW',close);win.bind('<Escape>',lambda e:close())
-    ttk.Button(win,text=tr('inspection_ui.0028'),command=close).pack(side='bottom',fill='x',padx=12,pady=10)
+    if close_button:ttk.Button(win,text=tr('inspection_ui.0028'),command=close).pack(side='bottom',fill='x',padx=12,pady=10)
     return win
 
 def inspect_item(app,item):
     if not item:return
-    win=window(app,tr('inspection_ui.0029')+item['name'])
+    win=window(app,tr('inspection_ui.0029')+item['name'],close_button=False)
+    w,h=min(780,win.winfo_screenwidth()-40),min(780,win.winfo_screenheight()-80)
+    win.geometry(f'{w}x{h}+{max(0,(win.winfo_screenwidth()-w)//2)}+{max(0,(win.winfo_screenheight()-h)//2)}')
+    from ui.item_inspection import ItemCard
+    win.item_card=ItemCard(win,app,item)
+    return win
 
-    # Назва зверху: 18 — розмір шрифту в пунктах.
-    tk.Label(
-        win,
-        text=item['name'],
-        bg=PANEL,
-        fg=GOLD,
-        font=('Segoe UI',16,'bold'),
-        wraplength=600,
-        justify='left',
-    ).pack(fill='x',padx=2,pady=(2,2))
-
-    # Зображення під назвою.
-    art=tk.Canvas(win,bg=PANEL,height=144,highlightthickness=0)
-    art.pack(fill='x')
-
-    from visuals import icon
-    icon(art,item,18,5,144)
-    detail=Detail(win,height=20);detail.pack(fill='both',expand=True,padx=12,pady=8);detail.config(text=item_text(app.game,item))
 
 def inspect_monster(app,event):
     if not app.game.battle:return
