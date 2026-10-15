@@ -101,9 +101,16 @@ class Game(
     ProgressionGame,
 ):
     """The complete game model, independent of launchers and presentation."""
+    def __init__(self,*args,**kwargs):
+        super().__init__(*args,**kwargs)
+        from location_art import assign_city_art
+        assign_city_art(self)
+
     @classmethod
     def load(cls,path):
         game=super().load(path)
         import special_sites
         special_sites.sync_saved(game)
+        from location_art import assign_city_art
+        assign_city_art(game)
         return game

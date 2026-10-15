@@ -146,15 +146,11 @@ class App(MapVisibility):
         world_window = world_canvas.create_window(0, 0, window=self.world_tab, anchor='nw')
         self.world_tab.bind('<Configure>', lambda e: world_canvas.configure(scrollregion=world_canvas.bbox('all')))
         world_canvas.bind('<Configure>', lambda e: world_canvas.itemconfigure(world_window, width=e.width))
-        self.location = tk.Label(self.world_tab, bg=PANEL, fg=TEXT, font=('Segoe UI', 12, 'bold'), wraplength=335, justify='left')
-        self.location.pack(fill='x', padx=12, pady=15)
-        self.city_info = tk.Label(self.world_tab, bg=PANEL, fg=MUTED, justify='left', wraplength=340)
-        self.city_info.pack(fill='x', padx=12, pady=8)
+        from ui.location_panel import LocationPanel
+        self.location_panel=LocationPanel(self.world_tab,self)
+        self.location_panel.pack(fill='x',padx=10,pady=10)
         self.services = adventure_ui.Services(self.world_tab,self)
         self.services.pack(fill='x',padx=6,pady=4)
-        tk.Label(self.world_tab, text=tr('afterdays.0147'), bg=PANEL, fg=GOLD).pack(anchor='w', padx=12, pady=(20, 8))
-        self.cities_label = tk.Label(self.world_tab, bg=PANEL, fg=MUTED, justify='left')
-        self.cities_label.pack(anchor='w', padx=12)
         self.inv_panel = visuals.EquipmentPanel(self.inv_tab, self)
         self.inv_panel.pack(fill='both', expand=True)
         self.quest_panel = refinement_ui.QuestCards(self.quest_tab, self)
@@ -268,18 +264,7 @@ class App(MapVisibility):
         self.tabs.tab(self.loot_tab, text=tr('afterdays.0152', v0=len(g.loot)))
         self.services.refresh()
         self.perks_panel.refresh()
-        self.location.config(text=g.city_name(g.city) if g.city is not None else TERRAINS[g.world[g.y][g.x]][1],fg=g.city_color(g.city,TEXT))
-        self.city_info.config(text=(tr('afterdays.0153', v0=g.current_site['npc']) if g.current_site else tr('afterdays.0154') if g.city is not None else
-                                  tr('afterdays.0155')) +
-                                  tr('afterdays.0157', v0=g.x, v1=g.y, v2=g.region_level, v3=weapon['name'] if weapon else tr('afterdays.0156'), v4=ws.get('damage', 0), v5=ws.get('range', 0), v6=weapon['ap'] if weapon else '—'))
-        if g.city is not None:
-            self.city_info.config(text=self.city_info.cget('text')+'\n'+tr('reputation.status', value=g.reputation(), buy=round((buy_factor(g.reputation())-1)*100), sell=round((sell_factor(g.reputation())-1)*100)))
-        if weapon:
-            ammo_type=weapon.get('ammo_type','pistol')
-            self.city_info.config(text=self.city_info.cget('text')+tr('afterdays.0158', v0=catalog.AMMO[ammo_type][0], v1=g.count('ammo', ammo_type), v2=weapon.get('durability', 100)))
-        self.city_info.config(text=self.city_info.cget('text')+'\n'+tr('survival040.sheet',rad=g.radiation_injury,hunger=g.hunger))
-        near = sorted(((n,pos) for n,pos in enumerate(g.cities) if n in g.known_cities), key=lambda entry: world_hex.distance(entry[1], (g.x, g.y)))[:3]
-        self.cities_label.config(text='\n'.join(f'◆ {self.game.city_name(n)} ({p[0]}, {p[1]})' for n,p in near))
+        self.location_panel.refresh()
         self.player_panel.refresh()
         self.inv_panel.refresh()
         self.quest_panel.refresh()
