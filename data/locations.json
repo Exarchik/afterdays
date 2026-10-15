@@ -1,0 +1,70 @@
+{
+  "waste": [
+    "art_custom_163",
+    "art_custom_164",
+    "art_custom_179",
+    "art_custom_180",
+    "art_custom_195"
+  ],
+  "waste_lake": [
+    "art_custom_165",
+    "art_custom_166",
+    "art_custom_196"
+  ],
+  "waste_mountain": [
+    "art_custom_181",
+    "art_custom_182",
+    "art_custom_197"
+  ],
+  "forest": [
+    "art_custom_167",
+    "art_custom_168",
+    "art_custom_183",
+    "art_custom_184",
+    "art_custom_198"
+  ],
+  "forest_lake": [
+    "art_custom_169",
+    "art_custom_170",
+    "art_custom_199"
+  ],
+  "forest_mountain": [
+    "art_custom_185",
+    "art_custom_186",
+    "art_custom_206"
+  ],
+  "ruin": [
+    "art_custom_171",
+    "art_custom_172",
+    "art_custom_187",
+    "art_custom_188",
+    "art_custom_200"
+  ],
+  "ruin_lake": [
+    "art_custom_173",
+    "art_custom_174",
+    "art_custom_201"
+  ],
+  "ruin_mountain": [
+    "art_custom_189",
+    "art_custom_190",
+    "art_custom_202"
+  ],
+  "road": [
+    "art_custom_175",
+    "art_custom_176",
+    "art_custom_191",
+    "art_custom_192",
+    "art_custom_203"
+  ],
+  "road_lake": [
+    "art_custom_177",
+    "art_custom_178",
+    "art_custom_204"
+  ],
+  "road_mountain": [
+    "art_custom_193",
+    "art_custom_194",
+    "art_custom_205"
+  ]
+}

@@ -63,11 +63,23 @@ def photo(widget,key,size=48):
     if cache not in root._sprite_cache:
         try:
             entry=MANIFEST[key];sheet=entry.get('sheet','atlas');sheet_key=(sheet,size);columns=entry.get('columns',16)
-            if sheet_key not in root._sprite_sheets:root._sprite_sheets[sheet_key]=tk.PhotoImage(master=root,file=str(ROOT/f'{sheet}_{size}.png'))
-            image=tk.PhotoImage(master=root,width=size,height=size)
+            if not hasattr(root,'_sprite_tiles'):root._sprite_tiles={}
+            identity=(sheet,entry['index'],columns,size)
+            if identity in root._sprite_tiles:
+                root._sprite_cache[cache]=root._sprite_tiles[identity]
+                return root._sprite_cache[cache]
             index=entry['index'];x=index%columns*size;y=index//columns*size
-            image.tk.call(str(image),'copy',str(root._sprite_sheets[sheet_key]),'-from',x,y,x+size,y+size,'-to',0,0)
+            sources=getattr(root,'_sprite_sources',{})
+            if sheet_key in sources:
+                if sources[sheet_key] is None:return None
+                from PIL import ImageTk
+                image=ImageTk.PhotoImage(sources[sheet_key].crop((x,y,x+size,y+size)),master=root)
+            else:
+                if sheet_key not in root._sprite_sheets:root._sprite_sheets[sheet_key]=tk.PhotoImage(master=root,file=str(ROOT/f'{sheet}_{size}.png'))
+                image=tk.PhotoImage(master=root,width=size,height=size)
+                image.tk.call(str(image),'copy',str(root._sprite_sheets[sheet_key]),'-from',x,y,x+size,y+size,'-to',0,0)
             root._sprite_cache[cache]=image
+            root._sprite_tiles[identity]=image
         except (OSError,tk.TclError):return None
     return root._sprite_cache[cache]
 
@@ -115,11 +127,17 @@ def inventory_photo(widget,item,width):
     if cache not in root._inventory_images:
         try:
             sheet_key=(sheet,width)
-            if sheet_key not in root._inventory_sheets:root._inventory_sheets[sheet_key]=tk.PhotoImage(master=root,file=str(ROOT/f'{sheet}_{width}.png'))
-            image=tk.PhotoImage(master=root,width=width,height=72)
             columns=entry.get('inventory_columns',16)
             x,y=index%columns*width,index//columns*72
-            image.tk.call(str(image),'copy',str(root._inventory_sheets[sheet_key]),'-from',x,y,x+width,y+72,'-to',0,0)
+            sources=getattr(root,'_inventory_sources',{})
+            if sheet_key in sources:
+                if sources[sheet_key] is None:return None
+                from PIL import ImageTk
+                image=ImageTk.PhotoImage(sources[sheet_key].crop((x,y,x+width,y+72)),master=root)
+            else:
+                if sheet_key not in root._inventory_sheets:root._inventory_sheets[sheet_key]=tk.PhotoImage(master=root,file=str(ROOT/f'{sheet}_{width}.png'))
+                image=tk.PhotoImage(master=root,width=width,height=72)
+                image.tk.call(str(image),'copy',str(root._inventory_sheets[sheet_key]),'-from',x,y,x+width,y+72,'-to',0,0)
             root._inventory_images[cache]=image
         except (OSError,tk.TclError):return None
     return root._inventory_images[cache]

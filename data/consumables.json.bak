@@ -286,7 +286,7 @@
     "weight": 0.1,
     "ap_cost": 0,
     "heal": 0,
-    "heal_percent": 50.0,
+    "heal_percent": 60.0,
     "satiety": 0,
     "radiation_heal": 0,
     "repair": 0,
@@ -296,8 +296,8 @@
     "stealth_duration": 0,
     "kind": "med",
     "name": "Військовий стимулятор",
-    "description": "",
-    "sprite_id": "med",
+    "description": "В бою важлива кожна секунда",
+    "sprite_id": "art_custom_142",
     "damage_percent": 0
   }
 }

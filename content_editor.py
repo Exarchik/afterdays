@@ -13,6 +13,7 @@ from quest_editor import QuestPanel
 from dialogue_editor import DialoguePanel
 from faction_editor import FactionPanel, HumanPanel
 from site_editor import SitePanel
+from location_editor import LocationsPanel
 
 
 class ContentEditor(ttk.Frame):
@@ -38,6 +39,7 @@ class ContentEditor(ttk.Frame):
         self.humans=HumanPanel(self.tabs,self.store,self.save_all);self.tabs.add(self.humans,text='Люди')
         self.factions=FactionPanel(self.tabs,self.store,self.save_all);self.tabs.add(self.factions,text='Фракції')
         self.sites=SitePanel(self.tabs,self.store,self.save_all);self.tabs.add(self.sites,text='Особливі локації')
+        self.locations=LocationsPanel(self.tabs,self.store,self.save_all);self.tabs.add(self.locations,text='Локації')
         self.tabs.bind('<<NotebookTabChanged>>',lambda e:self.factions.refresh_choices() if self.tabs.select()==str(self.factions) else None)
         self.arts=ArtPanel(self.tabs,self.library,self.commit,self.refresh_assets,self.save_all,lambda:self.events.document['events'])
         self.tabs.add(self.arts,text='Арти')
@@ -45,6 +47,7 @@ class ContentEditor(ttk.Frame):
         root.protocol('WM_DELETE_WINDOW',self.close)
 
     def refresh_assets(self):
+        self.locations.rebuild()
         self.sites.show_art()
         self.humans.show_art()
         self.items.refresh_preview()

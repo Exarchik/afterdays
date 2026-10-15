@@ -1,7 +1,7 @@
 {
   "item_med": {
     "value": 42,
-    "weight": 0.4,
+    "weight": 0.35,
     "ap_cost": 2,
     "heal": 0,
     "heal_percent": 50.0,
@@ -20,7 +20,7 @@
   },
   "item_food": {
     "value": 18,
-    "weight": 0.6,
+    "weight": 0.4,
     "ap_cost": 2,
     "heal": 0,
     "heal_percent": 0.0,
@@ -104,7 +104,7 @@
   },
   "item_repairkit": {
     "value": 50,
-    "weight": 0.0,
+    "weight": 0.3,
     "ap_cost": 2,
     "heal": 0,
     "heal_percent": 0.0,
@@ -187,8 +187,8 @@
     "damage_percent": 0
   },
   "item_custom_004": {
-    "value": 150,
-    "weight": 0.4,
+    "value": 130,
+    "weight": 0.3,
     "ap_cost": 2,
     "heal": 0,
     "heal_percent": 20.0,
@@ -197,7 +197,7 @@
     "repair": 0,
     "regen": 0,
     "regen_duration": 0,
-    "satiety_duration": 20,
+    "satiety_duration": 10,
     "stealth_duration": 0,
     "kind": "food",
     "name": "Сухпай",
@@ -264,7 +264,7 @@
   },
   "item_custom_008": {
     "value": 7,
-    "weight": 0.4,
+    "weight": 0.05,
     "ap_cost": 2,
     "heal": 10,
     "heal_percent": 0.0,

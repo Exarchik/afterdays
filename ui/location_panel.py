@@ -10,7 +10,9 @@ CITY_ART_SIZE=144
 def location_details(game):
     city=game.city;site=game.current_site
     kind=game.world[game.y][game.x]
-    title=game.city_name(city) if city is not None else TERRAINS[kind][1]
+    import location_rules
+    variant=location_rules.terrain_type(game,game.x,game.y)
+    title=game.city_name(city) if city is not None else location_rules.TYPES.get(variant,TERRAINS[kind][1])
     lines=[f'[{game.x}; {game.y}] · Рівень {game.region_level}']
     if site:lines.append(site['npc'])
     elif city is not None:lines.append('Поселення')
@@ -39,7 +41,7 @@ class LocationPanel(tk.Frame):
         game=self.app.game;title,details=location_details(game)
         self.title.config(text=title,fg=game.city_color(game.city,TEXT))
         self.info.config(text=details)
-        art=location_art.city_art(game,game.x,game.y)
+        art=location_art.location_art(game,game.x,game.y)
         key=(id(game),game.x,game.y,game.world[game.y][game.x],art)
         if key!=self.art_key:
             self.art_key=key

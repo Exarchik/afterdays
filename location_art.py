@@ -19,3 +19,25 @@ def assign_city_art(game,manifest=None):
 
 def city_art(game,x,y):
     return getattr(game,'reputation_state',{}).get('city_art',{}).get(f'{x},{y}')
+
+
+def location_art(game,x,y,definitions=None,manifest=None):
+    """Persist one independent random illustration per visited terrain hex."""
+    if game.world[y][x]=='city':return city_art(game,x,y)
+    import location_rules
+    kind=location_rules.terrain_type(game,x,y)
+    if kind is None:return None
+    definitions=location_rules.catalog() if definitions is None else definitions
+    if manifest is None:
+        import sprites
+        manifest=sprites.MANIFEST
+    pool=[key for key in definitions.get(kind,[]) if key in manifest]
+    if not pool:pool=[key for key in definitions.get(game.world[y][x],[]) if key in manifest]
+    if not pool:return None
+    game.init_reputation()
+    saved=game.reputation_state.setdefault('location_art',{})
+    key=f'{x},{y}'
+    if saved.get(key) not in pool:
+        rng=random.Random(repr(game.rng.getstate())+':location:'+key)
+        saved[key]=rng.choice(pool)
+    return saved[key]

@@ -672,9 +672,12 @@ class App(MapVisibility):
 
 
 def launch(test_hook=None):
-    """Create the game window and schedule an optional integration hook."""
-    root = tk.Tk()
-    app = App(root)
-    if test_hook:
-        root.after(100, lambda: test_hook(root, app))
+    """Preload graphics into the game root before enabling gameplay."""
+    from ui.graphics_loader import GraphicsLoader
+    root=tk.Tk()
+    root.title('Afterdays — завантаження графіки')
+    root.geometry('1260x880');root.minsize(1080,760)
+    root.configure(bg=BG)
+    ttk.Style(root).theme_use('clam')
+    GraphicsLoader(root,App,test_hook)
     root.mainloop()
