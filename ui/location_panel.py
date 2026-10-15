@@ -5,6 +5,7 @@ from visuals import PANEL,TEXT,MUTED
 import sprites
 import location_art
 
+CITY_ART_SIZE=144
 
 def location_details(game):
     city=game.city;site=game.current_site
@@ -21,7 +22,7 @@ class LocationPanel(tk.Frame):
     def __init__(self,parent,app):
         super().__init__(parent,bg=PANEL)
         self.app=app;self.photo=None;self.art_key=None
-        self.picture=tk.Label(self,bg=PANEL,width=96,height=96)
+        self.picture=tk.Label(self,bg=PANEL,width=CITY_ART_SIZE,height=CITY_ART_SIZE)
         self.picture.grid(row=0,column=0,rowspan=2,sticky='nw',padx=(0,10))
         self.title=tk.Label(self,bg=PANEL,fg=TEXT,font=('Segoe UI',11,'bold'),anchor='w',justify='left',wraplength=230)
         self.title.grid(row=0,column=1,sticky='ew')
@@ -31,7 +32,7 @@ class LocationPanel(tk.Frame):
         self.bind('<Configure>',self.resize)
 
     def resize(self,event):
-        width=max(90,event.width-110)
+        width=max(90,event.width-158)
         self.title.config(wraplength=width);self.info.config(wraplength=width)
 
     def refresh(self):
@@ -42,8 +43,8 @@ class LocationPanel(tk.Frame):
         key=(id(game),game.x,game.y,game.world[game.y][game.x],art)
         if key!=self.art_key:
             self.art_key=key
-            self.photo=sprites.photo(self,art,96) if art else None
+            self.photo=sprites.photo(self,art,CITY_ART_SIZE) if art else None
             if self.photo is None:
                 import world_hex_art
-                self.photo=world_hex_art.photo(self,game,game.x,game.y,48)
-            self.picture.config(image=self.photo,width=96,height=96)
+                self.photo=world_hex_art.photo(self,game,game.x,game.y,72)
+            self.picture.config(image=self.photo,width=CITY_ART_SIZE,height=CITY_ART_SIZE)
