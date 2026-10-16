@@ -41,6 +41,18 @@
         "xp_step": 10,
         "description": "Видається під час зустрічі з кандидатом; прив’язане до поселення."
       }
+    },
+    "delivery": {
+      "normal": {
+        "title": "Доставка",
+        "art": "quest:delivery",
+        "min_level": 1,
+        "reward": 90,
+        "money_power": 1.3,
+        "xp_reward": 20,
+        "xp_step": 5,
+        "description": "Доставити посилку доступному одержувачу."
+      }
     }
   }
 }

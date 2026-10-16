@@ -182,9 +182,13 @@ def paint_snapshot(app):
     finally:app.game=actual
 
 
-def service_picture(c,key,x,y,npc=None):
+def service_sprite(key,npc=None):
     sprite=('npc:'+npc if npc else 'npc:'+key) if key in ('smith','food','fence','tech','mayor','traveler','hunter') else {'loot':'loot','stash':'stash','rest':'rest','search':'loot','perks':'perk:tactician','atlas':'site','board':'journal'}.get(key)
-    sprite={'settlers':'npc_roamer_smith','torn_map':'quest:torn_map','board':'service_board','metro':'service_metro','cartographer':'npc_cartographer','guide':'npc_guide','action_delivery':'action_delivery','action_radio':'action_radio'}.get(key,sprite)
+    return {'settlers':'npc_roamer_smith','torn_map':'quest:torn_map','board':'service_board','metro':'service_metro','cartographer':'npc_cartographer','guide':'npc_guide','action_delivery':'action_delivery','action_radio':'action_radio'}.get(key,sprite)
+
+
+def service_picture(c,key,x,y,npc=None):
+    sprite=service_sprite(key,npc)
     if sprites.draw(c,sprite,x,y,52):return
     samples={'hunter':dict(name=tr('adventure_ui.0001'),kind='sealed',rarity=0),'smith':dict(name=tr('adventure_ui.0002'),kind='weapon',rarity=1),
              'food':items.supply('food'),'fence':dict(name=tr('adventure_ui.0003'),kind='sealed',rarity=0),
@@ -245,17 +249,27 @@ class Services(tk.Frame):
 
     def paint(self):
         """Малює актуальне представлення даних на Canvas."""
-        c=self.canvas;c.delete('all');self.rects=[]
+        from ui.service_art import photo
+        c=self.canvas;c.delete('all');self.rects=[];self.art_images=[]
         width=max(320,c.winfo_width());cell=width/3;h=102
         c.config(height=math.ceil(len(self.entries)/3)*h)
         for n,(key,label,fn) in enumerate(self.entries):
             x,y=n%3*cell,n//3*h
             rect=(x+4,y+4,x+cell-4,y+h-4);self.rects.append((rect,fn))
-            c.create_rectangle(*rect,fill='#2b3b30',outline='#63745a',width=1)
             site=self.app.game.current_site
-            if not (site and key in ('smith','mayor') and sprites.draw(c,site.get('npc_art'),x+cell/2-26,y+7,52)):
-                service_picture(c,key,x+cell/2-26,y+7,site['npc'] if site and key in ('smith','mayor') else None)
-            c.create_text(x+cell/2,y+74,text=label,fill=GOLD if key in ('mayor','stash') else TEXT,font=('Segoe UI',9),width=cell-12)
+            npc=site['npc'] if site and key in ('smith','mayor') else None
+            art_key=site.get('npc_art') if npc else None
+            art=photo(c,art_key or service_sprite(key,npc),max(1,round(cell-8)),h-8)
+            if art is None and art_key:art=photo(c,service_sprite(key,npc),max(1,round(cell-8)),h-8)
+            if art:
+                self.art_images.append(art)
+                c.create_image(x+4,y+4,image=art,anchor='nw')
+            else:
+                c.create_rectangle(*rect,fill='#1b2720',outline='')
+                service_picture(c,key,x+cell/2-26,y+7,npc)
+            c.create_rectangle(*rect,outline='#63745a',width=1)
+            c.create_text(x+cell/2+1,y+h-9,text=label,fill='#101714',font=('Segoe UI',9),width=cell-16,anchor='s',justify='center')
+            c.create_text(x+cell/2,y+h-10,text=label,fill=GOLD if key in ('mayor','stash') else TEXT,font=('Segoe UI',9),width=cell-16,anchor='s',justify='center')
 
     def click(self,e):
         """Обробляє натискання на елемент панелі за координатами курсора."""
