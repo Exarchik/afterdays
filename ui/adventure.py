@@ -183,7 +183,7 @@ def paint_snapshot(app):
 
 
 def service_picture(c,key,x,y,npc=None):
-    sprite=('npc:'+npc if npc else 'npc:'+key) if key in ('smith','food','fence','tech','mayor','traveler','hunter') else {'stash':'stash','rest':'rest','search':'loot','perks':'perk:tactician','atlas':'site','board':'journal'}.get(key)
+    sprite=('npc:'+npc if npc else 'npc:'+key) if key in ('smith','food','fence','tech','mayor','traveler','hunter') else {'loot':'loot','stash':'stash','rest':'rest','search':'loot','perks':'perk:tactician','atlas':'site','board':'journal'}.get(key)
     sprite={'settlers':'npc_roamer_smith','torn_map':'quest:torn_map','board':'service_board','metro':'service_metro','cartographer':'npc_cartographer','guide':'npc_guide','action_delivery':'action_delivery','action_radio':'action_radio'}.get(key,sprite)
     if sprites.draw(c,sprite,x,y,52):return
     samples={'hunter':dict(name=tr('adventure_ui.0001'),kind='sealed',rarity=0),'smith':dict(name=tr('adventure_ui.0002'),kind='weapon',rarity=1),
@@ -237,6 +237,9 @@ class Services(tk.Frame):
                 q=g.destination_quest();items.append(('action_delivery' if q['kind']=='delivery' else 'action_radio',tr('adventure_ui.0019') if q['kind']=='delivery' else tr('adventure_ui.0020'),lambda:app.act(g.search)))
             if getattr(g,'local_expedition',lambda:None)() and g.city is not None:items.append(('search',tr('adventure_ui.0018'),lambda:app.act(g.search)))
             if g.road_event:items.append(('traveler',tr('adventure_ui.0021'),app.road_dialog))
+        if g.loot and not g.battle:
+            from ui.event import show_loot
+            items.append(('loot',f'Здобич · {len(g.loot)}',lambda:show_loot(app)))
         items.extend([('atlas',tr('debug.atlas_button') if TEST_MODE else tr('adventure_ui.0023'),app.atlas)])
         self.entries=items;self.paint()
 
