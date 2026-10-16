@@ -103,6 +103,8 @@ class Game(
     """The complete game model, independent of launchers and presentation."""
     def __init__(self,*args,**kwargs):
         super().__init__(*args,**kwargs)
+        import secondary_roads
+        secondary_roads.build(self)
         from location_art import assign_city_art
         assign_city_art(self)
 
@@ -113,4 +115,5 @@ class Game(
         special_sites.sync_saved(game)
         from location_art import assign_city_art
         assign_city_art(game)
+        if 'secondary_roads_v1' not in game.reputation_state:game.trails=[]
         return game

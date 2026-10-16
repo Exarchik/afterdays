@@ -79,7 +79,7 @@ def draw(app,canvas=None,overview=False):
     for pos in sorted(trails):
         if not visible(*pos):continue
         for nxt in grid.adjacent(pos):
-            if nxt in trails and nxt>pos and visible(*nxt):
+            if nxt in trails and nxt>pos and visible(*nxt) and not all(g.world[y][x] in ('road','city','site') for x,y in (pos,nxt)):
                 c.create_line(*v.point(pos),*v.point(nxt),fill='#c5b590',dash=(3,2),width=1,tags='trail')
     for key in g.radiation:
         x,y=map(int,key.split(','))
@@ -109,6 +109,7 @@ def draw(app,canvas=None,overview=False):
         c.create_polygon(*v.polygon(pos,.96),outline='#71d2ff',width=1.5 if not overview else 1,**outline)
         c.create_text(px,py-v.radius-3,text=g.city_name(n),fill=g.city_color(n,'#efe0b5'),
                       anchor='s',font=('Segoe UI',8),tags='city_name')
+    draw_debug_sites(c,app,v,overview)
     for q in g.quests:
         if q['status']!='active':continue
         from quest_navigation import destination,edge_arrow
@@ -140,7 +141,7 @@ def draw(app,canvas=None,overview=False):
         if g.coward_turns:c.create_text(px,py-v.radius*1.1,text='⚑',fill='#ed795c',font=('Segoe UI',12,'bold'),tags='coward_icon')
         if g.traveler and g.traveler['pos']==[g.x,g.y]:
             c.create_text(px+v.radius*.8,py-v.radius,text='¤',fill='#f1d383',font=('Segoe UI',16,'bold'))
-        app.hint.config(text=HINT+('\nТут лежать ваші речі. E — відкрити надгробок.' if g.local_graves() else ''))
+        app.hint.config(text=HINT+(' · N — особливі локації' if TEST_MODE else '')+('\nТут лежать ваші речі. E — відкрити надгробок.' if g.local_graves() else ''))
     c.finish()
     return v
 
@@ -281,3 +282,17 @@ class OverlayCanvas:
         if self.changed:
             for _,_,_,ident in self.items:self.canvas.tag_raise(ident)
         for tag in ('world_player_ring','world_player_arrow','coward_icon','fx'):self.canvas.tag_raise(tag)
+
+
+def draw_debug_sites(canvas,app,view,overview=False):
+    from debug_config import TEST_MODE
+    if not TEST_MODE or not getattr(app,'show_special_sites',False):return
+    for site in app.game.special_sites:
+        pos=site['pos']
+        if not view.visible(pos):continue
+        x,y=view.point(pos)
+        canvas.create_polygon(*view.polygon(pos,.90),fill='',outline='#e5a6ff',width=2,dash=(3,2),tags='debug_site')
+        canvas.create_text(x,y,text='◆',fill='#e5a6ff',font=('Segoe UI',9 if overview else 12,'bold'),tags='debug_site')
+        # Known sites already have their normal city-name label.
+        if not site.get('found'):
+            canvas.create_text(x,y-view.radius-3,text=site['name'],anchor='s',fill='#e5a6ff',font=('Segoe UI',8),tags='debug_site')

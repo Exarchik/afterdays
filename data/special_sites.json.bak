@@ -9,24 +9,6 @@
     "stock": [],
     "location_art": "art_custom_216"
   },
-  "site_custom_001": {
-    "name": "Хижа Олафа",
-    "npc": "Рибак Олаф",
-    "npc_art": "art_custom_108",
-    "role": "both",
-    "refresh_turns": 100,
-    "stock": [
-      {
-        "kind": "food",
-        "amount": 20,
-        "chance": 1.0,
-        "rarity_min": 0,
-        "rarity_max": 4,
-        "item_id": "item_custom_002"
-      }
-    ],
-    "location_art": ""
-  },
   "site_002": {
     "name": "Станція Козача",
     "legacy_name": "Вагон №13",
@@ -62,7 +44,7 @@
         "chance": 1
       }
     ],
-    "location_art": ""
+    "location_art": "art_custom_226"
   },
   "site_003": {
     "name": "Стара насосна",
@@ -72,7 +54,25 @@
     "role": "quest",
     "refresh_turns": 100,
     "stock": [],
-    "location_art": ""
+    "location_art": "art_custom_228"
+  },
+  "site_custom_001": {
+    "name": "Хижа Олафа",
+    "npc": "Рибак Олаф",
+    "npc_art": "art_custom_108",
+    "role": "both",
+    "refresh_turns": 100,
+    "stock": [
+      {
+        "kind": "food",
+        "amount": 20,
+        "chance": 1.0,
+        "rarity_min": 0,
+        "rarity_max": 4,
+        "item_id": "item_custom_002"
+      }
+    ],
+    "location_art": "art_custom_231"
   },
   "site_004": {
     "name": "Бункер Залізоголового",
@@ -177,7 +177,7 @@
         "chance": 1
       }
     ],
-    "location_art": ""
+    "location_art": "art_custom_224"
   },
   "site_007": {
     "name": "Підземна друкарня",
@@ -271,7 +271,7 @@
         "chance": 1
       }
     ],
-    "location_art": ""
+    "location_art": "art_custom_229"
   },
   "site_011": {
     "name": "Польовий шпиталь",
@@ -350,7 +350,7 @@
         "chance": 1
       }
     ],
-    "location_art": ""
+    "location_art": "art_custom_230"
   },
   "site_014": {
     "name": "Сонячна ферма",
@@ -387,7 +387,7 @@
         "chance": 1
       }
     ],
-    "location_art": ""
+    "location_art": "art_custom_225"
   },
   "site_015": {
     "name": "Архів під мостом",
@@ -481,7 +481,7 @@
         "chance": 1
       }
     ],
-    "location_art": ""
+    "location_art": "art_custom_227"
   },
   "site_019": {
     "name": "Закинутий архів",
@@ -622,6 +622,6 @@
         "chance": 1
       }
     ],
-    "location_art": ""
+    "location_art": "art_custom_223"
   }
 }

@@ -9,24 +9,6 @@
     "stock": [],
     "location_art": "art_custom_216"
   },
-  "site_custom_001": {
-    "name": "Хижа Олафа",
-    "npc": "Рибак Олаф",
-    "npc_art": "art_custom_108",
-    "role": "both",
-    "refresh_turns": 100,
-    "stock": [
-      {
-        "kind": "food",
-        "amount": 20,
-        "chance": 1.0,
-        "rarity_min": 0,
-        "rarity_max": 4,
-        "item_id": "item_custom_002"
-      }
-    ],
-    "location_art": "art_custom_231"
-  },
   "site_002": {
     "name": "Станція Козача",
     "legacy_name": "Вагон №13",
@@ -73,6 +55,24 @@
     "refresh_turns": 100,
     "stock": [],
     "location_art": "art_custom_228"
+  },
+  "site_custom_001": {
+    "name": "Хижа Олафа",
+    "npc": "Рибак Олаф",
+    "npc_art": "art_custom_108",
+    "role": "both",
+    "refresh_turns": 100,
+    "stock": [
+      {
+        "kind": "food",
+        "amount": 20,
+        "chance": 1.0,
+        "rarity_min": 0,
+        "rarity_max": 4,
+        "item_id": "item_custom_002"
+      }
+    ],
+    "location_art": "art_custom_231"
   },
   "site_004": {
     "name": "Бункер Залізоголового",

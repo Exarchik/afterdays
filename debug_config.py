@@ -14,6 +14,7 @@ TEST_MODE=read_test_mode()
 
 class MapVisibility:
     show_full_map=False
+    show_special_sites=False
 
     def map_revealed(self,x,y):
         """Визначає видимість клітинки з урахуванням тестового режиму."""
@@ -27,4 +28,10 @@ class MapVisibility:
         """Перемикає повне відкриття карти у тестовому режимі."""
         if not TEST_MODE:return
         self.show_full_map=not self.show_full_map
+        self.refresh()
+
+    def toggle_test_sites(self):
+        """Show locations as an overlay without discovering them in gameplay."""
+        if not TEST_MODE or self.game.battle:return
+        self.show_special_sites=not self.show_special_sites
         self.refresh()

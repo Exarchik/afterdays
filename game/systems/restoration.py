@@ -63,8 +63,6 @@ class RestorationMixin:
         if q['layout']==list(range(9)):
             q.update(map_solved=True,progress=1,pos=q['stash_pos'][:])
             self.reveal(*q['pos'],1)
-            route=world_route(self,q['pos'])
-            self.trails=[list(pos) for pos in sorted(set(map(tuple,self.trails))|set(route))]
             for item in self.bag:
                 if item.get('quest_id')==ident:item.update(art_id='restored_map_item',name=tr('restoration.restored_map_item'))
             self.log(tr('restoration.map_solved',x=q['pos'][0],y=q['pos'][1]))

@@ -201,9 +201,6 @@ class AdventureMixin:
         self.cities.append(site['pos'][:]);self.city_names.append(site['name'])
         self.city_merchants.append([0] if site['role'] in ('merchant','both') else [])
         if site['role'] in ('quest','both'):self.mayors.append(site['city_id'])
-        from site_layout import road_path
-        route=road_path(self,site['pos'])
-        self.trails=[list(p) for p in sorted(set(map(tuple,self.trails))|set(route)|{tuple(site['pos'])})]
         self.world[site['pos'][1]][site['pos'][0]]='site'
         self.reveal(*site['pos'],2)
         self.radiation.pop(f'{site["pos"][0]},{site["pos"][1]}',None)

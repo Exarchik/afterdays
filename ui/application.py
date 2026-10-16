@@ -590,6 +590,8 @@ class App(MapVisibility):
             self.tabs.select(self.inv_tab)
         elif key == 'j':
             self.tabs.select(self.quest_tab)
+        elif key == 'n' and TEST_MODE and not self.game.battle:
+            self.toggle_test_sites()
         elif key == 'm':
             if TEST_MODE and not (event.state & 0x0001):
                 self.toggle_test_map()
