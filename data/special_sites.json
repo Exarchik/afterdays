@@ -6,7 +6,8 @@
     "npc_art": "art_custom_124",
     "role": "quest",
     "refresh_turns": 100,
-    "stock": []
+    "stock": [],
+    "location_art": "art_custom_216"
   },
   "site_custom_001": {
     "name": "Хижа Олафа",
@@ -23,7 +24,8 @@
         "rarity_max": 4,
         "item_id": "item_custom_002"
       }
-    ]
+    ],
+    "location_art": "art_custom_231"
   },
   "site_002": {
     "name": "Станція Козача",
@@ -59,7 +61,8 @@
         "amount": 5,
         "chance": 1
       }
-    ]
+    ],
+    "location_art": "art_custom_226"
   },
   "site_003": {
     "name": "Стара насосна",
@@ -68,7 +71,8 @@
     "npc_art": "art_custom_133",
     "role": "quest",
     "refresh_turns": 100,
-    "stock": []
+    "stock": [],
+    "location_art": "art_custom_228"
   },
   "site_004": {
     "name": "Бункер Залізоголового",
@@ -125,7 +129,8 @@
         "rarity_min": 0,
         "rarity_max": 4
       }
-    ]
+    ],
+    "location_art": "art_custom_209"
   },
   "site_005": {
     "name": "Самотня радіовежа",
@@ -134,10 +139,11 @@
     "npc_art": "art_custom_134",
     "role": "quest",
     "refresh_turns": 100,
-    "stock": []
+    "stock": [],
+    "location_art": "art_custom_221"
   },
   "site_006": {
-    "name": "Скляна оранжерея",
+    "name": "Теплиці",
     "legacy_name": "Скляна оранжерея",
     "npc": "Садівниця Софі",
     "npc_art": "art_custom_130",
@@ -170,7 +176,8 @@
         "amount": 5,
         "chance": 1
       }
-    ]
+    ],
+    "location_art": "art_custom_224"
   },
   "site_007": {
     "name": "Підземна друкарня",
@@ -179,7 +186,8 @@
     "npc_art": "art_custom_128",
     "role": "quest",
     "refresh_turns": 100,
-    "stock": []
+    "stock": [],
+    "location_art": "art_custom_218"
   },
   "site_008": {
     "name": "Затоплена станція",
@@ -215,7 +223,8 @@
         "amount": 5,
         "chance": 1
       }
-    ]
+    ],
+    "location_art": "art_custom_212"
   },
   "site_009": {
     "name": "Купол метеорологів",
@@ -224,7 +233,8 @@
     "npc_art": "art_custom_116",
     "role": "quest",
     "refresh_turns": 100,
-    "stock": []
+    "stock": [],
+    "location_art": "art_custom_213"
   },
   "site_010": {
     "name": "Старий елеватор",
@@ -260,7 +270,8 @@
         "amount": 5,
         "chance": 1
       }
-    ]
+    ],
+    "location_art": "art_custom_229"
   },
   "site_011": {
     "name": "Польовий шпиталь",
@@ -291,7 +302,8 @@
         "rarity_min": 0,
         "rarity_max": 4
       }
-    ]
+    ],
+    "location_art": "art_custom_217"
   },
   "site_012": {
     "name": "Забутий радар",
@@ -300,7 +312,8 @@
     "npc_art": "art_custom_118",
     "role": "quest",
     "refresh_turns": 100,
-    "stock": []
+    "stock": [],
+    "location_art": "art_custom_210"
   },
   "site_013": {
     "name": "Тунель караванників",
@@ -336,7 +349,8 @@
         "amount": 5,
         "chance": 1
       }
-    ]
+    ],
+    "location_art": "art_custom_230"
   },
   "site_014": {
     "name": "Сонячна ферма",
@@ -372,7 +386,8 @@
         "amount": 5,
         "chance": 1
       }
-    ]
+    ],
+    "location_art": "art_custom_225"
   },
   "site_015": {
     "name": "Архів під мостом",
@@ -381,7 +396,8 @@
     "npc_art": "art_custom_112",
     "role": "quest",
     "refresh_turns": 100,
-    "stock": []
+    "stock": [],
+    "location_art": "art_custom_207"
   },
   "site_016": {
     "name": "Майстерня в кар’єрі",
@@ -417,7 +433,8 @@
         "amount": 5,
         "chance": 1
       }
-    ]
+    ],
+    "location_art": "art_custom_214"
   },
   "site_017": {
     "name": "Руїни офісів",
@@ -426,7 +443,8 @@
     "npc_art": "art_custom_111",
     "role": "quest",
     "refresh_turns": 100,
-    "stock": []
+    "stock": [],
+    "location_art": "art_custom_220"
   },
   "site_018": {
     "name": "Станція очищення",
@@ -462,7 +480,8 @@
         "amount": 5,
         "chance": 1
       }
-    ]
+    ],
+    "location_art": "art_custom_227"
   },
   "site_019": {
     "name": "Закинутий архів",
@@ -471,7 +490,8 @@
     "npc_art": "art_custom_114",
     "role": "quest",
     "refresh_turns": 100,
-    "stock": []
+    "stock": [],
+    "location_art": "art_custom_211"
   },
   "site_020": {
     "name": "Майстерня під мостом",
@@ -507,7 +527,8 @@
         "amount": 5,
         "chance": 1
       }
-    ]
+    ],
+    "location_art": "art_custom_215"
   },
   "site_021": {
     "name": "Будинок зв’язківців",
@@ -516,7 +537,8 @@
     "npc_art": "art_custom_113",
     "role": "quest",
     "refresh_turns": 100,
-    "stock": []
+    "stock": [],
+    "location_art": "art_custom_208"
   },
   "site_022": {
     "name": "Роботизований Ангар",
@@ -552,7 +574,8 @@
         "amount": 5,
         "chance": 1
       }
-    ]
+    ],
+    "location_art": "art_custom_219"
   },
   "site_023": {
     "name": "Сигнальна вежа",
@@ -561,7 +584,8 @@
     "npc_art": "art_custom_119",
     "role": "quest",
     "refresh_turns": 100,
-    "stock": []
+    "stock": [],
+    "location_art": "art_custom_222"
   },
   "site_024": {
     "name": "Склад «Останній резерв»",
@@ -597,6 +621,7 @@
         "amount": 5,
         "chance": 1
       }
-    ]
+    ],
+    "location_art": "art_custom_223"
   }
 }

@@ -54,9 +54,16 @@ class SitePanel(CatalogPanel):
         self.list.configure(yscrollcommand=bar.set)
         self.npc=tk.StringVar();row(self.form,'Ім’я мешканця',self.npc)
         self.role=tk.StringVar();row(self.form,'Тип персонажа',self.role,list(rules.ROLES.values()))
-        self.art=tk.StringVar();row(self.form,'Арт персонажа',self.art,readonly=True)
-        self.preview=tk.Canvas(self.form,width=96,height=96,highlightthickness=0,bg='#24372c');self.preview.pack()
-        ttk.Button(self.form,text='Вибрати арт',command=self.choose_art).pack()
+        portraits=ttk.Frame(self.form);portraits.pack(fill='x',pady=6)
+        npc_frame=ttk.Frame(portraits);npc_frame.pack(side='left',fill='x',expand=True)
+        site_frame=ttk.Frame(portraits);site_frame.pack(side='left',fill='x',expand=True)
+        self.art=tk.StringVar();row(npc_frame,'Арт персонажа',self.art,readonly=True)
+        self.preview=tk.Canvas(npc_frame,width=96,height=96,highlightthickness=0,bg='#24372c');self.preview.pack()
+        ttk.Button(npc_frame,text='Вибрати арт персонажа',command=self.choose_art).pack()
+        self.location_art=tk.StringVar();row(site_frame,'Арт локації',self.location_art,readonly=True)
+        self.location_preview=tk.Canvas(site_frame,width=96,height=96,highlightthickness=0,bg='#24372c');self.location_preview.pack()
+        ttk.Button(site_frame,text='Вибрати арт локації',command=self.choose_location_art).pack()
+        ttk.Button(site_frame,text='Прибрати арт локації',command=self.clear_location_art).pack()
         self.refresh_turns=tk.StringVar();row(self.form,'Оновлення товарів, ходів',self.refresh_turns)
         ttk.Label(self.form,text='Асортимент (для персонажів, які торгують)',font=('Segoe UI',11,'bold')).pack(pady=(12,4))
         self.stock=[];self.stock_list=tk.Listbox(self.form,height=8,exportselection=False)
@@ -77,15 +84,23 @@ class SitePanel(CatalogPanel):
     def open(self,ident):
         self.current=ident;d=self.entries[ident]
         self.ident.set(ident);self.name.set(d['name']);self.npc.set(d['npc']);self.role.set(rules.ROLES[d['role']])
-        self.art.set(d['npc_art']);self.refresh_turns.set(str(d['refresh_turns']));self.stock=copy.deepcopy(d['stock'])
+        self.art.set(d['npc_art']);self.location_art.set(d.get('location_art',''));self.refresh_turns.set(str(d['refresh_turns']));self.stock=copy.deepcopy(d['stock'])
         self.refresh_stock();self.show_art()
 
     def show_art(self):
         self.preview.delete('all');sprites.draw(self.preview,self.art.get(),0,0,96)
+        self.location_preview.delete('all');sprites.draw(self.location_preview,self.location_art.get(),0,0,96)
 
     def choose_art(self):
         result=ArtDialog(self.root,self.art.get()).show()
         if result:self.art.set(result);self.show_art()
+
+    def choose_location_art(self):
+        result=ArtDialog(self.root,self.location_art.get()).show()
+        if result:self.location_art.set(result);self.show_art()
+
+    def clear_location_art(self):
+        self.location_art.set('');self.show_art()
 
     def refresh_stock(self):
         self.stock_list.delete(0,'end')
@@ -113,7 +128,7 @@ class SitePanel(CatalogPanel):
     def commit(self):
         if not self.current:return True
         try:
-            value=dict(self.entries[self.current],name=self.name.get().strip(),npc=self.npc.get().strip(),npc_art=self.art.get(),
+            value=dict(self.entries[self.current],name=self.name.get().strip(),npc=self.npc.get().strip(),npc_art=self.art.get(),location_art=self.location_art.get(),
                        role=next(k for k,v in rules.ROLES.items() if v==self.role.get()),refresh_turns=int(self.refresh_turns.get()),stock=copy.deepcopy(self.stock))
             errors=rules.validate({self.current:value},self.store.art,self.store.data['equipment'],self.store.data['modules'],self.store.data['consumables'])
             if errors:raise ValueError('\n'.join(errors))
@@ -137,6 +152,6 @@ class SitePanel(CatalogPanel):
         del self.entries[self.current];self.current=None
         if self.entries:self.open(next(iter(self.entries)))
         else:
-            for field in (self.ident,self.name,self.npc,self.art,self.role,self.refresh_turns):field.set('')
+            for field in (self.ident,self.name,self.npc,self.art,self.location_art,self.role,self.refresh_turns):field.set('')
             self.stock=[];self.refresh_stock();self.show_art()
         self.rebuild()

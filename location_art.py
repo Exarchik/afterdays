@@ -23,6 +23,8 @@ def city_art(game,x,y):
 
 def location_art(game,x,y,definitions=None,manifest=None):
     """Persist one independent random illustration per visited terrain hex."""
+    site=next((site for site in getattr(game,'special_sites',[]) if tuple(site.get('pos',()))==(x,y)),None)
+    if site:return site.get('location_art') or None
     if game.world[y][x]=='city':return city_art(game,x,y)
     import location_rules
     kind=location_rules.terrain_type(game,x,y)

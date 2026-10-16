@@ -174,7 +174,7 @@ class AdventureMixin:
             return
         from site_layout import place
         for (ident,d),pos in zip(definitions.items(),place(self,len(definitions)) if definitions else []):
-            self.special_sites.append(dict(id=game_catalog.uid(),definition_id=ident,name=d['name'],npc=d['npc'],npc_art=d['npc_art'],role=d['role'],pos=list(pos),found=False,city_id=None))
+            self.special_sites.append(dict(id=game_catalog.uid(),definition_id=ident,name=d['name'],npc=d['npc'],npc_art=d['npc_art'],location_art=d.get('location_art',''),role=d['role'],pos=list(pos),found=False,city_id=None))
 
     # Перевіряє прохідність клітинки місцевості.
     def passable(self,x,y):return 0<=x<len(self.world[0]) and 0<=y<32 and self.world[y][x] not in BLOCKED

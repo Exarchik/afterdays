@@ -119,9 +119,9 @@ class App(MapVisibility):
         self.root.after_idle(lambda:self.hint.config(wraplength=max(300,left.winfo_width()-10)))
         self.tabs = ttk.Notebook(side)
         self.tabs.pack(fill='both', expand=True)
-        self.world_tab, self.inv_tab, self.loot_tab, self.quest_tab = [ttk.Frame(self.tabs) for _ in range(4)]
-        for tab, title in [(self.world_tab, tr('afterdays.0142')), (self.inv_tab, tr('afterdays.0143')), (self.loot_tab, tr('afterdays.0144')), (self.quest_tab, tr('afterdays.0145'))]:
-            key={self.world_tab:'site',self.inv_tab:'backpack',self.loot_tab:'loot',self.quest_tab:'journal'}[tab]
+        self.world_tab, self.inv_tab, self.quest_tab = [ttk.Frame(self.tabs) for _ in range(3)]
+        for tab, title in [(self.world_tab, tr('afterdays.0142')), (self.inv_tab, tr('afterdays.0143')), (self.quest_tab, tr('afterdays.0145'))]:
+            key={self.world_tab:'site',self.inv_tab:'backpack',self.quest_tab:'journal'}[tab]
             art=sprites.photo(root,key,16)
             self.tabs.add(tab,text=title,**({'image':art,'compound':'left'} if art else {}))
         import ui.frontier as frontier_ui
@@ -137,6 +137,7 @@ class App(MapVisibility):
         self.guide=lambda:frontier_ui.guide(self)
         self.metro=lambda:frontier_ui.metro(self)
         world_page = self.world_tab
+        self.world_page=world_page
         world_canvas = tk.Canvas(world_page, bg=PANEL, highlightthickness=0)
         world_scroll = ttk.Scrollbar(world_page, command=world_canvas.yview)
         world_scroll.pack(side='right', fill='y')
@@ -155,14 +156,9 @@ class App(MapVisibility):
         self.inv_panel.pack(fill='both', expand=True)
         self.quest_panel = refinement_ui.QuestCards(self.quest_tab, self)
         self.quest_panel.pack(fill='both', expand=True)
-        self.loot_list = visuals.ItemGrid(self.loot_tab,lambda i:self.loot_detail.config(text=self.description(next((x for x in self.game.loot if x['id']==i),None))),height=240)
-        self.loot_list.pack(fill='both',expand=True,padx=6,pady=6)
-        self.loot_detail=refinement_ui.Detail(self.loot_tab,height=8)
-        self.loot_detail.pack(fill='x',padx=8)
-        ttk.Button(self.loot_tab, text=tr('afterdays.0148'), command=self.collect_selected).pack(fill='x', padx=10, pady=5)
-        ttk.Button(self.loot_tab, text=tr('afterdays.0149'), command=self.collect_all).pack(fill='x', padx=10, pady=5)
-        ttk.Button(self.loot_tab,text='Відкрити сховок на локації',command=lambda:event_ui.show_loot(self)).pack(fill='x',padx=10,pady=5)
-        tk.Label(self.loot_tab, text=tr('afterdays.0150'), bg=PANEL, fg=MUTED, justify='left').pack(padx=10, pady=12)
+        self.location_loot=ttk.LabelFrame(self.world_tab,text='Здобич',padding=8)
+        self.location_loot_button=ttk.Button(self.location_loot,command=lambda:event_ui.show_loot(self))
+        self.location_loot_button.pack(fill='x')
         logframe = tk.Frame(root, bg=PANEL)
         logframe.pack(fill='x', padx=18, pady=(0, 12))
         self.logbox = tk.Text(logframe, height=3, bg=PANEL, fg=MUTED, relief='flat', font=('Segoe UI', 10), padx=10, pady=6, state='disabled')
@@ -236,7 +232,7 @@ class App(MapVisibility):
             import ui.lock as lock_ui
             lock_ui.show(self,lock)
         if before_battle and not self.game.battle and self.game.loot:
-            self.tabs.select(self.loot_tab)
+            self.tabs.select(self.world_page)
 
     def refresh(self):
         """Оновлює віджети відповідно до поточного стану гри."""
@@ -261,7 +257,10 @@ class App(MapVisibility):
         self.end_button.config(state='normal' if combat else 'disabled')
         dungeon=combat and g.battle.get('dungeon')
         self.flee_button.config(text=tr('update032.leave') if dungeon else tr('afterdays.0140'),state='normal' if combat and (not dungeon or g.battle['pos']==g.battle['exit']) else 'disabled')
-        self.tabs.tab(self.loot_tab, text=tr('afterdays.0152', v0=len(g.loot)))
+        if g.loot and not combat:
+            self.location_loot_button.config(text=f'Відкрити здобич · {len(g.loot)}')
+            self.location_loot.pack(fill='x',padx=10,pady=(0,10),before=self.services)
+        else:self.location_loot.pack_forget()
         self.services.refresh()
         self.perks_panel.refresh()
         self.location_panel.refresh()
@@ -269,7 +268,6 @@ class App(MapVisibility):
         self.inv_panel.refresh()
         self.quest_panel.refresh()
         self.tabs.tab(self.quest_tab, text=tr('afterdays.0160'))
-        self.loot_list.set_items(g.loot)
         self.logbox.config(state='normal')
         self.logbox.delete('1.0', 'end')
         colors=([None]*len(g.messages)+getattr(g,'message_colors',[]))[-len(g.messages):] if g.messages else []
@@ -487,11 +485,6 @@ class App(MapVisibility):
         win=self.popup(self.game.merchant_title(merchant), '960x730')
         advanced_ui.TradingPanel(win,self,merchant).pack(fill='both',expand=True)
 
-    def collect_selected(self):
-        """Забирає вибраний предмет здобичі."""
-        sel=self.loot_list.selection
-        if sel:self.act(lambda:self.game.collect(sel))
-
     def collect_all(self):
         """Намагається забрати всі доступні предмети здобичі."""
         for item in list(self.game.loot):
@@ -554,7 +547,9 @@ class App(MapVisibility):
             if not messagebox.askyesno(tr('afterdays.0194'), tr('afterdays.0195'), parent=self.root):
                 return False
             g.loot.clear()
-        return g.step(dx, dy)
+        result=g.step(dx, dy)
+        if result:self.tabs.select(self.world_page)
+        return result
 
     def map_click(self, event, *, start=False):
         """Обробляє натискання на клітинку карти або бойову ціль."""

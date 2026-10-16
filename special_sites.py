@@ -29,6 +29,7 @@ def validate(data,art,equipment,modules,consumables):
         for key in ('name','npc'):
             if not isinstance(d.get(key),str) or not d[key].strip():errors.append(prefix+'потрібні назва та ім’я мешканця')
         if d.get('npc_art') not in art:errors.append(prefix+'невідомий арт персонажа')
+        if d.get('location_art') and d['location_art'] not in art:errors.append(prefix+'невідомий арт локації')
         if d.get('role') not in ROLES:errors.append(prefix+'невідомий тип персонажа')
         if type(d.get('refresh_turns')) is not int or not 1<=d['refresh_turns']<=100000:errors.append(prefix+'оновлення асортименту: 1–100000 ходів')
         if not isinstance(d.get('stock'),list):errors.append(prefix+'асортимент має бути списком');continue
@@ -84,7 +85,7 @@ def sync_saved(game):
     for site in game.special_sites:
         ident=site.get('definition_id') or next((key for key,d in definitions.items() if site['name']==d.get('legacy_name',d['name'])),None)
         if ident not in definitions:continue
-        d=definitions[ident];site.update(definition_id=ident,name=d['name'],npc=d['npc'],npc_art=d['npc_art'],role=d['role'])
+        d=definitions[ident];site.update(definition_id=ident,name=d['name'],npc=d['npc'],npc_art=d['npc_art'],location_art=d.get('location_art',''),role=d['role'])
         city=site.get('city_id')
         if city is not None:
             game.city_names[city]=site['name'];game.city_merchants[city]=[0] if has_role(site,'merchant') else []
