@@ -28,7 +28,7 @@ class AuthoredQuestsMixin:
             if entry and entry.get('authored_definition')!=spec:entry=None
             if entry is None:
                 template=next((q for q in self.offers.get(str(self.city),[]) if q['kind']==spec['kind'] and 'metro_city' not in q),None)
-                if template is None and spec['kind'] in ('hunt','retrieve','scout','supplies','purge'):
+                if template is None and spec['kind'] in ('hunt','retrieve','scout','supplies','purge','electronics_repair'):
                     template=dict(kind=spec['kind'],city=self.city,level=self.region_level,zone=self.region_level,
                                   progress=0,goal=1,target_kind=None,pos=None,scaled=True,distance_scaled=True,cycle_named=True)
                 if template is None:continue

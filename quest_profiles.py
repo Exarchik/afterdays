@@ -7,7 +7,7 @@ def defaults(kind,elite=False):
     from game.catalog import BASE_REWARDS
     title,description={**quest_catalog.TYPES,**quest_catalog.SPECIAL}[kind]
     multiplier=2 if elite else 1
-    return dict(title=title,description=description,art='quest:'+('recruit_tech' if kind=='recruit_mayor' else kind),
+    return dict(title=title,description=description,art='npc:tech' if kind=='electronics_repair' else 'quest:'+('recruit_tech' if kind=='recruit_mayor' else kind),
                 min_level=1,reward=(0 if kind=='permit' else 100 if kind=='thanks' else BASE_REWARDS.get(kind,85))*multiplier,
                 xp_reward=(0 if kind=='permit' else 70 if kind=='thanks' else 25)*multiplier,
                 xp_step=(0 if kind=='permit' else 10 if kind=='thanks' else 5)*multiplier,money_power=1.3)

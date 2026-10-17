@@ -107,6 +107,8 @@ class GraphicsLoader(tk.Frame):
         self.after(1,self.warm)
 
     def prepare_map(self):
+        from ui.electronics import prepare_art
+        prepare_art(self.root)
         self.app=self.create_app(self.root)
         self.lift();self.grab_set();self.focus_set()
         self.root.update_idletasks()

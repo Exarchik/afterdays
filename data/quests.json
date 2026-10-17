@@ -1,6 +1,32 @@
 {
   "version": 1,
-  "quests": [],
+  "quests": [
+    {
+      "id": "electronics_repair_intro",
+      "title": "Ремонт електронного обладнання",
+      "description": "На мапі позначено несправний блок керування. Дістаньтеся до нього, встановіть мікросхеми на відповідні клеми монтажної плати та перевірте живлення. Правою кнопкою миші модулі повертаються на 90°.",
+      "kind": "electronics_repair",
+      "enabled": true,
+      "repeatable": false,
+      "cooldown": 100,
+      "min_level": 1,
+      "max_level": 100,
+      "min_reputation": 0,
+      "max_reputation": 100,
+      "min_turn": 0,
+      "cities": [],
+      "requires": [],
+      "goal": 1,
+      "food_need": 0,
+      "med_need": 0,
+      "reward": 120,
+      "xp_reward": 35,
+      "art": "npc:tech",
+      "elite": false,
+      "money_power": 0,
+      "xp_step": 0
+    }
+  ],
   "stories": [
     {
       "id": "noise_in_the_wind",

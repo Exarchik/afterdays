@@ -1,3 +1,4 @@
+from game.systems.electronics import ElectronicsRepairMixin
 """Explicit gameplay composition; systems cooperate in established dispatch order."""
 from game.progression import ProgressionGame
 from game.systems.provisions import ProvisionsMixin
@@ -67,6 +68,7 @@ class Game(
     QuestExperienceMixin,
     Consumables,
     AuthoredQuestsMixin,
+    ElectronicsRepairMixin,
     Survival,
     StoryMixin,
     MetroRestorationMixin,
@@ -116,4 +118,5 @@ class Game(
         from location_art import assign_city_art
         assign_city_art(game)
         if 'secondary_roads_v1' not in game.reputation_state:game.trails=[]
+        game.migrate_circuit_quests()
         return game
