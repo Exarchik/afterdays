@@ -49,7 +49,13 @@ def pack(store, *, force=False):
             relative=f'assets/{prefix}/{name}';blob=encode(atlas)
             path=store.root/relative
             if not path.exists():pending[relative]=blob
-            elif path.read_bytes()!=blob:raise ValueError('Пошкоджений незмінний атлас: '+str(path))
+            elif path.read_bytes()!=blob:
+                # PNG metadata and compression may change without changing the atlas.
+                try:
+                    with Image.open(path) as saved:
+                        same=saved.size==atlas.size and saved.convert('RGBA').tobytes()==atlas.tobytes()
+                except (OSError,ValueError):same=False
+                if not same:raise ValueError('Пошкоджений незмінний атлас: '+str(path))
         for index,key in enumerate(page):addresses[key]=(prefix,index,columns)
     for entry in entries:
         prefix,index,columns=addresses[entry.pop('_atlas_token')]
