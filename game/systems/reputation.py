@@ -187,7 +187,8 @@ class Reputation:
         for ident in board['ids']:
             if len(visible)>=limit:break
             q = by_id.get(ident)
-            if q is None:continue
+            # Accepted/finished entries must not consume visible offer slots.
+            if q is None or q.get('status')!='offered':continue
             if 'metro_city' not in q:
                 elite = elite_count < elite_limit and q['rep_elite_roll'] < .30
                 if q['status']=='offered' and q.get('unique') != elite:
