@@ -2,7 +2,10 @@ import quest_area
 """Tk rendering of the pointy-top hex overworld and its overview atlas."""
 from dataclasses import dataclass
 import math
+from pathlib import Path
 import world_hex as grid
+
+RADIATION_STIPPLE = '@' + (Path(__file__).resolve().parent / 'assets' / 'radiation_sparse.xbm').as_posix()
 
 COLORS={'waste':'#665e49','road':'#665e49','forest':'#354a35','ruin':'#666359',
         'city':'#827346','site':'#708365','water':'#235665','cliff':'#686d64'}
@@ -84,7 +87,7 @@ def draw(app,canvas=None,overview=False):
     for key in g.radiation:
         x,y=map(int,key.split(','))
         if visible(x,y):
-            c.create_polygon(*v.polygon((x,y),.91),fill='#a4bf55',stipple='gray25',outline='#a4bf55',tags='radiation_hex')
+            c.create_polygon(*v.polygon((x,y),.91),fill='#a4bf55',stipple=RADIATION_STIPPLE,outline='#a4bf55',tags='radiation_hex')
             if not overview:c.create_text(*v.point((x,y)),text='☢',fill='#d0e775',font=('Segoe UI',max(8,round(v.radius*.6))),tags='radiation_hex')
     for pos in g.storm_cells():
         if visible(*pos):c.create_polygon(*v.polygon(pos),fill='#bad657',stipple='gray50',outline='#dfeb77',tags='storm')

@@ -125,7 +125,7 @@ class Effects:
                 for x,y in e['cells']:
                     if hasattr(a,"world_view") and a.world_view.visible((x,y)):
                         if hasattr(a,'world_view'):
-                            c.create_polygon(*a.world_view.polygon((x,y),.94),outline=e['color'],width=2 if int(dt*7)%2 else 4,fill=e['color'],stipple='gray75',tags='fx')
+                            c.create_polygon(*a.world_view.polygon((x,y),.94),outline=e['color'],width=2 if int(dt*7)%2 else 4,fill=e['color'],stipple='gray12',tags='fx')
                 continue
             px,py=self.point(e['pos'],e.get('entity'))
             if e['kind'] in ('attack','slash'):
