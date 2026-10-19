@@ -1,5 +1,6 @@
 from game.systems.electronics import ElectronicsRepairMixin
 from game.systems.radiation_source import RadiationSourceMixin
+from game.systems.track_scanner import TrackScannerMixin
 """Explicit gameplay composition; systems cooperate in established dispatch order."""
 from game.progression import ProgressionGame
 from game.systems.provisions import ProvisionsMixin
@@ -71,6 +72,7 @@ class Game(
     AuthoredQuestsMixin,
     ElectronicsRepairMixin,
     RadiationSourceMixin,
+    TrackScannerMixin,
     Survival,
     StoryMixin,
     MetroRestorationMixin,

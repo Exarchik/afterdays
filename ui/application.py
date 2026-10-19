@@ -223,6 +223,11 @@ class App(MapVisibility):
             self.game._junkyard_request=None
             import ui.junkyard as junkyard_ui
             junkyard_ui.show(self,junk)
+        scanner=getattr(self.game,'_scanner_request',None)
+        if scanner:
+            self.game._scanner_request=None
+            import ui.scanner as scanner_ui
+            scanner_ui.show(self,scanner)
         lock=getattr(self.game,'_lock_request',None)
         if lock:
             self.game._lock_request=None
@@ -508,14 +513,19 @@ class App(MapVisibility):
     def clear_battle_hover(self,event=None):
         """Прибирає ціль наведення після виходу курсора з арени."""
         self.battle_hover=None
-        if self.game.battle:self.draw()
+        if self.game.battle:self.redraw_hover()
+
+    def redraw_hover(self):
+        """Updates only the arena hover marker; a pending battle snapshot still needs a full frame."""
+        if self.fx.snapshot is not None and self.fx.blocked:self.draw()
+        else:advanced_ui.draw_hover(self)
 
     def map_hover(self, event):
         """Оновлює підсвічування й підказку клітинки під курсором."""
         if self.game.battle:
             pos = self.cell(event)
             if getattr(self,'battle_hover',None)!=pos:
-                self.battle_hover=pos;self.draw()
+                self.battle_hover=pos;self.redraw_hover()
             e = next((e for e in self.game.battle['enemies'] if tuple(e['pos']) == pos), None)
             if e:
                 valid, reason, chance = self.game.shot_info(e)

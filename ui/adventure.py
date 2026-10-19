@@ -17,11 +17,14 @@ import game.systems.adventure as a
 from visuals import BG,PANEL,TEXT,MUTED,GOLD,icon,ItemGrid,Drag,inside
 
 
+FRAME_MS=33
+
+
 class Effects:
     def __init__(self,app):
         """Ініціалізує об’єкт, його початковий стан і потрібні залежності."""
         self.app=app;self.game=app.game;self.active=[];self.snapshot=None;self.until=0
-        app.root.after(33,self.tick)
+        app.root.after(FRAME_MS,self.tick)
 
     @property
     def blocked(self):
@@ -161,6 +164,15 @@ class Effects:
     def tick(self):
         """Виконує черговий кадр оновлення та планує наступний."""
         now=time.monotonic()
+        try:self.frame()
+        finally:
+            # Keep a steady ~30 fps: the frame's own work counts toward the 33 ms interval.
+            spent=round((time.monotonic()-now)*1000)
+            self.app.root.after(max(1,FRAME_MS-spent),self.tick)
+
+    def frame(self):
+        """Один кадр: прибирає завершені ефекти й перемальовує лише потрібне."""
+        now=time.monotonic()
         self.pause_world_notices(now)
         had_motion=any(e['kind'] in ('move','reveal') for e in self.active)
         self.active=[e for e in self.active if 'paused_at' in e or now<e['start']+e['duration']]
@@ -170,7 +182,6 @@ class Effects:
         previous=getattr(self,'_last_reveal_focus',None);self._last_reveal_focus=focus
         if had_motion and (self.app.game.battle or self.snapshot is not None or focus!=previous):self.app.draw()
         else:self.render()
-        self.app.root.after(33,self.tick)
 
 
 def paint_snapshot(app):

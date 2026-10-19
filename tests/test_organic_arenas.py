@@ -49,7 +49,7 @@ class OrganicTests(unittest.TestCase):
   g=r.Game(7);g.start_battle();before=copy.deepcopy(g.battle)
   canvas=Mock();canvas.winfo_width.return_value=800;canvas.winfo_height.return_value=600
   app=SimpleNamespace(game=g,canvas=canvas,map_title=Mock(),hint=Mock(),battle_hover=(1,5))
-  with patch('sprites.draw',return_value=True),patch('arena_tiles.draw'):advanced_ui.draw_battle(app)
+  with patch('sprites.draw',return_value=True),patch('ui.advanced.place_static'):advanced_ui.draw_battle(app)
   self.assertTrue(canvas.create_polygon.called);self.assertEqual(g.battle,before)
   with tempfile.TemporaryDirectory() as td:
    path=Path(td)/'save.json';g.save(path);h=r.Game.load(path)

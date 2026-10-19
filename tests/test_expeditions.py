@@ -92,8 +92,11 @@ class ExpeditionTests(unittest.TestCase):
  def test_elite_tracks_boss_minions_and_victory(self):
   """Перевіряє сценарій «elite tracks boss minions and victory» та очікувані результати."""
   g,q=self.contract('elite_hunt');self.assertIn(len(q['track']),(2,3))
-  for pos in q['track']:
-   g.x,g.y=pos;self.assertTrue(g.search())
+  g.x,g.y=q['pos'];self.assertTrue(g.search());self.assertEqual(g._scanner_request,q['id'])
+  for p in q['scanner']['prints']:
+   g.scanner_tick(q['id'],0,[p['x'],p['y']],False);g.scanner_tick(q['id'],.05,[p['x'],p['y']],True)
+  self.assertTrue(q['scanner']['done']);self.assertEqual(q['track_index'],1)
+  g.x,g.y=q['pos'];self.assertTrue(g.search())
   b=g.battle;self.assertIn(len(b['enemies']),(3,4));self.assertEqual(len({e['kind'] for e in b['enemies']}),1)
   self.assertIn(b['enemies'][0]['grade'],('rare','mythic'));self.assertTrue(all(e['grade']=='normal' for e in b['enemies'][1:]))
   b['kills']=[dict(kind=e['kind'],grade=e['grade'],level=e['level']) for e in b['enemies']];b['enemies']=[];g.victory();self.assertTrue(g.quest_ready(q));self.return_to_giver(g,q)

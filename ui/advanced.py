@@ -32,34 +32,125 @@ def actor_health(canvas,x,y,hp,maximum,defense,color,label=''):
     if label:canvas.create_text(x,y-8,text=label,fill=color,font=('Segoe UI',7))
 
 
-def battle_camera(b,width,height,fx=None):
+def unit_bounds(b):
+    """Arena extent at unit scale: the whole grid, or only the organic floor."""
+    left,top,right,bottom=hexgrid.bounds(b['w'],b['h'])
+    if b.get('hex_arena') and b.get('floor'):
+        points=[hexgrid.polygon(*hexgrid.center(p,1),1) for p in b['floor']]
+        left=min(min(p[::2]) for p in points);right=max(max(p[::2]) for p in points)
+        top=min(min(p[1::2]) for p in points);bottom=max(max(p[1::2]) for p in points)
+    return left,top,right,bottom
+
+
+def battle_camera(b,width,height,fx=None,bounds=None):
     w,h=b['w'],b['h']
     if b.get('dungeon'):
         u=.7071*.9*.85*max(24,min(46,width/18,height/13))
         pos=fx.position('player',b['pos']) if hasattr(fx,'position') else b['pos']
         x,y=hexgrid.center(pos,u)
         return u,width/2-x,height*.55-y
-    left,top,right,bottom=hexgrid.bounds(w,h)
-    if b.get('hex_arena') and b.get('floor'):
-        points=[hexgrid.polygon(*hexgrid.center(p,1),1) for p in b['floor']]
-        left=min(min(p[::2]) for p in points);right=max(max(p[::2]) for p in points)
-        top=min(min(p[1::2]) for p in points);bottom=max(max(p[1::2]) for p in points)
+    left,top,right,bottom=bounds or unit_bounds(b)
     u=min((width-30)/(right-left),(height-65)/(bottom-top+1.6))
     return u,width/2-(left+right)*u/2,(height+40)/2-(top+bottom)*u/2
 
 
+def off_screen(px,py,u,width,height):
+    return px < -2*u or px > width+2*u or py < -2*u or py > height+2*u
+
+
+def arena_cache(app,g,b):
+    """Per-arena data that never changes during a fight: floor, rim, roads, terrain, draw order."""
+    w,h=b['w'],b['h']
+    walls=frozenset(map(tuple,b['walls']))
+    floor=frozenset(map(tuple,b.get('floor',[(x,y) for y in range(h) for x in range(w)])))
+    directions=arena_tiles.road_directions(g,b)
+    key=(w,h,floor,walls,directions,b.get('biome'),bool(b.get('dungeon')),bool(b.get('hex_arena')),g.x,g.y,
+         tuple(map(tuple,b.get('water_cells',[]))),tuple(map(tuple,b.get('shore_cells',[]))),
+         tuple(b.get('arena_center',())),tuple(b.get('arena_extent',())))
+    cache=getattr(app,'_arena_cache',None)
+    if cache is None or cache['key']!=key:
+        from organic_arenas import boundary_edges
+        roads=arena_tiles.road_cells(b,directions)
+        cells=sorted(floor,key=lambda a:(hexgrid.center(a,1)[1],hexgrid.center(a,1)[0]))
+        cache=dict(key=key,walls=walls,floor=floor,cells=cells,rim=boundary_edges(floor),
+                   kinds=arena_tiles.terrain_map(g,b,cells,roads),water=frozenset(map(tuple,b.get('water_cells',[]))),
+                   rank={pos:n for n,pos in enumerate(cells)},bounds=unit_bounds(b))
+        app._arena_cache=cache
+    return cache
+
+
+def place_static(app,cache,u,ox,oy):
+    """Show the baked floor as one canvas image; rebuild it only when the arena or zoom changes."""
+    c=app.canvas
+    key=(cache['key'],round(u,4))
+    static=getattr(c,'_arena_static',None)
+    if static is None or static['key']!=key:
+        from PIL import ImageTk
+        image,left,top=arena_tiles.render_floor(cache['cells'],cache['kinds'],cache['rim'],u,cache['water'],c.cget('bg'))
+        static=dict(key=key,left=left,top=top,photo=ImageTk.PhotoImage(image,master=c._root()),item=None)
+        c._arena_static=static
+    x,y=round(ox+static['left']),round(oy+static['top'])
+    if static['item'] is None or not c.find_withtag(static['item']):
+        c.delete('arena_static')
+        static['item']=c.create_image(x,y,image=static['photo'],anchor='nw',tags='arena_static')
+    else:c.coords(static['item'],x,y)
+    c.tag_lower('arena_static')
+
+
+def battle_status(app):
+    """Arena title and hint line (ammo, safe exit, dungeon)."""
+    g=app.game;b=g.battle;biome=b.get('biome','waste')
+    app.map_title.config(text=tr('advanced_ui.0003', v0=TERRAINS.get(biome,TERRAINS['waste'])[1].upper(), v1=b.get('region_level', 1), v2=b['ap'], v3=b.get('max_ap', 6)))
+    weapon=g.weapon
+    ammo=catalog.AMMO[weapon.get('ammo_type','pistol')][0] if weapon else '—'
+    count=g.count('ammo',weapon.get('ammo_type','pistol')) if weapon else 0
+    app.hint.config(text=tr('advanced_ui.0004', v0=ammo, v1=count))
+
+    if b.get('safe_exit047'):app.hint.config(text='Лише союзники. Зелена точка — безпечний вихід і здобич; штрафу «Боягуз» немає.')
+    if b.get('dungeon'):
+        app.map_title.config(text=tr('advanced_ui.0005', v0=b['dungeon_kind'], v1=len(b['enemies']), v2=b['ap'], v3=g.max_ap))
+        app.hint.config(text=(tr('advanced_ui.0006') if b.get('cleared') else '')+tr('advanced_ui.0007'))
+
+
+def draw_hover(app):
+    """Hover outline and hit chance only; the arena itself is not redrawn."""
+    c,g=app.canvas,app.game;b=g.battle;info=getattr(app,'iso',None)
+    c.delete('hover');c.delete('hit_chance')
+    if not b or not info or 'floor' not in info:return
+    battle_status(app)
+    u,ox,oy=info['u'],info['ox'],info['oy']
+    def center(pos):return hexgrid.center(pos,u,ox,oy)
+    hovered=getattr(app,'battle_hover',None)
+    if hovered in info['floor']:
+        px,py=center(hovered)
+        c.create_polygon(*hexgrid.polygon(px,py,u),fill='',outline='#bee5a6' if hovered in info['reach'] else '#d7866d',width=2,tags='hover')
+        if c.find_withtag('arena_static'):c.tag_raise('hover','arena_static')
+    target=next((e for e in b['enemies'] if tuple(e['pos'])==hovered),None)
+    if target:
+        valid,reason,chance=g.shot_info(target)
+        pos=app.fx.position(target['id'],target['pos']) if hasattr(getattr(app,'fx',None),'position') else target['pos']
+        px,py=center(pos);py=max(18,py-u*3.7)
+        label=tr('update030.hit_chance',chance=chance) if valid else reason
+        text=c.create_text(px,py,text=label,fill='#94e8aa' if valid else '#e5aa83',font=('Segoe UI',10,'bold'),tags='hit_chance')
+        box=c.bbox(text)
+        if box:
+            background=c.create_rectangle(box[0]-5,box[1]-3,box[2]+5,box[3]+3,fill='#15251c',outline='#60876b',tags='hit_chance')
+            c.tag_lower(background,text)
+
+
 def draw_battle(app):
+    """Static floor is one cached image; only units, markers and HUD text are redrawn."""
     c,g=app.canvas,app.game
     b=g.battle
     biome=b.get('biome','waste')
-    c.delete('all')
-    c._arena_refs=[]
+    # Remove everything except the cached floor (world map items, previous frame, effects).
+    c.addtag_all('arena_old');c.dtag('arena_static','arena_old');c.delete('arena_old')
     width,height=max(c.winfo_width(),200),max(c.winfo_height(),200)
     w,h=b['w'],b['h']
-    u,ox,oy=battle_camera(b,width,height,getattr(app,'fx',None))
-    app.iso=dict(u=u,ox=ox,oy=oy,sprites=[])
+    cache=arena_cache(app,g,b)
+    u,ox,oy=battle_camera(b,width,height,getattr(app,'fx',None),cache['bounds'])
+    walls,floor=cache['walls'],cache['floor']
     def center(pos): return hexgrid.center(pos,u,ox,oy)
-    walls=set(map(tuple,b['walls']))
     occupied=walls|{tuple(e['pos']) for e in b['enemies']}
     costs={tuple(b['pos']):0};queue=deque(costs)
     while queue:
@@ -68,52 +159,30 @@ def draw_battle(app):
         for q in hexgrid.neighbors(*pos,w,h):
             if q not in occupied and q not in costs:
                 costs[q]=costs[pos]+1;queue.append(q)
-    floor=set(map(tuple,b.get('floor',[(x,y) for y in range(h) for x in range(w)])))
-    directions=arena_tiles.road_directions(g,b)
-    road_key=(w,h,frozenset(floor),frozenset(walls),directions)
-    if getattr(app,'_arena_road_key',None)!=road_key:
-        app._arena_road_key=road_key
-        app._arena_roads=arena_tiles.road_cells(b,directions)
-    cells=sorted(floor,key=lambda a:(hexgrid.center(a,1)[1],hexgrid.center(a,1)[0]))
-    from organic_arenas import boundary_edges
-    # Cache unit geometry in the UI only; it never changes game RNG or save data.
-    signature=frozenset(floor)
-    if getattr(app,'_rim_signature',None)!=signature:
-        app._rim_signature=signature;app._rim_edges=boundary_edges(floor)
-    rim=app._rim_edges
-    depth=u*.65
-    for a,bp in sorted(rim,key=lambda edge:max(edge[0][1],edge[1][1])):
-        ax,ay=ox+a[0]*u,oy+a[1]*u;bx,by=ox+bp[0]*u,oy+bp[1]*u
-        if max(ax,bx)<-2*u or min(ax,bx)>width+2*u or max(ay,by)<-2*u or min(ay,by)>height+2*u:continue
-        c.create_polygon(ax,ay,bx,by,bx,by+depth,ax,ay+depth,fill='#293b36' if ax<bx else '#34473e',outline='#263730')
-    for x,y in cells:
-        px,py=center((x,y))
-        if px < -2*u or px > width+2*u or py < -2*u or py > height+2*u:continue
-        arena_tiles.draw(c,arena_tiles.terrain(g,b,(x,y),app._arena_roads),px,py,u,x,y)
-        if [x,y] in b.get('water_cells',[]):
-            c.create_polygon(*hexgrid.polygon(px,py,u),fill='#405f4c',stipple='gray50',outline='#596c50')
-    for a,bp in rim:
-        c.create_line(ox+a[0]*u,oy+a[1]*u,ox+bp[0]*u,oy+bp[1]*u,fill='#8c9479',width=1)
-    hovered=getattr(app,'battle_hover',None)
-    if hovered in floor:
-        px,py=center(hovered)
-        c.create_polygon(*hexgrid.polygon(px,py,u),fill='',outline='#bee5a6' if hovered in costs else '#d7866d',width=2)
+    app.iso=dict(u=u,ox=ox,oy=oy,sprites=[],floor=floor,reach=frozenset(costs))
+    place_static(app,cache,u,ox,oy)
     for pos in costs:
         if pos in walls:continue
         px,py=center(pos)
         if 0<=px<=width and 0<=py<=height:c.create_oval(px-1,py-1,px+1,py+1,fill='#91a88a',outline='')
     enemies={tuple(e['pos']):e for e in b['enemies']}
-    for pos in cells:
+    corpses={}
+    for corpse in b.get('corpses',[]):corpses.setdefault(tuple(corpse['pos']),[]).append(corpse)
+    water=cache['water']
+    special=set(corpses)|(walls&floor)|set(enemies)|{tuple(b['pos'])}
+    if b.get('safe_exit047') or b.get('dungeon'):special.add(tuple(b['exit']))
+    if b.get('dungeon'):special.add(tuple(b['chest']))
+    rank=cache['rank']
+    for pos in sorted((p for p in special if p in rank),key=rank.get):
         px,py=center(pos)
-        if list(pos)!=b['pos'] and pos not in enemies and (px < -2*u or px > width+2*u or py < -2*u or py > height+2*u):continue
-        for corpse in b.get('corpses',[]):
-            if tuple(corpse['pos'])==pos:
-                size=u*2.9
-                if not sprites.draw(c,sprites.corpse_key(corpse),px-size/2,py+u*.1-size/2,size) and corpse.get('human'):
-                    c.create_line(px-u*.5,py,px+u*.4,py+u*.12,fill='#87917c',width=max(3,int(u*.22)))
-                    c.create_oval(px-u*.7,py-u*.13,px-u*.4,py+u*.12,fill='#b5b79e',outline='')
-        if pos in walls and list(pos) not in b.get('water_cells',[]):
-            kind=arena_tiles.terrain(g,b,pos)
+        if list(pos)!=b['pos'] and pos not in enemies and off_screen(px,py,u,width,height):continue
+        for corpse in corpses.get(pos,()):
+            size=u*2.9
+            if not sprites.draw(c,sprites.corpse_key(corpse),px-size/2,py+u*.1-size/2,size) and corpse.get('human'):
+                c.create_line(px-u*.5,py,px+u*.4,py+u*.12,fill='#87917c',width=max(3,int(u*.22)))
+                c.create_oval(px-u*.7,py-u*.13,px-u*.4,py+u*.12,fill='#b5b79e',outline='')
+        if pos in walls and pos not in water:
+            kind=cache['kinds'].get(pos,'waste')
             if sprites.draw(c,'obstacle:forest' if kind=='forest' else 'obstacle:ruin' if kind in ('ruin','city') else 'obstacle:cliff',px-2*u,py+1.2*u-4*u,4*u):pass
             elif kind=='forest':
                 c.create_line(px,py,px,py-u*1.5,fill='#8a7f5d',width=max(2,int(u*.18)))
@@ -161,27 +230,7 @@ def draw_battle(app):
             actor_health(c,px,top,e['hp'],e['max_hp'],e.get('defense',e.get('armor',0)),
                          '#9cdda8' if friendly else '#d88667',
                          f'L{e.get("level",1)} · {faction_name}'+(' · z' if not e.get('awake',not b.get('dungeon')) else ''))
-    target=enemies.get(hovered)
-    if target:
-        valid,reason,chance=g.shot_info(target)
-        pos=app.fx.position(target['id'],target['pos']) if hasattr(getattr(app,'fx',None),'position') else target['pos']
-        px,py=center(pos);py=max(18,py-u*3.7)
-        label=tr('update030.hit_chance',chance=chance) if valid else reason
-        text=c.create_text(px,py,text=label,fill='#94e8aa' if valid else '#e5aa83',font=('Segoe UI',10,'bold'),tags='hit_chance')
-        box=c.bbox(text)
-        if box:
-            background=c.create_rectangle(box[0]-5,box[1]-3,box[2]+5,box[3]+3,fill='#15251c',outline='#60876b',tags='hit_chance')
-            c.tag_lower(background,text)
-    app.map_title.config(text=tr('advanced_ui.0003', v0=TERRAINS.get(biome,TERRAINS['waste'])[1].upper(), v1=b.get('region_level', 1), v2=b['ap'], v3=b.get('max_ap', 6)))
-    weapon=g.weapon
-    ammo=catalog.AMMO[weapon.get('ammo_type','pistol')][0] if weapon else '—'
-    count=g.count('ammo',weapon.get('ammo_type','pistol')) if weapon else 0
-    app.hint.config(text=tr('advanced_ui.0004', v0=ammo, v1=count))
-
-    if b.get('safe_exit047'):app.hint.config(text='Лише союзники. Зелена точка — безпечний вихід і здобич; штрафу «Боягуз» немає.')
-    if b.get('dungeon'):
-        app.map_title.config(text=tr('advanced_ui.0005', v0=b['dungeon_kind'], v1=len(b['enemies']), v2=b['ap'], v3=g.max_ap))
-        app.hint.config(text=(tr('advanced_ui.0006') if b.get('cleared') else '')+tr('advanced_ui.0007'))
+    draw_hover(app)
 
 
 def iso_cell(app,event):

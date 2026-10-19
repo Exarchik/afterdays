@@ -99,17 +99,33 @@ TILE_PAIRS = {'waste':0, 'forest':2, 'ruin':4, 'city':6,
               'road':8, 'water':10, 'cliff':12, 'site':14}
 
 
-def photo(canvas, kind, radius, variant):
-    from PIL import Image, ImageDraw, ImageTk
-    root=canvas._root()
-    if not hasattr(root, '_arena_atlas'):
-        with Image.open(ATLAS) as source:root._arena_atlas=source.convert('RGBA')
-        root._arena_photos=OrderedDict()
-    width=max(2,round(2*hexgrid.HALF_WIDTH*radius));height=max(2,round(2*hexgrid.HALF_HEIGHT*radius))
+_ATLAS=None
+_TILES=OrderedDict()
+
+
+def atlas():
+    global _ATLAS
+    if _ATLAS is None:
+        from PIL import Image
+        with Image.open(ATLAS) as source:_ATLAS=source.convert('RGBA')
+    return _ATLAS
+
+
+def tile_size(radius):
+    return max(2,round(2*hexgrid.HALF_WIDTH*radius)),max(2,round(2*hexgrid.HALF_HEIGHT*radius))
+
+
+def tile_image(kind, radius, variant, pad=0):
+    """Hex-masked PIL tile for one terrain kind at the given hex radius (cached).
+
+    pad enlarges the tile by that many pixels so neighbouring tiles overlap without seams.
+    """
+    from PIL import Image, ImageDraw
+    width,height=tile_size(radius);width+=pad;height+=pad
     index=TILE_PAIRS.get(kind,0)+variant%2
-    key=(index,width,height);cache=root._arena_photos
-    if key not in cache:
-        source=root._arena_atlas;col,row=index%4,index//4
+    key=(index,width,height)
+    if key not in _TILES:
+        source=atlas();col,row=index%4,index//4
         bounds=(round(col*source.width/4),round(row*source.height/4),
                 round((col+1)*source.width/4),round((row+1)*source.height/4))
         tile=source.crop(bounds).resize((width,height),Image.Resampling.LANCZOS)
@@ -117,17 +133,92 @@ def photo(canvas, kind, radius, variant):
         ImageDraw.Draw(mask).polygon([(width-1,height/2),(3*width/4,height-1),
             (width/4,height-1),(0,height/2),(width/4,0),(3*width/4,0)],fill=255)
         tile.putalpha(mask)
-        cache[key]=ImageTk.PhotoImage(tile,master=root)
+        _TILES[key]=tile
+    _TILES.move_to_end(key)
+    while len(_TILES)>64:_TILES.popitem(last=False)
+    return _TILES[key]
+
+
+def photo(canvas, kind, radius, variant):
+    from PIL import ImageTk
+    root=canvas._root()
+    if not hasattr(root,'_arena_photos'):root._arena_photos=OrderedDict()
+    tile=tile_image(kind,radius,variant)
+    key=(TILE_PAIRS.get(kind,0)+variant%2,)+tile.size;cache=root._arena_photos
+    if key not in cache:cache[key]=ImageTk.PhotoImage(tile,master=root)
     cache.move_to_end(key)
     while len(cache)>128:cache.popitem(last=False)
     return cache[key]
 
 
 def draw(c,kind,px,py,u,x,y):
-    # Base polygon closes subpixel seams at arbitrary zoom levels.
+    """Single tile on a Tk canvas (legacy path; the arena uses render_floor)."""
     base=PALETTES.get(kind,PALETTES['waste'])[0]
     c.create_polygon(*hexgrid.polygon(px,py,u),fill=base,outline=base)
     tile=photo(c,kind,u,(x*13+y*7)%2)
     if not hasattr(c,'_arena_refs'):c._arena_refs=[]
     c._arena_refs.append(tile)
     c.create_image(px,py,image=tile,anchor='center')
+
+
+RIM_DEPTH=.65
+RIM_LEFT,RIM_RIGHT,RIM_OUTLINE,RIM_LINE='#293b36','#34473e','#263730','#8c9479'
+WATER_FILL,WATER_OUTLINE=(0x40,0x5f,0x4c,128),'#596c50'
+
+
+def terrain_map(game,b,cells,roads=frozenset()):
+    """Terrain of every floor cell; computed once per arena instead of every frame."""
+    return {tuple(p):terrain(game,b,p,roads) for p in cells}
+
+
+def floor_bounds(cells,rim,u):
+    """Pixel bounds of the floor relative to the camera origin (ox,oy)."""
+    xs=[];ys=[]
+    for pos in cells:
+        px,py=hexgrid.center(pos,u)
+        xs+=(px-hexgrid.HALF_WIDTH*u,px+hexgrid.HALF_WIDTH*u);ys+=(py-hexgrid.HALF_HEIGHT*u,py+hexgrid.HALF_HEIGHT*u)
+    for a,b in rim:ys+=(a[1]*u+RIM_DEPTH*u,b[1]*u+RIM_DEPTH*u)
+    left,top=math.floor(min(xs))-2,math.floor(min(ys))-2
+    return left,top,math.ceil(max(xs))+2,math.ceil(max(ys))+2
+
+
+def render_floor(cells,kinds,rim,u,water=(),background='#18211d'):
+    """Bake the static arena (rim sides, terrain tiles, water, rim outline) into one PIL image.
+
+    Returns (image, left, top): the image's top-left corner is at (ox+left, oy+top) on screen.
+    Drawing order matches the former per-item canvas renderer.
+    """
+    from PIL import Image, ImageDraw
+    cells=list(cells)
+    if not cells:return Image.new('RGB',(1,1),background),0,0
+    left,top,right,bottom=floor_bounds(cells,rim,u)
+    image=Image.new('RGBA',(right-left,bottom-top),background)
+    draw=ImageDraw.Draw(image)
+    def at(x,y):return x*u-left,y*u-top
+    depth=RIM_DEPTH*u
+    for a,b in sorted(rim,key=lambda edge:max(edge[0][1],edge[1][1])):
+        ax,ay=at(*a);bx,by=at(*b)
+        draw.polygon([(ax,ay),(bx,by),(bx,by+depth),(ax,ay+depth)],fill=RIM_LEFT if ax<bx else RIM_RIGHT,outline=RIM_OUTLINE)
+    water=set(map(tuple,water));shade={}
+    order=sorted(cells,key=lambda a:(hexgrid.center(a,1)[1],hexgrid.center(a,1)[0]))
+    for x,y in order:
+        px,py=hexgrid.center((x,y),u);px-=left;py-=top
+        kind=kinds.get((x,y),'waste');base=PALETTES.get(kind,PALETTES['waste'])[0]
+        poly=hexgrid.polygon(px,py,u);points=list(zip(poly[::2],poly[1::2]))
+        draw.polygon(points,fill=base)
+        # Tiles are 2 px larger than the hex, so rows and columns overlap instead of leaving seams.
+        tile=tile_image(kind,u,(x*13+y*7)%2,pad=2)
+        image.alpha_composite(tile,(round(px-tile.width/2),round(py-tile.height/2)))
+        if (x,y) in water:
+            # Former stippled water polygon: a half-transparent tint, then its outline, before the next cell.
+            ix,iy=math.floor(px)-tile.width//2-2,math.floor(py)-tile.height//2-2
+            fx,fy=px-ix,py-iy;key=(round(fx,2),round(fy,2))
+            if key not in shade:
+                patch=Image.new('RGBA',(tile.width+4,tile.height+4),(0,0,0,0))
+                hexagon=hexgrid.polygon(fx,fy,u)
+                ImageDraw.Draw(patch).polygon(list(zip(hexagon[::2],hexagon[1::2])),fill=WATER_FILL)
+                shade[key]=patch
+            image.alpha_composite(shade[key],(ix,iy))
+            draw.polygon(points,outline=WATER_OUTLINE)
+    for a,b in rim:draw.line([at(*a),at(*b)],fill=RIM_LINE,width=1)
+    return image.convert('RGB'),left,top
