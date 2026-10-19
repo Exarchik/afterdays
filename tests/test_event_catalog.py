@@ -1,4 +1,5 @@
 """Catalog integration: arbitrary authored events, persistence and transactional edits."""
+from tests.fixtures.disc_lock import open_lock
 import copy
 import json
 from pathlib import Path
@@ -81,8 +82,8 @@ class CatalogTests(unittest.TestCase):
             self.assertEqual(cache['contents'][0]['qty'],5+3*g.region_level)
             spec['cache'][0]['amount']=1000; g.make_road_event(spec['id']); g.resolve_event('act'); self.assertEqual(cache,g.road_cache())
             p.add_to(g.bag,p.parts(1))
-            self.assertTrue(g.unlock_cache(cache['id'],cache['lock_target'])); before=copy.deepcopy(g.loot)
-            self.assertIsNone(g.unlock_cache(cache['id'],cache['lock_target'])); self.assertEqual(g.loot,before)
+            self.assertTrue(open_lock(g,cache['id'])); before=copy.deepcopy(g.loot)
+            self.assertIsNone(g.unlock_cache(cache['id'])); self.assertEqual(g.loot,before)
 
     def test_damage_stops_effects_on_defeat_even_at_spawn(self):
         spec=custom(); spec['choices'][0]['outcomes'][0]['effects']=[dict(kind='damage',amount=999),dict(kind='xp',amount=999)]
@@ -111,12 +112,11 @@ class CatalogTests(unittest.TestCase):
             path=Path(folder)/'save.json';g.save(path);g=r.Game.load(path)
             self.assertEqual(g.road_cache()['contents'],cache['contents'])
             p.add_to(g.bag,p.parts(2))
-            wrong=0 if cache['lock_target']>90 else 180
-            self.assertFalse(g.unlock_cache(cache['id'],wrong));self.assertEqual(g.money,before)
-            self.assertTrue(g.unlock_cache(cache['id'],cache['lock_target']))
+            self.assertFalse(g.unlock_cache(cache['id']));self.assertEqual(g.money,before)
+            self.assertTrue(open_lock(g,cache['id']))
             self.assertEqual(g.money,before);self.assertTrue(g.collect(coins['id']))
             self.assertEqual(g.money,before+coins['qty'])
-            self.assertIsNone(g.unlock_cache(cache['id'],cache['lock_target']))
+            self.assertIsNone(g.unlock_cache(cache['id']))
             self.assertFalse(g.collect(coins['id']));self.assertEqual(g.money,before+coins['qty'])
         for amount in (0,-1):
             spec['cache'][0]['amount']=amount

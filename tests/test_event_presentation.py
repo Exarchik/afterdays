@@ -1,3 +1,4 @@
+from tests.fixtures.disc_lock import open_lock
 import unittest
 from unittest.mock import patch
 import game.model as r
@@ -51,14 +52,14 @@ class EventPresentationTests(unittest.TestCase):
         spec=g.road_event['definition'];spec.update(id='locked_test',cache=[dict(kind='parts',amount=3)])
         self.assertTrue(g.resolve_event('yes'));self.assertFalse(getattr(g,'_event_results',[]))
         ident=g._lock_request;g._lock_request=None;cache=g.lock_context(ident)
-        self.assertTrue(g.unlock_cache(ident,cache['lock_target']))
+        self.assertTrue(open_lock(g,ident))
         rows=g._event_results[0]['rows']
         self.assertEqual(rows[0]['effect_kind'],'money_paid')
         self.assertTrue(any(row.get('effect_kind')=='cache' for row in rows))
         items=[row for row in rows if row.get('item')]
         self.assertEqual(len(items),1);self.assertEqual(items[0]['item']['qty'],3)
         self.assertEqual(items[0]['destination'],'loot')
-        self.assertIsNot(g.unlock_cache(ident,90),True)
+        self.assertIsNot(g.unlock_cache(ident),True)
         self.assertEqual(len(g._event_results),1)
 
     def test_location_collect_respects_quantity_capacity_and_invalid_input(self):

@@ -9,6 +9,7 @@ from i18n import t as tr
 
 import event_catalog
 import event_runtime
+from game.systems import disc_lock
 CACHE_TYPES={e['id'][7:]:e['terrain'] for e in event_catalog.EVENTS if e.get('legacy_group')=='cache'}
 
 
@@ -50,7 +51,7 @@ class CacheEventsMixin:
         if cache is None:
             level=self.region_level
             cache=dict(id=game_catalog.uid(),kind='road_cache',title=spec['title'],art=spec.get('art','stash'),theme=spec['id'].removeprefix('locked_'),pos=[self.x,self.y],level=level,
-                       lock_target=self.rng.randint(15,165),opened=False,
+                       opened=False,
                        contents=event_runtime.cache_contents(self,spec['cache'],level))
             self.reputation_state.setdefault('road_caches',[]).append(cache)
         self._lock_request=cache['id'];self.log(tr('cache_events.found'))
@@ -62,13 +63,13 @@ class CacheEventsMixin:
         if cache:self._lock_request=cache['id'];return True
         return super().search()
 
-    def unlock_cache(self,ident,angle):
-        """Обробляє результат відкриття замкненого сховку."""
+    def unlock_cache(self,ident,attempt=None):
+        """«Відкрити» дисковий замок дорожнього сховку."""
         cache=self.road_cache(ident)
-        if cache is None:return super().unlock_cache(ident,angle)
-        if type(angle) not in (int,float) or not math.isfinite(angle) or not 0<=angle<=180 or self.count('parts')<1:return None
-        if abs(angle-cache['lock_target'])>12:
-            self.consume('parts');self.log(tr('update024.lock_fail'));return False
+        if cache is None:return super().unlock_cache(ident,attempt)
+        if self.count('parts')<1:return None
+        if not disc_lock.aligned(self.lock_state(cache)):
+            self.lock_attempt_failed(cache);self.log(tr('update024.lock_fail'));return False
         cache['opened']=True
         for item in cache['contents']:item_rules.add_to(self.loot,item)
         cache['contents']=[]

@@ -1,3 +1,4 @@
+from tests.fixtures.disc_lock import open_lock
 import copy,math,tempfile,unittest
 from pathlib import Path
 from unittest.mock import Mock,patch
@@ -45,19 +46,19 @@ class Update025Tests(unittest.TestCase):
   self.assertEqual(len(adventure.ROAD_EVENTS),len(__import__('event_catalog').EVENTS))
   for theme in CACHE_TYPES:
    g,c=self.make_cache(theme);self.assertEqual(c['level'],g.region_level);self.assertTrue(c['contents']);self.assertFalse(g.loot)
-   content=copy.deepcopy(c['contents']);angle=c['lock_target'];ident=c['id']
+   content=copy.deepcopy(c['contents']);ident=c['id']
    with tempfile.TemporaryDirectory() as td:
     path=Path(td)/'s.json';g.save(path);g=r.Game.load(path)
    self.assertTrue(g.search());self.assertEqual(g._lock_request,ident);self.assertEqual(g.lock_context(ident)['contents'],content)
-   g.bag[:]=[i for i in g.bag if i['kind']!='parts'];self.assertIsNone(g.unlock_cache(ident,angle));p.add_to(g.bag,p.parts(2))
-   self.assertFalse(g.unlock_cache(ident,0 if angle>90 else 180));self.assertEqual(g.count('parts'),1)
-   self.assertTrue(g.unlock_cache(ident,angle));self.assertEqual(g.count('parts'),1);self.assertTrue(g.loot)
-   loot=copy.deepcopy(g.loot);self.assertIsNone(g.unlock_cache(ident,angle));self.assertEqual(g.loot,loot);self.assertIsNone(g.road_cache())
+   g.bag[:]=[i for i in g.bag if i['kind']!='parts'];self.assertIsNone(g.unlock_cache(ident));p.add_to(g.bag,p.parts(2))
+   self.assertFalse(g.unlock_cache(ident));self.assertEqual(g.count('parts'),1)
+   self.assertTrue(open_lock(g,ident));self.assertEqual(g.count('parts'),1);self.assertTrue(g.loot)
+   loot=copy.deepcopy(g.loot);self.assertIsNone(g.unlock_cache(ident));self.assertEqual(g.loot,loot);self.assertIsNone(g.road_cache())
  def test_wrong_position_and_invalid_attempt_atomic(self):
   """Перевіряє сценарій «wrong position and invalid attempt atomic» та очікувані результати."""
-  g,c=self.make_cache('medical');p.add_to(g.bag,p.parts(2));before=copy.deepcopy(c)
-  for angle in (-1,181,float('nan'),True):self.assertIsNone(g.unlock_cache(c['id'],angle))
-  g.x+=1;self.assertIsNone(g.unlock_cache(c['id'],c['lock_target']));self.assertEqual(g.count('parts'),2);self.assertEqual(c,before)
+  g,c=self.make_cache('medical');p.add_to(g.bag,p.parts(2));g.lock_state(c);before=copy.deepcopy(c)
+  for ring,direction in ((-1,1),(9,1),('x',1),(0,0),(0,2),(0.5,1)):self.assertIsNone(g.lock_turn(c['id'],ring,direction))
+  g.x+=1;self.assertIsNone(g.unlock_cache(c['id']));self.assertIsNone(g.lock_turn(c['id'],0,1));self.assertEqual(g.count('parts'),2);self.assertEqual(c,before)
  def test_rewards_use_location_not_player_level(self):
   """Перевіряє сценарій «rewards use location not player level» та очікувані результати."""
   g=r.Game(8);g.xp=progression.xp_for_level(20)

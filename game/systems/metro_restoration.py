@@ -147,10 +147,10 @@ class MetroRestorationMixin:
         if ok and s:self.metro_advance(s)
         return ok
 
-    def unlock_cache(self,ident,angle):
+    def unlock_cache(self,ident,attempt=None):
         """Replace the intermediate parcel with a clue or the final metro component."""
         q=self.metro_parent(ident);s=self.metro_step(q) if q else None
-        ok=super().unlock_cache(ident,angle)
+        ok=super().unlock_cache(ident,attempt)
         if ok and s:self.metro_advance(s)
         return ok
 

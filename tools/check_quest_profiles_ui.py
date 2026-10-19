@@ -64,6 +64,14 @@ with tempfile.TemporaryDirectory() as folder:
         assert not panel.native.commit();error.assert_called_once()
     panel.native.vars['switches'].set('6');panel.native.vars['negatives'].set('1');panel.native.vars['zone'].set('4');panel.native.vars['show_weights'].set('1')
     assert panel.commit()
+    panel.tree.selection_set('type:cache');root.update()
+    assert panel.native.extras['cache'].winfo_ismapped() and not panel.native.extras['generator'].winfo_ismapped()
+    assert panel.native.vars['rings'].get()=='4'
+    panel.native.vars['rings'].set('9')
+    with patch('quest_profile_editor.messagebox.showerror') as error:
+        assert not panel.native.commit();error.assert_called_once()
+    panel.native.vars['rings'].set('5');panel.native.vars['wear'].set('12')
+    assert panel.commit()
     panel.tree.selection_set('type:delivery');root.update()
     assert not any(frame.winfo_ismapped() for frame in panel.native.extras.values())
     panel.add();root.update();panel.vars['elite'].set(True);panel.vars['art'].set('quest:hunt')
@@ -76,6 +84,8 @@ with tempfile.TemporaryDirectory() as folder:
     radiation=doc['native']['radiation_source']['normal']
     junk=doc['native']['junkyard']['normal']
     assert (junk['parts'],junk['max_stamina'],junk['stamina_per_satiety'])==(4,40,2),junk
+    lock=doc['native']['cache']['normal']
+    assert (lock['rings'],lock['positions'],lock['wear'],lock['depth'])==(5,8,12,3),lock
     power=doc['native']['generator']['normal']
     assert (power['switches'],power['negatives'],power['zone'],power['show_weights'],power['shock_chance'])==(6,1,4,1,35),power
     repair=doc['native']['electronics_repair']['normal']
@@ -83,15 +93,15 @@ with tempfile.TemporaryDirectory() as folder:
     hunt=doc['native']['elite_hunt']['normal']
     assert (hunt['needed'],hunt['drain'],hunt['recharge'],hunt['lens_speed'])==(4,45,20,60),hunt
     assert (radiation['grid_size'],radiation['max_dose'],radiation['device_radiation'],radiation['device_art'])==(5,3,2,'quest:cache'),radiation
-    panel.tree.selection_set('type:radiation_source' if '--radiation' in sys.argv else 'type:junkyard' if '--junkyard' in sys.argv else 'type:elite_hunt' if '--scanner' in sys.argv else 'type:electronics_repair' if '--electronics' in sys.argv else 'type:generator' if '--generator' in sys.argv else 'type:hunt');root.update()
+    panel.tree.selection_set('type:radiation_source' if '--radiation' in sys.argv else 'type:junkyard' if '--junkyard' in sys.argv else 'type:elite_hunt' if '--scanner' in sys.argv else 'type:electronics_repair' if '--electronics' in sys.argv else 'type:generator' if '--generator' in sys.argv else 'type:cache' if '--lock' in sys.argv else 'type:hunt');root.update()
     if '--screenshot' in sys.argv:
         root.lift();root.attributes('-topmost',True);root.update()
         def capture():
             from PIL import ImageGrab
-            name='quest-profiles-radiation.png' if '--radiation' in sys.argv else 'quest-profiles-junkyard.png' if '--junkyard' in sys.argv else 'quest-profiles-scanner.png' if '--scanner' in sys.argv else 'quest-profiles-electronics.png' if '--electronics' in sys.argv else 'quest-profiles-generator.png' if '--generator' in sys.argv else 'quest-profiles-editor.png'
+            name='quest-profiles-radiation.png' if '--radiation' in sys.argv else 'quest-profiles-junkyard.png' if '--junkyard' in sys.argv else 'quest-profiles-scanner.png' if '--scanner' in sys.argv else 'quest-profiles-electronics.png' if '--electronics' in sys.argv else 'quest-profiles-generator.png' if '--generator' in sys.argv else 'quest-profiles-lock.png' if '--lock' in sys.argv else 'quest-profiles-editor.png'
             ImageGrab.grab(bbox=(root.winfo_rootx(),root.winfo_rooty(),root.winfo_rootx()+root.winfo_width(),root.winfo_rooty()+root.winfo_height())).save('artifacts/'+name)
             root.quit()
         root.after(600,capture);root.mainloop()
     root.destroy()
 assert not errors,'\n'.join(errors)
-print('PASS: all native types editable, separate elite profile, art, dosimeter, junkyard, scanner, circuit and generator settings, authored fields, atomic save and reload')
+print('PASS: all native types editable, separate elite profile, art, dosimeter, junkyard, scanner, circuit, generator and lock settings, authored fields, atomic save and reload')

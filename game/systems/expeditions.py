@@ -9,6 +9,7 @@ import copy; import math; import json
 from pathlib import Path
 
 import content; from game.systems import economy; import monster_rules
+from game.systems import disc_lock
 
 from i18n import t as tr
 
@@ -141,13 +142,12 @@ class ExpeditionsMixin:
             elif q.get('pos')==[self.x,self.y]:return q
         return None
 
-    def unlock_cache(self,ident,angle):
-        """Обробляє результат відкриття замкненого сховку."""
+    def unlock_cache(self,ident,attempt=None):
+        """«Відкрити» дисковий замок сховку: усі прорізи мають стояти під засувкою."""
         q=self.local_expedition()
-        if self.battle or not q or q['id']!=ident or q['kind']!='cache' or q.get('lock_open') or [self.x,self.y]!=q['cache_pos'] or 'lock_target' not in q or self.count('parts')<1:return None
-        if not isinstance(angle,(int,float)) or not math.isfinite(angle) or not 0<=angle<=180:return None
-        if abs(angle-q['lock_target'])>12:
-            self.consume('parts');self.log(tr('update024.lock_fail'));return False
+        if self.battle or not q or q['id']!=ident or q['kind']!='cache' or q.get('lock_open') or [self.x,self.y]!=q['cache_pos'] or not (q.get('lock_found') or 'lock_target' in q) or self.count('parts')<1:return None
+        if not disc_lock.aligned(self.lock_state(q)):
+            self.lock_attempt_failed(q);self.log(tr('update024.lock_fail'));return False
         q['lock_open']=True
         self.bag.append(dict(id=game_catalog.uid(),type_id='quest_item',kind='quest',name=tr('exp.parcel'),quest_id=q['id'],weight=0,value=0,rarity=0))
         q['progress']=1
@@ -167,12 +167,12 @@ class ExpeditionsMixin:
             pos=[self.x,self.y]
             if pos in q['searched_cells']:
                 if pos==q['cache_pos'] and not q.get('lock_open'):
-                    if 'lock_target' not in q:q['lock_target']=self.rng.randint(15,165)
+                    q['lock_found']=True;self.lock_state(q)
                     self._lock_request=q['id'];return True
                 self.log(tr('exp.already_searched'));return False
             q['searched_cells'].append(pos);self.turn+=1;self.rad_turns=max(0,self.rad_turns-1)
             if pos!=q['cache_pos']:self.log(tr('exp.cache_empty'));return True
-            q['lock_target']=self.rng.randint(15,165)
+            q['lock_found']=True;self.lock_state(q)
             self._lock_request=q['id'];self.log(tr('update024.lock_found'));return True
         if q['kind']=='elite_hunt':
             self.turn+=1;self.rad_turns=max(0,self.rad_turns-1)

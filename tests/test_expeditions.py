@@ -1,3 +1,4 @@
+from tests.fixtures.disc_lock import open_lock
 import quest_area
 import copy,json,math,tempfile,unittest
 from pathlib import Path
@@ -88,7 +89,7 @@ class ExpeditionTests(unittest.TestCase):
     if not quest_area.contains(q,x,y):continue
     if [x,y]==target:continue
     g.x,g.y=x,y;self.assertTrue(g.search());self.assertFalse(g.search());self.assertFalse(g.quest_ready(q))
-  g.x,g.y=target;self.assertTrue(g.search());self.assertFalse(g.quest_ready(q));p.add_to(g.bag,p.parts(1));self.assertTrue(g.unlock_cache(q['id'],q['lock_target']));self.assertTrue(g.quest_ready(q));self.assertTrue(g.loot)
+  g.x,g.y=target;self.assertTrue(g.search());self.assertFalse(g.quest_ready(q));p.add_to(g.bag,p.parts(1));self.assertTrue(open_lock(g,q['id']));self.assertTrue(g.quest_ready(q));self.assertTrue(g.loot)
   before=copy.deepcopy(g.loot);self.assertIsNone(g.local_expedition());self.return_to_giver(g,q);self.assertEqual(before,g.loot);self.assertIsNone(g.quest_equipment(q))
  def test_elite_tracks_boss_minions_and_victory(self):
   """Перевіряє сценарій «elite tracks boss minions and victory» та очікувані результати."""

@@ -17,6 +17,7 @@ from game.systems.expeditions import ExpeditionsMixin
 from game.systems.scavenging import ScavengingMixin
 from game.systems.settlements import SettlementsMixin
 from game.systems.cache_events import CacheEventsMixin
+from game.systems.disc_lock import DiscLockMixin
 from game.systems.restoration import RestorationMixin
 from game.systems.state_migrations import StateMigrationsMixin
 from game.systems.visited_recruitment import VisitedRecruitmentMixin
@@ -93,6 +94,7 @@ class Game(
     QuickModulesMixin,
     RestorationMixin,
     CacheEventsMixin,
+    DiscLockMixin,
     SettlementsMixin,
     ScavengingMixin,
     ExpeditionsMixin,

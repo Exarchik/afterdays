@@ -1,3 +1,4 @@
+from tests.fixtures.disc_lock import open_lock
 import copy,math,tempfile,unittest
 from pathlib import Path
 from types import SimpleNamespace
@@ -78,15 +79,15 @@ class Update024Tests(unittest.TestCase):
  def test_cache_lock_failure_success_and_reentry(self):
   """Перевіряє сценарій «cache lock failure success and reentry» та очікувані результати."""
   g,q=self.contract('cache');g.x,g.y=q['cache_pos'];self.assertTrue(g.search());self.assertFalse(g.quest_ready(q));self.assertFalse(g.loot)
-  g.bag[:]=[i for i in g.bag if i['kind']!='parts'];self.assertIsNone(g.unlock_cache(q['id'],q['lock_target']))
-  p.add_to(g.bag,p.parts(3));wrong=180 if q['lock_target']<90 else 0
-  self.assertFalse(g.unlock_cache(q['id'],wrong));self.assertEqual(g.count('parts'),2);self.assertFalse(g.quest_ready(q))
-  target=q['lock_target'];self.assertTrue(g.search());self.assertEqual(target,q['lock_target'])
+  g.bag[:]=[i for i in g.bag if i['kind']!='parts'];self.assertIsNone(g.unlock_cache(q['id']))
+  p.add_to(g.bag,p.parts(3))
+  self.assertFalse(g.unlock_cache(q['id']));self.assertEqual(g.count('parts'),2);self.assertFalse(g.quest_ready(q))
+  target=copy.deepcopy(q['lock_disc']);self.assertTrue(g.search());self.assertEqual(target,q['lock_disc'])
   with tempfile.TemporaryDirectory() as td:
    path=Path(td)/'s.json';g.save(path);g=r.Game.load(path)
-  q=next(v for v in g.quests if v['id']==q['id']);self.assertEqual(target,q['lock_target'])
-  self.assertTrue(g.unlock_cache(q['id'],target));self.assertEqual(g.count('parts'),2);self.assertTrue(g.quest_ready(q));loot=copy.deepcopy(g.loot)
-  self.assertIsNone(g.unlock_cache(q['id'],target));self.assertEqual(loot,g.loot)
+  q=next(v for v in g.quests if v['id']==q['id']);self.assertEqual(target,q['lock_disc'])
+  self.assertTrue(open_lock(g,q['id']));self.assertEqual(g.count('parts'),2);self.assertTrue(g.quest_ready(q));loot=copy.deepcopy(g.loot)
+  self.assertIsNone(g.unlock_cache(q['id']));self.assertEqual(loot,g.loot)
  def test_all_goods_discount_stacking_and_no_arbitrage(self):
   """Перевіряє сценарій «all goods discount stacking and no arbitrage» та очікувані результати."""
   from visuals import item_sort_key

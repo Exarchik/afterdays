@@ -1,4 +1,5 @@
 """End-to-end metro chains, persistence, repair and dungeon gates."""
+from tests.fixtures.disc_lock import open_lock
 import copy,math,tempfile,unittest
 from pathlib import Path
 import game.model as r
@@ -35,7 +36,7 @@ class MetroTests(unittest.TestCase):
         elif role=='cache':
             p.add_to(g.bag,p.parts(20));g.x,g.y=s['cache_pos']
             self.assertTrue(g.search());self.assertEqual(g.lock_context(s['id']),s)
-            self.assertTrue(g.unlock_cache(s['id'],s['lock_target']))
+            self.assertTrue(open_lock(g,s['id']))
         elif role=='hermit':
             self.assertTrue(g.metro_action(q['id']))
             if s['task']=='hunt':
