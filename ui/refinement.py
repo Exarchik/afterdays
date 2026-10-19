@@ -113,7 +113,7 @@ def description(game,item):
     if item.get('quest_repair'):lines.append(tr('quests.repair_item_info',condition=round(item.get('durability',0))))
     return '\n'.join(lines)
 
-QUEST_ICONS={'junkyard':'▦','field_test':'⚒','generator':'ϟ','cache':'▣','elite_hunt':'◎','repair_delivery':'⚒','permit':'⚿','thanks':'★','delivery':'✉','radio':'◉','trophies':'♜','hunt':'◎','retrieve':'▣','scout':'◈','supplies':'✚','purge':'⚑'}
+QUEST_ICONS={'radiation_source':'☢','junkyard':'▦','field_test':'⚒','generator':'ϟ','cache':'▣','elite_hunt':'◎','repair_delivery':'⚒','permit':'⚿','thanks':'★','delivery':'✉','radio':'◉','trophies':'♜','hunt':'◎','retrieve':'▣','scout':'◈','supplies':'✚','purge':'⚑'}
 class QuestCards(tk.Frame):
     def __init__(self,parent,app,mayor=False):
         """Ініціалізує об’єкт, його початковий стан і потрібні залежності."""

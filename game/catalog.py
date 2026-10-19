@@ -53,6 +53,7 @@ STACK_KINDS = {'food','med','ammo','parts','fragments','rad','repairkit','credit
 TECHNICIANS = [0,2,4,7,10]
 BASE_REWARDS = {
     'electronics_repair':120,
+    'radiation_source':130,
     'scout': 45, 'hunt': 70, 'retrieve': 85, 'purge': 110, 'supplies': 40,
     'trophies': 60, 'delivery': 90, 'radio': 100, 'repair_delivery': 130,
     'field_test': 95, 'generator': 100, 'cache': 85, 'elite_hunt': 150,

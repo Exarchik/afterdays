@@ -10,6 +10,10 @@ from game.systems import economy
 from i18n import t as tr
 
 
+# Quests completed where the objective is, not at the quest giver.
+ON_SITE_KINDS=('repair_delivery','delivery')
+
+
 class QuestSystem:
     def quest_capacity(self,city):
         """Визначає максимальну кількість завдань за репутацією."""
@@ -87,7 +91,7 @@ class QuestSystem:
 
     def quest_return_pos(self,q):
         """Повертає координати місця здачі завдання."""
-        return q['pos'] if q['kind'] in ('repair_delivery','delivery') else self.cities[q['city']]
+        return q['pos'] if q['kind'] in ON_SITE_KINDS else self.cities[q['city']]
 
     def can_turn_in(self,q):
         """Перевіряє готовність завдання та присутність гравця в місці здачі."""
@@ -142,7 +146,7 @@ class QuestSystem:
     def turn_in(self,quest_id):
         """Перевіряє умови здачі, видає нагороду й завершує завдання."""
         q=next((q for q in self.quests if q['id']==quest_id),None)
-        if q and q['kind'] in ('repair_delivery','delivery'):
+        if q and q['kind'] in ON_SITE_KINDS:
             # The parcel recipient closes the quest on the spot; no return to the quest giver.
             if not self.can_turn_in(q):return False
             self.bag[:]=[i for i in self.bag if i.get('quest_id')!=quest_id]

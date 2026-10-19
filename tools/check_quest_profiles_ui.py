@@ -27,6 +27,19 @@ with tempfile.TemporaryDirectory() as folder:
     panel.native.variant_var.set('Елітний');panel.native.switch()
     panel.native.vars['reward'].set('600');panel.native.vars['min_level'].set('10')
     assert panel.commit()
+    # Dosimeter minigame settings are edited only for their own quest type.
+    panel.tree.selection_set('type:radiation_source');root.update()
+    assert panel.native.extra.winfo_ismapped()
+    panel.native.vars['grid_size'].set('5');panel.native.vars['max_dose'].set('3')
+    panel.native.vars['device_radiation'].set('2');panel.native.vars['device_art'].set('quest:cache')
+    assert panel.commit()
+    panel.tree.selection_set('type:radiation_source');root.update()
+    panel.native.vars['grid_size'].set('12')
+    with patch('quest_profile_editor.messagebox.showerror') as error:
+        assert not panel.native.commit();error.assert_called_once()
+    panel.native.vars['grid_size'].set('5')
+    panel.tree.selection_set('type:delivery');root.update()
+    assert not panel.native.extra.winfo_ismapped()
     panel.add();root.update();panel.vars['elite'].set(True);panel.vars['art'].set('quest:hunt')
     panel.vars['xp_step'].set('8');panel.vars['money_power'].set('1.3')
     with patch('content_editor.messagebox.showerror') as error:
@@ -34,14 +47,17 @@ with tempfile.TemporaryDirectory() as folder:
     doc=Store(project).data['quests'];assert doc['native']['hunt']['normal']['min_level']==7
     assert doc['native']['hunt']['elite']['reward']==600
     assert doc['quests'][-1]['elite'] and doc['quests'][-1]['xp_step']==8
-    panel.tree.selection_set('type:hunt');root.update()
+    radiation=doc['native']['radiation_source']['normal']
+    assert (radiation['grid_size'],radiation['max_dose'],radiation['device_radiation'],radiation['device_art'])==(5,3,2,'quest:cache'),radiation
+    panel.tree.selection_set('type:radiation_source' if '--radiation' in sys.argv else 'type:hunt');root.update()
     if '--screenshot' in sys.argv:
         root.lift();root.attributes('-topmost',True);root.update()
         def capture():
             from PIL import ImageGrab
-            ImageGrab.grab(bbox=(root.winfo_rootx(),root.winfo_rooty(),root.winfo_rootx()+root.winfo_width(),root.winfo_rooty()+root.winfo_height())).save('artifacts/quest-profiles-editor.png')
+            name='quest-profiles-radiation.png' if '--radiation' in sys.argv else 'quest-profiles-editor.png'
+            ImageGrab.grab(bbox=(root.winfo_rootx(),root.winfo_rooty(),root.winfo_rootx()+root.winfo_width(),root.winfo_rooty()+root.winfo_height())).save('artifacts/'+name)
             root.quit()
         root.after(600,capture);root.mainloop()
     root.destroy()
 assert not errors,'\n'.join(errors)
-print('PASS: all native types editable, separate elite profile, art, authored fields, atomic save and reload')
+print('PASS: all native types editable, separate elite profile, art, dosimeter settings, authored fields, atomic save and reload')

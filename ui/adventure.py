@@ -183,7 +183,7 @@ def paint_snapshot(app):
 
 
 def service_sprite(key,npc=None):
-    sprite=('npc:'+npc if npc else 'npc:'+key) if key in ('smith','food','fence','tech','mayor','traveler','hunter') else {'electronics':'npc:tech','loot':'loot','stash':'stash','rest':'rest','search':'loot','perks':'perk:tactician','atlas':'site','board':'journal'}.get(key)
+    sprite=('npc:'+npc if npc else 'npc:'+key) if key in ('smith','food','fence','tech','mayor','traveler','hunter') else {'electronics':'npc:tech','radiation':'effects:radiation_damage','loot':'loot','stash':'stash','rest':'rest','search':'loot','perks':'perk:tactician','atlas':'site','board':'journal'}.get(key)
     return {'settlers':'npc_roamer_smith','torn_map':'quest:torn_map','board':'service_board','metro':'service_metro','cartographer':'npc_cartographer','guide':'npc_guide','action_delivery':'action_delivery','action_radio':'action_radio'}.get(key,sprite)
 
 
@@ -219,6 +219,9 @@ class Services(tk.Frame):
             from ui.electronics import show as show_electronics
             if any(q['kind']=='electronics_repair' and g.electronics_available(q) and not q.get('circuit_checked') for q in g.quests):
                 items.append(('electronics','Ремонт електроніки',lambda:show_electronics(app)))
+            from ui.radiation import show as show_radiation
+            if any(q['kind']=='radiation_source' and g.radiation_available(q) for q in g.quests):
+                items.append(('radiation','Пошук джерела',lambda:show_radiation(app)))
             for mq in g.metro_local():
                 items.append(('metro',tr('metro035.service'),lambda ident=mq['id']:metro.show(app,ident)))
             if g.scribe:items.append(('cartographer',tr('update032.scribe'),lambda:widgets.scribe(app)))
