@@ -48,6 +48,14 @@ with tempfile.TemporaryDirectory() as folder:
     assert panel.native.vars['drain'].get()=='38'
     panel.native.vars['needed'].set('4');panel.native.vars['drain'].set('45');panel.native.vars['recharge'].set('20');panel.native.vars['lens_speed'].set('60')
     assert panel.commit()
+    panel.tree.selection_set('type:electronics_repair');root.update()
+    assert panel.native.extras['electronics_repair'].winfo_ismapped() and not panel.native.extras['elite_hunt'].winfo_ismapped()
+    assert panel.native.vars['contacts_max'].get()=='5'
+    panel.native.vars['contacts_min'].set('5');panel.native.vars['contacts_max'].set('4')
+    with patch('quest_profile_editor.messagebox.showerror') as error:
+        assert not panel.native.commit();error.assert_called_once()
+    panel.native.vars['contacts_min'].set('3');panel.native.vars['contacts_max'].set('4');panel.native.vars['decoys'].set('2');panel.native.vars['shock'].set('1')
+    assert panel.commit()
     panel.tree.selection_set('type:delivery');root.update()
     assert not any(frame.winfo_ismapped() for frame in panel.native.extras.values())
     panel.add();root.update();panel.vars['elite'].set(True);panel.vars['art'].set('quest:hunt')
@@ -60,18 +68,20 @@ with tempfile.TemporaryDirectory() as folder:
     radiation=doc['native']['radiation_source']['normal']
     junk=doc['native']['junkyard']['normal']
     assert (junk['parts'],junk['max_stamina'],junk['stamina_per_satiety'])==(4,40,2),junk
+    repair=doc['native']['electronics_repair']['normal']
+    assert (repair['contacts_min'],repair['contacts_max'],repair['decoys'],repair['hints'],repair['shock'])==(3,4,2,1,1),repair
     hunt=doc['native']['elite_hunt']['normal']
     assert (hunt['needed'],hunt['drain'],hunt['recharge'],hunt['lens_speed'])==(4,45,20,60),hunt
     assert (radiation['grid_size'],radiation['max_dose'],radiation['device_radiation'],radiation['device_art'])==(5,3,2,'quest:cache'),radiation
-    panel.tree.selection_set('type:radiation_source' if '--radiation' in sys.argv else 'type:junkyard' if '--junkyard' in sys.argv else 'type:elite_hunt' if '--scanner' in sys.argv else 'type:hunt');root.update()
+    panel.tree.selection_set('type:radiation_source' if '--radiation' in sys.argv else 'type:junkyard' if '--junkyard' in sys.argv else 'type:elite_hunt' if '--scanner' in sys.argv else 'type:electronics_repair' if '--electronics' in sys.argv else 'type:hunt');root.update()
     if '--screenshot' in sys.argv:
         root.lift();root.attributes('-topmost',True);root.update()
         def capture():
             from PIL import ImageGrab
-            name='quest-profiles-radiation.png' if '--radiation' in sys.argv else 'quest-profiles-junkyard.png' if '--junkyard' in sys.argv else 'quest-profiles-scanner.png' if '--scanner' in sys.argv else 'quest-profiles-editor.png'
+            name='quest-profiles-radiation.png' if '--radiation' in sys.argv else 'quest-profiles-junkyard.png' if '--junkyard' in sys.argv else 'quest-profiles-scanner.png' if '--scanner' in sys.argv else 'quest-profiles-electronics.png' if '--electronics' in sys.argv else 'quest-profiles-editor.png'
             ImageGrab.grab(bbox=(root.winfo_rootx(),root.winfo_rooty(),root.winfo_rootx()+root.winfo_width(),root.winfo_rooty()+root.winfo_height())).save('artifacts/'+name)
             root.quit()
         root.after(600,capture);root.mainloop()
     root.destroy()
 assert not errors,'\n'.join(errors)
-print('PASS: all native types editable, separate elite profile, art, dosimeter, junkyard and scanner settings, authored fields, atomic save and reload')
+print('PASS: all native types editable, separate elite profile, art, dosimeter, junkyard, scanner and circuit settings, authored fields, atomic save and reload')
