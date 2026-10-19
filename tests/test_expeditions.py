@@ -74,7 +74,8 @@ class ExpeditionTests(unittest.TestCase):
   """Перевіряє сценарій «generator solvable consumes materials once» та очікувані результати."""
   g,q=self.contract('generator');g.x,g.y=q['pos'];self.assertTrue(g.search());self.assertEqual(g._generator_request,q['id'])
   self.assertFalse(g.repair_generator(q['id']))
-  for n in q['generator_order']:self.assertTrue(g.generator_toggle(q['id'],n))
+  from tests.fixtures.generator import solve
+  solve(g,q)
   g.bag[:]=[i for i in g.bag if i['kind']!=q['material']];self.assertFalse(g.repair_generator(q['id']))
   p.add_to(g.bag,p.parts(q['material_qty']) if q['material']=='parts' else p.fragments(q['material_qty']))
   self.assertTrue(g.repair_generator(q['id']));self.assertEqual(g.count(q['material']),0);self.assertFalse(g.repair_generator(q['id']));self.return_to_giver(g,q)

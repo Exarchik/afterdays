@@ -66,18 +66,36 @@ class SettlementTests(unittest.TestCase):
   g=r.Game(3);g.local_record()['value']=100;g.money=100000
   item=next(i for i in g.stock(2) if i['kind']=='sealed');item['promotion']=dict(city=0,merchant=2,discount=75);cost=g.price(item,2)
   self.assertTrue(g.buy(item['id'],2));gear=g.open_chest(item['id']);self.assertIsNotNone(gear);self.assertLess(g.price(gear,0,False),cost)
- def test_generator_wrong_only_can_shock_and_failure_uses_normal_defeat(self):
-  """Перевіряє сценарій «generator wrong only can shock and failure uses normal defeat» та очікувані результати."""
-  g=r.Game(4);offer=offer_for(g,'generator');g.accept_quest(offer['id']);q=g.quests[-1];g.x,g.y=q['pos'];good=q['generator_order'][0];wrong=(good+1)%5
+ def test_generator_overload_only_can_shock_and_failure_uses_normal_defeat(self):
+  """Перевантаження генератора може вдарити струмом; смерть від удару — звичайна поразка."""
+  g=r.Game(4);offer=offer_for(g,'generator');g.accept_quest(offer['id']);q=g.quests[-1];g.x,g.y=q['pos']
+  heavy=sorted(range(5),key=lambda i:-q['generator_weights'][i])
+  def overload():
+   total=0
+   for i in heavy:
+    g.generator_toggle(q['id'],i);total+=q['generator_weights'][i]
+    if total>100:return
   with patch.object(g.rng,'random',return_value=0),patch.object(g.rng,'randint',return_value=5):
-   hp=g.hp;g.generator_toggle(q['id'],good);self.assertEqual(g.hp,hp)
-   g.generator_toggle(q['id'],good);self.assertEqual(g.hp,hp-5);self.assertEqual(q['generator_input'],[])
-   g.hp=1;g.generator_toggle(q['id'],wrong);self.assertGreater(g.hp,0);self.assertEqual([g.x,g.y],g.cities[0]);self.assertFalse(g.quest_ready(q))
- def test_generator_error_without_shock(self):
-  """Перевіряє сценарій «generator error without shock» та очікувані результати."""
+   hp=g.hp;g.generator_toggle(q['id'],heavy[0]);self.assertEqual(g.hp,hp);g.generator_toggle(q['id'],heavy[0])
+   overload();self.assertEqual(g.hp,hp-5);self.assertEqual(q['generator_on'],[False]*5)
+   g.hp=1;overload();self.assertGreater(g.hp,0);self.assertEqual([g.x,g.y],g.cities[0]);self.assertFalse(g.quest_ready(q))
+ def test_generator_overload_without_shock(self):
+  """Перевантаження без удару, коли шанс не випав або сила удару 0."""
   g=r.Game(4);offer=offer_for(g,'generator');g.accept_quest(offer['id']);q=g.quests[-1];g.x,g.y=q['pos'];hp=g.hp
-  with patch.object(g.rng,'random',return_value=.9):g.generator_toggle(q['id'],(q['generator_order'][0]+1)%5)
+  heavy=sorted(range(5),key=lambda i:-q['generator_weights'][i])
+  with patch.object(g.rng,'random',return_value=.9):
+   total=0
+   for i in heavy:
+    g.generator_toggle(q['id'],i);total+=q['generator_weights'][i]
+    if total>100:break
   self.assertEqual(g.hp,hp);self.assertEqual(g._generator_shock,0)
+  q['generator_settings']['shock_max']=0
+  with patch.object(g.rng,'random',return_value=0):
+   total=0
+   for i in heavy:
+    g.generator_toggle(q['id'],i);total+=q['generator_weights'][i]
+    if total>100:break
+  self.assertTrue(g._generator_overload);self.assertEqual(g.hp,hp)
  def test_noise_is_temporary_and_trace_changes(self):
   """Перевіряє сценарій «noise is temporary and trace changes» та очікувані результати."""
   noise=Interference(0,random.Random(4));self.assertFalse(noise.advance(0));self.assertTrue(7<=noise.next<=13)

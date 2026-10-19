@@ -83,14 +83,16 @@ class SettlementsMixin:
         return text
 
     def generator_toggle(self,ident,index):
-        """Перемикає рубильник, перевіряє порядок і застосовує наслідки помилки."""
+        """Перемикає рубильник; при перевантаженні може вдарити струмом (шанс і сила з редактора)."""
         self._generator_shock=0
-        q=self.local_expedition()
-        wrong=bool(q and q['id']==ident and q['kind']=='generator' and type(index)==int and 0<=index<5 and len(q['generator_input'])<5 and index!=q['generator_order'][len(q['generator_input'])])
         ok=super().generator_toggle(ident,index)
-        if ok and wrong and self.rng.random()<.35:
-            self._generator_shock=self.rng.randint(1,5)
-            self.hurt_world(self._generator_shock,tr('settlements.shock'))
+        q=self.local_expedition()
+        if ok and getattr(self,'_generator_overload',False) and q:
+            settings=q.get('generator_settings') or {}
+            chance,top=settings.get('shock_chance',35),settings.get('shock_max',5)
+            if top>0 and self.rng.random()<chance/100:
+                self._generator_shock=self.rng.randint(1,top)
+                self.hurt_world(self._generator_shock,tr('settlements.shock'))
         return ok
 
     @classmethod

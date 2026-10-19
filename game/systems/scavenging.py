@@ -6,6 +6,8 @@ import quest_area
 
 import copy; import math
 import junk_physics
+import random
+from game.systems import generator_balance
 
 from game.systems import economy
 
@@ -116,10 +118,24 @@ class ScavengingMixin:
         q['goal']=7 if q['kind']=='scout' else 1;q['progress']=0
         if q['kind']=='retrieve':q['relic_pos']=list(self.rng.choice(quest_area.around((x,y))))
 
+    def generator_settings(self,q):
+        """Balance settings from the quest's native profile (regular or elite) or defaults."""
+        import quest_profiles
+        spec=quest_profiles.profile(q) or quest_profiles.defaults('generator',bool(q.get('unique')))
+        return generator_balance.settings_for(spec)
+
     def init_generator(self,q):
-        """Готує послідовність рубильників і стан генератора."""
-        q['generator_order']=self.rng.sample(list(range(5)),5);q['generator_input']=[]
-        q.pop('generator_board',None)
+        """Готує рубильники з різною вагою та зелену зону датчика."""
+        settings=self.generator_settings(q)
+        weights,zone=generator_balance.generate(random.Random('generator:'+q['id']),settings)
+        q.update(generator_weights=weights,generator_zone=zone,generator_on=[False]*len(weights),
+                 generator_settings=settings,generator_version=generator_balance.VERSION)
+        for key in ('generator_order','generator_input','generator_board'):q.pop(key,None)
+
+    def ensure_generator(self,q):
+        """Old saves (switch order or 3×3 board) get a balance board; a finished repair stays finished."""
+        if q.get('generator_version')!=generator_balance.VERSION:self.init_generator(q)
+        return q
 
     def junk_settings(self,q):
         """Pile settings from the quest's native profile (regular or elite) or defaults."""
@@ -202,21 +218,27 @@ class ScavengingMixin:
         """Створює предмет реліквії для відповідного завдання."""
         return dict(id=game_catalog.uid(),type_id='quest_item',kind='quest',name=tr('scav.relic'),quest_id=q['id'],rarity=2,weight=0,value=0)
 
-    def generator_toggle(self,ident,index):
-        """Перемикає рубильник, перевіряє порядок і застосовує наслідки помилки."""
+    def generator_quest(self,ident):
         q=self.local_expedition()
-        if not q or q['id']!=ident or q['kind']!='generator' or type(index)!=int or not 0<=index<5:return False
-        entered=q['generator_input']
-        if len(entered)==5:return False
-        if index==q['generator_order'][len(entered)]:entered.append(index)
-        else:q['generator_input']=[];self.log(tr('scav.generator_reset'))
+        if not q or q['id']!=ident or q['kind']!='generator' or q.get('progress'):return None
+        return self.ensure_generator(q)
+
+    def generator_toggle(self,ident,index):
+        """Перемикає рубильник; перевантаження вибиває всі рубильники."""
+        self._generator_overload=False
+        q=self.generator_quest(ident)
+        if not q or type(index)!=int or not 0<=index<len(q['generator_on']):return False
+        q['generator_on'][index]=not q['generator_on'][index]
+        if generator_balance.load(q)>generator_balance.RED:
+            q['generator_on']=[False]*len(q['generator_on']);self._generator_overload=True
+            self.log(tr('scav.generator_reset'))
         return True
 
     def repair_generator(self,ident):
-        """Перевіряє завершення ремонту генератора та оновлює завдання."""
-        q=self.local_expedition()
-        if not q or q['id']!=ident or q['kind']!='generator':return False
-        if q['generator_input']!=q['generator_order']:self.log(tr('exp.generator_unsolved'));return False
+        """Перевіряє, що навантаження в зеленій зоні, і списує матеріали."""
+        q=self.generator_quest(ident)
+        if not q:return False
+        if not generator_balance.in_zone(q):self.log(tr('exp.generator_unsolved'));return False
         if self.count(q['material'])<q['material_qty']:self.log(tr('exp.no_material'));return False
         self.consume(q['material'],q['material_qty']);self.turn+=1;self.rad_turns=max(0,self.rad_turns-1);q['progress']=1
         self.log(tr('exp.generator_done'));return True
@@ -302,7 +324,7 @@ class ScavengingMixin:
         for q in game.quests:
             if q['status']!='active':continue
             if q['kind']=='junkyard':game.ensure_junkyard(q)
-            if q['kind']=='generator' and 'generator_order' not in q:game.init_generator(q)
+            if q['kind']=='generator' and not q.get('progress'):game.ensure_generator(q)
             if q['kind'] in ('scout','retrieve') and 'metro_city' not in q and not q.get('area') and not game.quest_ready(q):
                 pool=game.area_candidates(q)
                 if pool:game.setup_area(q,pool)

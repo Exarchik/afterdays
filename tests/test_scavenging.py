@@ -100,12 +100,16 @@ class ScavengingTests(unittest.TestCase):
    for cx,cy in quest_area.cells(q):self.assertIn((cx,cy),reachable);self.assertLessEqual(g.region_at(cx,cy),q['level']+1)
  def test_generator_wrong_order_resets_and_saves(self):
   """Перевіряє сценарій «generator wrong order resets and saves» та очікувані результати."""
-  g,q=self.quest('generator');g.x,g.y=q['pos'];order=q['generator_order'][:];self.assertEqual(sorted(order),list(range(5)))
-  self.assertTrue(g.generator_toggle(q['id'],order[0]));self.assertEqual(len(q['generator_input']),1)
-  self.assertTrue(g.generator_toggle(q['id'],order[2]));self.assertEqual(q['generator_input'],[])
+  from tests.fixtures.generator import solution,solve
+  from game.systems import generator_balance as balance
+  g,q=self.quest('generator');g.x,g.y=q['pos'];self.assertEqual(q['generator_version'],balance.VERSION)
+  self.assertEqual(len(q['generator_weights']),5);self.assertEqual(q['generator_on'],[False]*5)
+  self.assertTrue(g.generator_toggle(q['id'],0));self.assertTrue(q['generator_on'][0])
+  self.assertTrue(g.generator_toggle(q['id'],0));self.assertFalse(q['generator_on'][0])
   self.assertFalse(g.generator_toggle(q['id'],5));self.assertFalse(g.repair_generator(q['id']))
-  g.generator_toggle(q['id'],order[0]);h=self.save_reload(g);q=h.quests[-1];self.assertEqual(q['generator_input'],order[:1]);self.assertEqual(q['generator_order'],order)
-  for n in order[1:]:h.generator_toggle(q['id'],n)
+  mask=solution(q);first=min(i for i in range(5) if mask>>i&1)
+  g.generator_toggle(q['id'],first);h=self.save_reload(g);q=h.quests[-1];self.assertTrue(q['generator_on'][first])
+  q['generator_on']=[False]*5;solve(h,q)
   h.bag[:]=[i for i in h.bag if i['kind']!=q['material']];self.assertFalse(h.repair_generator(q['id']))
   p.add_to(h.bag,p.supply(q['material'],q['material_qty']));self.assertTrue(h.repair_generator(q['id']));self.assertFalse(h.repair_generator(q['id']))
  def clear_pile(self,g,q):
@@ -150,8 +154,11 @@ class ScavengingTests(unittest.TestCase):
   canvas=MagicMock();draw_search_areas(canvas,g,20,0,0);self.assertEqual(canvas.create_line.call_count,18)
  def test_old_generator_and_quests_migrate_without_losing_rewards(self):
   """Перевіряє сценарій «old generator and quests migrate without losing rewards» та очікувані результати."""
-  g,q=self.quest('generator');q.pop('generator_order');q.pop('generator_input');q['generator_board']=[1]*9;reward=q['reward']
-  h=self.save_reload(g);self.assertEqual(len(h.quests[-1]['generator_order']),5);self.assertEqual(h.quests[-1]['reward'],reward)
+  g,q=self.quest('generator')
+  for key in ('generator_weights','generator_zone','generator_on','generator_version'):q.pop(key)
+  q.update(generator_board=[1]*9,generator_order=[0,1,2,3,4],generator_input=[]);reward=q['reward']
+  h=self.save_reload(g);q=h.quests[-1];self.assertEqual(len(q['generator_weights']),5);self.assertEqual(q['reward'],reward)
+  self.assertNotIn('generator_order',q);self.assertNotIn('generator_board',q)
   g,q=self.quest('scout');q.pop('area');q.pop('visited_cells');q['goal']=1
   h=self.save_reload(g);self.assertEqual(h.quests[-1]['goal'],7);self.assertEqual(len(h.quests[-1]['area']),4)
 

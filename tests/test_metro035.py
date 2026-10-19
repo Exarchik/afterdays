@@ -27,7 +27,8 @@ class MetroTests(unittest.TestCase):
         elif role=='generator':
             p.add_to(g.bag,p.parts(20));p.add_to(g.bag,p.fragments(20))
             self.assertTrue(g.search());self.assertFalse(g.repair_generator(s['id']))
-            for n in s['generator_order']:self.assertTrue(g.generator_toggle(s['id'],n))
+            from tests.fixtures.generator import solve
+            solve(g,s)
             self.assertTrue(g.repair_generator(s['id']))
         elif role=='radio':
             self.assertTrue(g.search());self.assertTrue(g.tune_radio(s['id'],s['radio_target']))
