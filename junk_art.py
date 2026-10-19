@@ -1,23 +1,31 @@
-"""Material drawings adapted from the supplied minigame, without weight labels."""
-GOLD="#eac56d"
-class ScrapArt:
-    def draw_scrap(self,s):
-        """Малює фрагмент сміття з його матеріалом, контуром і деталями."""
-        c = self.canvas
-        points = [v for px,py in s.points for v in (s.x+px,s.y+py)]
-        c.create_polygon(points,fill=s.color,outline='#222a23',width=2,tags=(s.tag,'body'+s.tag))
-        # Декор цілком усередині непрозорої області.
-        if s.name in ('Картон','Газети'):
-            for dy in (-16,-6,4,14):
-                c.create_line(s.x-30,s.y+dy,s.x+28,s.y+dy+2,fill='#777765',width=2,tags=s.tag)
-        elif s.name == 'Лист металу':
-            for dx in (-35,0,35):
-                c.create_line(s.x+dx,s.y-23,s.x+dx+4,s.y+20,fill='#899796',width=3,tags=s.tag)
-        elif s.name == 'Бетонна плита':
-            c.create_line(s.x-22,s.y-28,s.x-4,s.y-9,s.x-12,s.y+5,
-                          s.x+18,s.y+24,fill='#565952',width=3,tags=s.tag)
-        elif s.name == 'Дошка':
-            c.create_line(s.x-45,s.y-8,s.x+45,s.y+9,fill='#a17e55',width=2,tags=s.tag)
-        else:
-            c.create_line(s.x-25,s.y-16,s.x+10,s.y+18,s.x+30,s.y-12,
-                          fill='#89927d',width=2,tags=s.tag)
+"""Top-down drawing of junkyard pile pieces: material colour, outline and surface marks."""
+import math
+import junk_physics as pile
+
+MARKS={'Лист металу':'#8a9a99','Бетонна плита':'#5f625a','Дошка':'#a17e55','Мішок':'#7d8b78'}
+
+
+def local(piece,x,y):
+    c,s=math.cos(piece['a']),math.sin(piece['a'])
+    return piece['x']+x*c-y*s,piece['y']+x*s+y*c
+
+
+def draw_piece(canvas,piece,outline=None):
+    """Draws one piece in model coordinates; marks stay inside the piece outline."""
+    name,_,w,h,colour=pile.MATERIALS[piece['material']]
+    points=[v for pt in pile.corners(piece) for v in pt]
+    canvas.create_polygon(*[v+3 for v in points],fill='#20261d',outline='')
+    canvas.create_polygon(*points,fill=colour,outline=outline or '#1b221d',width=3 if outline else 1)
+    mark=MARKS.get(name,'#78786a');hw,hh=w/2,h/2
+    if name in ('Газети','Картон'):
+        lines=[((-hw+14,y),(hw-14,y+2)) for y in (-18,-7,4,15) if abs(y)<hh-6]
+    elif name=='Лист металу':
+        lines=[((x,-hh+4),(x,hh-4)) for x in (-50,-15,20,55)]
+    elif name=='Бетонна плита':
+        lines=[((-40,-50),(-10,-12)),((-10,-12),(-22,10)),((-22,10),(30,48))]
+    elif name=='Дошка':
+        lines=[((-hw+4,-9),(hw-4,-6)),((-hw+4,4),(hw-4,7))]
+    else:
+        lines=[((-30,-20),(10,22)),((10,22),(35,-14))]
+    for a,b in lines:
+        canvas.create_line(*local(piece,*a),*local(piece,*b),fill=mark,width=3 if name in ('Лист металу','Бетонна плита') else 2)

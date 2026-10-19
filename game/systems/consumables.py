@@ -51,12 +51,12 @@ class Consumables:
         item=self.consumable_candidate(token)
         return bool(item and (not self.battle or self.battle['ap']>=definition(item)['ap_cost']))
 
-    def apply_consumable(self,item,automatic=False,target=None,source=None):
-        
+    def apply_consumable(self,item,automatic=False,target=None,source=None,force=False):
+        # force: eat even when the effect is not needed now (e.g. for junkyard stamina).
         import module_rules
         d=definition(item)
         if self.battle and not automatic and self.battle['ap']<d['ap_cost']:return False
-        if target is None and not self.consumable_useful(item):return False
+        if target is None and not force and not self.consumable_useful(item):return False
         if item_rules.extract(self.bag if source is None else source,item,1) is None:return False
         if self.battle and not automatic:self.battle['ap']-=d['ap_cost']
         if d['radiation_heal']:self.cure_radiation(d['radiation_heal'])

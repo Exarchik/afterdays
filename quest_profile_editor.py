@@ -23,24 +23,26 @@ class NativeQuestForm(ttk.Frame):
             self.vars[key].trace_add('write',lambda *_:self.preview())
         ttk.Button(form,text='Вибрати арт…',command=self.pick_art).grid(row=1,column=2)
         # Minigame settings, shown only for quest types that have them.
-        from game.systems.radiation_source import SETTINGS
-        self.extra=ttk.LabelFrame(self,text='Мінігра «Дозиметр»',padding=6);self.extra.columnconfigure(1,weight=1)
-        self.extra_fields=[('grid_size','Розмір ділянки, гексів по стороні',SETTINGS['grid_size']),
-                           ('max_dose','Радіація за замір біля джерела',SETTINGS['max_dose']),
-                           ('device_radiation','Радіація від приладу за крок',SETTINGS['device_radiation'])]
-        for n,(key,label,(default,low,high)) in enumerate(self.extra_fields):
-            ttk.Label(self.extra,text=f'{label} ({low}–{high})').grid(row=n,column=0,sticky='w',pady=3)
-            self.vars[key]=tk.StringVar()
-            ttk.Entry(self.extra,textvariable=self.vars[key],width=8).grid(row=n,column=1,sticky='w',padx=6)
-        row=len(self.extra_fields)
-        ttk.Label(self.extra,text='Арт приладу (порожньо — стандартна іконка)').grid(row=row,column=0,sticky='w',pady=3)
-        self.vars['device_art']=tk.StringVar()
-        art_row=ttk.Frame(self.extra);art_row.grid(row=row,column=1,sticky='ew',padx=6)
-        ttk.Entry(art_row,textvariable=self.vars['device_art']).pack(side='left',fill='x',expand=True)
-        ttk.Button(art_row,text='Вибрати…',command=self.pick_device_art).pack(side='left',padx=(6,0))
-        ttk.Label(self.extra,text='Заміри без обмежень: гравець шукає, доки не заміряє сам гекс із джерелом. Єдина ціна довгого пошуку — накопичена радіація.\n'
-                  'Після знахідки гравець несе радіоактивний прилад замовнику; радіопротектор блокує опромінення від нього.',
-                  wraplength=600,justify='left').grid(row=row+1,column=0,columnspan=2,sticky='w',pady=(4,0))
+        import quest_minigames
+        self.extras={}
+        for kind,config in quest_minigames.MINIGAMES.items():
+            frame=ttk.LabelFrame(self,text=config['title'],padding=6);frame.columnconfigure(1,weight=1)
+            for n,(key,label) in enumerate(config['fields']):
+                _,low,high=quest_minigames.limits(kind,key)
+                ttk.Label(frame,text=f'{label} ({low}–{high})').grid(row=n,column=0,sticky='w',pady=3)
+                self.vars[key]=tk.StringVar()
+                ttk.Entry(frame,textvariable=self.vars[key],width=8).grid(row=n,column=1,sticky='w',padx=6)
+            row=len(config['fields'])
+            if config['art']:
+                key,label=config['art']
+                ttk.Label(frame,text=label).grid(row=row,column=0,sticky='w',pady=3)
+                self.vars[key]=tk.StringVar()
+                art_row=ttk.Frame(frame);art_row.grid(row=row,column=1,sticky='ew',padx=6)
+                ttk.Entry(art_row,textvariable=self.vars[key]).pack(side='left',fill='x',expand=True)
+                ttk.Button(art_row,text='Вибрати…',command=lambda key=key:self.pick_extra_art(key)).pack(side='left',padx=(6,0))
+                row+=1
+            ttk.Label(frame,text=config['note'],wraplength=600,justify='left').grid(row=row,column=0,columnspan=2,sticky='w',pady=(4,0))
+            self.extras[kind]=frame
         self.extra_anchor=form
         self.art_canvas=tk.Canvas(self,width=96,height=96,highlightthickness=0);self.art_canvas.pack(anchor='w',pady=5)
         ttk.Label(self,text='Опис (додається до конкретних цілей та прогресу квесту)').pack(anchor='w')
@@ -61,13 +63,11 @@ class NativeQuestForm(ttk.Frame):
         self.loading=True
         spec=self.store.data['quests'].get('native',{}).get(self.kind,{}).get(self.variant,profiles.defaults(self.kind,self.variant=='elite'))
         self.original=copy.deepcopy(spec)
-        extra=self.kind=='radiation_source'
-        if extra:
-            from game.systems.radiation_source import settings_for
-            spec=dict(spec,**{k:v for k,v in settings_for(spec).items() if k not in spec})
-            spec.setdefault('device_art','')
-            self.extra.pack(fill='x',pady=6,after=self.extra_anchor)
-        else:self.extra.pack_forget()
+        import quest_minigames
+        spec=dict(quest_minigames.defaults(self.kind),**spec)
+        for kind,frame in self.extras.items():
+            if kind==self.kind:frame.pack(fill='x',pady=6,after=self.extra_anchor)
+            else:frame.pack_forget()
         for key,var in self.vars.items():
             var.set(spec[key] if key in spec else '')
         self.description.delete('1.0','end');self.description.insert('1.0',spec['description'])
@@ -75,9 +75,11 @@ class NativeQuestForm(ttk.Frame):
 
     def read(self):
         spec={key:kind(self.vars[key].get().strip()) for key,_,kind in self.fields}
-        if self.kind=='radiation_source':
-            for key,_,_ in self.extra_fields:spec[key]=int(self.vars[key].get().strip())
-            spec['device_art']=self.vars['device_art'].get().strip()
+        import quest_minigames
+        config=quest_minigames.MINIGAMES.get(self.kind)
+        if config:
+            for key,_ in config['fields']:spec[key]=int(self.vars[key].get().strip())
+            if config['art']:spec[config['art'][0]]=self.vars[config['art'][0]].get().strip()
         spec['description']=self.description.get('1.0','end-1c')
         return spec
 
@@ -85,10 +87,11 @@ class NativeQuestForm(ttk.Frame):
         if self.kind is None:return True
         try:
             spec=self.read();errors=profiles.validate_spec(spec)
-            if self.kind=='radiation_source':
-                from game.systems.radiation_source import validate_settings
-                errors+=validate_settings(spec)
-                if spec['device_art'] and spec['device_art'] not in self.store.art:errors.append('Арт приладу не знайдено в бібліотеці')
+            import quest_minigames
+            config=quest_minigames.MINIGAMES.get(self.kind)
+            if config:
+                errors+=quest_minigames.validate(self.kind,spec)
+                if config['art'] and spec[config['art'][0]] and spec[config['art'][0]] not in self.store.art:errors.append('Арт мінігри не знайдено в бібліотеці')
             if spec['art'] and spec['art'] not in self.store.art:errors.append('ID арту не знайдено в бібліотеці')
             if errors:raise ValueError('\n'.join(errors))
             if spec!=self.original:
@@ -103,10 +106,10 @@ class NativeQuestForm(ttk.Frame):
         if not self.commit():self.variant_var.set('Елітний' if self.variant=='elite' else 'Звичайний');return
         self.variant=target;self.load()
 
-    def pick_device_art(self):
+    def pick_extra_art(self,key):
         from event_editor import ArtDialog
-        value=ArtDialog(self.winfo_toplevel(),self.vars['device_art'].get()).show()
-        if value:self.vars['device_art'].set(value)
+        value=ArtDialog(self.winfo_toplevel(),self.vars[key].get()).show()
+        if value:self.vars[key].set(value)
 
     def pick_art(self):
         from event_editor import ArtDialog

@@ -1,117 +1,126 @@
-"""Physics and polygon geometry adapted from the supplied zvalyshche2.py.
-No standalone app or separate save file: all state lives inside the Afterdays quest.
+"""Junkyard pile: top-down debris removed one piece at a time (mikado rule).
+
+Pure geometry and generation, without Tk or a game instance. All state lives in the
+quest dictionary: pieces, finds and the remaining stamina for this minigame.
 """
-import math,random,hashlib
-from dataclasses import dataclass
+import hashlib
+import math
+import random
+
 WIDTH,HEIGHT=850,560
-MATERIALS = [('Картон', 0.4, 145, 95, '#a58d64'),
-             ('Газети', 0.2, 120, 82, '#a9aaa0'),
-             ('Дошка', 3.0, 205, 65, '#806044'),
-             ('Мішок', 7.0, 135, 105, '#647463'),
-             ('Лист металу', 16.0, 175, 112, '#6a7c7d'),
-             ('Бетонна плита', 28.0, 170, 125, '#82827b')]
+VERSION=2
+# name, stamina cost, width, height, colour
+MATERIALS=[('Газети',1,110,78,'#a9aaa0'),
+           ('Картон',1,140,92,'#a58d64'),
+           ('Дошка',2,210,46,'#806044'),
+           ('Мішок',3,120,96,'#647463'),
+           ('Лист металу',5,180,112,'#6a7c7d'),
+           ('Бетонна плита',8,170,128,'#82827b')]
+HEAVY,LIGHT,FILLER=(3,4,5),(0,1,2,3),(0,1,2)
+FIND_RADIUS=24
+# Editor-tunable settings and their limits: (default, minimum, maximum).
+SETTINGS={'parts':(3,1,6),'max_stamina':(30,10,100),'stamina_per_satiety':(3,1,10)}
 
-def inside_polygon(x, y, points):
-    inside = False
-    j = len(points) - 1
-    for i, (xi, yi) in enumerate(points):
-        xj, yj = points[j]
-        if (yi > y) != (yj > y) and x < (xj-xi)*(y-yi)/(yj-yi)+xi:
-            inside = not inside
-        j = i
-    return inside
 
-@dataclass
-class Scrap:
-    number: int
-    name: str
-    mass: float
-    x: float
-    y: float
-    home_x: float
-    home_y: float
-    points: list
-    color: str
+def settings_for(spec):
+    spec=spec or {}
+    return {key:spec.get(key,default) for key,(default,_,_) in SETTINGS.items()}
 
-    @property
-    def tag(self):
-        """Повертає унікальний Canvas-тег фрагмента сміття."""
-        return f'scrap{self.number}'
 
-    def covers(self, x, y):
-        """Перевіряє, чи лежить точка всередині контуру фрагмента сміття."""
-        return inside_polygon(x-self.x, y-self.y, self.points)
+def validate_settings(spec,prefix=''):
+    return [f'{prefix}Некоректне поле {key}: ціле число від {low} до {high}'
+            for key,(_,low,high) in SETTINGS.items()
+            if key in spec and (type(spec[key]) is not int or not low<=spec[key]<=high)]
 
-    def step(self, dt, destination=None):
-        """Важкі фрагменти повільніше слідують за рукою; усі повертаються додому."""
-        if destination is not None:
-            tx, ty = destination
-            dx, dy = tx-self.x, ty-self.y
-            distance = math.hypot(dx, dy)
-            speed = 950 / (1 + self.mass * 0.20)
-            fraction = min(1 - math.exp(-dt * 16 / (1+self.mass*0.06)),
-                           speed*dt/distance if distance else 1)
-        else:
-            dx, dy = self.home_x-self.x, self.home_y-self.y
-            # Півперіод повернення приблизно 4–8 секунд.
-            fraction = 1 - math.exp(-dt / (5.5 + self.mass*0.20))
-        move_x, move_y = dx*fraction, dy*fraction
-        self.x += move_x
-        self.y += move_y
-        return move_x, move_y
 
-def make_site(seed):
-    rng = random.Random(seed)
-    targets = []
+def corners(p):
+    c,s=math.cos(p['a']),math.sin(p['a']);hw,hh=p['w']/2,p['h']/2
+    return [(p['x']+x*c-y*s,p['y']+x*s+y*c) for x,y in ((-hw,-hh),(hw,-hh),(hw,hh),(-hw,hh))]
+
+
+def octagon(f,radius=FIND_RADIUS):
+    return [(f['x']+radius*math.cos(i*math.pi/4),f['y']+radius*math.sin(i*math.pi/4)) for i in range(8)]
+
+
+def overlap(a,b):
+    """Separating-axis test for two convex polygons; touching edges do not overlap."""
+    for poly in (a,b):
+        for i,(x1,y1) in enumerate(poly):
+            x2,y2=poly[(i+1)%len(poly)];nx,ny=y2-y1,x1-x2
+            pa=[x*nx+y*ny for x,y in a];pb=[x*nx+y*ny for x,y in b]
+            if max(pa)<=min(pb)+.5 or max(pb)<=min(pa)+.5:return False
+    return True
+
+
+def inside(x,y,poly):
+    result=False;j=len(poly)-1
+    for i,(xi,yi) in enumerate(poly):
+        xj,yj=poly[j]
+        if (yi>y)!=(yj>y) and x<(xj-xi)*(y-yi)/(yj-yi)+xi:result=not result
+        j=i
+    return result
+
+
+def live(q):return [p for p in q['junk_pieces'] if not p['gone']]
+
+
+def blockers(q,piece):
+    """Pieces lying on top of this one; it can be taken only when the list is empty."""
+    poly=corners(piece)
+    return [p for p in live(q) if p['z']>piece['z'] and overlap(poly,corners(p))]
+
+
+def find_free(q,find):
+    poly=octagon(find)
+    return not any(overlap(poly,corners(p)) for p in live(q))
+
+
+def peek(q,find):
+    """A visible point on the rim of a partly covered find, used for the glint."""
+    ring=[(find['x']+FIND_RADIUS*math.cos(i*math.pi/6),find['y']+FIND_RADIUS*math.sin(i*math.pi/6)) for i in range(12)]
+    polys=[corners(p) for p in live(q)]
+    free=[pt for pt in ring if not any(inside(*pt,poly) for poly in polys)]
+    return free[0] if free and len(free)<len(ring) else None
+
+
+def piece_at(q,x,y):
+    return next((p for p in sorted(live(q),key=lambda p:-p['z']) if inside(x,y,corners(p))),None)
+
+
+def find_at(q,x,y):
+    return next((f for f in q['junk_finds'] if not f['found'] and math.hypot(x-f['x'],y-f['y'])<=FIND_RADIUS+2),None)
+
+
+def seed_for(q):
+    return int.from_bytes(hashlib.sha256((q['id']+':pile').encode()).digest()[:4],'big')
+
+
+def build(q,targets,bonus=()):
+    """Create a pile: every find sits under a heavy piece and one or two lighter ones."""
+    rng=random.Random(seed_for(q))
+    count=len(targets)+len(bonus)
+    spots=[]
+    columns=max(3,math.ceil(count/2))
     for row in range(2):
-        for col in range(3):
-            targets.append((155+col*260+rng.randint(-28,28),
-                            155+row*230+rng.randint(-28,28)))
-    scraps = []
-    def add(x, y, kind):
-        name, mass, w, h, color = MATERIALS[kind]
-        angle = rng.uniform(-0.6,0.6)
-        points = []
-        for px, py in [(-w/2+8,-h/2),(w/2-12,-h/2+4),(w/2,h/2-12),
-                       (w/2-16,h/2),(-w/2,h/2-8)]:
-            points.append((px*math.cos(angle)-py*math.sin(angle),
-                           px*math.sin(angle)+py*math.cos(angle)))
-        scraps.append(Scrap(len(scraps),name,mass,x,y,x,y,points,color))
-    # Кожна знахідка гарантовано захована під двома фрагментами.
-    for x,y in targets:
-        add(x,y,rng.choice([2,4,5]))
-        add(x+rng.randint(-15,15),y+rng.randint(-10,10),rng.choice([0,1,3]))
-    for _ in range(14):
-        add(rng.randint(105,WIDTH-105),rng.randint(100,HEIGHT-100),rng.randrange(len(MATERIALS)))
-    return targets, scraps
-
-def ensure(q):
-    if q.get('junk_physics')==1:return
-    seed=int.from_bytes(hashlib.sha256(q['id'].encode()).digest()[:4],'big')
-    targets,scraps=make_site(seed)
-    loot=[obj for obj in q['junk_objects'] if obj['kind']!='debris']
-    for n,obj in enumerate(loot):
-        x,y=targets[n];obj.update(x=x-30,y=y-30,w=60,h=60,circle=True)
-    debris=[]
-    for s in scraps:
-        debris.append(dict(id='debris'+str(s.number),kind='debris',found=False,material=MATERIALS.index(next(m for m in MATERIALS if m[0]==s.name)),
-                           mass=s.mass,x=s.x,y=s.y,home_x=s.home_x,home_y=s.home_y,points=[list(pt) for pt in s.points],color=s.color))
-    q['junk_objects']=loot+debris;q['junk_physics']=1
-
-def covers(obj,x,y):
-    if obj['kind']=='debris':return inside_polygon(x-obj['x'],y-obj['y'],obj['points'])
-    return math.hypot(x-(obj['x']+30),y-(obj['y']+30))<=30
-
-def clamp(obj,x,y):
-    rx=max(abs(p[0]) for p in obj['points'])+3;ry=max(abs(p[1]) for p in obj['points'])+3
-    return max(rx,min(WIDTH-rx,x)),max(ry,min(HEIGHT-ry,y))
-
-def tick(q,dt,held=None,destination=None):
-    dt=max(0,min(.05,dt));moves=[]
-    for obj in q['junk_objects']:
-        if obj['kind']!='debris' or obj['found']:continue
-        s=Scrap(0,'',obj['mass'],obj['x'],obj['y'],obj['home_x'],obj['home_y'],obj['points'],obj['color'])
-        target=clamp(obj,*destination) if obj['id']==held and destination is not None else None
-        dx,dy=s.step(dt,target);obj['x'],obj['y']=s.x,s.y
-        moves.append((obj['id'],dx,dy))
-    return moves
+        for col in range(columns):
+            spots.append((WIDTH*(col+.5)/columns+rng.uniform(-30,30),165+row*230+rng.uniform(-25,25)))
+    rng.shuffle(spots)
+    finds=[]
+    for n,kind in enumerate(list(targets)+list(bonus)):
+        x,y=spots[n];entry=dict(id=f'find{n}',kind=kind if isinstance(kind,str) else kind['kind'],x=round(x,1),y=round(y,1),found=False)
+        if not isinstance(kind,str):entry.update({k:v for k,v in kind.items() if k!='kind'})
+        finds.append(entry)
+    pieces=[]
+    def add(x,y,material):
+        name,cost,w,h,_=MATERIALS[material]
+        x=max(40,min(WIDTH-40,x));y=max(40,min(HEIGHT-40,y))
+        pieces.append(dict(id=f'piece{len(pieces)}',material=material,x=round(x,1),y=round(y,1),w=w,h=h,
+                           a=round(rng.uniform(-.7,.7),3),z=len(pieces),gone=False))
+    for f in finds:add(f['x']+rng.uniform(-15,15),f['y']+rng.uniform(-15,15),rng.choice(HEAVY))
+    for _ in range(9):add(rng.uniform(110,WIDTH-110),rng.uniform(100,HEIGHT-100),rng.randrange(len(MATERIALS)))
+    for f in finds:
+        add(f['x']+rng.uniform(-35,35),f['y']+rng.uniform(-25,25),rng.choice(LIGHT))
+        if rng.random()<.6:add(f['x']+rng.uniform(-45,45),f['y']+rng.uniform(-30,30),rng.choice(FILLER))
+    for _ in range(5):add(rng.uniform(110,WIDTH-110),rng.uniform(100,HEIGHT-100),rng.choice(FILLER))
+    q.update(junk_pieces=pieces,junk_finds=finds,junk_version=VERSION)
+    q.pop('junk_objects',None);q.pop('junk_physics',None)

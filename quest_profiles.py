@@ -9,8 +9,9 @@ def defaults(kind,elite=False):
     multiplier=2 if elite else 1
     from game.systems import radiation_source
     art={'electronics_repair':'npc:tech',radiation_source.KIND:radiation_source.RADIATION_ART,'recruit_mayor':'quest:recruit_tech'}.get(kind,'quest:'+kind)
-    # Dosimeter quests also carry their editable minigame settings.
-    extra=dict(radiation_source.settings_for({}),device_art='') if kind==radiation_source.KIND else {}
+    # Quest types with a minigame also carry its editable settings.
+    import quest_minigames
+    extra=quest_minigames.defaults(kind)
     return dict(title=title,description=description,art=art,**extra,
                 min_level=1,reward=(0 if kind=='permit' else 100 if kind=='thanks' else BASE_REWARDS.get(kind,85))*multiplier,
                 xp_reward=(0 if kind=='permit' else 70 if kind=='thanks' else 25)*multiplier,
@@ -40,9 +41,8 @@ def validate(doc):
         for variant,spec in variants.items():
             if variant not in ('normal','elite') or not isinstance(spec,dict):errors.append('Некоректний варіант квесту');continue
             errors+=validate_spec(spec,f'{kind}/{variant}: ')
-            if kind=='radiation_source':
-                from game.systems.radiation_source import validate_settings
-                errors+=validate_settings(spec,f'{kind}/{variant}: ')
+            import quest_minigames
+            errors+=quest_minigames.validate(kind,spec,f'{kind}/{variant}: ')
     return errors
 
 def validate_spec(spec,prefix=''):

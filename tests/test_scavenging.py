@@ -108,25 +108,27 @@ class ScavengingTests(unittest.TestCase):
   for n in order[1:]:h.generator_toggle(q['id'],n)
   h.bag[:]=[i for i in h.bag if i['kind']!=q['material']];self.assertFalse(h.repair_generator(q['id']))
   p.add_to(h.bag,p.supply(q['material'],q['material_qty']));self.assertTrue(h.repair_generator(q['id']));self.assertFalse(h.repair_generator(q['id']))
+ def clear_pile(self,g,q):
+  """Знімає вільні уламки згори вниз, поки завал не розібрано."""
+  import junk_physics as pile
+  q['junk_stamina']=10**6
+  while pile.live(q):
+   piece=max((p for p in pile.live(q) if not pile.blockers(q,p)),key=lambda p:p['z'])
+   self.assertTrue(g.junk_remove(q['id'],piece['id']))
  def test_junk_covered_targets_and_once_only_bonus(self):
   """Перевіряє сценарій «junk covered targets and once only bonus» та очікувані результати."""
   g,q=self.quest('junkyard');g.x,g.y=q['pos'];g.search();self.assertEqual(g._junkyard_request,q['id'])
-  target=next(o for o in q['junk_objects'] if o['kind']=='target');self.assertFalse(g.junk_collect(q['id'],target['x']+10,target['y']+10))
-  for obj in list(q['junk_objects']):
-   if obj['kind']=='debris':self.assertTrue(g.junk_move(q['id'],obj['id'],850,560))
-  for obj in q['junk_objects'][:]:
-   if obj['kind']=='debris':continue
-   for scrap in list(q['junk_objects']):
-    if scrap['kind']=='debris':g.junk_move(q['id'],scrap['id'],850 if obj['x']<425 else 0,560 if obj['y']<280 else 0)
-   self.assertTrue(g.junk_collect(q['id'],obj['x']+10,obj['y']+10));self.assertFalse(g.junk_collect(q['id'],obj['x']+10,obj['y']+10))
-  self.assertTrue(g.quest_ready(q));self.assertTrue(g.loot);g.x,g.y=g.cities[q['city']];self.assertTrue(g.turn_in(q['id']));self.assertFalse(g.quest_equipment(q))
+  target=next(f for f in q['junk_finds'] if f['kind']=='target');self.assertFalse(g.junk_collect(q['id'],target['id']))
+  self.clear_pile(g,q)
+  for find in q['junk_finds']:
+   self.assertTrue(g.junk_collect(q['id'],find['id']));self.assertFalse(g.junk_collect(q['id'],find['id']))
+  self.assertTrue(g.quest_ready(q));g.x,g.y=g.cities[q['city']];self.assertTrue(g.turn_in(q['id']));self.assertFalse(g.quest_equipment(q))
  def test_junk_state_persists_and_cancel_cleans_items(self):
   """Перевіряє сценарій «junk state persists and cancel cleans items» та очікувані результати."""
   g,q=self.quest('junkyard');g.x,g.y=q['pos'];g.search()
-  for obj in list(q['junk_objects']):
-   if obj['kind']=='debris':g.junk_move(q['id'],obj['id'],850,560)
-  target=next(o for o in q['junk_objects'] if o['kind']=='target');g.junk_collect(q['id'],target['x']+10,target['y']+10)
-  h=self.save_reload(g);self.assertEqual(h.quests[-1]['junk_objects'],q['junk_objects']);self.assertEqual(h.quests[-1]['progress'],1)
+  self.clear_pile(g,q)
+  target=next(f for f in q['junk_finds'] if f['kind']=='target');g.junk_collect(q['id'],target['id'])
+  h=self.save_reload(g);self.assertEqual(h.quests[-1]['junk_pieces'],q['junk_pieces']);self.assertEqual(h.quests[-1]['junk_finds'],q['junk_finds']);self.assertEqual(h.quests[-1]['progress'],1)
   self.assertTrue(h.abandon_quest(q['id']));self.assertFalse(h.quest_equipment(q))
  def test_spawn_weights_favor_close_species(self):
   """Перевіряє сценарій «spawn weights favor close species» та очікувані результати."""

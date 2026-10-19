@@ -88,6 +88,7 @@ class ScavengingMixin:
         if self.city in self.mayors and not any(q['kind']=='junkyard' for q in offers):
             q=dict(id=game_catalog.uid(),kind='junkyard',title=tr('scav.junkyard'),city=self.city,status='offered',progress=0,goal=3,pos=None,target_kind=None,
                    level=self.region_level,zone=self.region_level,unique=False,scaled=True,distance_scaled=True,cycle_named=True)
+            q['goal']=self.junk_settings(q)['parts']
             self.price_quest(q);offers.append(q)
         return offers
 
@@ -120,21 +121,28 @@ class ScavengingMixin:
         q['generator_order']=self.rng.sample(list(range(5)),5);q['generator_input']=[]
         q.pop('generator_board',None)
 
+    def junk_settings(self,q):
+        """Pile settings from the quest's native profile (regular or elite) or defaults."""
+        import quest_profiles
+        spec=quest_profiles.profile(q) or quest_profiles.defaults('junkyard',bool(q.get('unique')))
+        return junk_physics.settings_for(spec)
+
     def init_junkyard(self,q):
-        # Rectangles are both the visible drawing and hit-test bounds; all debris can be moved.
-        """Готує фізичні об’єкти та приховану здобич мінігри звалища."""
-        objects=[]
-        for n in range(q['goal']):
-            objects.append(dict(id='target'+str(n),kind='target',x=110+n*115,y=190+n%2*60,w=36,h=36,found=False))
-        for n in range(3):
+        """Builds the pile: quest parts and optional bonus finds under layered debris."""
+        settings=q['junk_settings']=self.junk_settings(q)
+        q['goal']=settings['parts'];q['progress']=0;q['junk_stamina']=settings['max_stamina']
+        bonus=[]
+        for _ in range(3):
             if self.rng.random()>=.5:continue
-            kind=self.rng.choice(['parts','fragments','ammo'])
-            objects.append(dict(id='bonus'+str(n),kind=kind,x=130+n*145,y=320,w=32,h=32,found=False,
-                                qty=self.rng.randint(2,6),ammo_type=self.rng.choice(list(game_catalog.AMMO))))
-        for n in range(15):
-            objects.append(dict(id='debris'+str(n),kind='debris',x=80+(n%5)*82+self.rng.randint(-10,10),y=150+(n//5)*70+self.rng.randint(-10,10),w=120,h=90,found=False,style=n%3))
-        q['junk_objects']=objects
-        junk_physics.ensure(q)
+            bonus.append(dict(kind=self.rng.choice(['parts','fragments','ammo']),qty=self.rng.randint(2,6),ammo_type=self.rng.choice(list(game_catalog.AMMO))))
+        junk_physics.build(q,['target']*q['goal'],bonus)
+
+    def ensure_junkyard(self,q):
+        """Old saves (dragging physics) get a new pile with only the parts still missing."""
+        if q.get('junk_version')==junk_physics.VERSION:return
+        settings=q.setdefault('junk_settings',self.junk_settings(q))
+        q.setdefault('junk_stamina',settings['max_stamina'])
+        junk_physics.build(q,['target']*max(0,q['goal']-q['progress']))
 
     def accept_quest(self,ident):
         """Приймає завдання і створює його цілі та необхідні квестові предмети."""
@@ -217,42 +225,55 @@ class ScavengingMixin:
         """Повертає доступне завдання звалища за ідентифікатором."""
         q=self.local_expedition()
         if q and q['id']==ident and q['kind']=='junkyard':
-            junk_physics.ensure(q);return q
+            self.ensure_junkyard(q);return q
         return None
 
-    def junk_top(self,q,x,y):
-        """Знаходить верхній предмет сміття під координатами курсора."""
-        junk_physics.ensure(q)
-        return next((o for o in reversed(q['junk_objects']) if not o['found'] and junk_physics.covers(o,x,y)),None)
-
-    def junk_move(self,ident,obj_id,x,y):
-        """Зсуває вибраний об’єкт сміття в межах мінігри."""
+    def junk_remove(self,ident,piece_id):
+        """Takes one free piece off the pile for its stamina cost."""
         q=self.junk_quest(ident)
-        if not q or not all(isinstance(v,(int,float)) and math.isfinite(v) for v in (x,y)):return False
-        obj=next((o for o in q['junk_objects'] if o['id']==obj_id and o['kind']=='debris'),None)
-        if not obj:return False
-        obj['x'],obj['y']=junk_physics.clamp(obj,x,y)
-        q['junk_objects'].remove(obj);q['junk_objects'].append(obj);return True
+        piece=next((p for p in junk_physics.live(q) if p['id']==piece_id),None) if q else None
+        if not piece or junk_physics.blockers(q,piece):return False
+        cost=junk_physics.MATERIALS[piece['material']][1]
+        if cost>q['junk_stamina']:return False
+        piece['gone']=True;q['junk_stamina']-=cost
+        return True
 
-    def junk_tick(self,ident,dt,held=None,destination=None):
-        """Оновлює фізичний стан сміття за один кадр."""
+    def junk_collect(self,ident,find_id):
+        """Збирає відкриту знахідку і оновлює прогрес завдання."""
         q=self.junk_quest(ident)
-        return junk_physics.tick(q,dt,held,destination) if q else []
-
-    def junk_collect(self,ident,x,y):
-        """Збирає відкритий предмет і оновлює прогрес завдання."""
-        q=self.junk_quest(ident)
-        if not q:return False
-        obj=self.junk_top(q,x,y)
-        if not obj or obj['kind']=='debris':return False
-        obj['found']=True
-        if obj['kind']=='target':
+        find=next((f for f in q['junk_finds'] if f['id']==find_id and not f['found']),None) if q else None
+        if not find or not junk_physics.find_free(q,find):return False
+        find['found']=True
+        if find['kind']=='target':
             self.bag.append(dict(id=game_catalog.uid(),type_id='quest_item',kind='quest',name=tr('scav.junk_part'),quest_id=q['id'],rarity=0,weight=0,value=0))
             q['progress']+=1;self.emit(tr('scav.junk_progress',count=q['progress'],goal=q['goal']))
         else:
-            item=item_rules.ammunition(obj['ammo_type'],obj['qty']) if obj['kind']=='ammo' else item_rules.supply(obj['kind'],obj['qty'])
+            item=item_rules.ammunition(find['ammo_type'],find['qty']) if find['kind']=='ammo' else item_rules.supply(find['kind'],find['qty'])
             item_rules.add_to(self.loot,item);self.log(tr('scav.bonus',name=item['name'],qty=item['qty']))
         return True
+
+    def junk_foods(self):
+        """Food the player can eat at the pile: backpack and provisions."""
+        from game.systems.consumables import definition
+        sources=list(self.bag)+list(getattr(self,'provisions',[]))
+        return [i for i in sources if i['kind']=='food' and not i.get('quest_id') and i.get('qty',1)>0 and definition(i)['satiety']>0]
+
+    def junk_food_gain(self,q,item):
+        from game.systems.consumables import definition
+        settings=q['junk_settings']
+        return max(0,min(settings['max_stamina']-q['junk_stamina'],definition(item)['satiety']*settings['stamina_per_satiety']))
+
+    def junk_eat(self,ident,item_id):
+        """Eat one portion: each satiety point on the food restores stamina; returns the gain."""
+        q=self.junk_quest(ident)
+        item=next((i for i in self.junk_foods() if i['id']==item_id),None) if q else None
+        if not item:return 0
+        gain=self.junk_food_gain(q,item)
+        if gain<=0:return 0
+        source=self.bag if any(i is item for i in self.bag) else self.provisions
+        if not self.apply_consumable(item,source=source,force=True):return 0
+        q['junk_stamina']+=gain
+        return gain
 
     def quest_ready(self,q):
         """Перевіряє виконання всіх умов для здачі завдання."""
@@ -280,7 +301,7 @@ class ScavengingMixin:
         game=super().load(path)
         for q in game.quests:
             if q['status']!='active':continue
-            if q['kind']=='junkyard':junk_physics.ensure(q)
+            if q['kind']=='junkyard':game.ensure_junkyard(q)
             if q['kind']=='generator' and 'generator_order' not in q:game.init_generator(q)
             if q['kind'] in ('scout','retrieve') and 'metro_city' not in q and not q.get('area') and not game.quest_ready(q):
                 pool=game.area_candidates(q)
