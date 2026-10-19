@@ -72,6 +72,14 @@ with tempfile.TemporaryDirectory() as folder:
         assert not panel.native.commit();error.assert_called_once()
     panel.native.vars['rings'].set('5');panel.native.vars['wear'].set('12')
     assert panel.commit()
+    panel.tree.selection_set('type:torn_map');root.update()
+    assert panel.native.extras['torn_map'].winfo_ismapped() and not panel.native.extras['cache'].winfo_ismapped()
+    assert panel.native.vars['cols'].get()=='4'
+    panel.native.vars['cols'].set('8')
+    with patch('quest_profile_editor.messagebox.showerror') as error:
+        assert not panel.native.commit();error.assert_called_once()
+    panel.native.vars['cols'].set('5');panel.native.vars['rotate'].set('0')
+    assert panel.commit()
     panel.tree.selection_set('type:delivery');root.update()
     assert not any(frame.winfo_ismapped() for frame in panel.native.extras.values())
     panel.add();root.update();panel.vars['elite'].set(True);panel.vars['art'].set('quest:hunt')
@@ -86,6 +94,8 @@ with tempfile.TemporaryDirectory() as folder:
     assert (junk['parts'],junk['max_stamina'],junk['stamina_per_satiety'])==(4,40,2),junk
     lock=doc['native']['cache']['normal']
     assert (lock['rings'],lock['positions'],lock['wear'],lock['depth'])==(5,8,12,3),lock
+    torn=doc['native']['torn_map']['normal']
+    assert (torn['cols'],torn['rows'],torn['rotate'])==(5,3,0),torn
     power=doc['native']['generator']['normal']
     assert (power['switches'],power['negatives'],power['zone'],power['show_weights'],power['shock_chance'])==(6,1,4,1,35),power
     repair=doc['native']['electronics_repair']['normal']
@@ -93,7 +103,7 @@ with tempfile.TemporaryDirectory() as folder:
     hunt=doc['native']['elite_hunt']['normal']
     assert (hunt['needed'],hunt['drain'],hunt['recharge'],hunt['lens_speed'])==(4,45,20,60),hunt
     assert (radiation['grid_size'],radiation['max_dose'],radiation['device_radiation'],radiation['device_art'])==(5,3,2,'quest:cache'),radiation
-    panel.tree.selection_set('type:radiation_source' if '--radiation' in sys.argv else 'type:junkyard' if '--junkyard' in sys.argv else 'type:elite_hunt' if '--scanner' in sys.argv else 'type:electronics_repair' if '--electronics' in sys.argv else 'type:generator' if '--generator' in sys.argv else 'type:cache' if '--lock' in sys.argv else 'type:hunt');root.update()
+    panel.tree.selection_set('type:radiation_source' if '--radiation' in sys.argv else 'type:junkyard' if '--junkyard' in sys.argv else 'type:elite_hunt' if '--scanner' in sys.argv else 'type:electronics_repair' if '--electronics' in sys.argv else 'type:generator' if '--generator' in sys.argv else 'type:cache' if '--lock' in sys.argv else 'type:torn_map' if '--map' in sys.argv else 'type:hunt');root.update()
     if '--screenshot' in sys.argv:
         root.lift();root.attributes('-topmost',True);root.update()
         def capture():
@@ -104,4 +114,4 @@ with tempfile.TemporaryDirectory() as folder:
         root.after(600,capture);root.mainloop()
     root.destroy()
 assert not errors,'\n'.join(errors)
-print('PASS: all native types editable, separate elite profile, art, dosimeter, junkyard, scanner, circuit, generator and lock settings, authored fields, atomic save and reload')
+print('PASS: all native types editable, separate elite profile, art, dosimeter, junkyard, scanner, circuit, generator, lock and torn map settings, authored fields, atomic save and reload')

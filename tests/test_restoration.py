@@ -15,8 +15,8 @@ class RestorationTests(unittest.TestCase):
 
     def solve(self,g,q):
         """Готує або імітує операцію «solve» для перевірок RestorationTests."""
-        for i in range(9):
-            if q['layout'][i]!=i:self.assertTrue(g.swap_map_pieces(q['id'],i,q['layout'].index(i)))
+        from tests.fixtures.torn_map import solve_map
+        solve_map(g,q['id']);self.assertTrue(q['map_solved'])
 
     def test_puzzle_saved_hidden_then_revealed_and_reward_once(self):
         """Перевіряє сценарій «puzzle saved hidden then revealed and reward once» та очікувані результати."""
@@ -26,16 +26,20 @@ class RestorationTests(unittest.TestCase):
         self.assertEqual(q['pos'],q['stash_pos']);self.assertTrue(g.revealed(*q['pos']))
         g.x,g.y=q['pos'];g.road_event=None;g.loot=[];self.assertTrue(g.search());loot=list(g.loot)
         self.assertTrue(g.quest_ready(q));self.assertEqual(q['contents'],[])
-        self.assertFalse(g.swap_map_pieces(ident,0,1));self.assertEqual(g.loot,loot)
+        self.assertFalse(g.map_move(ident,0,1,1));self.assertFalse(g.map_rotate(ident,0));self.assertEqual(g.loot,loot)
         g.x,g.y=g.cities[q['city']];self.assertTrue(g.turn_in(ident));money=g.money
         self.assertFalse(g.turn_in(ident));self.assertEqual(g.money,money)
 
     def test_invalid_moves_and_battle(self):
         """Перевіряє сценарій «invalid moves and battle» та очікувані результати."""
-        g,q=self.map_game();original=q['layout'][:]
-        for a,b in ((-1,2),(0,9),(True,2),(2.5,0)):
-            self.assertFalse(g.swap_map_pieces(q['id'],a,b))
-        g.battle={"active":True};self.assertFalse(g.swap_map_pieces(q['id'],0,1));self.assertEqual(q['layout'],original)
+        g,q=self.map_game();state=g.map_puzzle(q['id']);original=[p[:] for p in state['pieces']]
+        n=len(state['pieces'])
+        for piece in (-1,n,True,2.5,None):
+            self.assertFalse(g.map_move(q['id'],piece,1,1));self.assertFalse(g.map_rotate(q['id'],piece))
+        for x,y in ((float('nan'),1),(1,float('inf')),('1',1),(True,1)):
+            self.assertFalse(g.map_move(q['id'],0,x,y))
+        g.battle={"active":True};self.assertFalse(g.map_move(q['id'],0,1,1));self.assertFalse(g.map_rotate(q['id'],0))
+        self.assertEqual(state['pieces'],original)
 
     def test_recruit_both_roles_permission_return_delay_save(self):
         """Перевіряє сценарій «recruit both roles permission return delay save» та очікувані результати."""

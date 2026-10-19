@@ -23,8 +23,8 @@ class MetroTests(unittest.TestCase):
         role=s['metro_role']
         if role=='archive':
             self.assertTrue(g.metro_action(q['id']))
-            for a in range(9):
-                if s['layout'][a]!=a:self.assertTrue(g.swap_map_pieces(s['id'],a,s['layout'].index(a)))
+            from tests.fixtures.torn_map import solve_map
+            target=g.map_target(s);solve_map(g,s['id']);self.assertTrue(s['map_solved']);self.assertEqual(q['pos'],list(target))
         elif role=='generator':
             p.add_to(g.bag,p.parts(20));p.add_to(g.bag,p.fragments(20))
             self.assertTrue(g.search());self.assertFalse(g.repair_generator(s['id']))

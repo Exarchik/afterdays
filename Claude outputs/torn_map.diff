@@ -1,0 +1,1248 @@
+diff --git a/EDITING_QUESTS.md b/EDITING_QUESTS.md
+index e896349..99baa17 100644
+--- a/EDITING_QUESTS.md
++++ b/EDITING_QUESTS.md
+@@ -141,6 +141,24 @@
+ і складність перемішування (0–6, типово 3). Дорожні сховки беруть 3 кільця до 3 рівня регіону,
+ 4 до 8-го і 5 далі. Старі збереження з кутовим замком отримують дисковий при першому відкритті.
+ 
++## Розірвана мапа
++
++Квест мера «Розірвана мапа» й етап архіву в метро. На мапі — справжній фрагмент світу гравця:
++вікно 9×7 гексів навколо цілі (схованки квесту або наступного етапу метро), намальоване тими
++самими гекс-тайлами й дорогами, що й світ, і тоноване під старий папір; міста підписані.
++Ціль не в центрі; вікно обирається так, щоб у нього потрапили місто, дорога чи вода.
++Мапа розірвана на уламки з рваними краями, які лежать вільно на столі. Перетягування — рух,
++клік (права кнопка, коліщатко) — поворот на 90°. Правильний сусід із тим самим поворотом,
++покладений поруч, злипається (смужка скотчу), і далі уламки рухаються разом. Провалу немає.
++Коли все зібрано, мапа стає «північчю вгору», на гексі цілі з'являється хрестик із координатами,
++а клітинки фрагмента відкриваються на атласі.
++
++У вкладці «Квести» → «Вбудовані квести» → «Розірвана мапа» є блок «Мінігра «Розірвана мапа»»:
++уламків по горизонталі (3–5, типово 4), по вертикалі (3–4, типово 3) і чи повернуті уламки
++(0/1, типово 1). Етапи метро беруть елітний варіант. Розкладка детермінована від ID квесту;
++у сейві зберігаються лише позиції, повороти й групи уламків. Старі сейви з сіткою 3×3
++отримують нову мапу при першому відкритті. Перевірка: `python tools/check_torn_map_ui.py`.
++
+ ## Збереження
+ 
+ Натисніть **Зберегти всі зміни** або Ctrl+S і перезапустіть гру.
+diff --git a/game/systems/metro_restoration.py b/game/systems/metro_restoration.py
+index 4bc8b9e..ae62547 100644
+--- a/game/systems/metro_restoration.py
++++ b/game/systems/metro_restoration.py
+@@ -39,9 +39,7 @@ class MetroRestorationMixin:
+             pos=list(self.rng.choice(choices))
+             s=dict(id=game_catalog.uid(),kind={'archive':'torn_map','dungeon':'purge','hermit':'metro_hermit'}.get(kind,kind),metro_role=kind,metro_parent=q['id'],city=q['city'],level=q['level'],zone=q['level'],unique=True,status='active',title=q['title'],progress=0,goal=1,pos=pos,target_kind=None)
+             if kind=='archive':
+-                layout=list(range(9))
+-                while layout==list(range(9)):self.rng.shuffle(layout)
+-                s.update(layout=layout,map_solved=False,received=False)
++                s.update(map_solved=False,received=False)
+             elif kind=='generator':
+                 self.init_generator(s);s.update(material=self.rng.choice(['parts','fragments']),material_qty=self.rng.randint(2,6))
+             elif kind=='radio':s.update(radio_target=[self.rng.randint(2,18) for _ in range(3)],radio_values=[10]*3,radio_attempts=0)
+@@ -121,17 +119,20 @@ class MetroRestorationMixin:
+             if s['id']==ident and s['kind']=='torn_map' and s.get('received'):return s
+         return super().map_quest(ident)
+ 
+-    def swap_map_pieces(self,ident,a,b):
++    def map_target(self,s):
++        """An archive map leads to the next stage of the chain (or back to the station)."""
++        q=self.metro_parent(s['id'])
++        if not q:return super().map_target(s)
++        chain=q['metro_chain'];steps=chain['steps']
++        n=next((i for i,step in enumerate(steps) if step['id']==s['id']),len(steps)-1)
++        return (steps[n+1] if n+1<len(steps) else chain['station'])['pos']
++
++    def map_complete(self,s):
+         """Solve archive maps without opening an unrelated standalone treasure quest."""
+-        q=self.metro_parent(ident)
+-        if not q:return super().swap_map_pieces(ident,a,b)
+-        s=self.map_quest(ident)
+-        if self.battle or self.road_event or not s or s['map_solved'] or any(type(v)!=int or not 0<=v<9 for v in (a,b)):return False
+-        s['layout'][a],s['layout'][b]=s['layout'][b],s['layout'][a]
+-        if s['layout']==list(range(9)):
+-            s['map_solved']=True;self.metro_advance(s)
+-            s['pos']=q['pos'][:] # The completed puzzle displays the newly revealed coordinates.
+-        return True
++        q=self.metro_parent(s['id'])
++        if not q:return super().map_complete(s)
++        s['map_solved']=True;self.metro_advance(s)
++        s['pos']=q['pos'][:] # The completed puzzle displays the newly revealed coordinates.
+ 
+     def repair_generator(self,ident):
+         """Advance only after the generator puzzle and material payment succeed."""
+diff --git a/game/systems/restoration.py b/game/systems/restoration.py
+index 140c881..42322bf 100644
+--- a/game/systems/restoration.py
++++ b/game/systems/restoration.py
+@@ -5,6 +5,9 @@ import world_hex
+ 
+ import copy
+ import math
++import random
++
++from game.systems import torn_map
+ 
+ from game.systems import economy
+ 
+@@ -47,26 +50,67 @@ class RestorationMixin:
+         if self.battle or sum(q['status']=='active' for q in self.quests)>=8:return False
+         pool=self.quest_locations(offer)
+         if not pool:return False
+-        q=copy.deepcopy(offer);layout=list(range(9))
+-        while layout==list(range(9)):self.rng.shuffle(layout)
+-        q.update(status='active',layout=layout,stash_pos=list(self.rng.choice(pool)),
++        q=copy.deepcopy(offer)
++        q.update(status='active',stash_pos=list(self.rng.choice(pool)),
+                  contents=self.cache_contents('provisions',q['level']),map_solved=False)
+         self.quests.append(q);offer.update(status='accepted',seen=True)
+         self.bag.append(self.quest_token(q,'torn_map_item'))
+         self.log(tr('restoration.map_received'));return True
+ 
+-    def swap_map_pieces(self,ident,a,b):
+-        """Міняє фрагменти пазла місцями й перевіряє завершення мапи."""
++    def map_target(self,q):
++        """Hex the restored map leads to."""
++        return q.get('stash_pos')
++
++    def map_settings(self,q):
++        """Sheet size and rotation follow the native «torn_map» profile."""
++        import quest_profiles
++        spec=quest_profiles.profile(q) or quest_profiles.defaults('torn_map',bool(q.get('unique')))
++        return torn_map.settings_for(spec)
++
++    def map_puzzle(self,ident):
++        """Pieces of the torn map, created on first use (also for old saves with a 3×3 layout)."""
++        q=self.map_quest(ident)
++        if not q:return None
++        state=q.get('torn')
++        if not state or state.get('version')!=torn_map.VERSION:
++            rng=random.Random('torn-map:'+str(q['id']))
++            window=torn_map.choose_window(self.world,self.cities,self.map_target(q),rng)
++            state=q['torn']=torn_map.generate(rng,self.map_settings(q),window,(len(self.world[0]),len(self.world)))
++            q.pop('layout',None)
++        return state
++
++    def _map_open(self,ident,piece):
+         q=self.map_quest(ident)
+-        if self.battle or self.road_event or not q or q['map_solved'] or any(type(v)!=int or not 0<=v<9 for v in (a,b)):return False
+-        q['layout'][a],q['layout'][b]=q['layout'][b],q['layout'][a]
+-        if q['layout']==list(range(9)):
+-            q.update(map_solved=True,progress=1,pos=q['stash_pos'][:])
+-            self.reveal(*q['pos'],1)
+-            for item in self.bag:
+-                if item.get('quest_id')==ident:item.update(art_id='restored_map_item',name=tr('restoration.restored_map_item'))
+-            self.log(tr('restoration.map_solved',x=q['pos'][0],y=q['pos'][1]))
+-        return True
++        if self.battle or self.road_event or not q or q['map_solved'] or type(piece) is not int:return None,None
++        state=self.map_puzzle(ident)
++        return (q,state) if 0<=piece<len(state['pieces']) else (None,None)
++
++    def map_move(self,ident,piece,x,y):
++        """Move a piece (with its glued group) on the table; true neighbours glue on drop."""
++        q,state=self._map_open(ident,piece)
++        if not q or not torn_map.number(x) or not torn_map.number(y):return False
++        torn_map.move(state,piece,x,y);self._map_check(q,state);return True
++
++    def map_rotate(self,ident,piece):
++        """Turn a piece (with its glued group) by 90° clockwise."""
++        q,state=self._map_open(ident,piece)
++        if not q or not state['rotate']:return False
++        torn_map.rotate(state,piece);self._map_check(q,state);return True
++
++    def _map_check(self,q,state):
++        if not torn_map.solved(state):return
++        torn_map.assemble(state)
++        cells=torn_map.sheet_cells(self.world,state['window'],state['cols'],state['rows'])
++        self.explored=sorted(set(self.explored)|{f'{x},{y}' for x,y in cells})
++        self.map_complete(q)
++
++    def map_complete(self,q):
++        """The whole map is glued: mark the stash and turn the item into a restored map."""
++        q.update(map_solved=True,progress=1,pos=q['stash_pos'][:])
++        self.reveal(*q['pos'],1)
++        for item in self.bag:
++            if item.get('quest_id')==q['id']:item.update(art_id='restored_map_item',name=tr('restoration.restored_map_item'))
++        self.log(tr('restoration.map_solved',x=q['pos'][0],y=q['pos'][1]))
+ 
+     def search(self):
+         """Виконує пошук на місцевості та перевіряє квестові цілі."""
+diff --git a/game/systems/torn_map.py b/game/systems/torn_map.py
+new file mode 100644
+index 0000000..b5884cc
+--- /dev/null
++++ b/game/systems/torn_map.py
+@@ -0,0 +1,219 @@
++"""Torn map: ragged paper pieces of the real world around the quest target.
++
++The sheet shows a fragment of the actual generated world (a 9×7 hex window around
++the target, chosen so the target is off-centre and a city, road or water is visible).
++It is cut into cols×rows pieces with torn edges. Pieces lie loose on a table; a click
++turns a piece (with everything glued to it) by 90°, a drag moves it. When a piece lands
++next to its true neighbour with the same rotation, they glue together. One group = solved.
++
++Positions are in piece units (one piece = 1×1); the UI only scales them.
++Everything is deterministic from the quest ID; there is no failure.
++"""
++import math
++import random
++
++import world_hex
++
++VERSION=1
++# Editor-tunable settings: (default, minimum, maximum).
++SETTINGS={'cols':(4,3,5),'rows':(3,3,4),'rotate':(1,0,1)}
++VIEW=(9,7)          # hexes of the world window that holds the target
++TABLE=(6.4,4.4)     # table size in piece units
++SNAP=.15            # gluing tolerance in piece units
++LANDMARKS=('road','city','site','water')
++
++
++def settings_for(spec):
++    spec=spec or {}
++    return {key:spec.get(key,default) for key,(default,_,_) in SETTINGS.items()}
++
++
++def validate_settings(spec,prefix=''):
++    return [f'{prefix}Некоректне поле {key}: ціле число від {low} до {high}'
++            for key,(_,low,high) in SETTINGS.items()
++            if key in spec and (type(spec[key]) is not int or not low<=spec[key]<=high)]
++
++
++# ---------- the world fragment ----------
++def choose_window(world,cities,target,rng):
++    """A VIEW-sized window holding the target off-centre, preferring visible landmarks."""
++    w,h=len(world[0]),len(world);cols,rows=VIEW;tx,ty=target
++    city_cells={tuple(p) for p in cities}
++    best=None
++    for _ in range(60):
++        vx=tx-rng.randint(2,cols-3);vy=ty-rng.randint(2,rows-3)
++        vx=max(0,min(max(0,w-cols),vx));vy=max(0,min(max(0,h-rows),vy))
++        cells=[(x,y) for y in range(vy+1,min(h,vy+rows)-1) for x in range(vx+1,min(w,vx+cols)-1)]
++        kinds=[world[y][x] for x,y in cells]
++        edge=vx>=1 and vy>=1 and vx+cols<=w-1 and vy+rows<=h-1
++        score=(3*sum(c in city_cells for c in cells)+min(6,sum(k in LANDMARKS for k in kinds))
++               +len(set(kinds))+2*edge+rng.random())
++        if best is None or score>best[0]:best=(score,[vx,vy,cols,rows])
++    return best[1]
++
++
++def geometry(window,cols,rows,bounds=None):
++    """Hex radius and offset (piece units) that fit the window onto a cols×rows sheet.
++
++    The fitted window is trimmed by about half a hex so the paper is fully covered;
++    the renderer draws neighbouring hexes beyond it to fill the other dimension.
++    """
++    vx,vy,wc,wr=window
++    xs=[world_hex.center((x,y))[0] for x in (vx,vx+wc-1) for y in range(vy,vy+wr)]
++    left,right=min(xs)-math.sqrt(3)/2+.45,max(xs)+math.sqrt(3)/2-.45
++    top,bottom=1.5*vy-.5,1.5*(vy+wr-1)+.5
++    r=min(cols/(right-left),rows/(bottom-top))
++    ox,oy=(cols-(left+right)*r)/2,(rows-(top+bottom)*r)/2
++    if bounds:
++        # Keep the paper inside the world: no empty strip beyond its first/last row or column.
++        w,h=bounds;s3=math.sqrt(3)
++        for axis,low,high,size in ((0,.05,s3*(w-.5)-.05,cols),(1,-.5,1.5*(h-1)+.5,rows)):
++            o=ox if axis==0 else oy;start,end=-o/r,(size-o)/r
++            if end-start<=high-low:
++                shift=low-start if start<low else high-end if end>high else 0
++                if axis==0:ox-=shift*r
++                else:oy-=shift*r
++    return r,ox,oy
++
++
++def sheet_cells(world,window,cols,rows):
++    """World cells whose centre lies on the sheet (revealed on the atlas once solved)."""
++    w,h=len(world[0]),len(world);out=[]
++    r,ox,oy=geometry(window,cols,rows,(w,h));vx,vy,wc,wr=window
++    for y in range(max(0,vy-3),min(h,vy+wr+3)):
++        for x in range(max(0,vx-4),min(w,vx+wc+4)):
++            px,py=world_hex.center((x,y),r,ox,oy)
++            if 0<=px<=cols and 0<=py<=rows:out.append((x,y))
++    return out
++
++
++def target_point(state,target):
++    """Target hex centre on the sheet, in piece units from the sheet's top-left corner."""
++    r,ox,oy=geometry(state['window'],state['cols'],state['rows'],state.get('bounds'))
++    return world_hex.center(tuple(target),r,ox,oy)
++
++
++# ---------- torn edges (recomputed from the ID, not saved) ----------
++def _tear(rng,a,b,amp,border):
++    (ax,ay),(bx,by)=a,b;n=11
++    nx,ny=-(by-ay),bx-ax;length=math.hypot(nx,ny) or 1
++    at=.25+rng.random()*.5;lobe=0 if border else (rng.choice((-1,1))*(.06+rng.random()*.06))
++    points=[a]
++    for i in range(1,n):
++        t=i/n;j=(rng.random()*2-1)*amp+lobe*math.exp(-((t-at)**2)/.012)
++        points.append((ax+(bx-ax)*t+nx/length*j,ay+(by-ay)*t+ny/length*j))
++    return points+[b]
++
++
++def outlines(ident,cols,rows):
++    """Torn polygon of every piece, relative to its centre, in piece units."""
++    rng=random.Random('torn-map-edges:'+str(ident))
++    def jitter(c,r):
++        inner_x=0<c<cols;inner_y=0<r<rows
++        return (c+((rng.random()*2-1)*.06 if inner_x and inner_y else (rng.random()*2-1)*.035 if inner_x else 0),
++                r+((rng.random()*2-1)*.06 if inner_x and inner_y else (rng.random()*2-1)*.035 if inner_y else 0))
++    v=[[jitter(c,r) for c in range(cols+1)] for r in range(rows+1)]
++    horizontal=[[_tear(rng,v[r][c],v[r][c+1],.017 if r in (0,rows) else .033,r in (0,rows)) for c in range(cols)] for r in range(rows+1)]
++    vertical=[[_tear(rng,v[r][c],v[r+1][c],.017 if c in (0,cols) else .033,c in (0,cols)) for c in range(cols+1)] for r in range(rows)]
++    shapes=[]
++    for gy in range(rows):
++        for gx in range(cols):
++            cx,cy=gx+.5,gy+.5;points=[]
++            for line,reverse in ((horizontal[gy][gx],False),(vertical[gy][gx+1],False),
++                                 (horizontal[gy+1][gx],True),(vertical[gy][gx],True)):
++                line=line[::-1] if reverse else line
++                points+=[(x-cx,y-cy) for x,y in line[:-1]]
++            shapes.append(points)
++    return shapes
++
++
++# ---------- pieces on the table ----------
++def turn(x,y,r):
++    """Rotate a vector clockwise (screen axes) by r quarter turns."""
++    for _ in range(r%4):x,y=-y,x
++    return x,y
++
++
++def generate(rng,settings,window,bounds=None):
++    cols,rows=settings['cols'],settings['rows'];n=cols*rows;tw,th=TABLE
++    k=math.ceil(math.sqrt(n*tw/th));kr=math.ceil(n/k)
++    slots=list(range(k*kr));rng.shuffle(slots)
++    pieces=[]
++    for i in range(n):
++        sx,sy=slots[i]%k,slots[i]//k
++        pieces.append([round((sx+.5)*tw/k+(rng.random()*2-1)*.08,3),round((sy+.5)*th/kr+(rng.random()*2-1)*.07,3),
++                       rng.randrange(4) if settings['rotate'] else 0,i])
++    return dict(version=VERSION,cols=cols,rows=rows,rotate=bool(settings['rotate']),window=list(window),bounds=list(bounds) if bounds else None,pieces=pieces,glued=[])
++
++
++def members(state,group):
++    return [i for i,p in enumerate(state['pieces']) if p[3]==group]
++
++
++def solved(state):
++    return len({p[3] for p in state['pieces']})==1
++
++
++def _clamp(state,group):
++    tw,th=TABLE;ids=members(state,group);pieces=state['pieces']
++    for axis,size in ((0,tw),(1,th)):
++        low=min(pieces[i][axis] for i in ids);high=max(pieces[i][axis] for i in ids)
++        shift=(size-low-high)/2 if high-low>size-1 else .5-low if low<.5 else size-.5-high if high>size-.5 else 0
++        for i in ids:pieces[i][axis]+=shift
++
++
++def _neighbour(state,i,dx,dy):
++    cols,rows=state['cols'],state['rows'];gx,gy=i%cols+dx,i//cols+dy
++    return gy*cols+gx if 0<=gx<cols and 0<=gy<rows else None
++
++
++def _snap(state,group):
++    """Glue the moved group to every true neighbour lying within the tolerance."""
++    pieces=state['pieces'];joined=False;merged=True
++    while merged:
++        merged=False
++        for a in members(state,group):
++            for dx,dy in ((1,0),(-1,0),(0,1),(0,-1)):
++                b=_neighbour(state,a,dx,dy)
++                if b is None or pieces[b][3]==group or pieces[b][2]!=pieces[a][2]:continue
++                ox,oy=turn(dx,dy,pieces[a][2])
++                ex,ey=pieces[a][0]+ox,pieces[a][1]+oy
++                if math.hypot(ex-pieces[b][0],ey-pieces[b][1])<SNAP:
++                    sx,sy=pieces[b][0]-ex,pieces[b][1]-ey;other=pieces[b][3]
++                    for i in members(state,group):pieces[i][0]+=sx;pieces[i][1]+=sy;pieces[i][3]=other
++                    group=other;merged=joined=True;break
++            if merged:break
++    if joined:
++        for a in members(state,group):
++            for dx,dy in ((1,0),(0,1)):
++                b=_neighbour(state,a,dx,dy)
++                if b is not None and pieces[b][3]==group and [a,b] not in state['glued']:state['glued'].append([a,b])
++    for p in pieces:p[0],p[1]=round(p[0],4),round(p[1],4)
++    return joined
++
++
++def assemble(state):
++    """Lay the solved map upright in the middle of the table."""
++    tw,th=TABLE;cols,rows=state['cols'],state['rows']
++    for i,p in enumerate(state['pieces']):
++        p[0]=round(tw/2+(i%cols+.5-cols/2),4);p[1]=round(th/2+(i//cols+.5-rows/2),4);p[2]=0
++
++
++def move(state,i,x,y):
++    """Move piece i's group so that piece i is centred at (x,y); returns True if it glued."""
++    p=state['pieces'][i];dx,dy=x-p[0],y-p[1]
++    for j in members(state,p[3]):state['pieces'][j][0]+=dx;state['pieces'][j][1]+=dy
++    _clamp(state,p[3]);return _snap(state,p[3])
++
++
++def rotate(state,i):
++    """Turn piece i's group 90° clockwise around piece i; returns True if it glued."""
++    p=state['pieces'][i];px,py=p[0],p[1]
++    for j in members(state,p[3]):
++        q=state['pieces'][j];dx,dy=turn(q[0]-px,q[1]-py,1)
++        q[0],q[1],q[2]=px+dx,py+dy,(q[2]+1)%4
++    _clamp(state,p[3]);return _snap(state,p[3])
++
++
++def number(value):
++    return type(value) in (int,float) and math.isfinite(value)
+diff --git a/locales/uk/restoration.json b/locales/uk/restoration.json
+index 3ba83bf..5f79ece 100644
+--- a/locales/uk/restoration.json
++++ b/locales/uk/restoration.json
+@@ -26,6 +26,8 @@
+   "restoration.permission": "Дозвіл на поселення",
+   "restoration.permission_info": "Запросити «{role}» у місто {city}? Після передачі дозволу фахівець прибуде через 10–15 ходів.",
+   "restoration.assemble": "Скласти мапу",
+-  "restoration.puzzle_help": "Перетягуйте фрагмент на інший, щоб поміняти їх місцями. З’єднайте лінії річки, дороги та обриси місцевості. Прогрес зберігається разом із грою.",
+-  "restoration.close": "Закрити"
++  "restoration.puzzle_help": "Уламки мапи лежать на столі. Перетягуйте їх, клік — поворот на 90°. Коли рваний край ліг до свого сусіда, уламки злипаються й далі рухаються разом. Прогрес зберігається разом із грою.",
++  "restoration.close": "Закрити",
++  "restoration.map_glued": "Клац! Уламки злиплися.",
++  "restoration.map_seams": "Швів склеєно: {n} / {total}"
+ }
+diff --git a/map_fragment.py b/map_fragment.py
+new file mode 100644
+index 0000000..c066af4
+--- /dev/null
++++ b/map_fragment.py
+@@ -0,0 +1,115 @@
++"""Pillow rendering of the torn-map sheet: a real piece of the world on old paper.
++
++The terrain uses the world view's hex art and road topology, so the sheet matches the
++atlas exactly. The paper look is a sepia toning of that image with stains.
++"""
++import math
++import random
++
++import world_hex
++from game.systems import torn_map
++
++COLORS={'waste':'#665e49','road':'#665e49','forest':'#354a35','ruin':'#666359',
++        'city':'#827346','site':'#708365','water':'#235665','cliff':'#686d64'}
++FONTS=('segoepr.ttf','segoesc.ttf','segoeui.ttf','arial.ttf','DejaVuSans.ttf','/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf')
++
++
++def font(size):
++    from PIL import ImageFont
++    for name in FONTS:
++        try:return ImageFont.truetype(name,size)
++        except OSError:continue
++    try:return ImageFont.load_default(size)
++    except TypeError:return ImageFont.load_default()
++
++
++def _bezier(a,c,b,steps=16):
++    return [((1-t)**2*a[0]+2*(1-t)*t*c[0]+t*t*b[0],(1-t)**2*a[1]+2*(1-t)*t*c[1]+t*t*b[1])
++            for t in (i/steps for i in range(steps+1))]
++
++
++def _roads(draw,game,cells,point,radius):
++    import world_map
++    paths=[];junctions=[]
++    for x,y in cells:
++        if game.world[y][x]!='road':continue
++        center=point((x,y));ends=[]
++        for nxt in world_map.road_neighbors(game,(x,y)):
++            other=point(nxt);ends.append(((center[0]+other[0])/2,(center[1]+other[1])/2))
++        if len(ends)==2:paths.append(_bezier(ends[0],center,ends[1]))
++        else:
++            paths.extend([center,end] for end in ends)
++            if ends:junctions.append(center)
++    for color,width in (('#45463d',.67),('#777567',.49),('#a39d80',.035)):
++        w=max(1,round(radius*width))
++        for points in paths:draw.line(points,fill=color,width=w,joint='curve')
++        if width>.1:
++            for x,y in junctions:draw.ellipse((x-w/2,y-w/2,x+w/2,y+w/2),fill=color)
++
++
++def render(game,state,ident,piece,target,paper=True):
++    """RGB sheet of cols×rows pieces, each `piece` pixels; returns (image, target pixel)."""
++    from PIL import Image,ImageDraw
++    cols,rows=state['cols'],state['rows'];scale=2;size=piece*scale
++    width,height=cols*size,rows*size
++    r,ox,oy=torn_map.geometry(state['window'],cols,rows,state.get('bounds'))
++    radius=r*size
++    point=lambda p:world_hex.center(p,radius,ox*size,oy*size)
++    w,h=len(game.world[0]),len(game.world)
++    vx,vy,wc,wr=state['window']
++    cells=[(x,y) for y in range(max(0,vy-3),min(h,vy+wr+3)) for x in range(max(0,vx-4),min(w,vx+wc+4))
++           if -radius*2<point((x,y))[0]<width+radius*2 and -radius*2<point((x,y))[1]<height+radius*2]
++    image=Image.new('RGBA',(width,height),COLORS['waste']);draw=ImageDraw.Draw(image)
++    tw,th=max(2,round(math.sqrt(3)*radius)),max(2,round(2*radius))
++    from world_hex_art import tile_image
++    for x,y in cells:
++        cx,cy=point((x,y))
++        draw.polygon(world_hex.polygon(cx,cy,radius),fill=COLORS.get(game.world[y][x],COLORS['waste']),outline='#30392d')
++        tile=tile_image(game,x,y,tw,th)
++        image.alpha_composite(tile,(round(cx-tw/2),round(cy-th/2)))
++    draw=ImageDraw.Draw(image)
++    _roads(draw,game,cells,point,radius)
++    image=image.convert('RGB')
++    rng=random.Random('torn-map-paper:'+str(ident))
++    image=_paper(image,rng) if paper else image
++    ink=(59,42,23) if paper else (239,224,181);halo=(230,214,170) if paper else (20,30,25)
++    draw=ImageDraw.Draw(image)
++    label=font(round(size*.16))
++    for n,pos in enumerate(game.cities):
++        if tuple(pos) not in cells:continue
++        cx,cy=point(tuple(pos));text=game.city_name(n)
++        if not (0<cx<width and 0<cy<height):continue
++        box=draw.textbbox((0,0),text,font=label);tw2=box[2]-box[0]
++        x=min(max(4,cx-tw2/2),width-tw2-4);y=max(4,cy-radius-(box[3]-box[1])-6)
++        draw.text((x,y),text,font=label,fill=ink,stroke_width=max(2,size//60),stroke_fill=halo)
++    _compass(draw,size,ink)
++    image=image.resize((cols*piece,rows*piece),Image.Resampling.LANCZOS)
++    tx,ty=torn_map.target_point(state,target)
++    return image,(tx*piece,ty*piece),r*piece
++
++
++def _paper(image,rng):
++    from PIL import Image,ImageChops,ImageDraw,ImageEnhance,ImageFilter,ImageOps
++    w,h=image.size
++    sepia=ImageOps.colorize(ImageOps.grayscale(image),'#2c1f10','#f6e8c2',mid='#9f8155')
++    sepia=ImageEnhance.Contrast(Image.blend(image,sepia,.7)).enhance(1.08)
++    sepia=ImageEnhance.Brightness(sepia).enhance(1.18)
++    paper=Image.new('RGB',(w,h),'#ddc99a')
++    noise=Image.effect_noise((w//2,h//2),24).resize((w,h)).convert('RGB')
++    paper=ImageChops.multiply(paper,ImageEnhance.Brightness(noise).enhance(1.9))
++    out=ImageChops.multiply(sepia,paper)
++    out=Image.blend(out,Image.new('RGB',(w,h),'#e8d7a8'),.12)
++    stains=Image.new('L',(w,h),0);d=ImageDraw.Draw(stains)
++    for _ in range(5):
++        x,y=rng.random()*w,rng.random()*h;r=(.06+rng.random()*.14)*min(w,h)
++        d.ellipse((x-r,y-r*.8,x+r,y+r*.8),fill=60+rng.randrange(40))
++    stains=stains.filter(ImageFilter.GaussianBlur(min(w,h)/25))
++    return Image.composite(Image.new('RGB',(w,h),'#6e4b1e'),out,stains.point(lambda v:v*45//100))
++
++
++def _compass(draw,size,ink):
++    cx,cy,cr=size*.27,size*.4,size*.13
++    draw.ellipse((cx-cr,cy-cr,cx+cr,cy+cr),outline=ink,width=max(2,size//90))
++    draw.polygon([(cx,cy-cr*1.35),(cx+cr*.27,cy),(cx,cy+cr*1.35),(cx-cr*.27,cy)],fill=ink)
++    f=font(round(size*.11));box=draw.textbbox((0,0),'Пн',font=f)
++    draw.text((cx-(box[2]-box[0])/2,cy-cr*1.4-(box[3]-box[1])-4),'Пн',font=f,fill=ink)
+diff --git a/quest_minigames.py b/quest_minigames.py
+index bf07510..c595fec 100644
+--- a/quest_minigames.py
++++ b/quest_minigames.py
+@@ -41,6 +41,14 @@ MINIGAMES={
+         art=None,
+         note='Кільця з прорізами; частина зчеплена шестернями й крутиться разом із сусідом. Відкриття — коли всі прорізи під засувкою.\n'
+              'Найкоротший розв’язок = кільця + складність (±3). Зношена відмичка або «Відкрити» зарано — −1 запчастина. Дорожні сховки: 3–5 кілець за рівнем.'),
++    'torn_map':dict(
++        title='Мінігра «Розірвана мапа»',module='game.systems.torn_map',
++        fields=[('cols','Уламків по горизонталі'),
++                ('rows','Уламків по вертикалі'),
++                ('rotate','Уламки повернуті (0 — ні, 1 — так)')],
++        art=None,
++        note='На мапі — справжній фрагмент світу 9×7 гексів навколо схованки; схованка не в центрі, у фрагмент потрапляє місто, дорога чи вода.\n'
++             'Уламки лежать вільно: перетягування, клік — поворот на 90°. Правильні сусіди злипаються самі; провалу немає. Зібрана мапа відкриває ділянку на атласі.'),
+     'junkyard':dict(
+         title='Мінігра «Розбір завалу»',module='junk_physics',
+         fields=[('parts','Квестових деталей у завалі'),
+diff --git a/tests/fixtures/torn_map.py b/tests/fixtures/torn_map.py
+new file mode 100644
+index 0000000..501fd7c
+--- /dev/null
++++ b/tests/fixtures/torn_map.py
+@@ -0,0 +1,18 @@
++"""Assemble a torn map through the public game methods, like a player would."""
++
++
++def solve_map(g,ident):
++    state=g.map_puzzle(ident);cols=state['cols']
++    for i in range(len(state['pieces'])):
++        for _ in range(4):
++            if state['pieces'][i][2]==0:break
++            assert g.map_rotate(ident,i)
++        if g.map_quest(ident) is None or state is not g.map_puzzle(ident) or _solved(g,ident):break
++        assert g.map_move(ident,i,1+i%cols,.8+i//cols)
++        if _solved(g,ident):break
++    return state
++
++
++def _solved(g,ident):
++    q=g.map_quest(ident)
++    return q is None or q.get('map_solved')
+diff --git a/tests/test_metro035.py b/tests/test_metro035.py
+index da278ab..8cc14a4 100644
+--- a/tests/test_metro035.py
++++ b/tests/test_metro035.py
+@@ -23,8 +23,8 @@ class MetroTests(unittest.TestCase):
+         role=s['metro_role']
+         if role=='archive':
+             self.assertTrue(g.metro_action(q['id']))
+-            for a in range(9):
+-                if s['layout'][a]!=a:self.assertTrue(g.swap_map_pieces(s['id'],a,s['layout'].index(a)))
++            from tests.fixtures.torn_map import solve_map
++            target=g.map_target(s);solve_map(g,s['id']);self.assertTrue(s['map_solved']);self.assertEqual(q['pos'],list(target))
+         elif role=='generator':
+             p.add_to(g.bag,p.parts(20));p.add_to(g.bag,p.fragments(20))
+             self.assertTrue(g.search());self.assertFalse(g.repair_generator(s['id']))
+diff --git a/tests/test_restoration.py b/tests/test_restoration.py
+index 8473e09..3224278 100644
+--- a/tests/test_restoration.py
++++ b/tests/test_restoration.py
+@@ -15,8 +15,8 @@ class RestorationTests(unittest.TestCase):
+ 
+     def solve(self,g,q):
+         """Готує або імітує операцію «solve» для перевірок RestorationTests."""
+-        for i in range(9):
+-            if q['layout'][i]!=i:self.assertTrue(g.swap_map_pieces(q['id'],i,q['layout'].index(i)))
++        from tests.fixtures.torn_map import solve_map
++        solve_map(g,q['id']);self.assertTrue(q['map_solved'])
+ 
+     def test_puzzle_saved_hidden_then_revealed_and_reward_once(self):
+         """Перевіряє сценарій «puzzle saved hidden then revealed and reward once» та очікувані результати."""
+@@ -26,16 +26,20 @@ class RestorationTests(unittest.TestCase):
+         self.assertEqual(q['pos'],q['stash_pos']);self.assertTrue(g.revealed(*q['pos']))
+         g.x,g.y=q['pos'];g.road_event=None;g.loot=[];self.assertTrue(g.search());loot=list(g.loot)
+         self.assertTrue(g.quest_ready(q));self.assertEqual(q['contents'],[])
+-        self.assertFalse(g.swap_map_pieces(ident,0,1));self.assertEqual(g.loot,loot)
++        self.assertFalse(g.map_move(ident,0,1,1));self.assertFalse(g.map_rotate(ident,0));self.assertEqual(g.loot,loot)
+         g.x,g.y=g.cities[q['city']];self.assertTrue(g.turn_in(ident));money=g.money
+         self.assertFalse(g.turn_in(ident));self.assertEqual(g.money,money)
+ 
+     def test_invalid_moves_and_battle(self):
+         """Перевіряє сценарій «invalid moves and battle» та очікувані результати."""
+-        g,q=self.map_game();original=q['layout'][:]
+-        for a,b in ((-1,2),(0,9),(True,2),(2.5,0)):
+-            self.assertFalse(g.swap_map_pieces(q['id'],a,b))
+-        g.battle={"active":True};self.assertFalse(g.swap_map_pieces(q['id'],0,1));self.assertEqual(q['layout'],original)
++        g,q=self.map_game();state=g.map_puzzle(q['id']);original=[p[:] for p in state['pieces']]
++        n=len(state['pieces'])
++        for piece in (-1,n,True,2.5,None):
++            self.assertFalse(g.map_move(q['id'],piece,1,1));self.assertFalse(g.map_rotate(q['id'],piece))
++        for x,y in ((float('nan'),1),(1,float('inf')),('1',1),(True,1)):
++            self.assertFalse(g.map_move(q['id'],0,x,y))
++        g.battle={"active":True};self.assertFalse(g.map_move(q['id'],0,1,1));self.assertFalse(g.map_rotate(q['id'],0))
++        self.assertEqual(state['pieces'],original)
+ 
+     def test_recruit_both_roles_permission_return_delay_save(self):
+         """Перевіряє сценарій «recruit both roles permission return delay save» та очікувані результати."""
+diff --git a/tests/test_torn_map.py b/tests/test_torn_map.py
+new file mode 100644
+index 0000000..25dc6e6
+--- /dev/null
++++ b/tests/test_torn_map.py
+@@ -0,0 +1,118 @@
++import random,tempfile,unittest
++from pathlib import Path
++
++import game.model as r
++import world_hex
++from game.systems import torn_map as tm
++from tests.fixtures.quest_offer import offer_for
++from tests.fixtures.torn_map import solve_map
++
++
++class TornMapTests(unittest.TestCase):
++    def map_game(self,seed=4):
++        g=r.Game(seed);q=offer_for(g,'torn_map');self.assertTrue(g.accept_quest(q['id']))
++        return g,g.quests[-1]
++
++    def state(self,cols=4,rows=3,rotate=1,ident='x'):
++        rng=random.Random(ident)
++        return tm.generate(rng,dict(cols=cols,rows=rows,rotate=rotate),[3,3,9,7])
++
++    def test_real_world_window_holds_target_off_centre(self):
++        g,q=self.map_game();state=g.map_puzzle(q['id']);vx,vy,cols,rows=state['window']
++        tx,ty=q['stash_pos']
++        self.assertEqual((cols,rows),tm.VIEW)
++        self.assertTrue(vx+2<=tx<=vx+cols-3 or vx in (0,len(g.world[0])-cols))
++        self.assertTrue(vy+2<=ty<=vy+rows-3 or vy in (0,len(g.world)-rows))
++        self.assertTrue(0<=vx and vx+cols<=len(g.world[0]) and 0<=vy and vy+rows<=len(g.world))
++        x,y=tm.target_point(state,q['stash_pos'])
++        self.assertTrue(.3<x<state['cols']-.3 and .3<y<state['rows']-.3)
++        self.assertIn(tuple(q['stash_pos']),tm.sheet_cells(g.world,state['window'],state['cols'],state['rows']))
++
++    def test_deterministic_from_quest_id_and_saved(self):
++        g,q=self.map_game();state=g.map_puzzle(q['id'])
++        copy=r.Game(4);copy.quests=[dict(q,torn=None)]
++        self.assertEqual(copy.map_puzzle(q['id']),state)
++        self.assertEqual(tm.outlines(q['id'],4,3),tm.outlines(q['id'],4,3))
++        self.assertEqual(len(tm.outlines(q['id'],5,4)),20)
++        self.assertTrue(g.map_move(q['id'],0,2,2))
++        with tempfile.TemporaryDirectory() as td:
++            path=Path(td)/'save.json';g.save(path);loaded=r.Game.load(path)
++        self.assertEqual(loaded.map_puzzle(q['id']),state)
++
++    def test_old_save_layout_replaced(self):
++        g,q=self.map_game();q.pop('torn',None);q['layout']=[1,0,2,3,4,5,6,7,8]
++        state=g.map_puzzle(q['id'])
++        self.assertNotIn('layout',q);self.assertEqual(len(state['pieces']),state['cols']*state['rows'])
++
++    def test_true_neighbours_glue_only(self):
++        s=self.state(rotate=0)
++        for i,p in enumerate(s['pieces']):p[0],p[1],p[2]=.6+i%4*1.4,.6+i//4*1.4,0
++        tm.move(s,0,2,2)
++        self.assertFalse(tm.move(s,2,3+tm.SNAP*1.5,2));self.assertFalse(s['glued'])   # not a neighbour of 0
++        self.assertFalse(tm.move(s,1,3+tm.SNAP*1.5,2));self.assertFalse(s['glued'])   # too far
++        s['pieces'][1][2]=1
++        self.assertFalse(tm.move(s,1,3,2));self.assertFalse(s['glued'])               # wrong rotation
++        s['pieces'][1][2]=0
++        self.assertTrue(tm.move(s,1,3.05,2.04));self.assertEqual(s['glued'],[[0,1]])
++        self.assertEqual(s['pieces'][1][:2],[3,2]);self.assertEqual(s['pieces'][0][3],s['pieces'][1][3])
++
++    def test_group_moves_and_turns_together(self):
++        s=self.state(rotate=1)
++        for p in s['pieces']:p[2]=0
++        tm.move(s,0,2,2);tm.move(s,1,3,2);tm.move(s,4,2,3)
++        group=s['pieces'][0][3];self.assertEqual(sorted(tm.members(s,group)),[0,1,4])
++        tm.move(s,0,2.5,2.2)
++        self.assertEqual([s['pieces'][1][:2],s['pieces'][4][:2]],[[3.5,2.2],[2.5,3.2]])
++        tm.rotate(s,0)
++        p0,p1,p4=(s['pieces'][i] for i in (0,1,4))
++        self.assertEqual({p0[2],p1[2],p4[2]},{1})
++        self.assertAlmostEqual(p1[0]-p0[0],0);self.assertAlmostEqual(p1[1]-p0[1],1)   # right neighbour now below
++        self.assertAlmostEqual(p4[0]-p0[0],-1);self.assertAlmostEqual(p4[1]-p0[1],0)  # lower neighbour now left
++        # Four turns restore the orientation.
++        for _ in range(3):tm.rotate(s,0)
++        self.assertEqual(s['pieces'][0][2],0)
++
++    def test_pieces_stay_on_table(self):
++        s=self.state()
++        tm.move(s,0,-40,99);x,y=s['pieces'][0][:2]
++        self.assertTrue(.5<=x<=tm.TABLE[0]-.5 and .5<=y<=tm.TABLE[1]-.5)
++
++    def test_solve_reveals_sheet_and_marks_stash(self):
++        g,q=self.map_game();ident=q['id'];g.explored=[]
++        state=solve_map(g,ident)
++        self.assertTrue(q['map_solved']);self.assertEqual(q['pos'],q['stash_pos']);self.assertTrue(tm.solved(state))
++        self.assertEqual({p[2] for p in state['pieces']},{0})
++        cells=tm.sheet_cells(g.world,state['window'],state['cols'],state['rows'])
++        self.assertGreater(len(cells),40)
++        self.assertTrue(all(g.revealed(x,y) for x,y in cells))
++        self.assertTrue(any(i.get('art_id')=='restored_map_item' for i in g.bag if i.get('quest_id')==ident))
++        self.assertFalse(g.map_move(ident,0,1,1))
++
++    def test_rotation_can_be_disabled(self):
++        g,q=self.map_game()
++        q['torn']=tm.generate(random.Random(1),dict(cols=3,rows=3,rotate=0),[3,3,9,7])
++        self.assertEqual({p[2] for p in q['torn']['pieces']},{0})
++        self.assertFalse(g.map_rotate(q['id'],0))
++        solve_map(g,q['id']);self.assertTrue(q['map_solved'])
++
++    def test_profile_settings(self):
++        import quest_minigames,quest_profiles
++        self.assertEqual(quest_minigames.defaults('torn_map'),dict(cols=4,rows=3,rotate=1))
++        self.assertTrue(quest_profiles.defaults('torn_map')['cols']==4)
++        self.assertEqual(tm.validate_settings(dict(cols=4,rows=3,rotate=1)),[])
++        self.assertEqual(len(tm.validate_settings(dict(cols=9,rows=2.5,rotate=True))),3)
++
++    def test_geometry_for_every_sheet_size(self):
++        g,q=self.map_game();target=q['stash_pos']
++        for cols in (3,4,5):
++            for rows in (3,4):
++                s=tm.generate(random.Random(2),dict(cols=cols,rows=rows,rotate=1),
++                              tm.choose_window(g.world,g.cities,target,random.Random(3)))
++                x,y=tm.target_point(s,target)
++                self.assertTrue(0<x<cols and 0<y<rows)
++                radius=tm.geometry(s['window'],cols,rows)[0]
++                self.assertTrue(.15<radius<.6)
++                for i,p in enumerate(s['pieces']):self.assertTrue(0<p[0]<tm.TABLE[0] and 0<p[1]<tm.TABLE[1])
++
++
++if __name__=='__main__':unittest.main()
+diff --git a/tools/check_quest_profiles_ui.py b/tools/check_quest_profiles_ui.py
+index 4d64743..2ea714a 100644
+--- a/tools/check_quest_profiles_ui.py
++++ b/tools/check_quest_profiles_ui.py
+@@ -72,6 +72,14 @@ with tempfile.TemporaryDirectory() as folder:
+         assert not panel.native.commit();error.assert_called_once()
+     panel.native.vars['rings'].set('5');panel.native.vars['wear'].set('12')
+     assert panel.commit()
++    panel.tree.selection_set('type:torn_map');root.update()
++    assert panel.native.extras['torn_map'].winfo_ismapped() and not panel.native.extras['cache'].winfo_ismapped()
++    assert panel.native.vars['cols'].get()=='4'
++    panel.native.vars['cols'].set('8')
++    with patch('quest_profile_editor.messagebox.showerror') as error:
++        assert not panel.native.commit();error.assert_called_once()
++    panel.native.vars['cols'].set('5');panel.native.vars['rotate'].set('0')
++    assert panel.commit()
+     panel.tree.selection_set('type:delivery');root.update()
+     assert not any(frame.winfo_ismapped() for frame in panel.native.extras.values())
+     panel.add();root.update();panel.vars['elite'].set(True);panel.vars['art'].set('quest:hunt')
+@@ -86,6 +94,8 @@ with tempfile.TemporaryDirectory() as folder:
+     assert (junk['parts'],junk['max_stamina'],junk['stamina_per_satiety'])==(4,40,2),junk
+     lock=doc['native']['cache']['normal']
+     assert (lock['rings'],lock['positions'],lock['wear'],lock['depth'])==(5,8,12,3),lock
++    torn=doc['native']['torn_map']['normal']
++    assert (torn['cols'],torn['rows'],torn['rotate'])==(5,3,0),torn
+     power=doc['native']['generator']['normal']
+     assert (power['switches'],power['negatives'],power['zone'],power['show_weights'],power['shock_chance'])==(6,1,4,1,35),power
+     repair=doc['native']['electronics_repair']['normal']
+@@ -93,7 +103,7 @@ with tempfile.TemporaryDirectory() as folder:
+     hunt=doc['native']['elite_hunt']['normal']
+     assert (hunt['needed'],hunt['drain'],hunt['recharge'],hunt['lens_speed'])==(4,45,20,60),hunt
+     assert (radiation['grid_size'],radiation['max_dose'],radiation['device_radiation'],radiation['device_art'])==(5,3,2,'quest:cache'),radiation
+-    panel.tree.selection_set('type:radiation_source' if '--radiation' in sys.argv else 'type:junkyard' if '--junkyard' in sys.argv else 'type:elite_hunt' if '--scanner' in sys.argv else 'type:electronics_repair' if '--electronics' in sys.argv else 'type:generator' if '--generator' in sys.argv else 'type:cache' if '--lock' in sys.argv else 'type:hunt');root.update()
++    panel.tree.selection_set('type:radiation_source' if '--radiation' in sys.argv else 'type:junkyard' if '--junkyard' in sys.argv else 'type:elite_hunt' if '--scanner' in sys.argv else 'type:electronics_repair' if '--electronics' in sys.argv else 'type:generator' if '--generator' in sys.argv else 'type:cache' if '--lock' in sys.argv else 'type:torn_map' if '--map' in sys.argv else 'type:hunt');root.update()
+     if '--screenshot' in sys.argv:
+         root.lift();root.attributes('-topmost',True);root.update()
+         def capture():
+@@ -104,4 +114,4 @@ with tempfile.TemporaryDirectory() as folder:
+         root.after(600,capture);root.mainloop()
+     root.destroy()
+ assert not errors,'\n'.join(errors)
+-print('PASS: all native types editable, separate elite profile, art, dosimeter, junkyard, scanner, circuit, generator and lock settings, authored fields, atomic save and reload')
++print('PASS: all native types editable, separate elite profile, art, dosimeter, junkyard, scanner, circuit, generator, lock and torn map settings, authored fields, atomic save and reload')
+diff --git a/tools/check_torn_map_ui.py b/tools/check_torn_map_ui.py
+new file mode 100644
+index 0000000..0057c74
+--- /dev/null
++++ b/tools/check_torn_map_ui.py
+@@ -0,0 +1,89 @@
++"""Real Tk check of the torn-map minigame; never writes the user's save.
++
++Optional argument: a folder for screenshots (needs ImageMagick `import`).
++"""
++import faulthandler
++faulthandler.dump_traceback_later(180,exit=True)
++import subprocess
++import sys
++import time
++from pathlib import Path
++from types import SimpleNamespace
++sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
++import ui.application as application
++import ui.dialogs
++from tkinter import messagebox
++messagebox.showinfo=lambda *args,**kwargs: None
++ui.dialogs.showinfo=lambda *args,**kwargs: None
++from tests.fixtures.quest_offer import offer_for
++import ui.restoration as restoration_ui
++SHOTS=Path(sys.argv[1]) if len(sys.argv)>1 else None
++errors=[]
++
++
++def shot(win,name):
++    if not SHOTS:return
++    SHOTS.mkdir(parents=True,exist_ok=True)
++    win.update();subprocess.run(['import','-window',str(win.winfo_id()),str(SHOTS/name)],check=False,timeout=20)
++
++
++def settle(root,seconds=.5):
++    end=time.time()+seconds
++    while time.time()<end:root.update();time.sleep(.01)
++
++
++def drag(view,i,x,y):
++    """Drag piece i by mouse events so that its centre lands at table point (x,y)."""
++    view.raise_group(i)  # pieces may lie on top of each other
++    p=view.state["pieces"][i];sx,sy=view.point(p)
++    view.press(SimpleNamespace(x=int(sx),y=int(sy)))
++    assert view.drag and view.drag['i']==i,(i,view.drag)
++    tx,ty=view.point((x,y))
++    view.motion(SimpleNamespace(x=int(sx+(tx-sx)/2),y=int(sy+(ty-sy)/2)))
++    view.release(SimpleNamespace(x=int(tx),y=int(ty)))
++
++
++def check(root,app):
++    def failure(*args):
++        errors.append(str(args));root.destroy()
++    root.report_callback_exception=failure
++    try:
++        app.show_notice=lambda *args,**kwargs: None
++        import game.model as model
++        app.game=g=model.Game(4)
++        offer=offer_for(g,'torn_map');assert g.accept_quest(offer['id'])
++        q=g.quests[-1];ident=q['id'];app.refresh()
++        restoration_ui.puzzle(app,ident);settle(root,.8)
++        win=app.dialog;view=win._torn_map;state=view.state
++        assert view.S>0 and len(view.items)==len(state['pieces']),view.S
++        shot(win,'map_start.png')
++        # a click on a piece turns it
++        r=state['pieces'][5][2];x,y=view.point(state['pieces'][5])
++        view.press(SimpleNamespace(x=int(x),y=int(y)));view.release(SimpleNamespace(x=int(x),y=int(y)))
++        assert state['pieces'][5][2]==(r+1)%4
++        # straighten everything, then glue by real drags
++        for i,p in enumerate(state['pieces']):
++            while p[2]:view.turn(i)
++        cols=state['cols']
++        for i in range(len(state['pieces'])):
++            drag(view,i,1+i%cols+.05,.8+i//cols-.04)
++            if i==1:
++                assert state['glued']==[[0,1]],state['glued']
++                settle(root,.2);shot(win,'map_glued.png')
++            if q['map_solved']:break
++        settle(root,1.0)
++        assert q['map_solved'] and q['pos']==q['stash_pos'],q.get('pos')
++        assert view.c.find_withtag('stash') and view.c.find_withtag('cross')
++        shot(win,'map_solved.png')
++        # smaller window keeps the whole table visible
++        win.geometry('700x560');settle(root,.6);assert view.S*6.4<=view.c.winfo_width()+1
++        shot(win,'map_small.png')
++        win.close_dialog();root.update()
++    except Exception:
++        import traceback;errors.append(traceback.format_exc())
++    root.after(50,root.destroy)
++
++
++application.launch(test_hook=check)
++if errors:raise SystemExit('\n'.join(errors))
++print('Torn map UI checked')
+diff --git a/ui/restoration.py b/ui/restoration.py
+index 6c3d0ab..420f8b4 100644
+--- a/ui/restoration.py
++++ b/ui/restoration.py
+@@ -1,10 +1,10 @@
+-"""Canvas-only map puzzle; no generated minigame artwork."""
++"""Restoration dialogs: settlers, permissions and the torn-map entry point."""
+ import tkinter as tk
+ from tkinter import ttk
+ import ui.dialogs as messagebox
+ import sprites
+ from i18n import t as tr
+-from visuals import PANEL,TEXT,GOLD
++from visuals import PANEL,TEXT
+ from ui.inspection import window
+ 
+ def dialog(app,title):
+@@ -54,47 +54,6 @@ def maps(app):
+ 
+ 
+ def puzzle(app,ident):
+-    g=app.game;q=g.map_quest(ident)
+-    if not q or q['map_solved'] or g.battle:return
+-    win=dialog(app,tr('restoration.assemble'))
+-    tk.Label(win,text=tr('restoration.puzzle_help'),bg=PANEL,fg=TEXT,wraplength=550).pack(padx=15,pady=12)
+-    c=tk.Canvas(win,width=540,height=500,bg='#17231e',highlightthickness=0);c.pack(fill='both',expand=True,padx=15)
+-    status=tk.Label(win,text='',bg=PANEL,fg=GOLD);status.pack(pady=10)
+-    held=[None];rects=[]
+-    # Continuous hand-drawn paths are clipped to each paper piece. Their joins,
+-    # coast and landmarks form the puzzle; no numeric solution labels.
+-    paths=[('#477d80',6,[(0,.2),(.22,.28),(.35,.17),(.44,.35),(.38,.56),(.55,.68),(.64,.91),(.85,1)]),
+-           ('#875c38',4,[(0,.77),(.18,.67),(.31,.75),(.52,.54),(.76,.6),(.83,.38),(1,.26)]),
+-           ('#7c8654',3,[(.08,0),(.15,.15),(.37,.1),(.6,.2),(.88,.12),(1,.16)])]
+-    def clip(a,b,x0,y0,x1,y1):
+-        dx,dy=b[0]-a[0],b[1]-a[1];lo,hi=0.,1.
+-        for p,v in ((-dx,a[0]-x0),(dx,x1-a[0]),(-dy,a[1]-y0),(dy,y1-a[1])):
+-            if p==0:
+-                if v<0:return
+-            elif p<0:lo=max(lo,v/p)
+-            else:hi=min(hi,v/p)
+-        if lo<=hi:return (a[0]+dx*lo,a[1]+dy*lo,a[0]+dx*hi,a[1]+dy*hi)
+-    def draw():
+-        c.delete('all');rects.clear();size=min(c.winfo_width()-30,c.winfo_height()-25)/3
+-        size=max(60,size);ox=(c.winfo_width()-size*3)/2;oy=10
+-        for slot,piece in enumerate(q['layout']):
+-            x,y=ox+slot%3*size,oy+slot//3*size;rects.append((x,y,x+size,y+size))
+-            c.create_rectangle(x+2,y+2,x+size-2,y+size-2,fill='#c1aa79',outline=GOLD if held[0]==slot else '#695a3d',width=3)
+-            sx,sy=piece%3/3,piece//3/3
+-            for color,width,points in paths:
+-                for a,b in zip(points,points[1:]):
+-                    line=clip(a,b,sx,sy,sx+1/3,sy+1/3)
+-                    if line:c.create_line(*[x+(v-sx)*size*3 if i%2==0 else y+(v-sy)*size*3 for i,v in enumerate(line)],fill=color,width=width)
+-            for xx,yy in ((.08,.08),(.75,.85),(.87,.48),(.26,.52)):
+-                if sx<=xx<sx+1/3 and sy<=yy<sy+1/3:
+-                    px,py=x+(xx-sx)*size*3,y+(yy-sy)*size*3
+-                    c.create_polygon(px-7,py+5,px,py-9,px+8,py+5,fill='#66563d')
+-        if q['map_solved']:status.config(text=tr('restoration.map_solved',x=q['pos'][0],y=q['pos'][1]))
+-    def at(e):return next((i for i,(a,b,d,f) in enumerate(rects) if a<=e.x<d and b<=e.y<f),None)
+-    def press(e):held[0]=at(e);draw()
+-    def release(e):
+-        dest=at(e)
+-        if held[0] is not None and dest is not None:g.swap_map_pieces(ident,held[0],dest)
+-        held[0]=None;draw();app.refresh()
+-    c.bind('<Configure>',lambda e:draw());c.bind('<Button-1>',press);c.bind('<ButtonRelease-1>',release)
+-    ttk.Button(win,text=tr('restoration.close'),command=win.close_dialog).pack(pady=8)
++    """Open the torn-map minigame (ragged pieces of the real world map)."""
++    import ui.torn_map as torn_map_ui
++    return torn_map_ui.show(app,ident)
+diff --git a/ui/torn_map.py b/ui/torn_map.py
+new file mode 100644
+index 0000000..dd0f4c6
+--- /dev/null
++++ b/ui/torn_map.py
+@@ -0,0 +1,205 @@
++"""Torn map minigame: ragged pieces of the real world map on a table.
++
++Drag a piece to move it (with everything glued to it); a click, right click or the
++mouse wheel turns it by 90°. The model glues true neighbours and decides the solution.
++"""
++import math
++import tkinter as tk
++
++from i18n import t as tr
++from visuals import PANEL,TEXT,GOLD
++from game.systems import torn_map as model
++
++TABLE_BG='#26352d'
++W,H=940,780
++
++
++def show(app,ident,win=None):
++    g=app.game;q=g.map_quest(ident)
++    if not q or q['map_solved'] or g.battle:return
++    if win is None:
++        from ui.restoration import dialog
++        win=dialog(app,tr('restoration.assemble'))
++        w,h=min(W,win.winfo_screenwidth()-40),min(H,win.winfo_screenheight()-80)
++        win.geometry(f'{w}x{h}+{max(0,(win.winfo_screenwidth()-w)//2)}+{max(0,(win.winfo_screenheight()-h)//2)}')
++    win._torn_map=TornMap(app,win,ident)
++    return win._torn_map
++
++
++class TornMap:
++    def __init__(self,app,win,ident):
++        self.app,self.win,self.ident=app,win,ident
++        g=app.game;self.q=g.map_quest(ident);self.state=g.map_puzzle(ident)
++        self.target=list(g.map_target(self.q))
++        self.shapes=model.outlines(ident,self.state['cols'],self.state['rows'])
++        tk.Label(win,text=tr('restoration.puzzle_help'),bg=PANEL,fg=TEXT,wraplength=860,justify='left').pack(padx=15,pady=(12,6),fill='x')
++        info=tk.Frame(win,bg=PANEL);info.pack(side='bottom',fill='x',padx=15)
++        self.status=tk.Label(info,bg=PANEL,fg=GOLD,anchor='w');self.status.pack(side='left',fill='x',expand=True)
++        self.seams=tk.Label(info,bg=PANEL,fg=TEXT,anchor='e');self.seams.pack(side='right')
++        self.c=tk.Canvas(win,bg=TABLE_BG,highlightthickness=0,width=880,height=600)
++        self.c.pack(fill='both',expand=True,padx=15,pady=4)
++        self.S=0;self.ox=self.oy=0;self.items={};self.cache={};self.tapes={};self.z={i:i for i in range(len(self.state['pieces']))}
++        self.drag=None;self.pending=None;self.solved_shown=False
++        self.c.bind('<Configure>',lambda e:self.schedule())
++        self.c.bind('<ButtonPress-1>',self.press);self.c.bind('<B1-Motion>',self.motion)
++        self.c.bind('<ButtonRelease-1>',self.release)
++        self.c.bind('<Button-3>',lambda e:self.turn_at(e.x,e.y))
++        self.c.bind('<MouseWheel>',lambda e:self.turn_at(e.x,e.y))
++        self.c.bind('<Button-4>',lambda e:self.turn_at(e.x,e.y))
++        self.status.config(text='')
++        self.update_seams()
++
++    # ---------- images ----------
++    def schedule(self):
++        if self.pending:self.win.after_cancel(self.pending)
++        self.pending=self.win.after(80,self.layout)
++
++    def layout(self):
++        self.pending=None
++        if not self.win.winfo_exists():return
++        cw,ch=self.c.winfo_width(),self.c.winfo_height()
++        if cw<50 or ch<50:return
++        tw,th=model.TABLE;S=max(40,int(min(cw/tw,ch/th)))
++        self.ox,self.oy=(cw-tw*S)/2,(ch-th*S)/2
++        if S!=self.S:self.build(S)
++        self.sync()
++
++    def build(self,S):
++        import map_fragment
++        from PIL import ImageOps
++        self.S=S;self.cache={};self.tapes={}
++        sheet,self.target_px,self.hex_px=map_fragment.render(self.app.game,self.state,self.ident,S,self.target)
++        self.pad=pad=int(S*.22)
++        self.sheet=ImageOps.expand(sheet,border=pad,fill=(205,185,138)).convert('RGBA')
++
++    def piece_image(self,i,r):
++        key=(i,r)
++        if key not in self.cache:
++            from PIL import Image,ImageDraw,ImageFilter,ImageTk
++            S,pad,cols=self.S,self.pad,self.state['cols'];gx,gy=i%cols,i//cols
++            size=S+2*pad
++            piece=self.sheet.crop((gx*S,gy*S,gx*S+size,gy*S+size))
++            points=[(pad+S/2+x*S,pad+S/2+y*S) for x,y in self.shapes[i]]
++            mask=Image.new('L',(size,size),0);ImageDraw.Draw(mask).polygon(points,fill=255)
++            piece.putalpha(mask)
++            ImageDraw.Draw(piece).line(points+[points[0]],fill=(244,232,204,235),width=max(2,S//55),joint='curve')
++            piece=piece.rotate(-90*r,resample=Image.Resampling.BICUBIC)
++            shadow=Image.new('RGBA',(size,size),(0,0,0,0))
++            alpha=piece.getchannel('A').point(lambda a:a*110//255).filter(ImageFilter.GaussianBlur(max(2,S//28)))
++            shadow.paste((5,10,8,255),(0,0),alpha)
++            out=Image.new('RGBA',(size,size),(0,0,0,0))
++            out.alpha_composite(shadow,(0,max(2,S//40)));out.alpha_composite(piece)
++            self.cache[key]=(ImageTk.PhotoImage(out,master=self.c),piece.getchannel('A'))
++        return self.cache[key]
++
++    def tape_image(self,angle):
++        key=round(angle)%180
++        if key not in self.tapes:
++            from PIL import Image,ImageDraw,ImageTk
++            w,h=max(12,int(self.S*.26)),max(7,int(self.S*.13))
++            im=Image.new('RGBA',(w,h),(232,222,190,115));ImageDraw.Draw(im).rectangle((0,0,w-1,h-1),outline=(140,122,84,110))
++            self.tapes[key]=ImageTk.PhotoImage(im.rotate(-key,expand=True,resample=Image.Resampling.BICUBIC),master=self.c)
++        return self.tapes[key]
++
++    # ---------- drawing ----------
++    def point(self,p):return self.ox+p[0]*self.S,self.oy+p[1]*self.S
++
++    def sync(self):
++        if not self.S:return
++        self.c.delete('table');self.items={}
++        pieces=self.state['pieces']
++        groups={}
++        for i in sorted(range(len(pieces)),key=lambda i:self.z[i]):groups.setdefault(pieces[i][3],[]).append(i)
++        for group,ids in sorted(groups.items(),key=lambda kv:max(self.z[i] for i in kv[1])):
++            for i in ids:
++                photo,_=self.piece_image(i,pieces[i][2])
++                self.items[i]=self.c.create_image(*self.point(pieces[i]),image=photo,tags=('table','piece',f'g{group}'))
++            for a,b in self.state['glued']:
++                if pieces[a][3]!=group:continue
++                (ax,ay),(bx,by)=self.point(pieces[a]),self.point(pieces[b])
++                jitter=((a*7+b*13)%9-4)*3
++                angle=math.degrees(math.atan2(by-ay,bx-ax))+jitter
++                self.c.create_image((ax+bx)/2,(ay+by)/2,image=self.tape_image(angle),tags=('table','tape',f'g{group}'))
++        if model.solved(self.state):self.show_solved()
++
++    def update_seams(self):
++        cols,rows=self.state['cols'],self.state['rows']
++        self.seams.config(text=tr('restoration.map_seams',n=len(self.state['glued']),total=cols*(rows-1)+rows*(cols-1)))
++
++    def show_solved(self):
++        x0,y0=self.point(self.state['pieces'][0]);x0-=self.S/2;y0-=self.S/2
++        x,y=x0+self.target_px[0],y0+self.target_px[1];hr=self.hex_px*.92
++        pts=[v for n in range(6) for v in (x+hr*math.cos(math.radians(-90+60*n)),y+hr*math.sin(math.radians(-90+60*n)))]
++        self.c.create_polygon(*pts,outline='#a8261e',fill='',dash=(5,4),width=2,tags=('table','stash'))
++        self.status.config(text=tr('restoration.map_solved',x=self.target[0],y=self.target[1]),fg='#8fc67a')
++        if self.solved_shown:
++            self.cross(x,y,1);return
++        self.solved_shown=True
++        def step(k=1):
++            if not self.win.winfo_exists():return
++            self.c.delete('cross');self.cross(x,y,k/12)
++            if k<12:self.win.after(40,lambda:step(k+1))
++        step()
++
++    def cross(self,x,y,k):
++        d=self.S*.1;w=max(3,self.S//28)
++        a=min(1,k*2);self.c.create_line(x-d,y-d,x-d+2*d*a,y-d+2*d*a,fill='#b0261c',width=w,capstyle='round',tags=('table','cross'))
++        if k>.5:
++            b=min(1,(k-.5)*2);self.c.create_line(x+d,y-d,x+d-2*d*b,y-d+2*d*b,fill='#b0261c',width=w,capstyle='round',tags=('table','cross'))
++        if k>=1:
++            self.c.create_text(x+d*1.4,y-d*1.3,text=f'({self.target[0]}, {self.target[1]})',anchor='w',
++                               fill='#962018',font=('Segoe Print',max(10,self.S//11)),tags=('table','cross'))
++
++    # ---------- input ----------
++    def hit(self,x,y):
++        pieces=self.state['pieces']
++        for i in sorted(self.items,key=lambda i:-self.z[i]):
++            _,alpha=self.piece_image(i,pieces[i][2])
++            cx,cy=self.point(pieces[i]);lx,ly=int(x-cx+alpha.width/2),int(y-cy+alpha.height/2)
++            if 0<=lx<alpha.width and 0<=ly<alpha.height and alpha.getpixel((lx,ly))>40:return i
++        return None
++
++    def raise_group(self,i):
++        top=max(self.z.values())+1;group=self.state['pieces'][i][3]
++        for j,p in enumerate(self.state['pieces']):
++            if p[3]==group:self.z[j]=top
++        self.c.tag_raise(f'g{group}')
++
++    def press(self,e):
++        if model.solved(self.state) or not self.S:return
++        i=self.hit(e.x,e.y)
++        if i is None:return
++        self.raise_group(i)
++        self.drag=dict(i=i,x=e.x,y=e.y,sx=e.x,sy=e.y,moved=False,group=self.state['pieces'][i][3])
++
++    def motion(self,e):
++        d=self.drag
++        if not d:return
++        if math.hypot(e.x-d['sx'],e.y-d['sy'])>5:d['moved']=True
++        if d['moved']:
++            self.c.move(f"g{d['group']}",e.x-d['x'],e.y-d['y']);d['x'],d['y']=e.x,e.y
++
++    def release(self,e):
++        d=self.drag;self.drag=None
++        if not d:return
++        if not d['moved']:return self.turn(d['i'])
++        p=self.state['pieces'][d['i']]
++        cx,cy=self.point(p);x=(cx+e.x-d['sx']-self.ox)/self.S;y=(cy+e.y-d['sy']-self.oy)/self.S
++        self.act(lambda:self.app.game.map_move(self.ident,d['i'],x,y))
++
++    def turn_at(self,x,y):
++        if model.solved(self.state) or not self.S:return
++        i=self.hit(x,y)
++        if i is not None:self.raise_group(i);self.turn(i)
++
++    def turn(self,i):
++        if not self.state['rotate']:return
++        self.act(lambda:self.app.game.map_rotate(self.ident,i))
++
++    def act(self,call):
++        before=len(self.state['glued'])
++        call()
++        if len(self.state['glued'])>before and not model.solved(self.state):
++            self.status.config(text=tr('restoration.map_glued'),fg=GOLD)
++        self.update_seams();self.sync()
++        if model.solved(self.state):self.app.refresh()
+diff --git a/world_hex_art.py b/world_hex_art.py
+index 577c30e..28f2bb9 100644
+--- a/world_hex_art.py
++++ b/world_hex_art.py
+@@ -23,33 +23,50 @@ def art_cell(game,x,y):
+     return 0,0
+ 
+ 
++_SOURCE=None
++_TILES={}
++
++
++def _source_tile(row,col):
++    """Trimmed RGBA art of one terrain cell (shared by the world view and paper maps)."""
++    global _SOURCE
++    from PIL import Image
++    if _SOURCE is None:
++        with Image.open(SOURCE) as image:_SOURCE=image.convert('RGBA')
++    if (row,col) not in _TILES:
++        sheet=_SOURCE
++        tile=sheet.crop((round(col*sheet.width/8)+3,ROWS[row]+3,
++                         round((col+1)*sheet.width/8)-3,ROWS[row+1]-3))
++        # Ignore isolated low-opacity edge noise when finding the content.
++        bbox=tile.getchannel('A').point(lambda a:255 if a>200 else 0).getbbox()
++        _TILES[row,col]=tile.crop(bbox) if bbox else tile
++    return _TILES[row,col]
++
++
++def tile_image(game,x,y,width,height):
++    """Terrain art of cell (x,y) scaled to width×height and masked to the hex."""
++    from PIL import Image,ImageDraw,ImageChops
++    row,col=art_cell(game,x,y)
++    image=_source_tile(row,col).resize((width,height),Image.Resampling.LANCZOS)
++    # A common exact mask defines geometry, independent of generated outlines.
++    mask=Image.new('L',(width,height),0)
++    ImageDraw.Draw(mask).polygon([(width/2,0),(width-1,height/4),(width-1,height*3/4),
++                                 (width/2,height-1),(0,height*3/4),(0,height/4)],fill=255)
++    # Source content may have tiny transparent holes: the map's base polygon
++    # supplies matching ground underneath, while outer pixels remain clear.
++    image.putalpha(ImageChops.multiply(image.getchannel('A'),mask))
++    return image
++
++
+ def photo(canvas,game,x,y,radius):
+-    from PIL import Image,ImageDraw,ImageTk
++    from PIL import ImageTk
+     root=canvas._root()
+-    if not hasattr(root,'_world_hex_source'):
+-        with Image.open(SOURCE) as image:root._world_hex_source=image.convert('RGBA')
+-        root._world_hex_tiles={};root._world_hex_photos=OrderedDict()
++    if not hasattr(root,'_world_hex_photos'):root._world_hex_photos=OrderedDict()
+     row,col=art_cell(game,x,y)
+     width=max(2,round(math.sqrt(3)*radius));height=max(2,round(2*radius))
+     key=(row,col,width,height);cache=root._world_hex_photos
+     if key not in cache:
+-        if (row,col) not in root._world_hex_tiles:
+-            sheet=root._world_hex_source
+-            tile=sheet.crop((round(col*sheet.width/8)+3,ROWS[row]+3,
+-                             round((col+1)*sheet.width/8)-3,ROWS[row+1]-3))
+-            # Ignore isolated low-opacity edge noise when finding the content.
+-            bbox=tile.getchannel('A').point(lambda a:255 if a>200 else 0).getbbox()
+-            root._world_hex_tiles[row,col]=tile.crop(bbox) if bbox else tile
+-        image=root._world_hex_tiles[row,col].resize((width,height),Image.Resampling.LANCZOS)
+-        # A common exact mask defines geometry, independent of generated outlines.
+-        mask=Image.new('L',(width,height),0)
+-        ImageDraw.Draw(mask).polygon([(width/2,0),(width-1,height/4),(width-1,height*3/4),
+-                                     (width/2,height-1),(0,height*3/4),(0,height/4)],fill=255)
+-        # Source content may have tiny transparent holes: the map's base polygon
+-        # supplies matching ground underneath, while outer pixels remain clear.
+-        from PIL import ImageChops
+-        image.putalpha(ImageChops.multiply(image.getchannel('A'),mask))
+-        cache[key]=ImageTk.PhotoImage(image,master=root)
++        cache[key]=ImageTk.PhotoImage(tile_image(game,x,y,width,height),master=root)
+     cache.move_to_end(key)
+     while len(cache)>256:cache.popitem(last=False)
+     return cache[key]

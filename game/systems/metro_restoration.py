@@ -39,9 +39,7 @@ class MetroRestorationMixin:
             pos=list(self.rng.choice(choices))
             s=dict(id=game_catalog.uid(),kind={'archive':'torn_map','dungeon':'purge','hermit':'metro_hermit'}.get(kind,kind),metro_role=kind,metro_parent=q['id'],city=q['city'],level=q['level'],zone=q['level'],unique=True,status='active',title=q['title'],progress=0,goal=1,pos=pos,target_kind=None)
             if kind=='archive':
-                layout=list(range(9))
-                while layout==list(range(9)):self.rng.shuffle(layout)
-                s.update(layout=layout,map_solved=False,received=False)
+                s.update(map_solved=False,received=False)
             elif kind=='generator':
                 self.init_generator(s);s.update(material=self.rng.choice(['parts','fragments']),material_qty=self.rng.randint(2,6))
             elif kind=='radio':s.update(radio_target=[self.rng.randint(2,18) for _ in range(3)],radio_values=[10]*3,radio_attempts=0)
@@ -121,17 +119,20 @@ class MetroRestorationMixin:
             if s['id']==ident and s['kind']=='torn_map' and s.get('received'):return s
         return super().map_quest(ident)
 
-    def swap_map_pieces(self,ident,a,b):
+    def map_target(self,s):
+        """An archive map leads to the next stage of the chain (or back to the station)."""
+        q=self.metro_parent(s['id'])
+        if not q:return super().map_target(s)
+        chain=q['metro_chain'];steps=chain['steps']
+        n=next((i for i,step in enumerate(steps) if step['id']==s['id']),len(steps)-1)
+        return (steps[n+1] if n+1<len(steps) else chain['station'])['pos']
+
+    def map_complete(self,s):
         """Solve archive maps without opening an unrelated standalone treasure quest."""
-        q=self.metro_parent(ident)
-        if not q:return super().swap_map_pieces(ident,a,b)
-        s=self.map_quest(ident)
-        if self.battle or self.road_event or not s or s['map_solved'] or any(type(v)!=int or not 0<=v<9 for v in (a,b)):return False
-        s['layout'][a],s['layout'][b]=s['layout'][b],s['layout'][a]
-        if s['layout']==list(range(9)):
-            s['map_solved']=True;self.metro_advance(s)
-            s['pos']=q['pos'][:] # The completed puzzle displays the newly revealed coordinates.
-        return True
+        q=self.metro_parent(s['id'])
+        if not q:return super().map_complete(s)
+        s['map_solved']=True;self.metro_advance(s)
+        s['pos']=q['pos'][:] # The completed puzzle displays the newly revealed coordinates.
 
     def repair_generator(self,ident):
         """Advance only after the generator puzzle and material payment succeed."""

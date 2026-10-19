@@ -5,6 +5,9 @@ import world_hex
 
 import copy
 import math
+import random
+
+from game.systems import torn_map
 
 from game.systems import economy
 
@@ -47,26 +50,67 @@ class RestorationMixin:
         if self.battle or sum(q['status']=='active' for q in self.quests)>=8:return False
         pool=self.quest_locations(offer)
         if not pool:return False
-        q=copy.deepcopy(offer);layout=list(range(9))
-        while layout==list(range(9)):self.rng.shuffle(layout)
-        q.update(status='active',layout=layout,stash_pos=list(self.rng.choice(pool)),
+        q=copy.deepcopy(offer)
+        q.update(status='active',stash_pos=list(self.rng.choice(pool)),
                  contents=self.cache_contents('provisions',q['level']),map_solved=False)
         self.quests.append(q);offer.update(status='accepted',seen=True)
         self.bag.append(self.quest_token(q,'torn_map_item'))
         self.log(tr('restoration.map_received'));return True
 
-    def swap_map_pieces(self,ident,a,b):
-        """Міняє фрагменти пазла місцями й перевіряє завершення мапи."""
+    def map_target(self,q):
+        """Hex the restored map leads to."""
+        return q.get('stash_pos')
+
+    def map_settings(self,q):
+        """Sheet size and rotation follow the native «torn_map» profile."""
+        import quest_profiles
+        spec=quest_profiles.profile(q) or quest_profiles.defaults('torn_map',bool(q.get('unique')))
+        return torn_map.settings_for(spec)
+
+    def map_puzzle(self,ident):
+        """Pieces of the torn map, created on first use (also for old saves with a 3×3 layout)."""
         q=self.map_quest(ident)
-        if self.battle or self.road_event or not q or q['map_solved'] or any(type(v)!=int or not 0<=v<9 for v in (a,b)):return False
-        q['layout'][a],q['layout'][b]=q['layout'][b],q['layout'][a]
-        if q['layout']==list(range(9)):
-            q.update(map_solved=True,progress=1,pos=q['stash_pos'][:])
-            self.reveal(*q['pos'],1)
-            for item in self.bag:
-                if item.get('quest_id')==ident:item.update(art_id='restored_map_item',name=tr('restoration.restored_map_item'))
-            self.log(tr('restoration.map_solved',x=q['pos'][0],y=q['pos'][1]))
-        return True
+        if not q:return None
+        state=q.get('torn')
+        if not state or state.get('version')!=torn_map.VERSION:
+            rng=random.Random('torn-map:'+str(q['id']))
+            window=torn_map.choose_window(self.world,self.cities,self.map_target(q),rng)
+            state=q['torn']=torn_map.generate(rng,self.map_settings(q),window,(len(self.world[0]),len(self.world)))
+            q.pop('layout',None)
+        return state
+
+    def _map_open(self,ident,piece):
+        q=self.map_quest(ident)
+        if self.battle or self.road_event or not q or q['map_solved'] or type(piece) is not int:return None,None
+        state=self.map_puzzle(ident)
+        return (q,state) if 0<=piece<len(state['pieces']) else (None,None)
+
+    def map_move(self,ident,piece,x,y):
+        """Move a piece (with its glued group) on the table; true neighbours glue on drop."""
+        q,state=self._map_open(ident,piece)
+        if not q or not torn_map.number(x) or not torn_map.number(y):return False
+        torn_map.move(state,piece,x,y);self._map_check(q,state);return True
+
+    def map_rotate(self,ident,piece):
+        """Turn a piece (with its glued group) by 90° clockwise."""
+        q,state=self._map_open(ident,piece)
+        if not q or not state['rotate']:return False
+        torn_map.rotate(state,piece);self._map_check(q,state);return True
+
+    def _map_check(self,q,state):
+        if not torn_map.solved(state):return
+        torn_map.assemble(state)
+        cells=torn_map.sheet_cells(self.world,state['window'],state['cols'],state['rows'])
+        self.explored=sorted(set(self.explored)|{f'{x},{y}' for x,y in cells})
+        self.map_complete(q)
+
+    def map_complete(self,q):
+        """The whole map is glued: mark the stash and turn the item into a restored map."""
+        q.update(map_solved=True,progress=1,pos=q['stash_pos'][:])
+        self.reveal(*q['pos'],1)
+        for item in self.bag:
+            if item.get('quest_id')==q['id']:item.update(art_id='restored_map_item',name=tr('restoration.restored_map_item'))
+        self.log(tr('restoration.map_solved',x=q['pos'][0],y=q['pos'][1]))
 
     def search(self):
         """Виконує пошук на місцевості та перевіряє квестові цілі."""
