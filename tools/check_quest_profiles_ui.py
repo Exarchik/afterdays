@@ -40,8 +40,8 @@ with tempfile.TemporaryDirectory() as folder:
     panel.native.vars['grid_size'].set('5')
     panel.tree.selection_set('type:junkyard');root.update()
     assert panel.native.extras['junkyard'].winfo_ismapped() and not panel.native.extras['radiation_source'].winfo_ismapped()
-    assert panel.native.vars['max_stamina'].get()=='30'
-    panel.native.vars['parts'].set('4');panel.native.vars['max_stamina'].set('40');panel.native.vars['stamina_per_satiety'].set('2')
+    assert panel.native.vars['work_per_satiety'].get()=='4'
+    panel.native.vars['parts'].set('4');panel.native.vars['work_per_satiety'].set('5');panel.native.vars['settle_min'].set('12');panel.native.vars['settle_max'].set('18')
     assert panel.commit()
     panel.tree.selection_set('type:elite_hunt');root.update()
     assert panel.native.extras['elite_hunt'].winfo_ismapped() and not panel.native.extras['junkyard'].winfo_ismapped()
@@ -91,7 +91,7 @@ with tempfile.TemporaryDirectory() as folder:
     assert doc['quests'][-1]['elite'] and doc['quests'][-1]['xp_step']==8
     radiation=doc['native']['radiation_source']['normal']
     junk=doc['native']['junkyard']['normal']
-    assert (junk['parts'],junk['max_stamina'],junk['stamina_per_satiety'])==(4,40,2),junk
+    assert (junk['parts'],junk['work_per_satiety'],junk['settle_min'],junk['settle_max'],junk['settle_chance'])==(4,5,12,18,60),junk
     lock=doc['native']['cache']['normal']
     assert (lock['rings'],lock['positions'],lock['wear'],lock['depth'])==(5,8,12,3),lock
     torn=doc['native']['torn_map']['normal']

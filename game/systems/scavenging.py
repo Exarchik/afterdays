@@ -146,7 +146,8 @@ class ScavengingMixin:
     def init_junkyard(self,q):
         """Builds the pile: quest parts and optional bonus finds under layered debris."""
         settings=q['junk_settings']=self.junk_settings(q)
-        q['goal']=settings['parts'];q['progress']=0;q['junk_stamina']=settings['max_stamina']
+        q['goal']=settings['parts'];q['progress']=0;q['junk_work']=0;q['junk_settles']=0
+        junk_physics.next_settle(q,junk_physics.settle_rng(q))
         bonus=[]
         for _ in range(3):
             if self.rng.random()>=.5:continue
@@ -154,10 +155,12 @@ class ScavengingMixin:
         junk_physics.build(q,['target']*q['goal'],bonus)
 
     def ensure_junkyard(self,q):
-        """Old saves (dragging physics) get a new pile with only the parts still missing."""
+        """Old saves: dragging physics gets a new pile with only the missing parts; stamina gives way to satiety."""
+        if 'work_per_satiety' not in q.get('junk_settings',{}):
+            q['junk_settings']=self.junk_settings(q);q.pop('junk_stamina',None)
+        if 'junk_settle_at' not in q:
+            q.update(junk_work=0,junk_settles=0);junk_physics.next_settle(q,junk_physics.settle_rng(q))
         if q.get('junk_version')==junk_physics.VERSION:return
-        settings=q.setdefault('junk_settings',self.junk_settings(q))
-        q.setdefault('junk_stamina',settings['max_stamina'])
         junk_physics.build(q,['target']*max(0,q['goal']-q['progress']))
 
     def accept_quest(self,ident):
@@ -250,14 +253,35 @@ class ScavengingMixin:
             self.ensure_junkyard(q);return q
         return None
 
+    def junk_capacity(self,q):
+        """Weight the player can still lift before satiety runs out."""
+        return max(0,self.hunger)*q['junk_settings']['work_per_satiety']-q['junk_work']
+
     def junk_remove(self,ident,piece_id):
-        """Takes one free piece off the pile for its stamina cost."""
+        """Takes one free piece off the pile; its weight is paid for with satiety.
+
+        Every `work_per_satiety` points of lifted weight cost one satiety point. Once enough
+        weight has been removed the pile may settle (self._junk_settled describes it).
+        """
+        self._junk_settled=None
         q=self.junk_quest(ident)
         piece=next((p for p in junk_physics.live(q) if p['id']==piece_id),None) if q else None
         if not piece or junk_physics.blockers(q,piece):return False
         cost=junk_physics.MATERIALS[piece['material']][1]
-        if cost>q['junk_stamina']:return False
-        piece['gone']=True;q['junk_stamina']-=cost
+        if cost>self.junk_capacity(q):return False
+        piece['gone']=True;q['junk_work']+=cost
+        per=q['junk_settings']['work_per_satiety'];spent=q['junk_work']//per
+        if spent:
+            q['junk_work']-=spent*per
+            self.change_satiety(-spent)
+        q['junk_since']+=cost
+        if q['junk_since']>=q['junk_settle_at']:
+            rng=junk_physics.settle_rng(q);q['junk_settles']+=1
+            junk_physics.next_settle(q,rng)
+            if rng.randrange(100)<q['junk_settings']['settle_chance']:
+                new,between=junk_physics.settle(q,rng)
+                covered=sum(1 for f in q['junk_finds'] if not f['found'] and junk_physics.overlap(junk_physics.octagon(f),junk_physics.corners(new)))
+                self._junk_settled=dict(piece=new['id'],between=between,covered=covered)
         return True
 
     def junk_collect(self,ident,find_id):
@@ -281,21 +305,21 @@ class ScavengingMixin:
         return [i for i in sources if i['kind']=='food' and not i.get('quest_id') and i.get('qty',1)>0 and definition(i)['satiety']>0]
 
     def junk_food_gain(self,q,item):
+        """Satiety the food would add right now (capped at full)."""
         from game.systems.consumables import definition
-        settings=q['junk_settings']
-        return max(0,min(settings['max_stamina']-q['junk_stamina'],definition(item)['satiety']*settings['stamina_per_satiety']))
+        return max(0,min(20-self.hunger,definition(item)['satiety']))
 
     def junk_eat(self,ident,item_id):
-        """Eat one portion: each satiety point on the food restores stamina; returns the gain."""
+        """Eat one portion at the pile; returns the satiety gained."""
         q=self.junk_quest(ident)
         item=next((i for i in self.junk_foods() if i['id']==item_id),None) if q else None
         if not item:return 0
         gain=self.junk_food_gain(q,item)
         if gain<=0:return 0
+        before=self.hunger
         source=self.bag if any(i is item for i in self.bag) else self.provisions
         if not self.apply_consumable(item,source=source,force=True):return 0
-        q['junk_stamina']+=gain
-        return gain
+        return self.hunger-before
 
     def quest_ready(self,q):
         """Перевіряє виконання всіх умов для здачі завдання."""

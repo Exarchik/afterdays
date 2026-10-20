@@ -1,7 +1,10 @@
 """Junkyard pile: top-down debris removed one piece at a time (mikado rule).
 
 Pure geometry and generation, without Tk or a game instance. All state lives in the
-quest dictionary: pieces, finds and the remaining stamina for this minigame.
+quest dictionary: pieces, finds and the work done since satiety was last spent.
+Lifting costs the player's satiety: every `work_per_satiety` points of lifted weight take
+one point. After `settle_min`–`settle_max` points of removed weight the pile may settle:
+a new piece slides in on top or between the existing layers.
 """
 import hashlib
 import math
@@ -16,10 +19,13 @@ MATERIALS=[('Газети',1,110,78,'#a9aaa0'),
            ('Мішок',3,120,96,'#647463'),
            ('Лист металу',5,180,112,'#6a7c7d'),
            ('Бетонна плита',8,170,128,'#82827b')]
+# Accusative names for «… прибрано».
+ACCUSATIVE=('Газети','Картон','Дошку','Мішок','Лист металу','Бетонну плиту')
 HEAVY,LIGHT,FILLER=(3,4,5),(0,1,2,3),(0,1,2)
+SETTLE=(0,0,1,1,2,3,3,4)  # mostly light debris slides in when the pile settles
 FIND_RADIUS=24
 # Editor-tunable settings and their limits: (default, minimum, maximum).
-SETTINGS={'parts':(3,1,6),'max_stamina':(30,10,100),'stamina_per_satiety':(3,1,10)}
+SETTINGS={'parts':(3,1,6),'work_per_satiety':(4,2,8),'settle_min':(15,5,40),'settle_max':(20,5,60),'settle_chance':(60,0,100)}
 
 
 def settings_for(spec):
@@ -28,9 +34,13 @@ def settings_for(spec):
 
 
 def validate_settings(spec,prefix=''):
-    return [f'{prefix}Некоректне поле {key}: ціле число від {low} до {high}'
+    errors=[f'{prefix}Некоректне поле {key}: ціле число від {low} до {high}'
             for key,(_,low,high) in SETTINGS.items()
             if key in spec and (type(spec[key]) is not int or not low<=spec[key]<=high)]
+    values=settings_for(spec)
+    if not errors and values['settle_min']>values['settle_max']:
+        errors.append(f'{prefix}Осідання: «від» не може бути більше за «до»')
+    return errors
 
 
 def corners(p):
@@ -124,3 +134,31 @@ def build(q,targets,bonus=()):
     for _ in range(5):add(rng.uniform(110,WIDTH-110),rng.uniform(100,HEIGHT-100),rng.choice(FILLER))
     q.update(junk_pieces=pieces,junk_finds=finds,junk_version=VERSION)
     q.pop('junk_objects',None);q.pop('junk_physics',None)
+
+
+def settle_rng(q):
+    """Deterministic per quest and per settle, independent of the game's own RNG."""
+    return random.Random(f"{q['id']}:settle:{q.get('junk_settles',0)}")
+
+
+def next_settle(q,rng):
+    s=q['junk_settings'];q['junk_since']=0
+    q['junk_settle_at']=rng.randint(s['settle_min'],max(s['settle_min'],s['settle_max']))
+
+
+def settle(q,rng):
+    """A new piece slides in on top of the pile or between its layers; returns (piece, between)."""
+    material=rng.choice(SETTLE);name,cost,w,h,_=MATERIALS[material]
+    hidden=[f for f in q['junk_finds'] if not f['found']]
+    if hidden and rng.random()<.6:
+        f=rng.choice(hidden);x,y=f['x']+rng.uniform(-60,60),f['y']+rng.uniform(-45,45)
+    else:x,y=rng.uniform(110,WIDTH-110),rng.uniform(100,HEIGHT-100)
+    pieces=sorted(live(q),key=lambda p:p['z'])
+    between=len(pieces)>2 and rng.random()<.5
+    piece=dict(id=f"piece{len(q['junk_pieces'])}",material=material,x=round(max(50,min(WIDTH-50,x)),1),
+               y=round(max(50,min(HEIGHT-50,y)),1),w=w,h=h,a=round(rng.uniform(-.8,.8),3),gone=False)
+    at=int(len(pieces)*(.3+rng.random()*.5)) if between else len(pieces)
+    pieces.insert(at,piece)
+    for z,p in enumerate(pieces):p['z']=z
+    q['junk_pieces'].append(piece)
+    return piece,between

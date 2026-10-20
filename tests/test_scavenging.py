@@ -115,7 +115,7 @@ class ScavengingTests(unittest.TestCase):
  def clear_pile(self,g,q):
   """Знімає вільні уламки згори вниз, поки завал не розібрано."""
   import junk_physics as pile
-  q['junk_stamina']=10**6
+  g.survival['buffs']={'buff_satiety':{'remaining':10**6,'amount':0}};g.survival['hunger']=20;q['junk_settings']['settle_chance']=0
   while pile.live(q):
    piece=max((p for p in pile.live(q) if not pile.blockers(q,p)),key=lambda p:p['z'])
    self.assertTrue(g.junk_remove(q['id'],piece['id']))
