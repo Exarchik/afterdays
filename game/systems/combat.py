@@ -78,12 +78,15 @@ class Combat:
             chance=max(1,min(98,chance))
         return valid,reason,chance
 
-    def _projectile_damage(self,enemy,weapon,mode,pellet=None):
-        """Resolve one bullet or one sixth of a shotgun shell after defense/resistance."""
+    def _projectile_damage(self,enemy,weapon,mode,pellet=None,scale=1):
+        """Resolve one bullet or one sixth of a shotgun shell after defense/resistance.
+
+        `scale` is the shotgun's range falloff for this pellet.
+        """
         from game.systems.adventure import damage_type,RESISTANCES,DAMAGE_TYPES
         effective=module_rules.effective_weapon(self,weapon)
         stats=item_rules.stats(effective);critical=self.rng.randrange(100)<(min(65,5+stats.get('crit',0))+(15 if mode=='aimed' else 0))
-        dealt=projectile_components(effective,self.level,enemy,self.rng.randint(-2,2),critical,pellet,getattr(self,'outgoing_damage_multiplier',1))
+        dealt=projectile_components(effective,self.level,enemy,self.rng.randint(-2,2),critical,pellet,getattr(self,'outgoing_damage_multiplier',1)*scale)
         amount=sum(dealt.values())
         __import__('battle_results').hit(self,'dealt',amount,enemy['hp'])
         enemy['hp']-=amount;enemy['awake']=True
@@ -93,7 +96,6 @@ class Combat:
 
     def shoot(self,enemy_id):
         """Spend AP/ammunition once, animate every projectile and finish all hits before victory."""
-        from game.systems.adventure import damage_type,DAMAGE_TYPES
         b=self.battle;w=self.weapon
         if not b or not w:return False
         target=next((e for e in b['enemies'] if e['id']==enemy_id),None)
@@ -111,9 +113,21 @@ class Combat:
         for _ in range(bullets):
             if saved and self.rng.random()*100<saved:self.emit(tr('modules.ammo_saved'),color='#9cdcd8')
             else:self.consume('ammo',1,ammo)
-        shell=category(w)=='shotgun';count=6 if shell else bullets
-        from game.systems.weapon_spread import allocate
-        assignments=allocate(self,target,count,shell,mode=='burst')
+        shell=category(w)=='shotgun'
+        if shell:
+            self._shotgun_shell(target,w,mode,chance)
+        else:
+            self._bullets(target,w,mode,chance,bullets)
+        target['awake']=True
+        self.wear(w,.6*bullets*(2 if mode=='aimed' else 1))
+        if not b['enemies']:self.victory()
+        return True
+
+    def _bullets(self,target,w,mode,chance,bullets):
+        """A single bullet rolls the hit chance; a burst flies as a widening fan (see burst.py)."""
+        if mode=='burst':return self._burst(target,w,chance)
+        from game.systems.adventure import damage_type,DAMAGE_TYPES
+        b=self.battle
         volley=__import__('uuid').uuid4().hex
         misfire=self.rng.random()<misfire_chance(w) if misfire_chance(w) else False
         stray=None
@@ -121,17 +135,57 @@ class Combat:
             self.emit(tr('update033.jam'),color='#ffc46e')
             pool=[e for e in b['enemies'] if e is not target and (not hasattr(self,'hostile_to_player') or self.hostile_to_player(e)) and hexgrid.distance(b['pos'],e['pos'])<=module_rules.weapon_stats(self,w)['range'] and hexgrid.visible(tuple(b['pos']),tuple(e['pos']),b['walls'])]
             if pool and self.rng.random()<.25:stray=self.rng.choice(pool)
-        for n,assigned in enumerate(assignments):
+        for n in range(bullets):
             hit=None
             if misfire:
                 if stray in b['enemies'] and self.rng.randrange(100)<chance:hit=stray
-            elif assigned in b['enemies'] and self.rng.randrange(100)<max(1,chance-(15 if assigned is not target else 0)):hit=assigned
-            pos=(hit or assigned)['pos']
+            elif target in b['enemies'] and self.rng.randrange(100)<max(1,chance):hit=target
+            pos=(hit or target)['pos']
             self.emit(kind='attack',pos=pos,source=b['pos'],color=DAMAGE_TYPES[damage_type(w)][1])
-            self._events[-1].update(fire_mode='pellet' if shell else mode,projectile=n,volley=volley,volley_count=count)
-            if hit:self._projectile_damage(hit,w,mode,n if shell else None)
+            self._events[-1].update(fire_mode=mode,projectile=n,volley=volley,volley_count=bullets,damage_type=damage_type(w),hit=bool(hit))
+            if hit:self._projectile_damage(hit,w,mode,None)
             else:self.emit(tr('adventure.0218'),pos=pos,color='#d7d4c0')
-        target['awake']=True
-        self.wear(w,.6*bullets*(2 if mode=='aimed' else 1))
-        if not b['enemies']:self.victory()
-        return True
+
+    def _burst(self,target,w,chance):
+        """Five bullets one after another, each wider; the first hostile body on the way takes it."""
+        from game.systems.adventure import damage_type,DAMAGE_TYPES
+        from game.systems import burst
+        b=self.battle;limit=module_rules.weapon_stats(self,w)['range']
+        misfire=self.rng.random()<misfire_chance(w) if misfire_chance(w) else False
+        if misfire:self.emit(tr('update033.jam'),color='#ffc46e')
+        shots=burst.volley(self,target,chance,self.rng,limit,wild=misfire)
+        volley=__import__('uuid').uuid4().hex;hits={}
+        for n,(enemy,end,distance,wall) in enumerate(shots):
+            self.emit(kind='attack',pos=enemy['pos'] if enemy else end,source=b['pos'],color=DAMAGE_TYPES[damage_type(w)][1])
+            self._events[-1].update(fire_mode='burst',projectile=n,volley=volley,volley_count=burst.BULLETS,
+                                    damage_type=damage_type(w),hit=enemy is not None,wall=wall)
+            if enemy is None or enemy not in b['enemies']:continue
+            hits[enemy['id']]=hits.get(enemy['id'],0)+1
+            self._projectile_damage(enemy,w,'burst',None)
+        if not hits:self.emit(tr('adventure.0218'),pos=target['pos'],color='#d7d4c0')
+        self._last_burst=dict(hits=hits,bullets=len(shots))
+
+    def _shotgun_shell(self,target,w,mode,chance):
+        """Six pellets in a fan: each takes the first hostile body on its way (see shotgun.py)."""
+        from game.systems.adventure import damage_type,DAMAGE_TYPES
+        from game.systems import shotgun
+        b=self.battle;limit=module_rules.weapon_stats(self,w)['range']
+        misfire=self.rng.random()<misfire_chance(w) if misfire_chance(w) else False
+        if misfire:self.emit(tr('update033.jam'),color='#ffc46e')
+        pellets=shotgun.fan(self,target,chance,self.rng,limit,w,wild=misfire)
+        volley=__import__('uuid').uuid4().hex;hits={}
+        for n,(enemy,end,distance,wall) in enumerate(pellets):
+            self.emit(kind='attack',pos=enemy['pos'] if enemy else end,source=b['pos'],color=DAMAGE_TYPES[damage_type(w)][1])
+            self._events[-1].update(fire_mode='pellet',projectile=n,volley=volley,volley_count=shotgun.PELLETS,wall=wall,
+                                    damage_type=damage_type(w),hit=enemy is not None)
+            if enemy is None or enemy not in b['enemies']:continue
+            hits[enemy['id']]=hits.get(enemy['id'],0)+1
+            self._projectile_damage(enemy,w,mode,n,shotgun.falloff(w,distance,limit))
+        if not hits:self.emit(tr('adventure.0218'),pos=target['pos'],color='#d7d4c0')
+        for enemy in list(b['enemies']):
+            if hits.get(enemy['id'],0)>=shotgun.KNOCKBACK and enemy['hp']>0:
+                dest=shotgun.knockback(self,enemy)
+                if dest:
+                    self.emit_move([enemy['pos'],dest],enemy['id']);enemy['pos']=dest
+                    self.emit(tr('update033.knockback'),pos=dest,color='#ffcf8a')
+        self._last_shell=dict(hits=hits,pellets=len(pellets))

@@ -48,11 +48,12 @@ class Update048Tests(unittest.TestCase):
     def test_actual_shots_cost_and_delivery(self):
         for burst in (False,True):
             g,w,b=self.arena(burst);ammo=g.count('ammo',w['ammo_type']);ap=b['ap']
-            with patch.object(g.rng,'randrange',return_value=0),patch.object(g,'_projectile_damage') as damage:
+            with patch.object(g.rng,'randrange',return_value=0),patch.object(g.rng,'random',return_value=.5),patch.object(g,'_projectile_damage') as damage:
                 self.assertTrue(g.shoot('0'))
             self.assertEqual(len(damage.call_args_list),5 if burst else 6)
             diverted=sum(call.args[0]['id']!='0' for call in damage.call_args_list)
-            self.assertIn(diverted,(2,) if burst else (2,3))
+            # Aimed dead centre (random()=.5) every bullet and pellet goes into the target.
+            self.assertEqual(diverted,0)
             self.assertEqual(ammo-g.count('ammo',w['ammo_type']),5 if burst else 1)
             self.assertEqual(ap-b['ap'],g.shot_ap())
 

@@ -142,11 +142,15 @@ class Effects:
                         c.create_line(px-18,py,px+18,py,fill=e['color'],tags='fx')
                         if t<.4:continue
                         t=(t-.4)/.6
-                    if mode=='pellet':
+                    if mode=='pellet' and e.get('hit',True):
                         offset=(e.get('projectile',0)-2.5)*3;px+=offset;py+=offset*.4
-                    tx,ty=sx+(px-sx)*min(1,t*1.8),sy+(py-sy)*min(1,t*1.8)
-                    c.create_line(sx,sy,tx,ty,fill=e['color'],width=2,tags='fx')
-                    c.create_oval(tx-3,ty-3,tx+3,ty+3,fill=e['color'],outline='',tags='fx')
+                    if 'damage_type' in e:
+                        from ui.projectiles import draw as projectile
+                        projectile(c,e,sx,sy,px,py,t,getattr(self.app,'iso',{}).get('u',14))
+                    else:
+                        tx,ty=sx+(px-sx)*min(1,t*1.8),sy+(py-sy)*min(1,t*1.8)
+                        c.create_line(sx,sy,tx,ty,fill=e['color'],width=2,tags='fx')
+                        c.create_oval(tx-3,ty-3,tx+3,ty+3,fill=e['color'],outline='',tags='fx')
             else:
                 world=e['scene']=='world'
                 y=py-18-dt*(4 if world else 28)-e.get('offset',0)

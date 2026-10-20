@@ -132,7 +132,10 @@ class SharedBonusesTests(unittest.TestCase):
             expected=damage_preview.estimate(g,w);hp=e['hp']
             count=6 if key=='weapon_thunder_shotgun' else 5 if mode=='burst' else 1
             for _ in range(expected['attacks']):
-                with patch.object(g.rng,'randrange',side_effect=[0,99]*count),patch.object(g.rng,'randint',return_value=-2),patch.object(g.rng,'random',return_value=.99):
+                shell=key=='weapon_thunder_shotgun' or mode=='burst'
+                # Pellets and burst bullets only roll crit and fly dead centre with random()=.5; single bullets roll hit then crit.
+                rolls=dict(return_value=99) if shell else dict(side_effect=[0,99]*count)
+                with patch.object(g.rng,'randrange',**rolls),patch.object(g.rng,'randint',return_value=-2),patch.object(g.rng,'random',return_value=.5 if shell else .99):
                     self.assertTrue(g.shoot(e['id']))
             self.assertEqual(hp-e['hp'],expected['total_minimum'],key)
 

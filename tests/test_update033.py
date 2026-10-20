@@ -25,7 +25,7 @@ class Update033Tests(unittest.TestCase):
     def test_burst_atomic_and_costs(self):
         """Burst spends five bullets and one AP surcharge; insufficient ammo costs nothing."""
         g,w,b=self.arena('weapon_rust_assault');g.cycle_fire_mode();ammo=g.count('ammo',w['ammo_type']);ap=b['ap']
-        with patch.object(g.rng,'randrange',return_value=0):self.assertTrue(g.shoot('0'))
+        with patch.object(g.rng,'randrange',return_value=0),patch.object(g.rng,'random',return_value=.5):self.assertTrue(g.shoot('0'))
         self.assertEqual(ammo-g.count('ammo',w['ammo_type']),5);self.assertEqual(ap-b['ap'],w['ap']+1);self.assertEqual(w['durability'],97)
         self.assertEqual(len([e for e in g._events if e.get('fire_mode')=='burst']),5)
         g.consume('ammo',g.count('ammo',w['ammo_type'])-4,w['ammo_type']);before=(b['ap'],w['durability'],g.count('ammo',w['ammo_type']))

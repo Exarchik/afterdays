@@ -113,7 +113,10 @@ class SurvivalTests(unittest.TestCase):
             g.add_radiation(50);enemy=b['enemies'][0];damage_preview.remember_target(g,enemy)
             expected=damage_preview.estimate(g,w)['minimum'];hp=enemy['hp']
             count=6 if combat.category(w)=='shotgun' else 5 if mode=='burst' else 1
-            with patch.object(g.rng,'randrange',side_effect=[0,99]*count),patch.object(g.rng,'randint',return_value=-2),patch.object(g.rng,'random',return_value=.99):self.assertTrue(g.shoot(enemy['id']))
+            shell=combat.category(w)=='shotgun' or mode=='burst'
+            # Single bullets roll hit then crit; pellets and burst bullets only roll crit and fly dead centre with random()=.5.
+            rolls=dict(return_value=99) if shell else dict(side_effect=[0,99]*count)
+            with patch.object(g.rng,'randrange',**rolls),patch.object(g.rng,'randint',return_value=-2),patch.object(g.rng,'random',return_value=.5 if shell else .99):self.assertTrue(g.shoot(enemy['id']))
             self.assertEqual(hp-enemy['hp'],expected)
 
     def test_received_combat_damage_increases_and_regen_stays_capped(self):

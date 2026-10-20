@@ -1,6 +1,7 @@
 from game import items
 import ui.item_actions as item_actions
 import hexgrid
+from game.systems import shotgun
 from i18n import t as tr
 import sprites
 import arena_tiles
@@ -131,11 +132,68 @@ def draw_hover(app):
         pos=app.fx.position(target['id'],target['pos']) if hasattr(getattr(app,'fx',None),'position') else target['pos']
         px,py=center(pos);py=max(18,py-u*3.7)
         label=tr('update030.hit_chance',chance=chance) if valid else reason
+        if valid and shotgun.is_shotgun(g.weapon):label=shotgun_cone(app,target,chance,center)
+        elif valid and g.fire_mode()=='burst':label=burst_cone(app,target,chance,center)
         text=c.create_text(px,py,text=label,fill='#94e8aa' if valid else '#e5aa83',font=('Segoe UI',10,'bold'),tags='hit_chance')
         box=c.bbox(text)
         if box:
             background=c.create_rectangle(box[0]-5,box[1]-3,box[2]+5,box[3]+3,fill='#15251c',outline='#60876b',tags='hit_chance')
             c.tag_lower(background,text)
+
+
+def shotgun_cone(app,target,chance,center):
+    """Shotgun aim: the fan of pellets and how many each enemy in it should catch."""
+    import module_rules as mr
+    import damage_preview
+    c,g=app.canvas,app.game;b=g.battle;w=g.weapon;limit=mr.weapon_stats(g,w)['range']
+    key=(target['id'],tuple(b['pos']),tuple(tuple(e['pos']) for e in b['enemies']),len(b['walls']),chance,limit,w.get('id'),
+         tuple(e['id'] for e in b['enemies'] if e['hp']>0))
+    cache=getattr(app,'_shotgun_preview',None)
+    if not cache or cache[0]!=key:
+        app._shotgun_preview=cache=(key,shotgun.cone(g,target,chance,limit,w),shotgun.expected(g,target,chance,limit,w))
+    _,outline,expected=cache
+    cone=c.create_polygon(*[v for point in outline for v in center(point)],fill='#e8c46a',stipple='gray25',
+                          outline='#e8c46a',dash=(4,3),width=1,tags='hit_chance')
+    if c.find_withtag('arena_static'):c.tag_raise(cone,'arena_static')
+    u=app.iso['u'];label=None
+    for e in b['enemies']:
+        if e['id'] not in expected:continue
+        n,share=expected[e['id']]
+        if e is target and n>=.05:
+            low,high=damage_preview.attack_range(g,w,e)
+            label=tr('update033.pellets_hint',n=f'{n:.1f}',dmg=round((low+high)/2*share))
+        elif n>=.05:
+            px,py=center(e['pos']);text=c.create_text(px,py+u*.95,text=f'≈{n:.1f}',fill='#ffd27a',font=('Segoe UI',9,'bold'),tags='hit_chance')
+            box=c.bbox(text)
+            if box:c.tag_lower(c.create_rectangle(box[0]-3,box[1]-1,box[2]+3,box[3]+1,fill='#15251c',outline='',tags='hit_chance'),text)
+    return label or tr('update033.pellets_blocked')
+
+
+def burst_cone(app,target,chance,center):
+    """Burst aim: the fan of the last (widest) bullet, the first bullet's line, bullets per enemy."""
+    import module_rules as mr
+    from game.systems import burst
+    c,g=app.canvas,app.game;b=g.battle;w=g.weapon;limit=mr.weapon_stats(g,w)['range']
+    key=('burst',target['id'],tuple(b['pos']),tuple(tuple(e['pos']) for e in b['enemies']),len(b['walls']),chance,limit,w.get('id'),
+         tuple(e['id'] for e in b['enemies'] if e['hp']>0))
+    cache=getattr(app,'_shotgun_preview',None)
+    if not cache or cache[0]!=key:
+        app._shotgun_preview=cache=(key,(burst.cone(g,target,chance,limit),burst.cone(g,target,chance,limit,0)),burst.expected(g,target,chance,limit))
+    _,(outer,inner),expected=cache
+    ids=[c.create_polygon(*[v for point in outer for v in center(point)],fill='#e8c46a',stipple='gray12',
+                          outline='#e8c46a',dash=(4,3),width=1,tags='hit_chance'),
+         c.create_polygon(*[v for point in inner for v in center(point)],fill='#f0d283',stipple='gray25',outline='',tags='hit_chance')]
+    if c.find_withtag('arena_static'):
+        for i in ids:c.tag_raise(i,'arena_static')
+    u=app.iso['u'];label=None
+    for e in b['enemies']:
+        n=expected.get(e['id'],0)
+        if e is target:label=tr('update033.bullets_hint',n=f'{n:.1f}') if n>=.05 else tr('update033.pellets_blocked')
+        elif n>=.05:
+            px,py=center(e['pos']);text=c.create_text(px,py+u*.95,text=f'≈{n:.1f}',fill='#ffd27a',font=('Segoe UI',9,'bold'),tags='hit_chance')
+            box=c.bbox(text)
+            if box:c.tag_lower(c.create_rectangle(box[0]-3,box[1]-1,box[2]+3,box[3]+1,fill='#15251c',outline='',tags='hit_chance'),text)
+    return label or tr('update033.pellets_blocked')
 
 
 def draw_battle(app):

@@ -22,7 +22,10 @@ class DamagePreviewTests(unittest.TestCase):
                     count=6 if key=='weapon_thunder_shotgun' else 5 if mode=='burst' else 1
                     for attack in range(estimate['attacks']):
                         hp=enemy['hp']
-                        with patch.object(g.rng,'randrange',side_effect=[0,0 if maximum else 99]*count),patch.object(g.rng,'randint',return_value=2 if maximum else -2),patch.object(g.rng,'random',return_value=.99):
+                        shell=key=='weapon_thunder_shotgun' or mode=='burst'
+                        # Pellets and burst bullets only roll crit and fly dead centre with random()=.5; single bullets roll hit then crit.
+                        rolls=dict(return_value=0 if maximum else 99) if shell else dict(side_effect=[0,0 if maximum else 99]*count)
+                        with patch.object(g.rng,'randrange',**rolls),patch.object(g.rng,'randint',return_value=2 if maximum else -2),patch.object(g.rng,'random',return_value=.5 if shell else .99):
                             self.assertTrue(g.shoot(enemy['id']))
                         if attack==0:self.assertEqual(hp-enemy['hp'],estimate['maximum' if maximum else 'minimum'])
                     self.assertEqual(before-enemy['hp'],estimate['total_maximum' if maximum else 'total_minimum'])
