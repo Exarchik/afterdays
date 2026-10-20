@@ -283,6 +283,14 @@ class App(MapVisibility):
         if self.dialog or getattr(self,'_notice_open',False):
             return
         reports=getattr(self.game,'_event_results',[])
+        if reports and self.fx.blocked:
+            # The arena still plays the last shots: show the result once they have landed.
+            if not getattr(self,'_notices_waiting',False):
+                self._notices_waiting=True
+                def retry():
+                    self._notices_waiting=False;self.offer_notices()
+                self.root.after(120,retry)
+            return
         if reports:
             event_ui.show_result(self,reports.pop(0))
             return

@@ -23,8 +23,31 @@ FRAME_MS=33
 class Effects:
     def __init__(self,app):
         """Ініціалізує об’єкт, його початковий стан і потрібні залежності."""
-        self.app=app;self.game=app.game;self.active=[];self.snapshot=None;self.until=0
+        self.app=app;self.game=app.game;self.active=[];self.snapshot=None;self.until=0;self.pending=[]
         app.root.after(FRAME_MS,self.tick)
+
+    @staticmethod
+    def arrival(event):
+        """Fraction of an attack event's duration at which the projectile or blow lands."""
+        if 'damage_type' in event or 'attack_style' in event:
+            from ui.projectiles import arrive
+            fraction=arrive(event)
+        elif event['kind']=='slash':return .5
+        else:fraction=1/1.8
+        return .4+.6*fraction if event.get('fire_mode')=='aimed' else fraction
+
+    def hp_shown(self,ident,hp):
+        """Health as the arena should show it: damage still in flight is not taken yet."""
+        now=time.monotonic()
+        return hp+sum(hit['amount'] for hit in self.pending if hit['target']==ident and now<hit['at'])
+
+    def ghosts(self,present):
+        """Enemies already dead in the model whose killing shot is still in flight."""
+        now=time.monotonic();shown={}
+        for hit in self.pending:
+            entity=hit.get('entity')
+            if entity and now<hit['at'] and entity['id'] not in present:shown[entity['id']]=entity
+        return list(shown.values())
 
     @property
     def blocked(self):
@@ -49,7 +72,8 @@ class Effects:
         g=self.app.game
         if g is not self.game:
             self.active=[];self.snapshot=None;self.game=g
-        now=time.monotonic();timeline=0;texts=0;volleys={}
+        now=time.monotonic();timeline=0;texts=0;volleys={};landing=None;last_landing=0
+        self.pending=[hit for hit in self.pending if now<hit['at']]
         self.pause_world_notices(now)
         world_end=max([now]+[e['start']+e['duration']+.35+(now-e['paused_at'] if 'paused_at' in e else 0)
                             for e in self.active if e['kind']=='text' and e['scene']=='world'])
@@ -67,6 +91,14 @@ class Effects:
                     delay=timeline;timeline+=duration if kind=='move' else .09 if event.get('fire_mode')=='burst' else .15
             else:
                 delay=max(0,timeline-.15);event['offset']=(texts%3)*16;texts+=1
+                # Damage numbers and kill notices wait for the projectile that caused them.
+                if landing is not None and event.get('scene')=='battle':delay=landing
+            if kind in ('attack','slash'):
+                landing=delay+duration*self.arrival(event);last_landing=max(last_landing,landing)
+            elif kind=='move':landing=None
+            if event.get('hit_target') is not None:
+                self.pending.append(dict(target=event['hit_target'],amount=event.get('hit_amount',0),
+                                         at=now+(landing if landing is not None else delay),entity=event.get('hit_entity')))
             if kind=='text' and event['scene']=='world':
                 duration=max(1.0,min(2.0,len(event['text'])/30))
                 delay=max(delay,world_end-now);event['offset']=0
@@ -74,7 +106,8 @@ class Effects:
             event.update(start=now+delay,duration=duration);self.active.append(event)
         if g._last_battle is not None:
             self.snapshot=g._last_battle;g._last_battle=None
-            self.until=now+max(1.15,timeline+1.0)
+            # The result window waits one second after the last blow lands.
+            self.until=now+max(1.15,timeline+1.0,last_landing+1.0)
         self.pause_world_notices(now)
 
     def reveal_focus(self):
@@ -133,7 +166,10 @@ class Effects:
             px,py=self.point(e['pos'],e.get('entity'))
             if e['kind'] in ('attack','slash'):
                 sx,sy=self.point(e['source']);t=dt/e['duration']
-                if e['kind']=='slash':
+                if e['kind']=='slash' and 'attack_style' in e:
+                    from ui.projectiles import draw as projectile
+                    projectile(c,e,sx,sy,px,py,t,getattr(self.app,'iso',{}).get('u',14))
+                elif e['kind']=='slash':
                     c.create_line(px-14+t*20,py-12,px+14-t*10,py+10,fill=e['color'],width=4,tags='fx')
                 else:
                     mode=e.get('fire_mode')
@@ -144,7 +180,7 @@ class Effects:
                         t=(t-.4)/.6
                     if mode=='pellet' and e.get('hit',True):
                         offset=(e.get('projectile',0)-2.5)*3;px+=offset;py+=offset*.4
-                    if 'damage_type' in e:
+                    if 'damage_type' in e or 'attack_style' in e:
                         from ui.projectiles import draw as projectile
                         projectile(c,e,sx,sy,px,py,t,getattr(self.app,'iso',{}).get('u',14))
                     else:
@@ -184,7 +220,10 @@ class Effects:
             self.snapshot=None;self.app.refresh()
         focus=self.reveal_focus()
         previous=getattr(self,'_last_reveal_focus',None);self._last_reveal_focus=focus
-        if had_motion and (self.app.game.battle or self.snapshot is not None or focus!=previous):self.app.draw()
+        # A shot that lands updates health bars and removes the enemy it killed.
+        landed=any(getattr(self,'_last_frame',now)<hit['at']<=now for hit in self.pending);self._last_frame=now
+        arena=self.app.game.battle or self.snapshot is not None
+        if (had_motion and (arena or focus!=previous)) or (landed and arena):self.app.draw()
         else:self.render()
 
 

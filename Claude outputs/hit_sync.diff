@@ -1,0 +1,308 @@
+diff --git a/game/systems/adventure.py b/game/systems/adventure.py
+index a5761c7..da6d664 100644
+--- a/game/systems/adventure.py
++++ b/game/systems/adventure.py
+@@ -130,6 +130,18 @@ class AdventureMixin:
+                                  source=list(source) if source else None,entity=entity))
+         if effect_kind is not None:self._events[-1]['effect_kind']=effect_kind
+ 
++    def mark_hit(self,target,amount):
++        """Tag the last emitted text as damage to `target` (an enemy dict or 'player').
++
++        The arena shows the damage when the projectile arrives: the UI holds back the
++        health bar change, and keeps a killed enemy on screen until then.
++        """
++        event=self._events[-1]
++        if target=='player':event.update(hit_target='player',hit_amount=amount)
++        else:
++            event.update(hit_target=target['id'],hit_amount=amount)
++            if target['hp']<=0:event['hit_entity']=copy.deepcopy(target)
++
+     def emit_move(self,path,entity):
+         """Додає подію руху для плавної анімації."""
+         if len(path)<2:return
+@@ -487,7 +499,7 @@ class AdventureMixin:
+                 dealt[kind]=max(1,round(base*(1-resist/100)))
+             amount=sum(dealt.values())
+             e['hp']-=amount
+-            self.emit((tr('adventure.0217') if critical else '')+f'−{amount}',pos=e['pos'],color='#ffbf82' if critical else '#ff9d84')
++            self.emit((tr('adventure.0217') if critical else '')+f'−{amount}',pos=e['pos'],color='#ffbf82' if critical else '#ff9d84');self.mark_hit(e,amount)
+             self.log(f'{e["name"]}: −{amount} HP ('+', '.join(f'{DAMAGE_TYPES[k][0]}: {v}' for k,v in dealt.items())+').')
+             if e['hp']<=0:self._finish_enemy(e,w)
+             if not b['enemies']:self.victory()
+@@ -520,13 +532,13 @@ class AdventureMixin:
+                 if reflected and self.rng.random()*100<reflected:
+                     self.emit(tr('modules.reflected'),color='#c7a8ff')
+                     self.emit(kind='attack',pos=e['pos'],source=b['pos'],color='#c7a8ff')
+-                    e['hp']-=damage;self.emit(f'−{damage}',pos=e['pos'],color='#c7a8ff')
++                    e['hp']-=damage;self.emit(f'−{damage}',pos=e['pos'],color='#c7a8ff');self.mark_hit(e,damage)
+                     self.log(tr('modules.reflected_log',name=e['name'],damage=damage))
+                     if e['hp']<=0:self._finish_enemy(e)
+                     if not b['enemies']:self.victory();return
+                     continue
+                 damage=self.incoming_combat_damage(damage) if hasattr(self,'incoming_combat_damage') else damage
+-                self.hp-=damage;self.emit(f'−{damage}',color='#ff8f79')
++                self.hp-=damage;self.emit(f'−{damage}',color='#ff8f79');self.mark_hit('player',damage)
+                 if hasattr(self,'test_armor_hit'):self.test_armor_hit(damage)
+                 self.wear(self.equipped['armor'],.5);self.wear(self.equipped['helmet'],.25)
+                 self.log(f'{e["name"]}: −{damage} HP.')
+diff --git a/game/systems/combat.py b/game/systems/combat.py
+index cd0fbfb..3f45a43 100644
+--- a/game/systems/combat.py
++++ b/game/systems/combat.py
+@@ -91,6 +91,7 @@ class Combat:
+         __import__('battle_results').hit(self,'dealt',amount,enemy['hp'])
+         enemy['hp']-=amount;enemy['awake']=True
+         self.emit((tr('adventure.0217') if critical else '')+f'−{amount}',pos=enemy['pos'],color='#ffbf82' if critical else '#ff9d84')
++        if hasattr(self,'mark_hit'):self.mark_hit(enemy,amount)
+         self.log(f'{enemy["name"]}: −{amount} HP ('+', '.join(f'{DAMAGE_TYPES[k][0]}: {v}' for k,v in dealt.items())+').')
+         if enemy['hp']<=0:self._finish_enemy(enemy,weapon)
+ 
+diff --git a/game/systems/faction_combat.py b/game/systems/faction_combat.py
+index 094c02c..dd02bb3 100644
+--- a/game/systems/faction_combat.py
++++ b/game/systems/faction_combat.py
+@@ -196,7 +196,7 @@ class FactionCombatMixin:
+             reflected=module_rules.chance(self.protection_stat('reflect_percent'))
+             if reflected and self.rng.random()*100<reflected:
+                 __import__('battle_results').hit(self,'dealt',damage,actor['hp'])
+-                actor['hp']-=damage;self.emit(f'Відбиття: −{damage}',pos=actor['pos'])
++                actor['hp']-=damage;self.emit(f'Відбиття: −{damage}',pos=actor['pos']);self.mark_hit(actor,damage)
+                 if actor['hp']<=0:self._finish_enemy(actor)
+                 return
+             damage=self.incoming_combat_damage(damage)
+@@ -207,14 +207,14 @@ class FactionCombatMixin:
+         else:
+             reflected=module_rules.chance(sum(item_rules.stats(i).get('reflect_percent',0) for k,i in target.get('equipment',{}).items() if k!='weapon'))
+             if reflected and self.rng.random()*100<reflected:
+-                actor['hp']-=damage;self.emit(f'Відбиття: −{damage}',pos=actor['pos'])
++                actor['hp']-=damage;self.emit(f'Відбиття: −{damage}',pos=actor['pos']);self.mark_hit(actor,damage)
+                 if actor['hp']<=0:
+                     self._faction_npc_kill=True
+                     try:self._finish_enemy(actor)
+                     finally:self._faction_npc_kill=False
+                 return
+             target['hp']-=damage;target['awake']=True
+-        self.emit(f'−{damage}',pos=target['pos'],color='#ff8f79')
++        self.emit(f'−{damage}',pos=target['pos'],color='#ff8f79');self.mark_hit('player' if is_player else target,damage)
+         self.log(f'{actor["name"]} → '+('Гравець' if is_player else target['name'])+f': −{damage} HP.')
+         if is_player and self.hp<=0:self.defeat()
+         elif not is_player and target['hp']<=0:
+diff --git a/tests/test_hit_sync.py b/tests/test_hit_sync.py
+new file mode 100644
+index 0000000..53ea8cd
+--- /dev/null
++++ b/tests/test_hit_sync.py
+@@ -0,0 +1,69 @@
++"""Damage shows on the arena when the projectile lands, and the result waits a second."""
++import unittest
++from types import SimpleNamespace
++from unittest.mock import MagicMock,patch
++from tests import test_update033 as arena
++from ui.adventure import Effects
++
++
++def effects(g):
++    app=SimpleNamespace(game=g,root=MagicMock(),dialog=None)
++    fx=Effects(app)
++    with patch('time.monotonic',return_value=100):fx.ingest()
++    return fx
++
++
++class HitSyncTests(unittest.TestCase):
++    def arena(self,key='weapon_rust_assault',distance=2):
++        g,w,b=arena.Update033Tests().arena(key,distance);g.pop_events();return g,w,b
++
++    def test_damage_numbers_wait_for_their_bullet(self):
++        g,w,b=self.arena();w['fire_mode']='burst';target=b['enemies'][0];before=target['hp']
++        with patch.object(g.rng,'random',return_value=.5),patch.object(g.rng,'randrange',return_value=99):g.shoot('0')
++        fx=effects(g)
++        shots=[e for e in fx.active if e['kind']=='attack'];texts=[e for e in fx.active if e.get('hit_target')=='0']
++        self.assertEqual(len(shots),5);self.assertEqual(len(texts),5)
++        for shot,text in zip(shots,texts):
++            self.assertAlmostEqual(text['start'],shot['start']+shot['duration']*Effects.arrival(shot))
++        self.assertGreater(texts[0]['start'],shots[0]['start'])
++        with patch('time.monotonic',return_value=100):self.assertEqual(fx.hp_shown('0',target['hp']),before)
++        with patch('time.monotonic',return_value=texts[2]['start']+.001):
++            self.assertEqual(before-fx.hp_shown('0',target['hp']),sum(t['hit_amount'] for t in texts[:3]))
++        with patch('time.monotonic',return_value=texts[-1]['start']+.01):self.assertEqual(fx.hp_shown('0',target['hp']),target['hp'])
++
++    def test_killed_enemy_stays_until_the_shot_lands(self):
++        g,w,b=self.arena('weapon_thunder_shotgun',1);b['enemies'][0]['hp']=1;b['enemies'][0]['max_hp']=1
++        with patch.object(g.rng,'random',return_value=.5),patch.object(g.rng,'randrange',return_value=99):g.shoot('0')
++        self.assertNotIn('0',[e['id'] for e in b['enemies']])
++        fx=effects(g);present={e['id'] for e in b['enemies']}
++        landing=min(e['start'] for e in fx.active if e.get('hit_target')=='0')
++        with patch('time.monotonic',return_value=100):self.assertEqual([e['id'] for e in fx.ghosts(present)],['0'])
++        last=max(e['start'] for e in fx.active if e.get('hit_target')=='0')
++        with patch('time.monotonic',return_value=last+.01):self.assertEqual(fx.ghosts(present),[])
++        self.assertGreater(landing,100)
++
++    def test_result_waits_a_second_after_the_last_hit(self):
++        g,w,b=self.arena('weapon_thunder_shotgun',1);b['enemies']=b['enemies'][:1];b['enemies'][0]['hp']=1
++        with patch.object(g.rng,'random',return_value=.5),patch.object(g.rng,'randrange',return_value=99):g.shoot('0')
++        self.assertIsNone(g.battle)
++        fx=effects(g)
++        last=max(e['start'] for e in fx.active if e.get('hit_target'))
++        self.assertGreaterEqual(fx.until,last+1.0)
++        with patch('time.monotonic',return_value=last+.5):self.assertTrue(fx.blocked)
++        with patch('time.monotonic',return_value=fx.until+.01):self.assertFalse(fx.blocked)
++
++    def test_player_health_waits_for_the_enemy_blow(self):
++        g,w,b=self.arena();g.hp=500  # tough enough to survive the blow
++        enemy=b['enemies'][0];enemy.update(pos=[b['pos'][0]+1,b['pos'][1]],range=1,speed=0,damage=3,attack=0,level=1)
++        b['enemies']=[enemy]
++        with patch.object(g.rng,'randrange',return_value=99),patch.object(g.rng,'random',return_value=.99),patch.object(g,'protection_stat',return_value=0):g.end_turn()
++        fx=effects(g);hits=[e for e in fx.active if e.get('hit_target')=='player']
++        self.assertIsNotNone(g.battle,'the player must survive this blow')
++        self.assertEqual(len(hits),1);amount=hits[0]['hit_amount']
++        with patch('time.monotonic',return_value=100):self.assertEqual(fx.hp_shown('player',g.hp),g.hp+amount)
++        blow=next(e for e in fx.active if e['kind'] in ('attack','slash'))
++        self.assertAlmostEqual(hits[0]['start'],blow['start']+blow['duration']*Effects.arrival(blow))
++        with patch('time.monotonic',return_value=hits[0]['start']+.01):self.assertEqual(fx.hp_shown('player',g.hp),g.hp)
++
++
++if __name__=='__main__':unittest.main()
+diff --git a/ui/advanced.py b/ui/advanced.py
+index 8c88e7d..c6968df 100644
+--- a/ui/advanced.py
++++ b/ui/advanced.py
+@@ -224,8 +224,15 @@ def draw_battle(app):
+         px,py=center(pos)
+         if 0<=px<=width and 0<=py<=height:c.create_oval(px-1,py-1,px+1,py+1,fill='#91a88a',outline='')
+     enemies={tuple(e['pos']):e for e in b['enemies']}
++    fx=getattr(app,'fx',None)
++    # Enemies killed by a shot still in flight stay on screen until it lands.
++    ghosts=fx.ghosts({e['id'] for e in b['enemies']}) if hasattr(fx,'ghosts') else []
++    for ghost in ghosts:enemies.setdefault(tuple(ghost['pos']),ghost)
++    shown_hp=fx.hp_shown if hasattr(fx,'hp_shown') else (lambda ident,hp:hp)
+     corpses={}
+-    for corpse in b.get('corpses',[]):corpses.setdefault(tuple(corpse['pos']),[]).append(corpse)
++    for corpse in b.get('corpses',[]):
++        if any(tuple(corpse['pos'])==tuple(ghost['pos']) for ghost in ghosts):continue
++        corpses.setdefault(tuple(corpse['pos']),[]).append(corpse)
+     water=cache['water']
+     special=set(corpses)|(walls&floor)|set(enemies)|{tuple(b['pos'])}
+     if b.get('safe_exit047') or b.get('dungeon'):special.add(tuple(b['exit']))
+@@ -266,7 +273,7 @@ def draw_battle(app):
+             if hasattr(getattr(app,'fx',None),'position'):px,py=center(app.fx.position('player',b['pos']))
+             from visuals import human
+             human(c,px,py,u)
+-            actor_health(c,px,py-u*2.2,g.hp,g.max_hp,g.defense,'#9cdda8',f'L{g.level}')
++            actor_health(c,px,py-u*2.2,min(g.max_hp,shown_hp('player',g.hp)),g.max_hp,g.defense,'#9cdda8',f'L{g.level}')
+         if pos in enemies:
+             e=enemies[pos];valid,_,_=g.shot_info(e)
+             px,py=center(app.fx.position(e['id'],e['pos'])) if hasattr(getattr(app,'fx',None),'position') else center(pos)
+@@ -285,7 +292,7 @@ def draw_battle(app):
+             app.iso['sprites'].append((px-size/2,py-size,px+size/2,py+.18*u,pos))
+             top=py-size-u*.18
+             faction_name=faction_rules.catalog()['factions'].get(faction_rules.faction_of(e),{}).get('name','')
+-            actor_health(c,px,top,e['hp'],e['max_hp'],e.get('defense',e.get('armor',0)),
++            actor_health(c,px,top,min(e['max_hp'],shown_hp(e['id'],e['hp'])),e['max_hp'],e.get('defense',e.get('armor',0)),
+                          '#9cdda8' if friendly else '#d88667',
+                          f'L{e.get("level",1)} · {faction_name}'+(' · z' if not e.get('awake',not b.get('dungeon')) else ''))
+     draw_hover(app)
+diff --git a/ui/adventure.py b/ui/adventure.py
+index 4b3f1c3..9e36271 100644
+--- a/ui/adventure.py
++++ b/ui/adventure.py
+@@ -23,9 +23,32 @@ FRAME_MS=33
+ class Effects:
+     def __init__(self,app):
+         """Ініціалізує об’єкт, його початковий стан і потрібні залежності."""
+-        self.app=app;self.game=app.game;self.active=[];self.snapshot=None;self.until=0
++        self.app=app;self.game=app.game;self.active=[];self.snapshot=None;self.until=0;self.pending=[]
+         app.root.after(FRAME_MS,self.tick)
+ 
++    @staticmethod
++    def arrival(event):
++        """Fraction of an attack event's duration at which the projectile or blow lands."""
++        if event['kind']=='slash':return .5
++        if 'damage_type' in event:
++            from ui.projectiles import ARRIVE
++            fraction=ARRIVE.get(event['damage_type'],.5)
++        else:fraction=1/1.8
++        return .4+.6*fraction if event.get('fire_mode')=='aimed' else fraction
++
++    def hp_shown(self,ident,hp):
++        """Health as the arena should show it: damage still in flight is not taken yet."""
++        now=time.monotonic()
++        return hp+sum(hit['amount'] for hit in self.pending if hit['target']==ident and now<hit['at'])
++
++    def ghosts(self,present):
++        """Enemies already dead in the model whose killing shot is still in flight."""
++        now=time.monotonic();shown={}
++        for hit in self.pending:
++            entity=hit.get('entity')
++            if entity and now<hit['at'] and entity['id'] not in present:shown[entity['id']]=entity
++        return list(shown.values())
++
+     @property
+     def blocked(self):
+         """Перевіряє, чи дозволяє поточний стан продовжувати рух."""
+@@ -49,7 +72,8 @@ class Effects:
+         g=self.app.game
+         if g is not self.game:
+             self.active=[];self.snapshot=None;self.game=g
+-        now=time.monotonic();timeline=0;texts=0;volleys={}
++        now=time.monotonic();timeline=0;texts=0;volleys={};landing=None;last_landing=0
++        self.pending=[hit for hit in self.pending if now<hit['at']]
+         self.pause_world_notices(now)
+         world_end=max([now]+[e['start']+e['duration']+.35+(now-e['paused_at'] if 'paused_at' in e else 0)
+                             for e in self.active if e['kind']=='text' and e['scene']=='world'])
+@@ -67,6 +91,14 @@ class Effects:
+                     delay=timeline;timeline+=duration if kind=='move' else .09 if event.get('fire_mode')=='burst' else .15
+             else:
+                 delay=max(0,timeline-.15);event['offset']=(texts%3)*16;texts+=1
++                # Damage numbers and kill notices wait for the projectile that caused them.
++                if landing is not None and event.get('scene')=='battle':delay=landing
++            if kind in ('attack','slash'):
++                landing=delay+duration*self.arrival(event);last_landing=max(last_landing,landing)
++            elif kind=='move':landing=None
++            if event.get('hit_target') is not None:
++                self.pending.append(dict(target=event['hit_target'],amount=event.get('hit_amount',0),
++                                         at=now+(landing if landing is not None else delay),entity=event.get('hit_entity')))
+             if kind=='text' and event['scene']=='world':
+                 duration=max(1.0,min(2.0,len(event['text'])/30))
+                 delay=max(delay,world_end-now);event['offset']=0
+@@ -74,7 +106,8 @@ class Effects:
+             event.update(start=now+delay,duration=duration);self.active.append(event)
+         if g._last_battle is not None:
+             self.snapshot=g._last_battle;g._last_battle=None
+-            self.until=now+max(1.15,timeline+1.0)
++            # The result window waits one second after the last blow lands.
++            self.until=now+max(1.15,timeline+1.0,last_landing+1.0)
+         self.pause_world_notices(now)
+ 
+     def reveal_focus(self):
+@@ -184,7 +217,10 @@ class Effects:
+             self.snapshot=None;self.app.refresh()
+         focus=self.reveal_focus()
+         previous=getattr(self,'_last_reveal_focus',None);self._last_reveal_focus=focus
+-        if had_motion and (self.app.game.battle or self.snapshot is not None or focus!=previous):self.app.draw()
++        # A shot that lands updates health bars and removes the enemy it killed.
++        landed=any(getattr(self,'_last_frame',now)<hit['at']<=now for hit in self.pending);self._last_frame=now
++        arena=self.app.game.battle or self.snapshot is not None
++        if (had_motion and (arena or focus!=previous)) or (landed and arena):self.app.draw()
+         else:self.render()
+ 
+ 
+diff --git a/ui/application.py b/ui/application.py
+index 4a9df79..acaa661 100644
+--- a/ui/application.py
++++ b/ui/application.py
+@@ -283,6 +283,14 @@ class App(MapVisibility):
+         if self.dialog or getattr(self,'_notice_open',False):
+             return
+         reports=getattr(self.game,'_event_results',[])
++        if reports and self.fx.blocked:
++            # The arena still plays the last shots: show the result once they have landed.
++            if not getattr(self,'_notices_waiting',False):
++                self._notices_waiting=True
++                def retry():
++                    self._notices_waiting=False;self.offer_notices()
++                self.root.after(120,retry)
++            return
+         if reports:
+             event_ui.show_result(self,reports.pop(0))
+             return

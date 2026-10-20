@@ -91,6 +91,7 @@ class Combat:
         __import__('battle_results').hit(self,'dealt',amount,enemy['hp'])
         enemy['hp']-=amount;enemy['awake']=True
         self.emit((tr('adventure.0217') if critical else '')+f'−{amount}',pos=enemy['pos'],color='#ffbf82' if critical else '#ff9d84')
+        if hasattr(self,'mark_hit'):self.mark_hit(enemy,amount)
         self.log(f'{enemy["name"]}: −{amount} HP ('+', '.join(f'{DAMAGE_TYPES[k][0]}: {v}' for k,v in dealt.items())+').')
         if enemy['hp']<=0:self._finish_enemy(enemy,weapon)
 

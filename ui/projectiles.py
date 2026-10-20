@@ -8,6 +8,8 @@ import math
 import random
 
 ARRIVE={'kinetic':.5,'piercing':.32,'thermal':.72,'energy':.55,'electric':.4}
+# Monster and melee styles (see game/systems/attack_looks.py).
+STYLE_ARRIVE={'spit':.62,'acid':.6,'laser':.28,'mud':.6,'web':.45,'bite':.45,'claw':.4,'smash':.5,'punch':.4}
 MUZZLE={'kinetic':'#ffe08a','piercing':'#f4ffe0','thermal':'#ff9a50','energy':'#bff7f1','electric':'#e2d2ff'}
 
 
@@ -19,8 +21,16 @@ def zigzag(x1,y1,x2,y2,amp,rng):
     return points+[x2,y2]
 
 
+def arrive(e):
+    """Fraction of the event at which the blow lands."""
+    style=e.get('attack_style')
+    if style in STYLE_ARRIVE:return STYLE_ARRIVE[style]
+    return ARRIVE.get(e.get('damage_type'),.5)
+
+
 def draw(c,e,sx,sy,px,py,t,u=14):
     """Draw one projectile event; returns nothing. Unknown types fall back to kinetic."""
+    if e.get('attack_style') in STYLE_ARRIVE:return draw_style(c,e,sx,sy,px,py,t,u)
     kind=e.get('damage_type','kinetic')
     if kind not in ARRIVE:kind='kinetic'
     small=e.get('fire_mode')=='pellet'
@@ -95,3 +105,94 @@ def draw(c,e,sx,sy,px,py,t,u=14):
             points=zigzag(px,py,px+math.cos(a)*L,py+math.sin(a)*L,4*s,jitter)
             c.create_line(*points,fill='#7b5cc8',width=max(1,2.4*s),tags='fx')
             c.create_line(*points,fill='#e9ddff',width=1,tags='fx')
+
+
+def _arc_point(sx,sy,px,py,k,lift):
+    """Point on a thrown arc: straight in plan, lifted by a parabola."""
+    return sx+(px-sx)*k,sy+(py-sy)*k-lift*4*k*(1-k)
+
+
+def draw_style(c,e,sx,sy,px,py,t,u=14):
+    """Monster spit, acid, laser, mud, web and melee bites, claws, smashes and punches."""
+    style=e['attack_style'];s=max(.6,min(1.5,u/14))
+    seed=hash((e.get('source') and tuple(e['source']),tuple(e.get('pos') or ()),style))&0xffff
+    arrive=STYLE_ARRIVE[style];length=math.hypot(px-sx,py-sy) or 1
+    hit=e.get('hit',True);rng=random.Random(seed)
+    if t<arrive:
+        k=t/arrive
+        if style in ('spit','acid','mud'):
+            lift=length*(.28 if style!='acid' else .16)
+            hx,hy=_arc_point(sx,sy,px,py,k,lift)
+            body,edge={'spit':('#b8d84a','#55701f'),'acid':('#7fe05a','#2f7a24'),'mud':('#6b5332','#3a2c1a')}[style]
+            for n in range(1,4):
+                tx,ty=_arc_point(sx,sy,px,py,max(0,k-.06*n),lift);r=(3.5-n*.8)*s
+                c.create_oval(tx-r,ty-r,tx+r,ty+r,fill=body,outline='',tags='fx')
+            if style=='acid':
+                for n in range(3):
+                    dk=max(0,k-.1*(n+1));tx,ty=_arc_point(sx,sy,px,py,dk,lift);ty+=(n+1)*4*s
+                    c.create_oval(tx-1.3,ty-1.3,tx+1.3,ty+1.3,fill=body,outline='',tags='fx')
+            r=5.5*s;c.create_oval(hx-r,hy-r*.85,hx+r,hy+r*.85,fill=body,outline=edge,width=1,tags='fx')
+            c.create_oval(hx-r*.35-1,hy-r*.5,hx-r*.35+1.5,hy-r*.5+2,fill='#f4ffd0',outline='',tags='fx')
+        elif style=='laser':
+            hx,hy=sx+(px-sx)*k,sy+(py-sy)*k
+            c.create_line(sx,sy,hx,hy,fill='#a01e14',width=max(1,4*s),tags='fx')
+            c.create_line(sx,sy,hx,hy,fill='#ff4a3a',width=max(1,2.2*s),tags='fx')
+            c.create_line(sx,sy,hx,hy,fill='#ffd8d0',width=1,tags='fx')
+        elif style=='web':
+            hx,hy=sx+(px-sx)*k,sy+(py-sy)*k;mx,my=(sx+hx)/2,(sy+hy)/2+length*k*.05
+            c.create_line(sx,sy,mx,my,hx,hy,fill='#e8e8dc',width=1,smooth=True,tags='fx')
+            c.create_oval(hx-2*s,hy-2*s,hx+2*s,hy+2*s,fill='#f6f6ee',outline='',tags='fx')
+        else:
+            # Melee: a short lunge streak towards the target.
+            a=max(0,k-.35);c.create_line(sx+(px-sx)*a,sy+(py-sy)*a,sx+(px-sx)*k*.85,sy+(py-sy)*k*.85,
+                                         fill='#d9cdb2',width=max(1,2*s),dash=(3,3),tags='fx')
+        return
+    k=(t-arrive)/max(.01,1-arrive)
+    if style in ('spit','acid','mud'):
+        body={'spit':'#b8d84a','acid':'#7fe05a','mud':'#6b5332'}[style]
+        r=(7+6*k)*s;c.create_oval(px-r*1.3,py-r*.45,px+r*1.3,py+r*.55,fill=body,outline='',stipple='gray50',tags='fx')
+        for _ in range(6):
+            a=rng.uniform(math.pi,2*math.pi);d=(4+16*k)*s
+            x,y=px+math.cos(a)*d,py+math.sin(a)*d*.7+12*k*k*s;rr=max(1,2.2*s*(1-k*.5))
+            c.create_oval(x-rr,y-rr,x+rr,y+rr,fill=body,outline='',tags='fx')
+        if style=='acid':
+            for n in range(3):
+                x=px+rng.uniform(-8,8)*s;y=py-(4+14*((k+n*.3)%1))*s;rr=1.5*s
+                c.create_oval(x-rr,y-rr,x+rr,y+rr,outline='#c8ffb0',width=1,tags='fx')
+    elif style=='laser':
+        r=(3+10*k)*s;c.create_oval(px-r,py-r*.6,px+r,py+r*.6,outline='#ff6a5a',width=2,tags='fx')
+        for _ in range(5):
+            a=rng.uniform(0,2*math.pi);d=(4+12*k)*s
+            c.create_line(px+math.cos(a)*d,py+math.sin(a)*d,px+math.cos(a)*(d+4*s),py+math.sin(a)*(d+4*s),fill='#ffc0b0',width=1,tags='fx')
+    elif style=='web':
+        r=(8+6*k)*s
+        for n in range(8):
+            a=n*math.pi/4;c.create_line(px,py,px+math.cos(a)*r,py+math.sin(a)*r*.7,fill='#e8e8dc',width=1,tags='fx')
+        for ring in (.45,.85):
+            points=[v for n in range(9) for v in (px+math.cos(n*math.pi/4)*r*ring,py+math.sin(n*math.pi/4)*r*ring*.7)]
+            c.create_line(*points,fill='#d8d8c8',width=1,tags='fx')
+    elif style=='bite':
+        r=11*s;gap=(1-min(1,k*2.2))*7*s;color='#f0e6d0' if hit else '#8f8a7c'
+        c.create_arc(px-r,py-r-gap,px+r,py+r-gap,start=200,extent=140,style='arc',outline=color,width=max(1,2*s),tags='fx')
+        c.create_arc(px-r,py-r+gap,px+r,py+r+gap,start=20,extent=140,style='arc',outline=color,width=max(1,2*s),tags='fx')
+        for n in (-1,0,1):
+            x=px+n*r*.45;c.create_line(x,py-gap-r*.55,x,py-gap-r*.25,fill=color,width=1,tags='fx')
+            c.create_line(x,py+gap+r*.55,x,py+gap+r*.25,fill=color,width=1,tags='fx')
+    elif style=='claw':
+        grow=min(1,k*2.5);color='#ff8f79' if hit else '#a49a86'
+        for n in (-1,0,1):
+            x1,y1=px-9*s+n*5*s,py-10*s;x2,y2=px+7*s+n*5*s,py+9*s
+            c.create_line(x1,y1,x1+(x2-x1)*grow,y1+(y2-y1)*grow,fill=color,width=max(1,2.2*s),capstyle='round',tags='fx')
+    elif style=='smash':
+        r=(6+26*k)*s;c.create_oval(px-r,py-r*.45,px+r,py+r*.45,outline='#d9cdb2',width=max(1,3*(1-k)+.5),tags='fx')
+        for _ in range(4):
+            a=rng.uniform(0,2*math.pi);points=[px,py];x,y=px,py
+            for _ in range(3):
+                x+=math.cos(a+rng.uniform(-.5,.5))*6*s;y+=math.sin(a+rng.uniform(-.5,.5))*3*s;points+=[x,y]
+            c.create_line(*points,fill='#3a3426',width=max(1,1.6*s),tags='fx')
+    else:  # punch
+        r=(5+6*k)*s;points=[]
+        for n in range(10):
+            rr=r if n%2==0 else r*.45;a=n*math.pi/5
+            points+=[px+math.cos(a)*rr,py+math.sin(a)*rr]
+        c.create_polygon(*points,fill='#ffe3a0' if hit else '#a49a86',outline='',tags='fx')

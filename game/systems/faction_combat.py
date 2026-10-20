@@ -182,10 +182,12 @@ class FactionCombatMixin:
         from game.systems.combat import projectile_components
         weapon=actor.get('equipment',{}).get('weapon')
         self.emit(kind='attack' if actor['range']>1 else 'slash',pos=target['pos'],source=actor['pos'],color='#ff976f')
+        from game.systems.attack_looks import look
+        blow=self._events[-1];blow.update(look(actor))
         evasion=self.protection_stat('evasion') if is_player else sum(item_rules.stats(i).get('evasion',0) for i in target.get('equipment',{}).values())
-        if self.rng.randrange(100)<min(45,evasion):self.emit('Ухилення',pos=target['pos']);return
+        if self.rng.randrange(100)<min(45,evasion):blow['hit']=False;self.emit('Ухилення',pos=target['pos']);return
         if weapon:
-            if self.rng.randrange(100)>=min(98,max(1,item_rules.stats(weapon).get('accuracy',75))):self.emit('Промах',pos=target['pos']);return
+            if self.rng.randrange(100)>=min(98,max(1,item_rules.stats(weapon).get('accuracy',75))):blow['hit']=False;self.emit('Промах',pos=target['pos']);return
             # Share weapon/module damage and target resistance formulas with the player.
             shot=copy.deepcopy(weapon);shot['stats']['attack']+=actor['attack']-item_rules.stats(weapon).get('attack',0)
             critical=self.rng.randrange(100)<min(65,5+item_rules.stats(weapon).get('crit',0))
@@ -196,7 +198,7 @@ class FactionCombatMixin:
             reflected=module_rules.chance(self.protection_stat('reflect_percent'))
             if reflected and self.rng.random()*100<reflected:
                 __import__('battle_results').hit(self,'dealt',damage,actor['hp'])
-                actor['hp']-=damage;self.emit(f'Відбиття: −{damage}',pos=actor['pos'])
+                actor['hp']-=damage;self.emit(f'Відбиття: −{damage}',pos=actor['pos']);self.mark_hit(actor,damage)
                 if actor['hp']<=0:self._finish_enemy(actor)
                 return
             damage=self.incoming_combat_damage(damage)
@@ -207,14 +209,14 @@ class FactionCombatMixin:
         else:
             reflected=module_rules.chance(sum(item_rules.stats(i).get('reflect_percent',0) for k,i in target.get('equipment',{}).items() if k!='weapon'))
             if reflected and self.rng.random()*100<reflected:
-                actor['hp']-=damage;self.emit(f'Відбиття: −{damage}',pos=actor['pos'])
+                actor['hp']-=damage;self.emit(f'Відбиття: −{damage}',pos=actor['pos']);self.mark_hit(actor,damage)
                 if actor['hp']<=0:
                     self._faction_npc_kill=True
                     try:self._finish_enemy(actor)
                     finally:self._faction_npc_kill=False
                 return
             target['hp']-=damage;target['awake']=True
-        self.emit(f'−{damage}',pos=target['pos'],color='#ff8f79')
+        self.emit(f'−{damage}',pos=target['pos'],color='#ff8f79');self.mark_hit('player' if is_player else target,damage)
         self.log(f'{actor["name"]} → '+('Гравець' if is_player else target['name'])+f': −{damage} HP.')
         if is_player and self.hp<=0:self.defeat()
         elif not is_player and target['hp']<=0:

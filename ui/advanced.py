@@ -224,8 +224,15 @@ def draw_battle(app):
         px,py=center(pos)
         if 0<=px<=width and 0<=py<=height:c.create_oval(px-1,py-1,px+1,py+1,fill='#91a88a',outline='')
     enemies={tuple(e['pos']):e for e in b['enemies']}
+    fx=getattr(app,'fx',None)
+    # Enemies killed by a shot still in flight stay on screen until it lands.
+    ghosts=fx.ghosts({e['id'] for e in b['enemies']}) if hasattr(fx,'ghosts') else []
+    for ghost in ghosts:enemies.setdefault(tuple(ghost['pos']),ghost)
+    shown_hp=fx.hp_shown if hasattr(fx,'hp_shown') else (lambda ident,hp:hp)
     corpses={}
-    for corpse in b.get('corpses',[]):corpses.setdefault(tuple(corpse['pos']),[]).append(corpse)
+    for corpse in b.get('corpses',[]):
+        if any(tuple(corpse['pos'])==tuple(ghost['pos']) for ghost in ghosts):continue
+        corpses.setdefault(tuple(corpse['pos']),[]).append(corpse)
     water=cache['water']
     special=set(corpses)|(walls&floor)|set(enemies)|{tuple(b['pos'])}
     if b.get('safe_exit047') or b.get('dungeon'):special.add(tuple(b['exit']))
@@ -266,7 +273,7 @@ def draw_battle(app):
             if hasattr(getattr(app,'fx',None),'position'):px,py=center(app.fx.position('player',b['pos']))
             from visuals import human
             human(c,px,py,u)
-            actor_health(c,px,py-u*2.2,g.hp,g.max_hp,g.defense,'#9cdda8',f'L{g.level}')
+            actor_health(c,px,py-u*2.2,min(g.max_hp,shown_hp('player',g.hp)),g.max_hp,g.defense,'#9cdda8',f'L{g.level}')
         if pos in enemies:
             e=enemies[pos];valid,_,_=g.shot_info(e)
             px,py=center(app.fx.position(e['id'],e['pos'])) if hasattr(getattr(app,'fx',None),'position') else center(pos)
@@ -285,7 +292,7 @@ def draw_battle(app):
             app.iso['sprites'].append((px-size/2,py-size,px+size/2,py+.18*u,pos))
             top=py-size-u*.18
             faction_name=faction_rules.catalog()['factions'].get(faction_rules.faction_of(e),{}).get('name','')
-            actor_health(c,px,top,e['hp'],e['max_hp'],e.get('defense',e.get('armor',0)),
+            actor_health(c,px,top,min(e['max_hp'],shown_hp(e['id'],e['hp'])),e['max_hp'],e.get('defense',e.get('armor',0)),
                          '#9cdda8' if friendly else '#d88667',
                          f'L{e.get("level",1)} · {faction_name}'+(' · z' if not e.get('awake',not b.get('dungeon')) else ''))
     draw_hover(app)

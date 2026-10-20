@@ -130,6 +130,18 @@ class AdventureMixin:
                                  source=list(source) if source else None,entity=entity))
         if effect_kind is not None:self._events[-1]['effect_kind']=effect_kind
 
+    def mark_hit(self,target,amount):
+        """Tag the last emitted text as damage to `target` (an enemy dict or 'player').
+
+        The arena shows the damage when the projectile arrives: the UI holds back the
+        health bar change, and keeps a killed enemy on screen until then.
+        """
+        event=self._events[-1]
+        if target=='player':event.update(hit_target='player',hit_amount=amount)
+        else:
+            event.update(hit_target=target['id'],hit_amount=amount)
+            if target['hp']<=0:event['hit_entity']=copy.deepcopy(target)
+
     def emit_move(self,path,entity):
         """Додає подію руху для плавної анімації."""
         if len(path)<2:return
@@ -487,7 +499,7 @@ class AdventureMixin:
                 dealt[kind]=max(1,round(base*(1-resist/100)))
             amount=sum(dealt.values())
             e['hp']-=amount
-            self.emit((tr('adventure.0217') if critical else '')+f'−{amount}',pos=e['pos'],color='#ffbf82' if critical else '#ff9d84')
+            self.emit((tr('adventure.0217') if critical else '')+f'−{amount}',pos=e['pos'],color='#ffbf82' if critical else '#ff9d84');self.mark_hit(e,amount)
             self.log(f'{e["name"]}: −{amount} HP ('+', '.join(f'{DAMAGE_TYPES[k][0]}: {v}' for k,v in dealt.items())+').')
             if e['hp']<=0:self._finish_enemy(e,w)
             if not b['enemies']:self.victory()
@@ -513,20 +525,22 @@ class AdventureMixin:
             self.emit_move(motion,e['id'])
             if hexgrid.distance(e['pos'],b['pos'])<=e['range'] and hexgrid.visible(tuple(e['pos']),tuple(b['pos']),b['walls']):
                 self.emit(kind='slash' if e['range']<=1 else 'attack',pos=b['pos'],source=e['pos'],color='#ff976f')
+                from game.systems.attack_looks import look
+                blow=self._events[-1];blow.update(look(e))
                 if self.rng.randrange(100)<min(45,self.protection_stat('evasion')):
-                    self.emit(tr('adventure.0220'),color='#b8dcb0');self.emit(tr('adventure.0221'),pos=e['pos'],color='#d7d4c0');continue
+                    blow['hit']=False;self.emit(tr('adventure.0220'),color='#b8dcb0');self.emit(tr('adventure.0221'),pos=e['pos'],color='#d7d4c0');continue
                 damage=balance.damage(e['damage']+self.rng.randint(-2,2),e.get('attack',0),self.defense)
                 reflected=module_rules.chance(self.protection_stat('reflect_percent'))
                 if reflected and self.rng.random()*100<reflected:
                     self.emit(tr('modules.reflected'),color='#c7a8ff')
                     self.emit(kind='attack',pos=e['pos'],source=b['pos'],color='#c7a8ff')
-                    e['hp']-=damage;self.emit(f'−{damage}',pos=e['pos'],color='#c7a8ff')
+                    e['hp']-=damage;self.emit(f'−{damage}',pos=e['pos'],color='#c7a8ff');self.mark_hit(e,damage)
                     self.log(tr('modules.reflected_log',name=e['name'],damage=damage))
                     if e['hp']<=0:self._finish_enemy(e)
                     if not b['enemies']:self.victory();return
                     continue
                 damage=self.incoming_combat_damage(damage) if hasattr(self,'incoming_combat_damage') else damage
-                self.hp-=damage;self.emit(f'−{damage}',color='#ff8f79')
+                self.hp-=damage;self.emit(f'−{damage}',color='#ff8f79');self.mark_hit('player',damage)
                 if hasattr(self,'test_armor_hit'):self.test_armor_hit(damage)
                 self.wear(self.equipped['armor'],.5);self.wear(self.equipped['helmet'],.25)
                 self.log(f'{e["name"]}: −{damage} HP.')
