@@ -63,6 +63,11 @@
         "money_power": 1.3,
         "xp_reward": 25,
         "xp_step": 5,
+        "contacts_min": 3,
+        "contacts_max": 5,
+        "decoys": 1,
+        "hints": 1,
+        "shock": 0,
         "description": "Дістатися точки поломки, встановити й повернути мікросхеми відповідно до клем плати, увімкнути схему."
       }
     },
@@ -76,9 +81,74 @@
         "xp_reward": 25,
         "xp_step": 5,
         "grid_size": 6,
-        "probes": 6,
         "max_dose": 5,
+        "device_radiation": 1,
+        "device_art": "",
         "description": "Знайти загублене джерело радіації дозиметром на ділянці гексів і позначити його. Кожен замір додає радіацію; квест здається на місці."
+      }
+    },
+    "torn_map": {
+      "normal": {
+        "title": "Розірвана мапа",
+        "art": "quest:torn_map",
+        "min_level": 1,
+        "reward": 100,
+        "money_power": 1.3,
+        "xp_reward": 25,
+        "xp_step": 5,
+        "cols": 3,
+        "rows": 3,
+        "rotate": 0,
+        "description": "Зібрати частини мапи та знайти скарб."
+      }
+    },
+    "elite_hunt": {
+      "normal": {
+        "title": "Елітне полювання",
+        "art": "quest:elite_hunt",
+        "min_level": 1,
+        "reward": 150,
+        "money_power": 1.3,
+        "xp_reward": 25,
+        "xp_step": 5,
+        "needed": 3,
+        "drain": 150,
+        "recharge": 25,
+        "lens_speed": 55,
+        "description": "Знайти сканером сліди, вистежити лігво й перемогти елітного монстра."
+      }
+    },
+    "cache": {
+      "normal": {
+        "title": "Схованка",
+        "art": "quest:cache",
+        "min_level": 1,
+        "reward": 85,
+        "money_power": 1.3,
+        "xp_reward": 25,
+        "xp_step": 5,
+        "rings": 3,
+        "positions": 8,
+        "wear": 10,
+        "depth": 3,
+        "description": "Знайти схованку в позначеній області."
+      }
+    },
+    "junkyard": {
+      "normal": {
+        "title": "Звалище",
+        "art": "quest:junkyard",
+        "min_level": 1,
+        "reward": 100,
+        "money_power": 1.3,
+        "xp_reward": 25,
+        "xp_step": 5,
+        "parts": 3,
+        "work_per_satiety": 4,
+        "settle_min": 10,
+        "settle_max": 15,
+        "settle_chance": 75,
+        "description": "Розібрати завал на звалищі й дістати квестові деталі. Брати можна лише вільні уламки; робота забирає ситість, а звалище може осісти й підкинути нове сміття."
       }
     }
   }
