@@ -94,7 +94,8 @@ class ResultView(tk.Canvas):
             self.content_photo=ImageTk.PhotoImage(self.background.crop((self.area_x,self.area_y,self.area_x+self.area_width,self.area_y+self.view_height)),master=self)
             c.create_image(0,0,image=self.content_photo,anchor='nw')
         width=self.area_width-18
-        columns=max(1,int(width//230));cell=width/columns
+        columns = max(1, min(3, int(width // 200)))
+        cell = width / columns
         y=12-self.offset
         for title,rows in zip(('Стани','Предмети'),groups(self.report)):
             head=c.create_text(0,y,text=title,anchor='nw',font=('Bahnschrift',18,'bold'),fill=GOLD)
