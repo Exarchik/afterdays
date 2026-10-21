@@ -69,7 +69,7 @@ class ProgressionGame(WorldGame):
     @property
     def max_hp(self):
         """Обчислює максимальне здоров’я з рівня, перків і спорядження."""
-        return max(1,25+(self.level-1)*5+self.protection_stat('vitality')+self.rank('hardy')*10)
+        return max(1,40+(self.level-1)*8+self.protection_stat('vitality')+self.rank('hardy')*10)
 
     @property
     def defense(self):
