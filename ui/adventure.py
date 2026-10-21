@@ -237,7 +237,7 @@ def paint_snapshot(app):
 
 
 def service_sprite(key,npc=None):
-    sprite=('npc:'+npc if npc else 'npc:'+key) if key in ('smith','food','fence','tech','mayor','traveler','hunter') else {'electronics':'npc:tech','radiation':'effects:radiation_damage','loot':'loot','stash':'stash','rest':'rest','search':'loot','perks':'perk:tactician','atlas':'site','board':'journal'}.get(key)
+    sprite=('npc:'+npc if npc else 'npc:'+key) if key in ('smith','food','fence','tech','mayor','traveler','hunter') else {'electronics':'npc:tech','radiation':'effects:radiation_damage','loot':'loot','stash':'stash','rest':'rest','search':'search','perks':'perk:tactician','atlas':'site','board':'journal'}.get(key)
     return {'settlers':'npc_roamer_smith','torn_map':'quest:torn_map','board':'service_board','metro':'service_metro','cartographer':'npc_cartographer','guide':'npc_guide','action_delivery':'action_delivery','action_radio':'action_radio'}.get(key,sprite)
 
 
