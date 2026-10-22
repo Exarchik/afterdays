@@ -27,7 +27,7 @@
     "ammo_type": "rifle",
     "damage_type": "kinetic",
     "sprite_id": "weapon_watch_rifle",
-    "category": "rifle"
+    "category": "sniper"
   },
   "weapon_rust_assault": {
     "kind": "weapon",
@@ -160,7 +160,7 @@
     "ammo_type": "rifle",
     "damage_type": "kinetic",
     "sprite_id": "weapon_pilgrim_carbine",
-    "category": "sniper"
+    "category": "rifle"
   },
   "weapon_horizon_sniper": {
     "kind": "weapon",
