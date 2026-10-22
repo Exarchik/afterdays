@@ -1,10 +1,10 @@
-"""Dosimeter contracts: offers, unlimited probing, carrying the device back, editor settings."""
+"""Dosimeter contracts: sweeping, digging stray sources, carrying the device back, editor settings."""
 import copy
 import tempfile
 import unittest
 from pathlib import Path
 
-import world_hex
+import math
 import quest_catalog
 import quest_profiles
 from game.model import Game
@@ -19,13 +19,12 @@ def accepted(seed=4):
     return g,q
 
 
-def cells(q):
-    size=q['rad_settings']['grid_size']
-    return [(x,y) for y in range(size) for x in range(size)]
+def device(q):
+    return next(s for s in q['rad_sources'] if s['kind']=='device')
 
 
 def find(g,q):
-    return g.probe_radiation(q['id'],*q['rad_source'])
+    s=device(q);return g.dig_radiation(q['id'],s['x'],s['y'])
 
 
 class RadiationSourceTests(unittest.TestCase):
@@ -34,52 +33,78 @@ class RadiationSourceTests(unittest.TestCase):
         g=Game(4);offer=offer_for(g,rs.KIND)
         self.assertEqual(offer['title'],rs.TITLE);self.assertGreater(offer['reward'],0)
         spec=quest_profiles.defaults(rs.KIND)
-        self.assertEqual(rs.settings_for(spec),{'grid_size':6,'max_dose':5,'device_radiation':1})
+        self.assertEqual(rs.settings_for(spec),{'grid_size':6,'isotopes':3,'max_dose':5,'device_radiation':1})
         self.assertEqual(rs.device_art(spec),'')
         self.assertEqual(quest_profiles.validate_spec(spec),[])
 
-    def test_accept_places_quest_and_board(self):
+    def test_accept_plants_device_and_stray_sources(self):
         g,q=accepted()
         self.assertTrue(g.radiation_available(q))
         self.assertNotIn(q['pos'],g.cities)
-        self.assertIn(tuple(q['rad_source']),cells(q))
-        self.assertEqual(q['rad_probes'],[]);self.assertEqual(q['rad_dose'],0)
+        kinds=[s['kind'] for s in q['rad_sources']]
+        self.assertEqual(kinds,['device','cs137','co60','sr90'])
+        w,h=rs.area(q['rad_settings'])
+        for s in q['rad_sources']:
+            self.assertTrue(0<s['x']<w and 0<s['y']<h);self.assertFalse(s['found'])
+        self.assertEqual(q['rad_holes'],[]);self.assertEqual(q['rad_dose'],0)
         g.x,g.y=g.cities[q['city']];self.assertFalse(g.radiation_available(q))
-        self.assertIsNone(g.probe_radiation(q['id'],0,0))
+        self.assertIsNone(g.radiation_sweep(q['id'],1,1,.1));self.assertIsNone(g.dig_radiation(q['id'],1,1))
 
-    def test_readings_fall_off_with_distance_and_are_deterministic(self):
-        g,q=accepted()
-        values={c:rs.reading_at(q,c) for c in cells(q)}
-        source=tuple(q['rad_source'])
-        self.assertEqual(max(values,key=values.get),source)
-        by_distance={}
-        for c,v in values.items():by_distance.setdefault(world_hex.distance(c,source),[]).append(v)
-        ranges=[(min(v),max(v)) for _,v in sorted(by_distance.items())]
-        for (low,_),(_,high) in zip(ranges,ranges[1:]):self.assertGreater(low,high)
-        self.assertEqual(values,{c:rs.reading_at(q,c) for c in cells(q)})
+    def test_layout_is_deterministic_and_the_strongest_stray_masks_the_device(self):
+        for seed in range(4,12):
+            g,q=accepted(seed)
+            self.assertEqual(rs.place_sources(q['id'],q['rad_attempt'],q['rad_settings']),
+                             [dict(s,found=False) for s in q['rad_sources']])
+            d=device(q);mask=q['rad_sources'][1]
+            self.assertTrue(2.1<=math.dist((d['x'],d['y']),(mask['x'],mask['y']))<=3.05)
+            # The device is barely a bump until the mask is lifted, then it stands out.
+            ring=lambda:max(rs.reading(q,d['x']+math.cos(i/8*math.pi)*.6,d['y']+math.sin(i/8*math.pi)*.6) for i in range(16))
+            masked=rs.reading(q,d['x'],d['y'])/ring()
+            mask['found']=True;clear=rs.reading(q,d['x'],d['y'])/ring()
+            self.assertLess(masked,1.25);self.assertGreater(clear,1.28);self.assertGreater(clear-masked,.1)
 
-    def test_probes_are_unlimited_and_cost_only_radiation(self):
-        g,q=accepted();before=g.radiation_injury
-        self.assertIsNone(g.probe_radiation(q['id'],-1,0))
-        self.assertIsNone(g.probe_radiation(q['id'],0,'1'))
-        others=[c for c in cells(q) if c!=tuple(q['rad_source'])]
-        for c in others:self.assertIsNotNone(g.probe_radiation(q['id'],*c))
-        self.assertEqual(len(q['rad_probes']),len(others))
-        self.assertIsNone(g.probe_radiation(q['id'],*others[0]))
-        self.assertTrue(g.radiation_available(q));self.assertEqual(q['progress'],0)
+    def test_no_isotopes_leaves_only_the_device(self):
+        sources=rs.place_sources('x',0,dict(grid_size=4,isotopes=0,max_dose=5,device_radiation=1))
+        self.assertEqual([s['kind'] for s in sources],['device'])
+
+    def test_sweeping_costs_radiation_over_time_and_validates_input(self):
+        g,q=accepted();before=g.radiation_injury;mask=q['rad_sources'][1]
+        self.assertIsNone(g.radiation_sweep(q['id'],-1,0,.1))
+        self.assertIsNone(g.radiation_sweep(q['id'],0,'1',.1))
+        self.assertIsNone(g.radiation_sweep(q['id'],True,1,.1))
+        value=g.radiation_sweep(q['id'],mask['x'],mask['y'],0)
+        self.assertGreater(value,40);self.assertEqual(g.radiation_injury,before)
+        for _ in range(40):g.radiation_sweep(q['id'],mask['x'],mask['y'],.25)
+        expected=q['rad_settings']['max_dose']*rs.SWEEP_RATE*value/rs.PEAK*10
+        self.assertAlmostEqual(q['rad_dose']+q['rad_dose_left'],expected,places=6)
         self.assertEqual(g.radiation_injury-before,q['rad_dose'])
-        self.assertGreater(q['rad_dose'],0)
-        self.assertLessEqual(max(round(q['rad_settings']['max_dose']*p['value']/rs.PEAK) for p in q['rad_probes']),q['rad_settings']['max_dose'])
-        self.assertIsNotNone(find(g,q));self.assertTrue(g.quest_ready(q))
+        # A huge time step from the UI is clamped.
+        dose=q['rad_dose']+q['rad_dose_left'];g.radiation_sweep(q['id'],mask['x'],mask['y'],100)
+        self.assertLessEqual(q['rad_dose']+q['rad_dose_left']-dose,q['rad_settings']['max_dose']*rs.SWEEP_RATE*rs.MAX_SWEEP*1.1)
+        far=g.radiation_sweep(q['id'],0,0,0);self.assertLess(far,value)
 
-    def test_probing_the_source_finds_the_device(self):
+    def test_digging_lifts_strays_and_lowers_the_field(self):
+        g,q=accepted();mask=q['rad_sources'][1];d=device(q)
+        before=g.radiation_injury
+        miss=g.dig_radiation(q['id'],mask['x']+1,mask['y'])
+        self.assertEqual(miss['result'],'empty');self.assertGreater(miss['dose'],0)
+        self.assertEqual(g.radiation_injury-before,miss['dose']);self.assertEqual(len(q['rad_holes']),1)
+        level=rs.reading(q,d['x'],d['y'])
+        hit=g.dig_radiation(q['id'],mask['x']+.3,mask['y'])
+        self.assertEqual((hit['result'],hit['name']),('isotope',rs.source_name(mask)))
+        self.assertTrue(mask['found']);self.assertEqual(g.radiation_cleared(q),1)
+        self.assertLess(rs.reading(q,d['x'],d['y']),level)
+        self.assertEqual(g.dig_radiation(q['id'],mask['x'],mask['y'])['result'],'empty')
+        self.assertTrue(g.radiation_available(q));self.assertEqual(q['progress'],0)
+
+    def test_digging_the_device_finds_it(self):
         g,q=accepted();before=g.radiation_injury
-        self.assertIsNotNone(find(g,q))
-        self.assertEqual(g.radiation_injury-before,q['rad_settings']['max_dose'])
-        device=next(i for i in g.bag if rs.is_device(i,q))
-        self.assertEqual((device['kind'],device['name'],device['weight']),('quest',rs.DEVICE_NAME,rs.DEVICE_WEIGHT))
-        self.assertFalse(g.radiation_available(q))
-        self.assertIsNone(g.probe_radiation(q['id'],0,0))
+        self.assertEqual(find(g,q)['result'],'device')
+        self.assertEqual(g.radiation_injury,before)
+        item=next(i for i in g.bag if rs.is_device(i,q))
+        self.assertEqual((item['kind'],item['name'],item['weight']),('quest',rs.DEVICE_NAME,rs.DEVICE_WEIGHT))
+        self.assertTrue(g.quest_ready(q));self.assertFalse(g.radiation_available(q))
+        self.assertIsNone(g.dig_radiation(q['id'],1,1))
         self.assertEqual(sum(rs.is_device(i) for i in g.bag),1)
 
     def test_device_must_be_returned_to_giver(self):
@@ -114,17 +139,20 @@ class RadiationSourceTests(unittest.TestCase):
         g,q=accepted()
         self.assertEqual(quest_navigation.destination(g,q),q['pos'])
         self.assertEqual(g.quest_item_views(q)[0]['name'],rs.DEVICE_NAME)
-        self.assertIn('без обмежень',g.quest_text(dict(q,status='offered')))
+        self.assertIn('сторонніх джерел',g.quest_text(dict(q,status='offered')))
         find(g,q)
         self.assertEqual(list(quest_navigation.destination(g,q)),list(g.cities[q['city']]))
         self.assertEqual(g.quest_return_city(q),q['city'])
         self.assertIn('Віднесіть його замовнику',g.quest_text(q))
 
-    def test_old_saves_with_attempt_limits_keep_working(self):
+    def test_old_hex_probe_saves_are_replanted(self):
         g,q=accepted()
-        q['rad_settings']['probes']=1;q['rad_retry_turn']=g.turn+50;q['rad_probes'].append(dict(cell=[9,9],value=1.0))
-        self.assertTrue(g.radiation_available(q))
-        self.assertIsNotNone(find(g,q));self.assertTrue(g.quest_ready(q))
+        for key in ('rad_sources','rad_holes','rad_dose_left'):q.pop(key)
+        q.update(rad_source=[1,2],rad_probes=[dict(cell=[0,0],value=1.0)],rad_dose=7,rad_settings=dict(grid_size=5,max_dose=5,device_radiation=1))
+        q=g.radiation_quest(q['id'])
+        self.assertNotIn('rad_probes',q);self.assertNotIn('rad_source',q)
+        self.assertEqual(q['rad_settings']['isotopes'],3);self.assertEqual(q['rad_dose'],7)
+        self.assertEqual(find(g,q)['result'],'device');self.assertTrue(g.quest_ready(q))
 
     def test_profile_settings_are_used_and_validated(self):
         doc=copy.deepcopy(quest_catalog.DOCUMENT)
@@ -137,7 +165,7 @@ class RadiationSourceTests(unittest.TestCase):
         quest_catalog.DOCUMENT=dict(original,native={rs.KIND:{'normal':spec}})
         try:
             g,q=accepted()
-            self.assertEqual(q['rad_settings'],{'grid_size':4,'max_dose':0,'device_radiation':2})
+            self.assertEqual(q['rad_settings'],{'grid_size':4,'isotopes':3,'max_dose':0,'device_radiation':2})
             before=g.radiation_injury
             find(g,q)
             self.assertEqual(g.radiation_injury,before)
@@ -147,11 +175,11 @@ class RadiationSourceTests(unittest.TestCase):
         finally:quest_catalog.DOCUMENT=original
 
     def test_state_survives_save_and_load(self):
-        g,q=accepted();g.probe_radiation(q['id'],*next(c for c in cells(q) if c!=tuple(q['rad_source'])))
+        g,q=accepted();mask=q['rad_sources'][1];g.dig_radiation(q['id'],mask['x'],mask['y']);g.dig_radiation(q['id'],.5,.5)
         with tempfile.TemporaryDirectory() as folder:
             path=Path(folder)/'save.json';g.save(path);h=Game.load(path)
         other=h.radiation_quest(q['id'])
-        self.assertEqual(other['rad_probes'],q['rad_probes']);self.assertEqual(other['rad_source'],q['rad_source'])
+        self.assertEqual(other['rad_sources'],q['rad_sources']);self.assertEqual(other['rad_holes'],q['rad_holes'])
         self.assertIsNotNone(find(h,other))
         with tempfile.TemporaryDirectory() as folder:
             path=Path(folder)/'save.json';h.save(path);k=Game.load(path)

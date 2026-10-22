@@ -39,11 +39,28 @@ def check(root,app):
         assert not services or 'Пошук джерела' in services,services
         import ui.radiation as radiation
         radiation.show(app,q['id']);board=app.dialog.dosimeter;root.update()
-        for cell in ((0,0),(5,5),(2,3)):
-            x,y=board.center(*cell);board.click(type('E',(),dict(x=x,y=y))())
-        assert len(q['rad_probes'])==3
-        shot(app.dialog,'dosimeter_probes.png')
-        x,y=board.center(*q['rad_source']);board.click(type('E',(),dict(x=x,y=y))())
+        ev=lambda x,y:type('E',(),dict(x=x,y=y))()
+        mask=q['rad_sources'][1];dev=next(s for s in q['rad_sources'] if s['kind']=='device')
+        # Sweep towards the strongest stray: the needle climbs and radiation accrues.
+        for i in range(12):
+            x,y=board.to_screen(mask['x']*i/11+.5*(11-i)/11,mask['y']*i/11+.5*(11-i)/11);board.motion(ev(x,y));root.after(60);root.update()
+        for _ in range(10):root.after(45);root.update()
+        assert board.shown>10,board.shown
+        shot(app.dialog,'dosimeter_sweep.png')
+        def hold(x,y):
+            board.motion(ev(x,y));board.press(ev(x,y))
+            end=__import__('time').monotonic()+radiation.DIG_SECONDS+.3
+            while __import__('time').monotonic()<end:root.after(30);root.update()
+            board.release(ev(x,y))
+        hold(*board.to_screen(mask['x']+1.2,mask['y']))
+        assert len(q['rad_holes'])==1,q['rad_holes']
+        hold(*board.to_screen(mask['x'],mask['y']))
+        assert mask['found'] and g.radiation_cleared(q)==1
+        shot(app.dialog,'dosimeter_cleared.png')
+        x,y=board.to_screen(dev['x'],dev['y']);board.motion(ev(x,y))
+        board.start_dig(button=True)
+        end=__import__('time').monotonic()+radiation.DIG_SECONDS+.3
+        while __import__('time').monotonic()<end:root.after(30);root.update()
         assert g.quest_ready(q) and any(i.get('type_id')=='quest_radioactive_device' for i in g.bag)
         shot(app.dialog,'dosimeter_found.png')
         app.dialog.close_dialog()

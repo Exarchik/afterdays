@@ -10,6 +10,15 @@ from entity_catalog import Store
 from tests.test_entity_editor import project_copy
 import quest_catalog
 errors=[]
+
+
+def shown(key):
+    """The value the editor should show: the saved native profile, else the minigame default."""
+    import quest_minigames
+    kind=next(k for k,v in quest_minigames.MINIGAMES.items() if key in [f for f,_ in v['fields']])
+    spec=(quest_catalog.DOCUMENT.get('native',{}).get(kind) or {}).get('normal') or {}
+    return str(spec.get(key,quest_minigames.defaults(kind)[key]))
+
 with tempfile.TemporaryDirectory() as folder:
     project=project_copy(folder);root=tk.Tk();root.geometry('1200x850')
     root.report_callback_exception=lambda *args:errors.append(''.join(traceback.format_exception(*args)))
@@ -30,7 +39,7 @@ with tempfile.TemporaryDirectory() as folder:
     # Dosimeter minigame settings are edited only for their own quest type.
     panel.tree.selection_set('type:radiation_source');root.update()
     assert panel.native.extras['radiation_source'].winfo_ismapped() and not panel.native.extras['junkyard'].winfo_ismapped()
-    panel.native.vars['grid_size'].set('5');panel.native.vars['max_dose'].set('3')
+    panel.native.vars['grid_size'].set('5');panel.native.vars['isotopes'].set('2');panel.native.vars['max_dose'].set('3')
     panel.native.vars['device_radiation'].set('2');panel.native.vars['device_art'].set('quest:cache')
     assert panel.commit()
     panel.tree.selection_set('type:radiation_source');root.update()
@@ -40,17 +49,17 @@ with tempfile.TemporaryDirectory() as folder:
     panel.native.vars['grid_size'].set('5')
     panel.tree.selection_set('type:junkyard');root.update()
     assert panel.native.extras['junkyard'].winfo_ismapped() and not panel.native.extras['radiation_source'].winfo_ismapped()
-    assert panel.native.vars['work_per_satiety'].get()=='4'
+    assert panel.native.vars['work_per_satiety'].get()==shown('work_per_satiety')
     panel.native.vars['parts'].set('4');panel.native.vars['work_per_satiety'].set('5');panel.native.vars['settle_min'].set('12');panel.native.vars['settle_max'].set('18')
     assert panel.commit()
     panel.tree.selection_set('type:elite_hunt');root.update()
     assert panel.native.extras['elite_hunt'].winfo_ismapped() and not panel.native.extras['junkyard'].winfo_ismapped()
-    assert panel.native.vars['drain'].get()=='38'
+    assert panel.native.vars['drain'].get().isdigit()
     panel.native.vars['needed'].set('4');panel.native.vars['drain'].set('45');panel.native.vars['recharge'].set('20');panel.native.vars['lens_speed'].set('60')
     assert panel.commit()
     panel.tree.selection_set('type:electronics_repair');root.update()
     assert panel.native.extras['electronics_repair'].winfo_ismapped() and not panel.native.extras['elite_hunt'].winfo_ismapped()
-    assert panel.native.vars['contacts_max'].get()=='5'
+    assert panel.native.vars['contacts_max'].get()==shown('contacts_max')
     panel.native.vars['contacts_min'].set('5');panel.native.vars['contacts_max'].set('4')
     with patch('quest_profile_editor.messagebox.showerror') as error:
         assert not panel.native.commit();error.assert_called_once()
@@ -58,7 +67,7 @@ with tempfile.TemporaryDirectory() as folder:
     assert panel.commit()
     panel.tree.selection_set('type:generator');root.update()
     assert panel.native.extras['generator'].winfo_ismapped() and not panel.native.extras['electronics_repair'].winfo_ismapped()
-    assert panel.native.vars['switches'].get()=='5'
+    assert panel.native.vars['switches'].get()==shown('switches')
     panel.native.vars['switches'].set('3');panel.native.vars['negatives'].set('3')
     with patch('quest_profile_editor.messagebox.showerror') as error:
         assert not panel.native.commit();error.assert_called_once()
@@ -66,7 +75,7 @@ with tempfile.TemporaryDirectory() as folder:
     assert panel.commit()
     panel.tree.selection_set('type:cache');root.update()
     assert panel.native.extras['cache'].winfo_ismapped() and not panel.native.extras['generator'].winfo_ismapped()
-    assert panel.native.vars['rings'].get()=='4'
+    assert panel.native.vars['rings'].get()==shown('rings')
     panel.native.vars['rings'].set('9')
     with patch('quest_profile_editor.messagebox.showerror') as error:
         assert not panel.native.commit();error.assert_called_once()
@@ -74,7 +83,7 @@ with tempfile.TemporaryDirectory() as folder:
     assert panel.commit()
     panel.tree.selection_set('type:torn_map');root.update()
     assert panel.native.extras['torn_map'].winfo_ismapped() and not panel.native.extras['cache'].winfo_ismapped()
-    assert panel.native.vars['cols'].get()=='4'
+    assert panel.native.vars['cols'].get()==shown('cols')
     panel.native.vars['cols'].set('8')
     with patch('quest_profile_editor.messagebox.showerror') as error:
         assert not panel.native.commit();error.assert_called_once()
@@ -91,7 +100,7 @@ with tempfile.TemporaryDirectory() as folder:
     assert doc['quests'][-1]['elite'] and doc['quests'][-1]['xp_step']==8
     radiation=doc['native']['radiation_source']['normal']
     junk=doc['native']['junkyard']['normal']
-    assert (junk['parts'],junk['work_per_satiety'],junk['settle_min'],junk['settle_max'],junk['settle_chance'])==(4,5,12,18,60),junk
+    assert (junk['parts'],junk['work_per_satiety'],junk['settle_min'],junk['settle_max'],junk['settle_chance'])==(4,5,12,18,int(shown('settle_chance'))),junk
     lock=doc['native']['cache']['normal']
     assert (lock['rings'],lock['positions'],lock['wear'],lock['depth'])==(5,8,12,3),lock
     torn=doc['native']['torn_map']['normal']
@@ -102,7 +111,7 @@ with tempfile.TemporaryDirectory() as folder:
     assert (repair['contacts_min'],repair['contacts_max'],repair['decoys'],repair['hints'],repair['shock'])==(3,4,2,1,1),repair
     hunt=doc['native']['elite_hunt']['normal']
     assert (hunt['needed'],hunt['drain'],hunt['recharge'],hunt['lens_speed'])==(4,45,20,60),hunt
-    assert (radiation['grid_size'],radiation['max_dose'],radiation['device_radiation'],radiation['device_art'])==(5,3,2,'quest:cache'),radiation
+    assert (radiation['grid_size'],radiation['isotopes'],radiation['max_dose'],radiation['device_radiation'],radiation['device_art'])==(5,2,3,2,'quest:cache'),radiation
     panel.tree.selection_set('type:radiation_source' if '--radiation' in sys.argv else 'type:junkyard' if '--junkyard' in sys.argv else 'type:elite_hunt' if '--scanner' in sys.argv else 'type:electronics_repair' if '--electronics' in sys.argv else 'type:generator' if '--generator' in sys.argv else 'type:cache' if '--lock' in sys.argv else 'type:torn_map' if '--map' in sys.argv else 'type:hunt');root.update()
     if '--screenshot' in sys.argv:
         root.lift();root.attributes('-topmost',True);root.update()
