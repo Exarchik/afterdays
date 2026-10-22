@@ -127,7 +127,7 @@ class Combat:
     def _bullets(self,target,w,mode,chance,bullets):
         """A single bullet rolls the hit chance; a burst flies as a widening fan (see burst.py)."""
         if mode=='burst':return self._burst(target,w,chance)
-        from game.systems.adventure import damage_type,DAMAGE_TYPES
+        from game.systems.adventure import damage_type,DAMAGE_TYPES,attack_look
         b=self.battle
         volley=__import__('uuid').uuid4().hex
         misfire=self.rng.random()<misfire_chance(w) if misfire_chance(w) else False
@@ -143,13 +143,13 @@ class Combat:
             elif target in b['enemies'] and self.rng.randrange(100)<max(1,chance):hit=target
             pos=(hit or target)['pos']
             self.emit(kind='attack',pos=pos,source=b['pos'],color=DAMAGE_TYPES[damage_type(w)][1])
-            self._events[-1].update(fire_mode=mode,projectile=n,volley=volley,volley_count=bullets,damage_type=damage_type(w),hit=bool(hit))
+            self._events[-1].update(fire_mode=mode,projectile=n,volley=volley,volley_count=bullets,damage_type=damage_type(w),hit=bool(hit),**attack_look(w))
             if hit:self._projectile_damage(hit,w,mode,None)
             else:self.emit(tr('adventure.0218'),pos=pos,color='#d7d4c0')
 
     def _burst(self,target,w,chance):
         """Five bullets one after another, each wider; the first hostile body on the way takes it."""
-        from game.systems.adventure import damage_type,DAMAGE_TYPES
+        from game.systems.adventure import damage_type,DAMAGE_TYPES,attack_look
         from game.systems import burst
         b=self.battle;limit=module_rules.weapon_stats(self,w)['range']
         misfire=self.rng.random()<misfire_chance(w) if misfire_chance(w) else False
@@ -159,7 +159,7 @@ class Combat:
         for n,(enemy,end,distance,wall) in enumerate(shots):
             self.emit(kind='attack',pos=enemy['pos'] if enemy else end,source=b['pos'],color=DAMAGE_TYPES[damage_type(w)][1])
             self._events[-1].update(fire_mode='burst',projectile=n,volley=volley,volley_count=burst.BULLETS,
-                                    damage_type=damage_type(w),hit=enemy is not None,wall=wall)
+                                    damage_type=damage_type(w),hit=enemy is not None,wall=wall,**attack_look(w))
             if enemy is None or enemy not in b['enemies']:continue
             hits[enemy['id']]=hits.get(enemy['id'],0)+1
             self._projectile_damage(enemy,w,'burst',None)
@@ -168,7 +168,7 @@ class Combat:
 
     def _shotgun_shell(self,target,w,mode,chance):
         """Six pellets in a fan: each takes the first hostile body on its way (see shotgun.py)."""
-        from game.systems.adventure import damage_type,DAMAGE_TYPES
+        from game.systems.adventure import damage_type,DAMAGE_TYPES,attack_look
         from game.systems import shotgun
         b=self.battle;limit=module_rules.weapon_stats(self,w)['range']
         misfire=self.rng.random()<misfire_chance(w) if misfire_chance(w) else False
@@ -178,7 +178,7 @@ class Combat:
         for n,(enemy,end,distance,wall) in enumerate(pellets):
             self.emit(kind='attack',pos=enemy['pos'] if enemy else end,source=b['pos'],color=DAMAGE_TYPES[damage_type(w)][1])
             self._events[-1].update(fire_mode='pellet',projectile=n,volley=volley,volley_count=shotgun.PELLETS,wall=wall,
-                                    damage_type=damage_type(w),hit=enemy is not None)
+                                    damage_type=damage_type(w),hit=enemy is not None,**attack_look(w))
             if enemy is None or enemy not in b['enemies']:continue
             hits[enemy['id']]=hits.get(enemy['id'],0)+1
             self._projectile_damage(enemy,w,mode,n,shotgun.falloff(w,distance,limit))

@@ -15,6 +15,10 @@ SECTIONS = {'weapon':'Зброя','armor':'Броня','helmet':'Шоломи','
 GROUPS = {'weapon':'equipment','armor':'equipment','helmet':'equipment','module':'modules','monster':'monsters'}
 DAMAGE = {'kinetic':'Кінетична','piercing':'Пробивна','thermal':'Термічна','energy':'Енергетична','electric':'Електрична'}
 AMMO = {'pistol':'Пістолетні','rifle':'Гвинтівкові','shell':'Дріб','energy':'Енергоосередки','heavy':'Важкі','bolt':'Болти'}
+# Attack animation of a weapon (ui/projectiles.py); '' draws it by damage type.
+PROJECTILES = {'':'За типом шкоди','kinetic':'Куля (кінетична)','piercing':'Голка (пробивна)','thermal':'Вогняна куля (термічна)',
+               'energy':'Бірюзовий імпульс (енергетична)','electric':'Блискавка (електрична)','laser_bolt':'Жовтий лазерний імпульс',
+               'railgun':'Рельсотрон: спіральний слід','plasma_red':'Згусток червоної плазми','heavy':'Потужний постріл'}
 CATEGORIES = {'pistol':'Пістолет','rifle':'Гвинтівка','automatic':'Автоматична','shotgun':'Дробовик','sniper':'Снайперська'}
 TARGETS = {'weapon':'Зброя','protection':'Броня та шоломи','armor':'Лише броня','helmet':'Лише шоломи'}
 STATS = {
@@ -28,7 +32,7 @@ STATS = {
 RARITIES = ('Звичайна','Незвична','Рідкісна','Унікальна','Міфічна')
 GRADES = {'normal':'Звичайний','rare':'Рідкісний','mythic':'Міфічний'}
 FIELDS = {
-    'weapon': [('damage','Базова шкода',int),('attack','Базова атака',int),('range','Дальність',int),('accuracy','Точність, %',int),('weight','Вага, кг',float),('ap','Витрата ОД',int),('min_level','Мін. рівень появи',int),('ammo_type','Тип набоїв',AMMO),('damage_type','Тип шкоди',DAMAGE),('category','Клас зброї',CATEGORIES)],
+    'weapon': [('damage','Базова шкода',int),('attack','Базова атака',int),('range','Дальність',int),('accuracy','Точність, %',int),('weight','Вага, кг',float),('ap','Витрата ОД',int),('min_level','Мін. рівень появи',int),('ammo_type','Тип набоїв',AMMO),('damage_type','Тип шкоди',DAMAGE),('category','Клас зброї',CATEGORIES),('projectile','Анімація атаки',PROJECTILES)],
     'armor': [('defense','Базовий захист',int),('weight','Вага, кг',float),('min_level','Мін. рівень появи',int)],
     'helmet': [('defense','Базовий захист',int),('weight','Вага, кг',float),('min_level','Мін. рівень появи',int)],
     'module': [('target','Для спорядження',TARGETS),('min_level','Мін. рівень появи',int),('stat','Основний параметр',STATS),('base','Базовий бонус',float),('weight','Вага, кг',float)],
@@ -51,7 +55,7 @@ def validate_definition(section, ident, data, texts, art):
     need(isinstance(texts.get('description'),str), 'опис має бути текстом')
     need(isinstance(data.get('sprite_id'),str) and data['sprite_id'] in art, 'невідомий асет')
     for field,label,kind in FIELDS[section]:
-        value=data.get(field, 2*(4+data.get('legacy_index',0)) if section=='monster' and field=='trophy_value' else .3 if section=='module' and field=='weight' else 1 if section=='module' and field=='min_level' else None)
+        value=data.get(field, 2*(4+data.get('legacy_index',0)) if section=='monster' and field=='trophy_value' else .3 if section=='module' and field=='weight' else 1 if section=='module' and field=='min_level' else '' if field=='projectile' else None)
         if isinstance(kind,dict): need(isinstance(value,str) and value in kind, label+': невідоме значення')
         elif kind is str: need(isinstance(value,str),label+': потрібен текст')
         else:

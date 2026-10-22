@@ -80,6 +80,9 @@ class Effects:
         for event in g.pop_events():
             event=dict(event);kind=event['kind']
             duration=min(1.10, max(.24, .14 * (len(event.get('path', [])) - 1))) if kind=='move' else .65 if event.get('fire_mode')=='aimed' else .4 if kind in ('attack','slash') else 2.8 if kind=='reveal' else 1.0
+            if kind=='attack' and event.get('look'):
+                from ui.projectiles import duration as look_duration
+                duration=look_duration(event,duration)
             if kind in ('move','attack','slash'):
                 if kind=='attack' and event.get('volley'):
                     ident=event['volley']

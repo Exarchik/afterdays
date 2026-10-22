@@ -29,9 +29,9 @@ def style_of(actor):
 
 def look(actor):
     """Event fields for the attack animation of an enemy or an armed person."""
-    from game.systems.adventure import damage_type
+    from game.systems.adventure import damage_type,attack_look
     weapon=(actor.get('equipment') or {}).get('weapon')
-    if weapon and actor.get('range',1)>1:return dict(damage_type=damage_type(weapon))
+    if weapon and actor.get('range',1)>1:return dict(damage_type=damage_type(weapon),**attack_look(weapon))
     if actor.get('human'):return dict(attack_style='punch')
     style=style_of(actor)
     return dict(damage_type='electric') if style=='spark' else dict(attack_style=style)

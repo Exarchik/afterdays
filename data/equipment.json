@@ -27,7 +27,7 @@
     "ammo_type": "rifle",
     "damage_type": "kinetic",
     "sprite_id": "weapon_watch_rifle",
-    "category": "rifle"
+    "category": "sniper"
   },
   "weapon_rust_assault": {
     "kind": "weapon",
@@ -72,7 +72,8 @@
     "ammo_type": "energy",
     "damage_type": "energy",
     "sprite_id": "weapon_ray_laser",
-    "category": "rifle"
+    "category": "rifle",
+    "projectile": "laser_bolt"
   },
   "armor_plated_jacket": {
     "kind": "armor",
@@ -159,7 +160,7 @@
     "ammo_type": "rifle",
     "damage_type": "kinetic",
     "sprite_id": "weapon_pilgrim_carbine",
-    "category": "sniper"
+    "category": "rifle"
   },
   "weapon_horizon_sniper": {
     "kind": "weapon",
@@ -204,7 +205,8 @@
     "ammo_type": "energy",
     "damage_type": "thermal",
     "sprite_id": "weapon_sun_plasma",
-    "category": "rifle"
+    "category": "rifle",
+    "projectile": "thermal"
   },
   "weapon_impulse_gauss": {
     "kind": "weapon",
@@ -219,7 +221,8 @@
     "ammo_type": "energy",
     "damage_type": "electric",
     "sprite_id": "weapon_impulse_gauss",
-    "category": "sniper"
+    "category": "sniper",
+    "projectile": "railgun"
   },
   "weapon_spark_ion": {
     "kind": "weapon",
@@ -446,7 +449,8 @@
     "ammo_type": "energy",
     "damage_type": "thermal",
     "sprite_id": "art_custom_001",
-    "category": "pistol"
+    "category": "pistol",
+    "projectile": "plasma_red"
   },
   "weapon_custom_002": {
     "kind": "weapon",
@@ -461,7 +465,8 @@
     "ammo_type": "energy",
     "damage_type": "thermal",
     "sprite_id": "art_custom_018",
-    "category": "automatic"
+    "category": "automatic",
+    "projectile": "laser_bolt"
   },
   "weapon_custom_003": {
     "kind": "weapon",
@@ -476,6 +481,7 @@
     "ammo_type": "heavy",
     "damage_type": "kinetic",
     "sprite_id": "art_custom_019",
-    "category": "pistol"
+    "category": "pistol",
+    "projectile": "heavy"
   }
 }

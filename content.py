@@ -41,6 +41,8 @@ GEAR_MIN_LEVEL=AliasDict({k:v['min_level'] for k,v in EQUIPMENT.items()})
 AMMO_BY_WEAPON=AliasDict({k:v['ammo_type'] for k,v in EQUIPMENT.items() if v['kind']=='weapon'})
 WEAPON_ATTACK=AliasDict({k:v['attack'] for k,v in EQUIPMENT.items() if v['kind']=='weapon'})
 WEAPON_DAMAGE=AliasDict({k:v['damage_type'] for k,v in EQUIPMENT.items() if v['kind']=='weapon'})
+# Optional attack animation of a weapon; empty means "by damage type" (see ui/projectiles.py).
+WEAPON_LOOK=AliasDict({k:v.get('projectile','') for k,v in EQUIPMENT.items() if v['kind']=='weapon'})
 MODULES=[(name(k),v['target'],v['stat'],v['base']) for k in MODULE_IDS for v in [MODULE_DATA[k]]]
 class Monsters:
     # Повертає кількість доступних елементів.

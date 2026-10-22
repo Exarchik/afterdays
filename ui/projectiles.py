@@ -8,9 +8,14 @@ import math
 import random
 
 ARRIVE={'kinetic':.5,'piercing':.32,'thermal':.72,'energy':.55,'electric':.4}
+# Weapon looks chosen in the editor (equipment 'projectile'); events carry them as 'look'.
+LOOKS={'laser_bolt':.3,'railgun':.14,'plasma_red':.26,'heavy':.42}
+# A railgun's trail lingers, so its event lasts longer (seconds).
+DURATION={'railgun':.8}
 # Monster and melee styles (see game/systems/attack_looks.py).
 STYLE_ARRIVE={'spit':.62,'acid':.6,'laser':.28,'mud':.6,'web':.45,'bite':.45,'claw':.4,'smash':.5,'punch':.4}
-MUZZLE={'kinetic':'#ffe08a','piercing':'#f4ffe0','thermal':'#ff9a50','energy':'#bff7f1','electric':'#e2d2ff'}
+MUZZLE={'kinetic':'#ffe08a','piercing':'#f4ffe0','thermal':'#ff9a50','energy':'#bff7f1','electric':'#e2d2ff',
+        'laser_bolt':'#fff2a0','railgun':'#d8f4ff','plasma_red':'#ffb09a','heavy':'#fff0b0'}
 
 
 def zigzag(x1,y1,x2,y2,amp,rng):
@@ -21,21 +26,33 @@ def zigzag(x1,y1,x2,y2,amp,rng):
     return points+[x2,y2]
 
 
+def look(e):
+    """Animation of a shot: the weapon's own look if set, else its damage type."""
+    if e.get('look') in LOOKS or e.get('look') in ARRIVE:return e['look']
+    return e.get('damage_type','kinetic') if e.get('damage_type') in ARRIVE else 'kinetic'
+
+
 def arrive(e):
     """Fraction of the event at which the blow lands."""
     style=e.get('attack_style')
     if style in STYLE_ARRIVE:return STYLE_ARRIVE[style]
-    return ARRIVE.get(e.get('damage_type'),.5)
+    kind=look(e)
+    return LOOKS.get(kind,ARRIVE.get(kind,.5))
+
+
+def duration(e,default):
+    """Event length in seconds; some looks need longer than a plain shot."""
+    return max(default,DURATION.get(e.get('look'),0))
 
 
 def draw(c,e,sx,sy,px,py,t,u=14):
     """Draw one projectile event; returns nothing. Unknown types fall back to kinetic."""
     if e.get('attack_style') in STYLE_ARRIVE:return draw_style(c,e,sx,sy,px,py,t,u)
-    kind=e.get('damage_type','kinetic')
-    if kind not in ARRIVE:kind='kinetic'
+    kind=look(e)
     small=e.get('fire_mode')=='pellet'
     s=max(.6,min(1.5,u/14))*(.7 if small else 1)
     seed=hash((e.get('volley'),e.get('projectile',0)))&0xffff
+    if kind in LOOKS:return _draw_look(c,e,kind,sx,sy,px,py,t,s,small,seed)
     arrive=ARRIVE[kind];length=math.hypot(px-sx,py-sy) or 1;dx,dy=(px-sx)/length,(py-sy)/length
     if t<arrive:
         k=t/arrive;hx,hy=sx+(px-sx)*k,sy+(py-sy)*k
@@ -105,6 +122,119 @@ def draw(c,e,sx,sy,px,py,t,u=14):
             points=zigzag(px,py,px+math.cos(a)*L,py+math.sin(a)*L,4*s,jitter)
             c.create_line(*points,fill='#7b5cc8',width=max(1,2.4*s),tags='fx')
             c.create_line(*points,fill='#e9ddff',width=1,tags='fx')
+
+
+def _flash(c,x,y,r,color):
+    points=[]
+    for i in range(8):
+        a=i*math.pi/4+.2;rr=r if i%2==0 else r*.38
+        points+=[x+math.cos(a)*rr,y+math.sin(a)*rr]
+    c.create_polygon(*points,fill=color,outline='',tags='fx')
+
+
+def _ellipse(cx,cy,a,b,dx,dy,n=14):
+    """Polygon points of an ellipse with its long axis along (dx,dy)."""
+    points=[]
+    for i in range(n):
+        q=i/n*2*math.pi;u,v=math.cos(q)*a,math.sin(q)*b
+        points+=[cx+u*dx-v*dy,cy+u*dy+v*dx]
+    return points
+
+
+def _helix(sx,sy,px,py,radius,turn,phase):
+    """Spiral around the line sx,sy→px,py: (front, back) runs of points, front faces the viewer."""
+    length=math.hypot(px-sx,py-sy) or 1;dx,dy=(px-sx)/length,(py-sy)/length;nx,ny=-dy,dx
+    n=max(8,int(length/1.5));runs=([],[]);current=None;run=[]
+    for i in range(n+1):
+        d=length*i/n;a=d/turn*2*math.pi+phase;off=math.sin(a)*radius
+        x,y=sx+dx*d+nx*off,sy+dy*d+ny*off;front=math.cos(a)>=0
+        if front!=current and run:
+            run+=[x,y];runs[0 if current else 1].append(run);run=[]
+        current=front;run+=[x,y]
+    if len(run)>=4:runs[0 if current else 1].append(run)
+    return runs
+
+
+def _draw_look(c,e,kind,sx,sy,px,py,t,s,small,seed):
+    """The four editor looks: yellow laser bolt, railgun spiral, red plasma, heavy round."""
+    arrive=LOOKS[kind];length=math.hypot(px-sx,py-sy) or 1;dx,dy=(px-sx)/length,(py-sy)/length
+    hit=e.get('hit',True);wall=e.get('wall',False);rng=random.Random(seed)
+    if kind=='railgun':
+        # The slug is near-instant; the trail stays and slowly falls apart.
+        reach=min(1,t/arrive);hx,hy=sx+(px-sx)*reach,sy+(py-sy)*reach
+        fade=max(0,(t-arrive)/(1-arrive))
+        radius=(5+6*fade)*s;phase=fade*2.2
+        front,back=_helix(sx,sy,hx,hy,radius,30*s,phase)
+        step=min(3,int(fade*4))
+        dim='gray50' if fade>.55 else ''
+        back_color=('#2b6fae','#235d93','#1c4a75','#173c5e')[step];front_color=('#9fe2ff','#7fcff7','#5aa8d8','#3f7fb0')[step]
+        for run in back:c.create_line(*run,fill=back_color,width=max(1,1.6*s),tags='fx')
+        if fade<.85:
+            core=('#ffffff','#d8f2ff','#9ccbe6','#7fb6d8')[step]
+            c.create_line(sx,sy,hx,hy,fill=core,width=max(1,(2.6-2.2*fade)*s),stipple=dim,tags='fx')
+        for run in front:c.create_line(*run,fill=front_color,width=max(1,2.8*s*(1-fade*.4)),capstyle='round',stipple=dim,tags='fx')
+        if t<.12:_flash(c,sx,sy,(1-t/.12)*13*s,MUZZLE[kind])
+        if t>=arrive:
+            k=fade;r=(5+24*k)*s
+            c.create_oval(px-r,py-r*.6,px+r,py+r*.6,outline='#9fe0ff' if k<.5 else '#3f7fb0',width=max(1,3*(1-k)+.5),tags='fx')
+            if k<.25:f=12*s*(1-k/.25);c.create_oval(px-f,py-f,px+f,py+f,fill='#eaf8ff',outline='',tags='fx')
+            for _ in range(0 if small else 6):
+                a=rng.uniform(0,2*math.pi);d=(5+26*k)*s;x,y=px+math.cos(a)*d,py+math.sin(a)*d
+                c.create_line(x,y,x-math.cos(a)*5*s,y-math.sin(a)*5*s,fill='#cfeeff',width=1,tags='fx')
+        return
+    if t<arrive:
+        k=t/arrive;hx,hy=sx+(px-sx)*k,sy+(py-sy)*k
+        def back(n):
+            n=min(n,length*k);return hx-dx*n,hy-dy*n
+        if t<.1:_flash(c,sx,sy,(1-t/.1)*(20 if kind=='heavy' else 11)*s,MUZZLE[kind])
+        if kind=='laser_bolt':
+            bx,by=back(20*s)
+            for width,color in ((7,'#8a6a08'),(4,'#ffd21a'),(1.6,'#fffbe0')):
+                c.create_line(bx,by,hx,hy,fill=color,width=max(1,width*s),capstyle='round',tags='fx')
+        elif kind=='plasma_red':
+            for i,(back_k,color) in enumerate(((.22,'#5a0a0a'),(.14,'#9a1410'),(.07,'#d8261a'))):
+                x,y=back(length*back_k*k+6*s);r=(2.4-i*.4)*s
+                c.create_oval(x-r,y-r,x+r,y+r,fill=color,outline='',stipple='gray50',tags='fx')
+            for a,b,color in ((9,5.5,'#7a0d0d'),(6.5,4,'#ff2a1a'),(3.2,2,'#ffd6c0')):
+                c.create_polygon(*_ellipse(hx,hy,a*s,b*s,dx,dy),fill=color,outline='',tags='fx')
+        else:  # heavy round: thick tracer, the air ripples behind it
+            bx,by=back(44*s)
+            c.create_line(bx,by,hx,hy,fill='#7a5520',width=max(1,6*s),tags='fx')
+            c.create_line(bx+dx*10*s,by+dy*10*s,hx,hy,fill='#ffe7a8',width=max(1,2.8*s),tags='fx')
+            c.create_oval(hx-3.4*s,hy-3.4*s,hx+3.4*s,hy+3.4*s,fill='#fff8e0',outline='',tags='fx')
+            if k<.5:r=(5+14*k)*s;c.create_oval(sx-r,sy-r*.7,sx+r,sy+r*.7,outline='#d8cfb8',width=1,tags='fx')
+            for i in range(3):
+                x,y=sx+dx*(10+i*8)*s+rng.uniform(-2,2),sy+dy*(10+i*8)*s-4*k*s;r=(4+5*k+i)*s
+                c.create_oval(x-r,y-r,x+r,y+r,fill='#6b665c',outline='',stipple='gray25',tags='fx')
+        return
+    k=(t-arrive)/max(.01,1-arrive)
+    if kind=='laser_bolt':
+        if k<.35:_flash(c,px,py,9*s*(1-k/.35)+3,'#fff3a0')
+        for _ in range(3 if small else 5):
+            a=rng.uniform(0,2*math.pi);d=(4+16*k)*s;x,y=px+math.cos(a)*d,py+math.sin(a)*d
+            c.create_line(x,y,x-math.cos(a)*5*s,y-math.sin(a)*5*s,fill='#ffe35a',width=max(1,1.4*s),tags='fx')
+        r=3.5*s;c.create_oval(px-r,py-r*.6,px+r,py+r*.6,fill='#3a2a0a',outline='#ffcf30' if k<.5 else '',stipple='gray50',tags='fx')
+    elif kind=='plasma_red':
+        r=(5+22*k)*s;c.create_oval(px-r,py-r*.65,px+r,py+r*.65,outline='#ff3b2a',width=max(1,3*(1-k)+.5),tags='fx')
+        if k<.3:
+            f=11*s*(1-k/.3)
+            for rr,color in ((f,'#ff3b2a'),(f*.55,'#ffd0b0')):c.create_oval(px-rr,py-rr,px+rr,py+rr,fill=color,outline='',tags='fx')
+        for _ in range(4 if small else 9):
+            vx,vy=rng.uniform(-1,1)*18*s,rng.uniform(-1.2,-.2)*16*s
+            x,y=px+vx*k,py+vy*k+30*s*k*k;r=max(.8,1.8*s*(1-k*.6))
+            c.create_oval(x-r,y-r,x+r,y+r,fill='#ff8a3a' if k<.5 else '#a02a14',outline='',tags='fx')
+        c.create_oval(px-9*s,py-4*s,px+9*s,py+5*s,fill='#ff5030',outline='',stipple='gray25',tags='fx')
+    else:
+        color='#cfcabb' if wall or not hit else '#8d7f63'
+        r=(6+34*k)*s;c.create_oval(px-r,py-r*.55,px+r,py+r*.55,outline='#e8dfc4',width=max(1,3.5*(1-k)),tags='fx')
+        if k<.2:_flash(c,px,py,16*s*(1-k/.2)+4,'#fff0b0')
+        for _ in range(5 if small else 11):
+            vx,vy=rng.uniform(-1,1)*22*s,rng.uniform(-1,.2)*20*s;r=(3+5*k)*s
+            x,y=px+vx*k,py+vy*k;c.create_oval(x-r,y-r,x+r,y+r,fill=color,outline='',stipple='gray50' if k>.45 else '',tags='fx')
+        for _ in range(0 if small else 6):
+            vx,vy=rng.uniform(-1,1)*30*s,rng.uniform(-1.4,-.4)*22*s
+            x,y=px+vx*k,py+vy*k+40*s*k*k;q=2*s
+            c.create_rectangle(x-q,y-q,x+q,y+q,fill='#3b342a',outline='',tags='fx')
 
 
 def _arc_point(sx,sy,px,py,k,lift):

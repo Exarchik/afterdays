@@ -22,6 +22,7 @@ DAMAGE_TYPES={'kinetic':(tr('adventure.0001'),'#e8c78c'),'piercing':(tr('adventu
               'thermal':(tr('adventure.0003'),'#ff9160'),'energy':(tr('adventure.0004'),'#88e3d9'),
               'electric':(tr('adventure.0005'),'#bf9dff')}
 WEAPON_DAMAGE = content.WEAPON_DAMAGE
+WEAPON_LOOK = content.WEAPON_LOOK
 # Positive values resist damage; negative values increase damage taken.
 RESISTANCES = content.RESISTANCES
 BLOCKED={'water','cliff'}
@@ -40,6 +41,11 @@ EXTRA_EVENTS={e['id']:(e['terrain'],e['title'],e['description'],[(c['id'],c['tex
 SIMPLE_EVENTS={e['id']:(e['title'],e['description'],e['choices'][0]['outcomes'][0]['effects'][0]['kind'],e['choices'][0]['outcomes'][0]['effects'][0]['amount']) for e in event_catalog.EVENTS if e.get('legacy_group')=='simple'}
 
 def damage_type(item):return WEAPON_DAMAGE.get(item.get('type_id',item['name']),'kinetic')
+
+def attack_look(item):
+    """Event fields for a weapon's own attack animation; empty when it is drawn by damage type."""
+    look=WEAPON_LOOK.get(item.get('type_id',item.get('name','')),'')
+    return {'look':look} if look else {}
 
 def resistance_text(enemy):
     profile=enemy.get('resists',RESISTANCES.get(enemy['kind'],{}))

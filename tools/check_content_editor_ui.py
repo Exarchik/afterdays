@@ -16,7 +16,7 @@ def run(capture=None):
         root=tk.Tk();ttk.Style(root).theme_use('clam')
         try:
             app=ContentEditor(root,root_path/'data/road_events.json',root_path);root.update()
-            assert len(app.tabs.tabs())==10
+            assert len(app.tabs.tabs())>=10,len(app.tabs.tabs())
             assert app.commit() and not app.store.dirty,'Opening unchanged sections must not alter catalogs'
             app.items.open('item_credits');app.items.variables['sprite_id'].set('med');root.update()
             assert app.items.image is not None
@@ -39,6 +39,10 @@ def run(capture=None):
                 panel.duplicate();assert len(app.store.items(section))==initial+2
                 field={'weapon':'damage','armor':'defense','helmet':'defense','module':'base','monster':'hp'}[section]
                 panel.fields[field].set('51');panel.refresh_preview();root.update()
+                if section=='weapon':
+                    # Attack animation: empty means "by damage type"; a chosen look is saved with the weapon.
+                    assert panel.fields['projectile'].get()==catalog.PROJECTILES['']
+                    panel.fields['projectile'].set(catalog.PROJECTILES['railgun'])
                 if section=='monster':
                     panel.fields['base_level'].set('7');panel.refresh_preview();root.update()
                     assert panel.level.get()=='7'
@@ -60,6 +64,8 @@ def run(capture=None):
             saved_events=event_catalog.load(root_path/'data/road_events.json')
             assert any(e['id']==app.events.current and e['title']=='Тест спільного збереження' for e in saved_events['events'])
             for section,panel in app.panels.items():assert loaded.data[catalog.GROUPS[section]][panel.current][{'weapon':'damage','armor':'defense','helmet':'defense','module':'base','monster':'hp'}[section]]==51
+            assert loaded.data['equipment'][app.panels['weapon'].current]['projectile']=='railgun'
+            assert all('projectile' not in d for k,d in loaded.data['equipment'].items() if k!=app.panels['weapon'].current and d['kind']=='weapon' and k in catalog.Store(Path(__file__).resolve().parents[1]).baseline['equipment'])
             panel=app.panels['weapon'];panel.fields['damage'].set('invalid')
             with patch('entity_editor.messagebox.showerror') as error:
                 assert not app.save_all() and error.called

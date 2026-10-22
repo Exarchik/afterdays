@@ -218,6 +218,7 @@ class EntityPanel(ttk.Frame):
             try:value=next(k for k,v in kind.items() if v==text) if isinstance(kind,dict) else kind(text)
             except (ValueError,StopIteration):raise ValueError(label+': некоректне значення')
             data[field]=value
+        if data.get('projectile')=='':data.pop('projectile')  # by damage type: keep the record unchanged
         if self.module_options:self.module_options.apply(data)
         if self.section=='monster':data['resists']={k:int(v.get()) for k,v in self.resists.items()}
         if self.curves:
