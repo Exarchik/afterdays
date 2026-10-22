@@ -1,0 +1,318 @@
+diff --git a/EDITING_CONTENT.md b/EDITING_CONTENT.md
+index 79b7c74..0bd5910 100644
+--- a/EDITING_CONTENT.md
++++ b/EDITING_CONTENT.md
+@@ -211,6 +211,12 @@ Pillow має бути встановлений саме у версії ред
+   окремих анімацій: жовтий лазерний імпульс, рельсотрон зі спіральним слідом (його
+   слід тримається довше, 0,8 с), згусток червоної плазми, потужний постріл. Анімація
+   лише візуальна й діє і для гравця, і для ворогів із цією зброєю.
++  Блок «Режими атаки»: клас зброї задає режими за замовчуванням (автоматична —
++  одиночний і черга, снайперська — прицільний, решта — одиночний). Зніміть галочку
++  «Як у класу зброї», щоб вибрати режими цієї моделі вручну; біля кожного режиму
++  коротко описано плюси й мінуси. Перший доступний режим стоїть у бою за замовчуванням,
++  кнопка режиму перебирає всі вибрані. Дробовик чергою не стріляє. Власний список
++  зберігається в `equipment.json` як `fire_modes`.
+ - **Броня та шоломи:** захист, вага, мінімальний рівень; перегляд враховує
+   рідкість і стан предмета.
+ - **Модулі:** цільове спорядження, основний параметр, базовий бонус, вага,
+diff --git a/entity_catalog.py b/entity_catalog.py
+index 1afff56..df85bdd 100644
+--- a/entity_catalog.py
++++ b/entity_catalog.py
+@@ -68,6 +68,9 @@ def validate_definition(section, ident, data, texts, art):
+         need(data.get('kind')==section,'тип спорядження не можна змінювати')
+         for key in ('damage','range','defense','accuracy','ap','attack'):
+             need(type(data.get(key)) is int and data[key]>=0,key+': має бути цілим ≥ 0')
++    if section=='weapon' and 'fire_modes' in data:
++        import fire_modes
++        for problem in fire_modes.problems(data.get('category'),data['fire_modes']):need(False,'режими атаки: '+problem)
+     if section in ('module','monster'):
+         need(type(data.get('legacy_index')) is int and data['legacy_index']>=0,'некоректний індекс')
+     if section=='module':
+diff --git a/entity_editor.py b/entity_editor.py
+index 9635ae8..78e80aa 100644
+--- a/entity_editor.py
++++ b/entity_editor.py
+@@ -112,6 +112,8 @@ class EntityPanel(ttk.Frame):
+             var=self.trophy_value if field=='trophy_value' else tk.StringVar();self.fields[field]=var
+             if field!='trophy_value' and not (section=='module' and field=='target'):row(self.form,label,var,list(kind.values()) if isinstance(kind,dict) else None)
+             var.trace_add('write',lambda *args,f=field:self.field_changed(f))
++        self.mode_vars={};self.modes_default=None
++        if section=='weapon':self.build_modes()
+         self.module_options=None
+         if section=='module':
+             from module_options_ui import ModuleOptions
+@@ -162,6 +164,53 @@ class EntityPanel(ttk.Frame):
+         items=self.list.get_children()
+         if items:self.open(items[0])
+ 
++    def build_modes(self):
++        """Fire modes of the weapon: the class defaults or the editor's own choice."""
++        import fire_modes
++        box=ttk.LabelFrame(self.form,text='Режими атаки',padding=8);box.pack(fill='x',pady=(10,4))
++        self.modes_default=tk.BooleanVar(value=True)
++        self.modes_hint=tk.StringVar()
++        ttk.Checkbutton(box,text='Як у класу зброї',variable=self.modes_default,command=self.modes_toggled).pack(anchor='w')
++        ttk.Label(box,textvariable=self.modes_hint,foreground='#5d6656',wraplength=330).pack(anchor='w',pady=(0,6))
++        self.mode_checks={}
++        for key,mode in fire_modes.MODES.items():
++            var=tk.BooleanVar();self.mode_vars[key]=var
++            check=ttk.Checkbutton(box,text=mode['name'],variable=var,command=self.schedule_preview);check.pack(anchor='w',pady=(4,0))
++            self.mode_checks[key]=check
++            ttk.Label(box,text='+ '+mode['pros'],foreground='#2f6b3a',wraplength=330).pack(anchor='w',padx=(22,0))
++            ttk.Label(box,text='− '+mode['cons'],foreground='#8a3b2c',wraplength=330).pack(anchor='w',padx=(22,0))
++        self.fields['category'].trace_add('write',lambda *args:self.modes_toggled(keep=True))
++
++    def category_key(self):
++        text=self.fields['category'].get();return next((k for k,v in catalog.CATEGORIES.items() if v==text),'pistol')
++
++    def modes_toggled(self,keep=False):
++        """Default on: show the class modes, locked. Off: unlock, starting from what is shown."""
++        import fire_modes
++        if self.modes_default is None:return
++        category=self.category_key();defaults=fire_modes.defaults(category)
++        self.modes_hint.set('Клас «'+catalog.CATEGORIES[category]+'»: '+', '.join(fire_modes.MODES[m]['name'] for m in defaults)+'.')
++        default=self.modes_default.get()
++        for key,var in self.mode_vars.items():
++            if default:var.set(key in defaults)
++            forbidden=key in fire_modes.FORBIDDEN.get(category,())
++            self.mode_checks[key].state(['disabled'] if default or forbidden else ['!disabled'])
++            if forbidden and not default:var.set(False)
++        if not self.loading:self.schedule_preview()
++
++    def load_modes(self,data):
++        if self.modes_default is None:return
++        explicit=data.get('fire_modes')
++        self.modes_default.set(not isinstance(explicit,list))
++        self.modes_toggled(keep=True)
++        if isinstance(explicit,list):
++            for key,var in self.mode_vars.items():var.set(key in explicit)
++
++    def read_modes(self,data):
++        if self.modes_default is None:return
++        if self.modes_default.get():data.pop('fire_modes',None)
++        else:data['fire_modes']=[key for key,var in self.mode_vars.items() if var.get()]
++
+     def rebuild(self):
+         self.loading=True;self.list.delete(*self.list.get_children())
+         level_key='base_level' if self.section=='monster' else 'min_level' if self.section in ('weapon','armor','helmet','module') else None
+@@ -193,6 +242,7 @@ class EntityPanel(ttk.Frame):
+             value=self.original.get(field,'pistol' if field=='category' else '')
+             self.fields[field].set(kind[value] if isinstance(kind,dict) else str(value))
+         if self.module_options:self.module_options.load(self.original)
++        self.load_modes(self.original)
+         for key,var in self.resists.items():var.set(str(self.original.get('resists',{}).get(key,0)))
+         if self.curves:self.curves.set(self.original.get('rarity_stats',{}));self.penalties.set(self.original.get('fixed_penalties',{}))
+         self.level.set(str(self.original.get('base_level',self.original.get('min_level',1))))
+@@ -219,6 +269,7 @@ class EntityPanel(ttk.Frame):
+             except (ValueError,StopIteration):raise ValueError(label+': некоректне значення')
+             data[field]=value
+         if data.get('projectile')=='':data.pop('projectile')  # by damage type: keep the record unchanged
++        self.read_modes(data)
+         if self.module_options:self.module_options.apply(data)
+         if self.section=='monster':data['resists']={k:int(v.get()) for k,v in self.resists.items()}
+         if self.curves:
+diff --git a/fire_modes.py b/fire_modes.py
+new file mode 100644
+index 0000000..7cbe502
+--- /dev/null
++++ b/fire_modes.py
+@@ -0,0 +1,48 @@
++"""Weapon fire modes: names, trade-offs and which modes a weapon offers.
++
++The weapon class (category) gives the default set; a weapon model may list its own
++`fire_modes` in data/equipment.json (edited in the content editor). Pure data: no game state.
++"""
++
++# Canonical order: the first available mode is the default one in battle.
++MODES={
++    'single':dict(name='Одиночний',
++                  pros='Базова витрата ОД і точність, один набій. Дробовик стріляє віялом із 6 дробин.',
++                  cons='Жодних бонусів до влучання чи критичного удару.'),
++    'burst':dict(name='Черга',
++                 pros='5 куль віялом, що ширшає: більше влучань, хвіст черги може зачепити сусіда.',
++                 cons='+1 ОД, витрачає 5 набоїв, точність −15%. Дробовик чергою не стріляє.'),
++    'aimed':dict(name='Прицільний',
++                 pros='Від 4 гексів точність +10%, критичний шанс +15%.',
++                 cons='+1 ОД; ближче ніж на 4 гекси точність −30%.'),
++}
++DEFAULTS={'automatic':('single','burst'),'sniper':('aimed',)}
++# Modes a weapon class cannot fire, whatever the data says.
++FORBIDDEN={'shotgun':{'burst'}}
++
++
++def defaults(category):
++    return DEFAULTS.get(category,('single',))
++
++
++def allowed(category,explicit=None):
++    """Modes a weapon offers, in canonical order. Invalid or empty lists fall back to the class."""
++    if isinstance(explicit,(list,tuple)):
++        chosen=tuple(m for m in MODES if m in explicit and m not in FORBIDDEN.get(category,()))
++        if chosen:return chosen
++    return defaults(category)
++
++
++def problems(category,explicit):
++    """Editor validation of an explicit list; empty list of messages when it is fine."""
++    if not isinstance(explicit,list) or not explicit:return ['виберіть хоча б один режим атаки']
++    errors=[]
++    if any(not isinstance(m,str) or m not in MODES for m in explicit):errors.append('невідомий режим атаки')
++    if len(set(map(str,explicit)))!=len(explicit):errors.append('режим атаки повторюється')
++    for m in FORBIDDEN.get(category,()):
++        if m in explicit:errors.append(f'клас зброї не підтримує режим «{MODES[m]["name"]}»')
++    return errors
++
++
++def describe(mode):
++    m=MODES[mode];return f"{m['name']}: + {m['pros']} − {m['cons']}"
+diff --git a/game/systems/combat.py b/game/systems/combat.py
+index 40c7987..05aee15 100644
+--- a/game/systems/combat.py
++++ b/game/systems/combat.py
+@@ -11,8 +11,10 @@ def category(item):
+     return content.EQUIPMENT.get(item.get('type_id'),{}).get('category','pistol') if item else 'pistol'
+ 
+ def modes(item):
+-    kind=category(item)
+-    return ('single','burst') if kind=='automatic' else ('aimed',) if kind=='sniper' else ('single',)
++    """Fire modes of a weapon: its own list from the editor, else its class defaults."""
++    import fire_modes
++    explicit=content.EQUIPMENT.get(item.get('type_id'),{}).get('fire_modes') if item else None
++    return fire_modes.allowed(category(item),explicit)
+ 
+ def shot_cost(item):
+     allowed=modes(item);mode=item.get('fire_mode',allowed[0])
+@@ -59,9 +61,10 @@ class Combat:
+         return value if value in allowed else allowed[0]
+ 
+     def cycle_fire_mode(self):
+-        """Switch between single and burst without spending AP."""
+-        if not self.battle or not self.weapon or len(self.fire_modes())<2:return False
+-        self.weapon['fire_mode']='burst' if self.fire_mode()=='single' else 'single';return True
++        """Switch to the weapon's next fire mode without spending AP."""
++        allowed=self.fire_modes() if self.battle and self.weapon else ()
++        if len(allowed)<2:return False
++        self.weapon['fire_mode']=allowed[(allowed.index(self.fire_mode())+1)%len(allowed)];return True
+ 
+     def shot_ap(self,weapon=None):
+         """Calculate AP including automatic burst or aimed-shot surcharge."""
+diff --git a/tests/test_fire_modes.py b/tests/test_fire_modes.py
+new file mode 100644
+index 0000000..dc13d2d
+--- /dev/null
++++ b/tests/test_fire_modes.py
+@@ -0,0 +1,83 @@
++"""Fire modes per weapon: class defaults, editor overrides, cycling and validation."""
++import copy
++import unittest
++from unittest.mock import patch
++
++import content
++import entity_catalog
++import fire_modes
++from game.systems import combat
++
++
++class FireModeTests(unittest.TestCase):
++    def setUp(self):
++        self.saved=copy.deepcopy(content.EQUIPMENT)
++
++    def tearDown(self):
++        content.EQUIPMENT.clear();content.EQUIPMENT.update(self.saved)
++
++    def test_class_defaults_are_unchanged(self):
++        self.assertEqual(fire_modes.allowed('automatic'),('single','burst'))
++        self.assertEqual(fire_modes.allowed('sniper'),('aimed',))
++        for category in ('pistol','rifle','shotgun'):self.assertEqual(fire_modes.allowed(category),('single',))
++        self.assertEqual(combat.modes({'type_id':'weapon_rust_assault'}),('single','burst'))
++        self.assertEqual(combat.modes({'type_id':'weapon_horizon_sniper'}),('aimed',))
++
++    def test_every_mode_has_a_name_and_trade_offs(self):
++        self.assertEqual(list(fire_modes.MODES),['single','burst','aimed'])
++        for mode in fire_modes.MODES.values():
++            self.assertTrue(mode['name'] and mode['pros'] and mode['cons'])
++
++    def test_weapon_list_overrides_its_class_in_canonical_order(self):
++        content.EQUIPMENT['weapon_ash_pistol']['fire_modes']=['aimed','single']
++        self.assertEqual(combat.modes({'type_id':'weapon_ash_pistol'}),('single','aimed'))
++        content.EQUIPMENT['weapon_ash_pistol']['fire_modes']=[]
++        self.assertEqual(combat.modes({'type_id':'weapon_ash_pistol'}),('single',))
++        content.EQUIPMENT['weapon_thunder_shotgun']['fire_modes']=['burst']
++        self.assertEqual(combat.modes({'type_id':'weapon_thunder_shotgun'}),('single',))
++        content.EQUIPMENT['weapon_thunder_shotgun']['fire_modes']=['single','aimed','burst']
++        self.assertEqual(combat.modes({'type_id':'weapon_thunder_shotgun'}),('single','aimed'))
++
++    def test_cost_follows_the_chosen_mode(self):
++        content.EQUIPMENT['weapon_ash_pistol']['fire_modes']=['single','aimed']
++        w={'type_id':'weapon_ash_pistol','ap':2}
++        self.assertEqual(combat.shot_cost(w),2)
++        self.assertEqual(combat.shot_cost(dict(w,fire_mode='aimed')),3)
++        self.assertEqual(combat.shot_cost(dict(w,fire_mode='burst')),2)
++
++    def test_cycling_walks_every_available_mode(self):
++        from tests import test_update033 as arena
++        content.EQUIPMENT['weapon_rust_assault']['fire_modes']=['single','burst','aimed']
++        g,w,b=arena.Update033Tests().arena('weapon_rust_assault',5)
++        seen=[g.fire_mode()]
++        for _ in range(3):
++            self.assertTrue(g.cycle_fire_mode());seen.append(g.fire_mode())
++        self.assertEqual(seen,['single','burst','aimed','single'])
++        content.EQUIPMENT['weapon_rust_assault']['fire_modes']=['aimed']
++        self.assertFalse(g.cycle_fire_mode());self.assertEqual(g.fire_mode(),'aimed')
++
++    def test_aimed_pistol_shot_uses_aimed_rules(self):
++        from tests import test_update033 as arena
++        content.EQUIPMENT['weapon_ash_pistol']['fire_modes']=['single','aimed']
++        g,w,b=arena.Update033Tests().arena('weapon_ash_pistol',5);g.pop_events()
++        g.cycle_fire_mode();self.assertEqual(g.fire_mode(),'aimed')
++        ap=b['ap']
++        with patch.object(g.rng,'random',return_value=.5),patch.object(g.rng,'randrange',return_value=99):
++            self.assertTrue(g.shoot('0'))
++        self.assertEqual(ap-b['ap'],w['ap']+1)
++        self.assertTrue(all(e['fire_mode']=='aimed' for e in g.pop_events() if e['kind']=='attack'))
++
++    def test_editor_validation(self):
++        ident='weapon_thunder_shotgun';data=copy.deepcopy(content.EQUIPMENT[ident])
++        texts={'name':'Дробовик','description':''};art={data['sprite_id']}
++        check=lambda modes:entity_catalog.validate_definition('weapon',ident,dict(data,fire_modes=modes),texts,art)
++        self.assertEqual(entity_catalog.validate_definition('weapon',ident,data,texts,art),[])
++        self.assertEqual(check(['single','aimed']),[])
++        self.assertTrue(check([]));self.assertTrue(check(['rocket']));self.assertTrue(check(['single','single']))
++        self.assertTrue(any('Черга' in e for e in check(['single','burst'])))
++        self.assertEqual(entity_catalog.validate_definition('weapon','weapon_rust_assault',
++            dict(copy.deepcopy(content.EQUIPMENT['weapon_rust_assault']),fire_modes=['burst','aimed']),texts,
++            {content.EQUIPMENT['weapon_rust_assault']['sprite_id']}),[])
++
++
++if __name__=='__main__':unittest.main()
+diff --git a/tools/check_content_editor_ui.py b/tools/check_content_editor_ui.py
+index 0c7dff3..701a816 100644
+--- a/tools/check_content_editor_ui.py
++++ b/tools/check_content_editor_ui.py
+@@ -43,6 +43,16 @@ def run(capture=None):
+                     # Attack animation: empty means "by damage type"; a chosen look is saved with the weapon.
+                     assert panel.fields['projectile'].get()==catalog.PROJECTILES['']
+                     panel.fields['projectile'].set(catalog.PROJECTILES['railgun'])
++                    # Fire modes: class defaults are locked until the weapon gets its own list.
++                    panel.fields['category'].set(catalog.CATEGORIES['automatic']);root.update()
++                    assert panel.modes_default.get() and [k for k,v in panel.mode_vars.items() if v.get()]==['single','burst']
++                    assert panel.mode_checks['aimed'].instate(['disabled'])
++                    panel.modes_default.set(False);panel.modes_toggled();panel.mode_vars['aimed'].set(True);root.update()
++                    assert not panel.mode_checks['aimed'].instate(['disabled'])
++                    if capture:
++                        canvas=panel.form.master
++                        try:canvas.yview_moveto(1.0)
++                        except Exception:pass
+                 if section=='monster':
+                     panel.fields['base_level'].set('7');panel.refresh_preview();root.update()
+                     assert panel.level.get()=='7'
+@@ -65,6 +75,8 @@ def run(capture=None):
+             assert any(e['id']==app.events.current and e['title']=='Тест спільного збереження' for e in saved_events['events'])
+             for section,panel in app.panels.items():assert loaded.data[catalog.GROUPS[section]][panel.current][{'weapon':'damage','armor':'defense','helmet':'defense','module':'base','monster':'hp'}[section]]==51
+             assert loaded.data['equipment'][app.panels['weapon'].current]['projectile']=='railgun'
++            assert loaded.data['equipment'][app.panels['weapon'].current]['fire_modes']==['single','burst','aimed']
++            assert all('fire_modes' not in d for d in catalog.Store(Path(__file__).resolve().parents[1]).baseline['equipment'].values())
+             assert all('projectile' not in d for k,d in loaded.data['equipment'].items() if k!=app.panels['weapon'].current and d['kind']=='weapon' and k in catalog.Store(Path(__file__).resolve().parents[1]).baseline['equipment'])
+             panel=app.panels['weapon'];panel.fields['damage'].set('invalid')
+             with patch('entity_editor.messagebox.showerror') as error:

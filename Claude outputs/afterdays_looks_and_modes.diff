@@ -1,0 +1,756 @@
+diff --git a/EDITING_CONTENT.md b/EDITING_CONTENT.md
+index 723442b..0bd5910 100644
+--- a/EDITING_CONTENT.md
++++ b/EDITING_CONTENT.md
+@@ -205,7 +205,18 @@ Pillow має бути встановлений саме у версії ред
+ не зберігаючи чернетку на диск. Прокрутіть середню колонку для додаткових полів.
+ 
+ - **Зброя:** шкода, атака, дальність, точність, вага, ОД, мінімальний рівень,
+-  тип набоїв, тип шкоди та клас зброї, який визначає режими стрільби.
++  тип набоїв, тип шкоди, клас зброї, який визначає режими стрільби, і анімація атаки.
++  «За типом шкоди» малює снаряд за типом шкоди (куля, голка, вогняна куля, імпульс,
++  блискавка). Можна вибрати будь-який із них незалежно від типу шкоди або одну з
++  окремих анімацій: жовтий лазерний імпульс, рельсотрон зі спіральним слідом (його
++  слід тримається довше, 0,8 с), згусток червоної плазми, потужний постріл. Анімація
++  лише візуальна й діє і для гравця, і для ворогів із цією зброєю.
++  Блок «Режими атаки»: клас зброї задає режими за замовчуванням (автоматична —
++  одиночний і черга, снайперська — прицільний, решта — одиночний). Зніміть галочку
++  «Як у класу зброї», щоб вибрати режими цієї моделі вручну; біля кожного режиму
++  коротко описано плюси й мінуси. Перший доступний режим стоїть у бою за замовчуванням,
++  кнопка режиму перебирає всі вибрані. Дробовик чергою не стріляє. Власний список
++  зберігається в `equipment.json` як `fire_modes`.
+ - **Броня та шоломи:** захист, вага, мінімальний рівень; перегляд враховує
+   рідкість і стан предмета.
+ - **Модулі:** цільове спорядження, основний параметр, базовий бонус, вага,
+diff --git a/content.py b/content.py
+index 99857f5..afcd29d 100644
+--- a/content.py
++++ b/content.py
+@@ -41,6 +41,8 @@ GEAR_MIN_LEVEL=AliasDict({k:v['min_level'] for k,v in EQUIPMENT.items()})
+ AMMO_BY_WEAPON=AliasDict({k:v['ammo_type'] for k,v in EQUIPMENT.items() if v['kind']=='weapon'})
+ WEAPON_ATTACK=AliasDict({k:v['attack'] for k,v in EQUIPMENT.items() if v['kind']=='weapon'})
+ WEAPON_DAMAGE=AliasDict({k:v['damage_type'] for k,v in EQUIPMENT.items() if v['kind']=='weapon'})
++# Optional attack animation of a weapon; empty means "by damage type" (see ui/projectiles.py).
++WEAPON_LOOK=AliasDict({k:v.get('projectile','') for k,v in EQUIPMENT.items() if v['kind']=='weapon'})
+ MODULES=[(name(k),v['target'],v['stat'],v['base']) for k in MODULE_IDS for v in [MODULE_DATA[k]]]
+ class Monsters:
+     # Повертає кількість доступних елементів.
+diff --git a/entity_catalog.py b/entity_catalog.py
+index 039841c..df85bdd 100644
+--- a/entity_catalog.py
++++ b/entity_catalog.py
+@@ -15,6 +15,10 @@ SECTIONS = {'weapon':'Зброя','armor':'Броня','helmet':'Шоломи','
+ GROUPS = {'weapon':'equipment','armor':'equipment','helmet':'equipment','module':'modules','monster':'monsters'}
+ DAMAGE = {'kinetic':'Кінетична','piercing':'Пробивна','thermal':'Термічна','energy':'Енергетична','electric':'Електрична'}
+ AMMO = {'pistol':'Пістолетні','rifle':'Гвинтівкові','shell':'Дріб','energy':'Енергоосередки','heavy':'Важкі','bolt':'Болти'}
++# Attack animation of a weapon (ui/projectiles.py); '' draws it by damage type.
++PROJECTILES = {'':'За типом шкоди','kinetic':'Куля (кінетична)','piercing':'Голка (пробивна)','thermal':'Вогняна куля (термічна)',
++               'energy':'Бірюзовий імпульс (енергетична)','electric':'Блискавка (електрична)','laser_bolt':'Жовтий лазерний імпульс',
++               'railgun':'Рельсотрон: спіральний слід','plasma_red':'Згусток червоної плазми','heavy':'Потужний постріл'}
+ CATEGORIES = {'pistol':'Пістолет','rifle':'Гвинтівка','automatic':'Автоматична','shotgun':'Дробовик','sniper':'Снайперська'}
+ TARGETS = {'weapon':'Зброя','protection':'Броня та шоломи','armor':'Лише броня','helmet':'Лише шоломи'}
+ STATS = {
+@@ -28,7 +32,7 @@ STATS = {
+ RARITIES = ('Звичайна','Незвична','Рідкісна','Унікальна','Міфічна')
+ GRADES = {'normal':'Звичайний','rare':'Рідкісний','mythic':'Міфічний'}
+ FIELDS = {
+-    'weapon': [('damage','Базова шкода',int),('attack','Базова атака',int),('range','Дальність',int),('accuracy','Точність, %',int),('weight','Вага, кг',float),('ap','Витрата ОД',int),('min_level','Мін. рівень появи',int),('ammo_type','Тип набоїв',AMMO),('damage_type','Тип шкоди',DAMAGE),('category','Клас зброї',CATEGORIES)],
++    'weapon': [('damage','Базова шкода',int),('attack','Базова атака',int),('range','Дальність',int),('accuracy','Точність, %',int),('weight','Вага, кг',float),('ap','Витрата ОД',int),('min_level','Мін. рівень появи',int),('ammo_type','Тип набоїв',AMMO),('damage_type','Тип шкоди',DAMAGE),('category','Клас зброї',CATEGORIES),('projectile','Анімація атаки',PROJECTILES)],
+     'armor': [('defense','Базовий захист',int),('weight','Вага, кг',float),('min_level','Мін. рівень появи',int)],
+     'helmet': [('defense','Базовий захист',int),('weight','Вага, кг',float),('min_level','Мін. рівень появи',int)],
+     'module': [('target','Для спорядження',TARGETS),('min_level','Мін. рівень появи',int),('stat','Основний параметр',STATS),('base','Базовий бонус',float),('weight','Вага, кг',float)],
+@@ -51,7 +55,7 @@ def validate_definition(section, ident, data, texts, art):
+     need(isinstance(texts.get('description'),str), 'опис має бути текстом')
+     need(isinstance(data.get('sprite_id'),str) and data['sprite_id'] in art, 'невідомий асет')
+     for field,label,kind in FIELDS[section]:
+-        value=data.get(field, 2*(4+data.get('legacy_index',0)) if section=='monster' and field=='trophy_value' else .3 if section=='module' and field=='weight' else 1 if section=='module' and field=='min_level' else None)
++        value=data.get(field, 2*(4+data.get('legacy_index',0)) if section=='monster' and field=='trophy_value' else .3 if section=='module' and field=='weight' else 1 if section=='module' and field=='min_level' else '' if field=='projectile' else None)
+         if isinstance(kind,dict): need(isinstance(value,str) and value in kind, label+': невідоме значення')
+         elif kind is str: need(isinstance(value,str),label+': потрібен текст')
+         else:
+@@ -64,6 +68,9 @@ def validate_definition(section, ident, data, texts, art):
+         need(data.get('kind')==section,'тип спорядження не можна змінювати')
+         for key in ('damage','range','defense','accuracy','ap','attack'):
+             need(type(data.get(key)) is int and data[key]>=0,key+': має бути цілим ≥ 0')
++    if section=='weapon' and 'fire_modes' in data:
++        import fire_modes
++        for problem in fire_modes.problems(data.get('category'),data['fire_modes']):need(False,'режими атаки: '+problem)
+     if section in ('module','monster'):
+         need(type(data.get('legacy_index')) is int and data['legacy_index']>=0,'некоректний індекс')
+     if section=='module':
+diff --git a/entity_editor.py b/entity_editor.py
+index 206a39f..78e80aa 100644
+--- a/entity_editor.py
++++ b/entity_editor.py
+@@ -112,6 +112,8 @@ class EntityPanel(ttk.Frame):
+             var=self.trophy_value if field=='trophy_value' else tk.StringVar();self.fields[field]=var
+             if field!='trophy_value' and not (section=='module' and field=='target'):row(self.form,label,var,list(kind.values()) if isinstance(kind,dict) else None)
+             var.trace_add('write',lambda *args,f=field:self.field_changed(f))
++        self.mode_vars={};self.modes_default=None
++        if section=='weapon':self.build_modes()
+         self.module_options=None
+         if section=='module':
+             from module_options_ui import ModuleOptions
+@@ -162,6 +164,53 @@ class EntityPanel(ttk.Frame):
+         items=self.list.get_children()
+         if items:self.open(items[0])
+ 
++    def build_modes(self):
++        """Fire modes of the weapon: the class defaults or the editor's own choice."""
++        import fire_modes
++        box=ttk.LabelFrame(self.form,text='Режими атаки',padding=8);box.pack(fill='x',pady=(10,4))
++        self.modes_default=tk.BooleanVar(value=True)
++        self.modes_hint=tk.StringVar()
++        ttk.Checkbutton(box,text='Як у класу зброї',variable=self.modes_default,command=self.modes_toggled).pack(anchor='w')
++        ttk.Label(box,textvariable=self.modes_hint,foreground='#5d6656',wraplength=330).pack(anchor='w',pady=(0,6))
++        self.mode_checks={}
++        for key,mode in fire_modes.MODES.items():
++            var=tk.BooleanVar();self.mode_vars[key]=var
++            check=ttk.Checkbutton(box,text=mode['name'],variable=var,command=self.schedule_preview);check.pack(anchor='w',pady=(4,0))
++            self.mode_checks[key]=check
++            ttk.Label(box,text='+ '+mode['pros'],foreground='#2f6b3a',wraplength=330).pack(anchor='w',padx=(22,0))
++            ttk.Label(box,text='− '+mode['cons'],foreground='#8a3b2c',wraplength=330).pack(anchor='w',padx=(22,0))
++        self.fields['category'].trace_add('write',lambda *args:self.modes_toggled(keep=True))
++
++    def category_key(self):
++        text=self.fields['category'].get();return next((k for k,v in catalog.CATEGORIES.items() if v==text),'pistol')
++
++    def modes_toggled(self,keep=False):
++        """Default on: show the class modes, locked. Off: unlock, starting from what is shown."""
++        import fire_modes
++        if self.modes_default is None:return
++        category=self.category_key();defaults=fire_modes.defaults(category)
++        self.modes_hint.set('Клас «'+catalog.CATEGORIES[category]+'»: '+', '.join(fire_modes.MODES[m]['name'] for m in defaults)+'.')
++        default=self.modes_default.get()
++        for key,var in self.mode_vars.items():
++            if default:var.set(key in defaults)
++            forbidden=key in fire_modes.FORBIDDEN.get(category,())
++            self.mode_checks[key].state(['disabled'] if default or forbidden else ['!disabled'])
++            if forbidden and not default:var.set(False)
++        if not self.loading:self.schedule_preview()
++
++    def load_modes(self,data):
++        if self.modes_default is None:return
++        explicit=data.get('fire_modes')
++        self.modes_default.set(not isinstance(explicit,list))
++        self.modes_toggled(keep=True)
++        if isinstance(explicit,list):
++            for key,var in self.mode_vars.items():var.set(key in explicit)
++
++    def read_modes(self,data):
++        if self.modes_default is None:return
++        if self.modes_default.get():data.pop('fire_modes',None)
++        else:data['fire_modes']=[key for key,var in self.mode_vars.items() if var.get()]
++
+     def rebuild(self):
+         self.loading=True;self.list.delete(*self.list.get_children())
+         level_key='base_level' if self.section=='monster' else 'min_level' if self.section in ('weapon','armor','helmet','module') else None
+@@ -193,6 +242,7 @@ class EntityPanel(ttk.Frame):
+             value=self.original.get(field,'pistol' if field=='category' else '')
+             self.fields[field].set(kind[value] if isinstance(kind,dict) else str(value))
+         if self.module_options:self.module_options.load(self.original)
++        self.load_modes(self.original)
+         for key,var in self.resists.items():var.set(str(self.original.get('resists',{}).get(key,0)))
+         if self.curves:self.curves.set(self.original.get('rarity_stats',{}));self.penalties.set(self.original.get('fixed_penalties',{}))
+         self.level.set(str(self.original.get('base_level',self.original.get('min_level',1))))
+@@ -218,6 +268,8 @@ class EntityPanel(ttk.Frame):
+             try:value=next(k for k,v in kind.items() if v==text) if isinstance(kind,dict) else kind(text)
+             except (ValueError,StopIteration):raise ValueError(label+': некоректне значення')
+             data[field]=value
++        if data.get('projectile')=='':data.pop('projectile')  # by damage type: keep the record unchanged
++        self.read_modes(data)
+         if self.module_options:self.module_options.apply(data)
+         if self.section=='monster':data['resists']={k:int(v.get()) for k,v in self.resists.items()}
+         if self.curves:
+diff --git a/fire_modes.py b/fire_modes.py
+new file mode 100644
+index 0000000..7cbe502
+--- /dev/null
++++ b/fire_modes.py
+@@ -0,0 +1,48 @@
++"""Weapon fire modes: names, trade-offs and which modes a weapon offers.
++
++The weapon class (category) gives the default set; a weapon model may list its own
++`fire_modes` in data/equipment.json (edited in the content editor). Pure data: no game state.
++"""
++
++# Canonical order: the first available mode is the default one in battle.
++MODES={
++    'single':dict(name='Одиночний',
++                  pros='Базова витрата ОД і точність, один набій. Дробовик стріляє віялом із 6 дробин.',
++                  cons='Жодних бонусів до влучання чи критичного удару.'),
++    'burst':dict(name='Черга',
++                 pros='5 куль віялом, що ширшає: більше влучань, хвіст черги може зачепити сусіда.',
++                 cons='+1 ОД, витрачає 5 набоїв, точність −15%. Дробовик чергою не стріляє.'),
++    'aimed':dict(name='Прицільний',
++                 pros='Від 4 гексів точність +10%, критичний шанс +15%.',
++                 cons='+1 ОД; ближче ніж на 4 гекси точність −30%.'),
++}
++DEFAULTS={'automatic':('single','burst'),'sniper':('aimed',)}
++# Modes a weapon class cannot fire, whatever the data says.
++FORBIDDEN={'shotgun':{'burst'}}
++
++
++def defaults(category):
++    return DEFAULTS.get(category,('single',))
++
++
++def allowed(category,explicit=None):
++    """Modes a weapon offers, in canonical order. Invalid or empty lists fall back to the class."""
++    if isinstance(explicit,(list,tuple)):
++        chosen=tuple(m for m in MODES if m in explicit and m not in FORBIDDEN.get(category,()))
++        if chosen:return chosen
++    return defaults(category)
++
++
++def problems(category,explicit):
++    """Editor validation of an explicit list; empty list of messages when it is fine."""
++    if not isinstance(explicit,list) or not explicit:return ['виберіть хоча б один режим атаки']
++    errors=[]
++    if any(not isinstance(m,str) or m not in MODES for m in explicit):errors.append('невідомий режим атаки')
++    if len(set(map(str,explicit)))!=len(explicit):errors.append('режим атаки повторюється')
++    for m in FORBIDDEN.get(category,()):
++        if m in explicit:errors.append(f'клас зброї не підтримує режим «{MODES[m]["name"]}»')
++    return errors
++
++
++def describe(mode):
++    m=MODES[mode];return f"{m['name']}: + {m['pros']} − {m['cons']}"
+diff --git a/game/systems/adventure.py b/game/systems/adventure.py
+index 34b62aa..e455f9a 100644
+--- a/game/systems/adventure.py
++++ b/game/systems/adventure.py
+@@ -22,6 +22,7 @@ DAMAGE_TYPES={'kinetic':(tr('adventure.0001'),'#e8c78c'),'piercing':(tr('adventu
+               'thermal':(tr('adventure.0003'),'#ff9160'),'energy':(tr('adventure.0004'),'#88e3d9'),
+               'electric':(tr('adventure.0005'),'#bf9dff')}
+ WEAPON_DAMAGE = content.WEAPON_DAMAGE
++WEAPON_LOOK = content.WEAPON_LOOK
+ # Positive values resist damage; negative values increase damage taken.
+ RESISTANCES = content.RESISTANCES
+ BLOCKED={'water','cliff'}
+@@ -41,6 +42,11 @@ SIMPLE_EVENTS={e['id']:(e['title'],e['description'],e['choices'][0]['outcomes'][
+ 
+ def damage_type(item):return WEAPON_DAMAGE.get(item.get('type_id',item['name']),'kinetic')
+ 
++def attack_look(item):
++    """Event fields for a weapon's own attack animation; empty when it is drawn by damage type."""
++    look=WEAPON_LOOK.get(item.get('type_id',item.get('name','')),'')
++    return {'look':look} if look else {}
++
+ def resistance_text(enemy):
+     profile=enemy.get('resists',RESISTANCES.get(enemy['kind'],{}))
+     return ' · '.join(f'{DAMAGE_TYPES[k][0]}: '+(tr('adventure.0136', v0=v) if v>0 else tr('adventure.0137', v0=-v)) for k,v in profile.items()) or tr('adventure.0138')
+diff --git a/game/systems/attack_looks.py b/game/systems/attack_looks.py
+index efa946c..758c665 100644
+--- a/game/systems/attack_looks.py
++++ b/game/systems/attack_looks.py
+@@ -29,9 +29,9 @@ def style_of(actor):
+ 
+ def look(actor):
+     """Event fields for the attack animation of an enemy or an armed person."""
+-    from game.systems.adventure import damage_type
++    from game.systems.adventure import damage_type,attack_look
+     weapon=(actor.get('equipment') or {}).get('weapon')
+-    if weapon and actor.get('range',1)>1:return dict(damage_type=damage_type(weapon))
++    if weapon and actor.get('range',1)>1:return dict(damage_type=damage_type(weapon),**attack_look(weapon))
+     if actor.get('human'):return dict(attack_style='punch')
+     style=style_of(actor)
+     return dict(damage_type='electric') if style=='spark' else dict(attack_style=style)
+diff --git a/game/systems/combat.py b/game/systems/combat.py
+index 3f45a43..05aee15 100644
+--- a/game/systems/combat.py
++++ b/game/systems/combat.py
+@@ -11,8 +11,10 @@ def category(item):
+     return content.EQUIPMENT.get(item.get('type_id'),{}).get('category','pistol') if item else 'pistol'
+ 
+ def modes(item):
+-    kind=category(item)
+-    return ('single','burst') if kind=='automatic' else ('aimed',) if kind=='sniper' else ('single',)
++    """Fire modes of a weapon: its own list from the editor, else its class defaults."""
++    import fire_modes
++    explicit=content.EQUIPMENT.get(item.get('type_id'),{}).get('fire_modes') if item else None
++    return fire_modes.allowed(category(item),explicit)
+ 
+ def shot_cost(item):
+     allowed=modes(item);mode=item.get('fire_mode',allowed[0])
+@@ -59,9 +61,10 @@ class Combat:
+         return value if value in allowed else allowed[0]
+ 
+     def cycle_fire_mode(self):
+-        """Switch between single and burst without spending AP."""
+-        if not self.battle or not self.weapon or len(self.fire_modes())<2:return False
+-        self.weapon['fire_mode']='burst' if self.fire_mode()=='single' else 'single';return True
++        """Switch to the weapon's next fire mode without spending AP."""
++        allowed=self.fire_modes() if self.battle and self.weapon else ()
++        if len(allowed)<2:return False
++        self.weapon['fire_mode']=allowed[(allowed.index(self.fire_mode())+1)%len(allowed)];return True
+ 
+     def shot_ap(self,weapon=None):
+         """Calculate AP including automatic burst or aimed-shot surcharge."""
+@@ -127,7 +130,7 @@ class Combat:
+     def _bullets(self,target,w,mode,chance,bullets):
+         """A single bullet rolls the hit chance; a burst flies as a widening fan (see burst.py)."""
+         if mode=='burst':return self._burst(target,w,chance)
+-        from game.systems.adventure import damage_type,DAMAGE_TYPES
++        from game.systems.adventure import damage_type,DAMAGE_TYPES,attack_look
+         b=self.battle
+         volley=__import__('uuid').uuid4().hex
+         misfire=self.rng.random()<misfire_chance(w) if misfire_chance(w) else False
+@@ -143,13 +146,13 @@ class Combat:
+             elif target in b['enemies'] and self.rng.randrange(100)<max(1,chance):hit=target
+             pos=(hit or target)['pos']
+             self.emit(kind='attack',pos=pos,source=b['pos'],color=DAMAGE_TYPES[damage_type(w)][1])
+-            self._events[-1].update(fire_mode=mode,projectile=n,volley=volley,volley_count=bullets,damage_type=damage_type(w),hit=bool(hit))
++            self._events[-1].update(fire_mode=mode,projectile=n,volley=volley,volley_count=bullets,damage_type=damage_type(w),hit=bool(hit),**attack_look(w))
+             if hit:self._projectile_damage(hit,w,mode,None)
+             else:self.emit(tr('adventure.0218'),pos=pos,color='#d7d4c0')
+ 
+     def _burst(self,target,w,chance):
+         """Five bullets one after another, each wider; the first hostile body on the way takes it."""
+-        from game.systems.adventure import damage_type,DAMAGE_TYPES
++        from game.systems.adventure import damage_type,DAMAGE_TYPES,attack_look
+         from game.systems import burst
+         b=self.battle;limit=module_rules.weapon_stats(self,w)['range']
+         misfire=self.rng.random()<misfire_chance(w) if misfire_chance(w) else False
+@@ -159,7 +162,7 @@ class Combat:
+         for n,(enemy,end,distance,wall) in enumerate(shots):
+             self.emit(kind='attack',pos=enemy['pos'] if enemy else end,source=b['pos'],color=DAMAGE_TYPES[damage_type(w)][1])
+             self._events[-1].update(fire_mode='burst',projectile=n,volley=volley,volley_count=burst.BULLETS,
+-                                    damage_type=damage_type(w),hit=enemy is not None,wall=wall)
++                                    damage_type=damage_type(w),hit=enemy is not None,wall=wall,**attack_look(w))
+             if enemy is None or enemy not in b['enemies']:continue
+             hits[enemy['id']]=hits.get(enemy['id'],0)+1
+             self._projectile_damage(enemy,w,'burst',None)
+@@ -168,7 +171,7 @@ class Combat:
+ 
+     def _shotgun_shell(self,target,w,mode,chance):
+         """Six pellets in a fan: each takes the first hostile body on its way (see shotgun.py)."""
+-        from game.systems.adventure import damage_type,DAMAGE_TYPES
++        from game.systems.adventure import damage_type,DAMAGE_TYPES,attack_look
+         from game.systems import shotgun
+         b=self.battle;limit=module_rules.weapon_stats(self,w)['range']
+         misfire=self.rng.random()<misfire_chance(w) if misfire_chance(w) else False
+@@ -178,7 +181,7 @@ class Combat:
+         for n,(enemy,end,distance,wall) in enumerate(pellets):
+             self.emit(kind='attack',pos=enemy['pos'] if enemy else end,source=b['pos'],color=DAMAGE_TYPES[damage_type(w)][1])
+             self._events[-1].update(fire_mode='pellet',projectile=n,volley=volley,volley_count=shotgun.PELLETS,wall=wall,
+-                                    damage_type=damage_type(w),hit=enemy is not None)
++                                    damage_type=damage_type(w),hit=enemy is not None,**attack_look(w))
+             if enemy is None or enemy not in b['enemies']:continue
+             hits[enemy['id']]=hits.get(enemy['id'],0)+1
+             self._projectile_damage(enemy,w,mode,n,shotgun.falloff(w,distance,limit))
+diff --git a/tests/test_fire_modes.py b/tests/test_fire_modes.py
+new file mode 100644
+index 0000000..dc13d2d
+--- /dev/null
++++ b/tests/test_fire_modes.py
+@@ -0,0 +1,83 @@
++"""Fire modes per weapon: class defaults, editor overrides, cycling and validation."""
++import copy
++import unittest
++from unittest.mock import patch
++
++import content
++import entity_catalog
++import fire_modes
++from game.systems import combat
++
++
++class FireModeTests(unittest.TestCase):
++    def setUp(self):
++        self.saved=copy.deepcopy(content.EQUIPMENT)
++
++    def tearDown(self):
++        content.EQUIPMENT.clear();content.EQUIPMENT.update(self.saved)
++
++    def test_class_defaults_are_unchanged(self):
++        self.assertEqual(fire_modes.allowed('automatic'),('single','burst'))
++        self.assertEqual(fire_modes.allowed('sniper'),('aimed',))
++        for category in ('pistol','rifle','shotgun'):self.assertEqual(fire_modes.allowed(category),('single',))
++        self.assertEqual(combat.modes({'type_id':'weapon_rust_assault'}),('single','burst'))
++        self.assertEqual(combat.modes({'type_id':'weapon_horizon_sniper'}),('aimed',))
++
++    def test_every_mode_has_a_name_and_trade_offs(self):
++        self.assertEqual(list(fire_modes.MODES),['single','burst','aimed'])
++        for mode in fire_modes.MODES.values():
++            self.assertTrue(mode['name'] and mode['pros'] and mode['cons'])
++
++    def test_weapon_list_overrides_its_class_in_canonical_order(self):
++        content.EQUIPMENT['weapon_ash_pistol']['fire_modes']=['aimed','single']
++        self.assertEqual(combat.modes({'type_id':'weapon_ash_pistol'}),('single','aimed'))
++        content.EQUIPMENT['weapon_ash_pistol']['fire_modes']=[]
++        self.assertEqual(combat.modes({'type_id':'weapon_ash_pistol'}),('single',))
++        content.EQUIPMENT['weapon_thunder_shotgun']['fire_modes']=['burst']
++        self.assertEqual(combat.modes({'type_id':'weapon_thunder_shotgun'}),('single',))
++        content.EQUIPMENT['weapon_thunder_shotgun']['fire_modes']=['single','aimed','burst']
++        self.assertEqual(combat.modes({'type_id':'weapon_thunder_shotgun'}),('single','aimed'))
++
++    def test_cost_follows_the_chosen_mode(self):
++        content.EQUIPMENT['weapon_ash_pistol']['fire_modes']=['single','aimed']
++        w={'type_id':'weapon_ash_pistol','ap':2}
++        self.assertEqual(combat.shot_cost(w),2)
++        self.assertEqual(combat.shot_cost(dict(w,fire_mode='aimed')),3)
++        self.assertEqual(combat.shot_cost(dict(w,fire_mode='burst')),2)
++
++    def test_cycling_walks_every_available_mode(self):
++        from tests import test_update033 as arena
++        content.EQUIPMENT['weapon_rust_assault']['fire_modes']=['single','burst','aimed']
++        g,w,b=arena.Update033Tests().arena('weapon_rust_assault',5)
++        seen=[g.fire_mode()]
++        for _ in range(3):
++            self.assertTrue(g.cycle_fire_mode());seen.append(g.fire_mode())
++        self.assertEqual(seen,['single','burst','aimed','single'])
++        content.EQUIPMENT['weapon_rust_assault']['fire_modes']=['aimed']
++        self.assertFalse(g.cycle_fire_mode());self.assertEqual(g.fire_mode(),'aimed')
++
++    def test_aimed_pistol_shot_uses_aimed_rules(self):
++        from tests import test_update033 as arena
++        content.EQUIPMENT['weapon_ash_pistol']['fire_modes']=['single','aimed']
++        g,w,b=arena.Update033Tests().arena('weapon_ash_pistol',5);g.pop_events()
++        g.cycle_fire_mode();self.assertEqual(g.fire_mode(),'aimed')
++        ap=b['ap']
++        with patch.object(g.rng,'random',return_value=.5),patch.object(g.rng,'randrange',return_value=99):
++            self.assertTrue(g.shoot('0'))
++        self.assertEqual(ap-b['ap'],w['ap']+1)
++        self.assertTrue(all(e['fire_mode']=='aimed' for e in g.pop_events() if e['kind']=='attack'))
++
++    def test_editor_validation(self):
++        ident='weapon_thunder_shotgun';data=copy.deepcopy(content.EQUIPMENT[ident])
++        texts={'name':'Дробовик','description':''};art={data['sprite_id']}
++        check=lambda modes:entity_catalog.validate_definition('weapon',ident,dict(data,fire_modes=modes),texts,art)
++        self.assertEqual(entity_catalog.validate_definition('weapon',ident,data,texts,art),[])
++        self.assertEqual(check(['single','aimed']),[])
++        self.assertTrue(check([]));self.assertTrue(check(['rocket']));self.assertTrue(check(['single','single']))
++        self.assertTrue(any('Черга' in e for e in check(['single','burst'])))
++        self.assertEqual(entity_catalog.validate_definition('weapon','weapon_rust_assault',
++            dict(copy.deepcopy(content.EQUIPMENT['weapon_rust_assault']),fire_modes=['burst','aimed']),texts,
++            {content.EQUIPMENT['weapon_rust_assault']['sprite_id']}),[])
++
++
++if __name__=='__main__':unittest.main()
+diff --git a/tests/test_weapon_looks.py b/tests/test_weapon_looks.py
+new file mode 100644
+index 0000000..00894a3
+--- /dev/null
++++ b/tests/test_weapon_looks.py
+@@ -0,0 +1,84 @@
++"""Weapon attack animations chosen in the editor: data field, events, enemy shots, drawing hooks."""
++import unittest
++
++import content
++import entity_catalog
++from game.systems import adventure,attack_looks
++from ui import projectiles
++
++
++class WeaponLookTests(unittest.TestCase):
++    def setUp(self):
++        self.saved=dict(adventure.WEAPON_LOOK)
++
++    def tearDown(self):
++        adventure.WEAPON_LOOK.clear();adventure.WEAPON_LOOK.update(self.saved)
++
++    def test_editor_offers_every_drawable_look(self):
++        choices=entity_catalog.PROJECTILES
++        self.assertEqual(choices[''],'За типом шкоди')
++        self.assertEqual(set(choices)-{''},set(projectiles.ARRIVE)|set(projectiles.LOOKS))
++        self.assertIn(('projectile','Анімація атаки',choices),entity_catalog.FIELDS['weapon'])
++
++    def test_validation_accepts_missing_and_known_looks_only(self):
++        ident='weapon_ray_laser';data=dict(content.EQUIPMENT[ident]);data.pop('projectile',None)
++        texts={'name':'Лазер','description':''};art={data['sprite_id']}
++        self.assertEqual(entity_catalog.validate_definition('weapon',ident,data,texts,art),[])
++        for look in ('railgun','laser_bolt','plasma_red','heavy','thermal'):
++            self.assertEqual(entity_catalog.validate_definition('weapon',ident,dict(data,projectile=look),texts,art),[])
++        self.assertTrue(entity_catalog.validate_definition('weapon',ident,dict(data,projectile='rocket'),texts,art))
++
++    def test_attack_look_follows_the_weapon(self):
++        w={'type_id':'weapon_ray_laser','name':'x'}
++        self.assertEqual(adventure.attack_look(w),{})
++        adventure.WEAPON_LOOK['weapon_ray_laser']='laser_bolt'
++        self.assertEqual(adventure.attack_look(w),{'look':'laser_bolt'})
++
++    def test_shots_carry_the_look(self):
++        from unittest.mock import patch
++        from tests import test_update033 as arena
++        for ident,mode,count in (('weapon_ash_pistol',None,1),('weapon_rust_assault','burst',5),('weapon_thunder_shotgun',None,6)):
++            adventure.WEAPON_LOOK[ident]='heavy'
++            g,w,b=arena.Update033Tests().arena(ident,2)
++            if mode:w['fire_mode']=mode
++            g.pop_events()
++            with patch.object(g.rng,'random',return_value=.5),patch.object(g.rng,'randrange',return_value=99):
++                self.assertTrue(g.shoot('0'))
++            shots=[e for e in g.pop_events() if e['kind']=='attack']
++            self.assertEqual(len(shots),count,ident)
++            self.assertTrue(all(e.get('look')=='heavy' for e in shots),ident)
++            adventure.WEAPON_LOOK[ident]=''
++            g,w,b=arena.Update033Tests().arena(ident,2);g.pop_events()
++            with patch.object(g.rng,'random',return_value=.5),patch.object(g.rng,'randrange',return_value=99):g.shoot('0')
++            self.assertFalse(any('look' in e for e in g.pop_events()),ident)
++
++    def test_armed_enemies_use_their_weapon_look(self):
++        adventure.WEAPON_LOOK['weapon_watch_rifle']='railgun'
++        enemy=dict(range=6,human=True,equipment={'weapon':{'type_id':'weapon_watch_rifle','name':'x'}})
++        self.assertEqual(attack_looks.look(enemy),{'damage_type':'kinetic','look':'railgun'})
++        enemy['equipment']['weapon']['type_id']='weapon_ash_pistol'
++        self.assertEqual(attack_looks.look(enemy),{'damage_type':'kinetic'})
++
++    def test_drawing_hooks(self):
++        self.assertEqual(projectiles.look({'damage_type':'thermal'}),'thermal')
++        self.assertEqual(projectiles.look({'damage_type':'thermal','look':'railgun'}),'railgun')
++        self.assertEqual(projectiles.look({'damage_type':'thermal','look':'unknown'}),'thermal')
++        self.assertEqual(projectiles.arrive({'damage_type':'kinetic','look':'plasma_red'}),projectiles.LOOKS['plasma_red'])
++        self.assertEqual(projectiles.duration({'look':'railgun'},.4),.8)
++        self.assertEqual(projectiles.duration({'look':'heavy'},.65),.65)
++
++    def test_every_look_draws_through_the_whole_event(self):
++        class Canvas:
++            def __init__(self):self.items=0
++            def __getattr__(self,name):
++                def item(*args,**kwargs):self.items+=1
++                return item
++        for look in projectiles.LOOKS:
++            for mode in ('single','pellet'):
++                c=Canvas()
++                for i in range(41):
++                    projectiles.draw(c,dict(damage_type='kinetic',look=look,fire_mode=mode,hit=i%2==0),10,10,200,60,i/40,20)
++                self.assertGreater(c.items,40,look)
++
++
++if __name__=='__main__':unittest.main()
+diff --git a/tools/check_content_editor_ui.py b/tools/check_content_editor_ui.py
+index d0b7c52..701a816 100644
+--- a/tools/check_content_editor_ui.py
++++ b/tools/check_content_editor_ui.py
+@@ -16,7 +16,7 @@ def run(capture=None):
+         root=tk.Tk();ttk.Style(root).theme_use('clam')
+         try:
+             app=ContentEditor(root,root_path/'data/road_events.json',root_path);root.update()
+-            assert len(app.tabs.tabs())==10
++            assert len(app.tabs.tabs())>=10,len(app.tabs.tabs())
+             assert app.commit() and not app.store.dirty,'Opening unchanged sections must not alter catalogs'
+             app.items.open('item_credits');app.items.variables['sprite_id'].set('med');root.update()
+             assert app.items.image is not None
+@@ -39,6 +39,20 @@ def run(capture=None):
+                 panel.duplicate();assert len(app.store.items(section))==initial+2
+                 field={'weapon':'damage','armor':'defense','helmet':'defense','module':'base','monster':'hp'}[section]
+                 panel.fields[field].set('51');panel.refresh_preview();root.update()
++                if section=='weapon':
++                    # Attack animation: empty means "by damage type"; a chosen look is saved with the weapon.
++                    assert panel.fields['projectile'].get()==catalog.PROJECTILES['']
++                    panel.fields['projectile'].set(catalog.PROJECTILES['railgun'])
++                    # Fire modes: class defaults are locked until the weapon gets its own list.
++                    panel.fields['category'].set(catalog.CATEGORIES['automatic']);root.update()
++                    assert panel.modes_default.get() and [k for k,v in panel.mode_vars.items() if v.get()]==['single','burst']
++                    assert panel.mode_checks['aimed'].instate(['disabled'])
++                    panel.modes_default.set(False);panel.modes_toggled();panel.mode_vars['aimed'].set(True);root.update()
++                    assert not panel.mode_checks['aimed'].instate(['disabled'])
++                    if capture:
++                        canvas=panel.form.master
++                        try:canvas.yview_moveto(1.0)
++                        except Exception:pass
+                 if section=='monster':
+                     panel.fields['base_level'].set('7');panel.refresh_preview();root.update()
+                     assert panel.level.get()=='7'
+@@ -60,6 +74,10 @@ def run(capture=None):
+             saved_events=event_catalog.load(root_path/'data/road_events.json')
+             assert any(e['id']==app.events.current and e['title']=='Тест спільного збереження' for e in saved_events['events'])
+             for section,panel in app.panels.items():assert loaded.data[catalog.GROUPS[section]][panel.current][{'weapon':'damage','armor':'defense','helmet':'defense','module':'base','monster':'hp'}[section]]==51
++            assert loaded.data['equipment'][app.panels['weapon'].current]['projectile']=='railgun'
++            assert loaded.data['equipment'][app.panels['weapon'].current]['fire_modes']==['single','burst','aimed']
++            assert all('fire_modes' not in d for d in catalog.Store(Path(__file__).resolve().parents[1]).baseline['equipment'].values())
++            assert all('projectile' not in d for k,d in loaded.data['equipment'].items() if k!=app.panels['weapon'].current and d['kind']=='weapon' and k in catalog.Store(Path(__file__).resolve().parents[1]).baseline['equipment'])
+             panel=app.panels['weapon'];panel.fields['damage'].set('invalid')
+             with patch('entity_editor.messagebox.showerror') as error:
+                 assert not app.save_all() and error.called
+diff --git a/ui/adventure.py b/ui/adventure.py
+index 8811289..7b977bd 100644
+--- a/ui/adventure.py
++++ b/ui/adventure.py
+@@ -80,6 +80,9 @@ class Effects:
+         for event in g.pop_events():
+             event=dict(event);kind=event['kind']
+             duration=min(1.10, max(.24, .14 * (len(event.get('path', [])) - 1))) if kind=='move' else .65 if event.get('fire_mode')=='aimed' else .4 if kind in ('attack','slash') else 2.8 if kind=='reveal' else 1.0
++            if kind=='attack' and event.get('look'):
++                from ui.projectiles import duration as look_duration
++                duration=look_duration(event,duration)
+             if kind in ('move','attack','slash'):
+                 if kind=='attack' and event.get('volley'):
+                     ident=event['volley']
+diff --git a/ui/projectiles.py b/ui/projectiles.py
+index 627e334..b6c3005 100644
+--- a/ui/projectiles.py
++++ b/ui/projectiles.py
+@@ -8,9 +8,14 @@ import math
+ import random
+ 
+ ARRIVE={'kinetic':.5,'piercing':.32,'thermal':.72,'energy':.55,'electric':.4}
++# Weapon looks chosen in the editor (equipment 'projectile'); events carry them as 'look'.
++LOOKS={'laser_bolt':.3,'railgun':.14,'plasma_red':.26,'heavy':.42}
++# A railgun's trail lingers, so its event lasts longer (seconds).
++DURATION={'railgun':.8}
+ # Monster and melee styles (see game/systems/attack_looks.py).
+ STYLE_ARRIVE={'spit':.62,'acid':.6,'laser':.28,'mud':.6,'web':.45,'bite':.45,'claw':.4,'smash':.5,'punch':.4}
+-MUZZLE={'kinetic':'#ffe08a','piercing':'#f4ffe0','thermal':'#ff9a50','energy':'#bff7f1','electric':'#e2d2ff'}
++MUZZLE={'kinetic':'#ffe08a','piercing':'#f4ffe0','thermal':'#ff9a50','energy':'#bff7f1','electric':'#e2d2ff',
++        'laser_bolt':'#fff2a0','railgun':'#d8f4ff','plasma_red':'#ffb09a','heavy':'#fff0b0'}
+ 
+ 
+ def zigzag(x1,y1,x2,y2,amp,rng):
+@@ -21,21 +26,33 @@ def zigzag(x1,y1,x2,y2,amp,rng):
+     return points+[x2,y2]
+ 
+ 
++def look(e):
++    """Animation of a shot: the weapon's own look if set, else its damage type."""
++    if e.get('look') in LOOKS or e.get('look') in ARRIVE:return e['look']
++    return e.get('damage_type','kinetic') if e.get('damage_type') in ARRIVE else 'kinetic'
++
++
+ def arrive(e):
+     """Fraction of the event at which the blow lands."""
+     style=e.get('attack_style')
+     if style in STYLE_ARRIVE:return STYLE_ARRIVE[style]
+-    return ARRIVE.get(e.get('damage_type'),.5)
++    kind=look(e)
++    return LOOKS.get(kind,ARRIVE.get(kind,.5))
++
++
++def duration(e,default):
++    """Event length in seconds; some looks need longer than a plain shot."""
++    return max(default,DURATION.get(e.get('look'),0))
+ 
+ 
+ def draw(c,e,sx,sy,px,py,t,u=14):
+     """Draw one projectile event; returns nothing. Unknown types fall back to kinetic."""
+     if e.get('attack_style') in STYLE_ARRIVE:return draw_style(c,e,sx,sy,px,py,t,u)
+-    kind=e.get('damage_type','kinetic')
+-    if kind not in ARRIVE:kind='kinetic'
++    kind=look(e)
+     small=e.get('fire_mode')=='pellet'
+     s=max(.6,min(1.5,u/14))*(.7 if small else 1)
+     seed=hash((e.get('volley'),e.get('projectile',0)))&0xffff
++    if kind in LOOKS:return _draw_look(c,e,kind,sx,sy,px,py,t,s,small,seed)
+     arrive=ARRIVE[kind];length=math.hypot(px-sx,py-sy) or 1;dx,dy=(px-sx)/length,(py-sy)/length
+     if t<arrive:
+         k=t/arrive;hx,hy=sx+(px-sx)*k,sy+(py-sy)*k
+@@ -107,6 +124,119 @@ def draw(c,e,sx,sy,px,py,t,u=14):
+             c.create_line(*points,fill='#e9ddff',width=1,tags='fx')
+ 
+ 
++def _flash(c,x,y,r,color):
++    points=[]
++    for i in range(8):
++        a=i*math.pi/4+.2;rr=r if i%2==0 else r*.38
++        points+=[x+math.cos(a)*rr,y+math.sin(a)*rr]
++    c.create_polygon(*points,fill=color,outline='',tags='fx')
++
++
++def _ellipse(cx,cy,a,b,dx,dy,n=14):
++    """Polygon points of an ellipse with its long axis along (dx,dy)."""
++    points=[]
++    for i in range(n):
++        q=i/n*2*math.pi;u,v=math.cos(q)*a,math.sin(q)*b
++        points+=[cx+u*dx-v*dy,cy+u*dy+v*dx]
++    return points
++
++
++def _helix(sx,sy,px,py,radius,turn,phase):
++    """Spiral around the line sx,sy→px,py: (front, back) runs of points, front faces the viewer."""
++    length=math.hypot(px-sx,py-sy) or 1;dx,dy=(px-sx)/length,(py-sy)/length;nx,ny=-dy,dx
++    n=max(8,int(length/1.5));runs=([],[]);current=None;run=[]
++    for i in range(n+1):
++        d=length*i/n;a=d/turn*2*math.pi+phase;off=math.sin(a)*radius
++        x,y=sx+dx*d+nx*off,sy+dy*d+ny*off;front=math.cos(a)>=0
++        if front!=current and run:
++            run+=[x,y];runs[0 if current else 1].append(run);run=[]
++        current=front;run+=[x,y]
++    if len(run)>=4:runs[0 if current else 1].append(run)
++    return runs
++
++
++def _draw_look(c,e,kind,sx,sy,px,py,t,s,small,seed):
++    """The four editor looks: yellow laser bolt, railgun spiral, red plasma, heavy round."""
++    arrive=LOOKS[kind];length=math.hypot(px-sx,py-sy) or 1;dx,dy=(px-sx)/length,(py-sy)/length
++    hit=e.get('hit',True);wall=e.get('wall',False);rng=random.Random(seed)
++    if kind=='railgun':
++        # The slug is near-instant; the trail stays and slowly falls apart.
++        reach=min(1,t/arrive);hx,hy=sx+(px-sx)*reach,sy+(py-sy)*reach
++        fade=max(0,(t-arrive)/(1-arrive))
++        radius=(5+6*fade)*s;phase=fade*2.2
++        front,back=_helix(sx,sy,hx,hy,radius,30*s,phase)
++        step=min(3,int(fade*4))
++        dim='gray50' if fade>.55 else ''
++        back_color=('#2b6fae','#235d93','#1c4a75','#173c5e')[step];front_color=('#9fe2ff','#7fcff7','#5aa8d8','#3f7fb0')[step]
++        for run in back:c.create_line(*run,fill=back_color,width=max(1,1.6*s),tags='fx')
++        if fade<.85:
++            core=('#ffffff','#d8f2ff','#9ccbe6','#7fb6d8')[step]
++            c.create_line(sx,sy,hx,hy,fill=core,width=max(1,(2.6-2.2*fade)*s),stipple=dim,tags='fx')
++        for run in front:c.create_line(*run,fill=front_color,width=max(1,2.8*s*(1-fade*.4)),capstyle='round',stipple=dim,tags='fx')
++        if t<.12:_flash(c,sx,sy,(1-t/.12)*13*s,MUZZLE[kind])
++        if t>=arrive:
++            k=fade;r=(5+24*k)*s
++            c.create_oval(px-r,py-r*.6,px+r,py+r*.6,outline='#9fe0ff' if k<.5 else '#3f7fb0',width=max(1,3*(1-k)+.5),tags='fx')
++            if k<.25:f=12*s*(1-k/.25);c.create_oval(px-f,py-f,px+f,py+f,fill='#eaf8ff',outline='',tags='fx')
++            for _ in range(0 if small else 6):
++                a=rng.uniform(0,2*math.pi);d=(5+26*k)*s;x,y=px+math.cos(a)*d,py+math.sin(a)*d
++                c.create_line(x,y,x-math.cos(a)*5*s,y-math.sin(a)*5*s,fill='#cfeeff',width=1,tags='fx')
++        return
++    if t<arrive:
++        k=t/arrive;hx,hy=sx+(px-sx)*k,sy+(py-sy)*k
++        def back(n):
++            n=min(n,length*k);return hx-dx*n,hy-dy*n
++        if t<.1:_flash(c,sx,sy,(1-t/.1)*(20 if kind=='heavy' else 11)*s,MUZZLE[kind])
++        if kind=='laser_bolt':
++            bx,by=back(20*s)
++            for width,color in ((7,'#8a6a08'),(4,'#ffd21a'),(1.6,'#fffbe0')):
++                c.create_line(bx,by,hx,hy,fill=color,width=max(1,width*s),capstyle='round',tags='fx')
++        elif kind=='plasma_red':
++            for i,(back_k,color) in enumerate(((.22,'#5a0a0a'),(.14,'#9a1410'),(.07,'#d8261a'))):
++                x,y=back(length*back_k*k+6*s);r=(2.4-i*.4)*s
++                c.create_oval(x-r,y-r,x+r,y+r,fill=color,outline='',stipple='gray50',tags='fx')
++            for a,b,color in ((9,5.5,'#7a0d0d'),(6.5,4,'#ff2a1a'),(3.2,2,'#ffd6c0')):
++                c.create_polygon(*_ellipse(hx,hy,a*s,b*s,dx,dy),fill=color,outline='',tags='fx')
++        else:  # heavy round: thick tracer, the air ripples behind it
++            bx,by=back(44*s)
++            c.create_line(bx,by,hx,hy,fill='#7a5520',width=max(1,6*s),tags='fx')
++            c.create_line(bx+dx*10*s,by+dy*10*s,hx,hy,fill='#ffe7a8',width=max(1,2.8*s),tags='fx')
++            c.create_oval(hx-3.4*s,hy-3.4*s,hx+3.4*s,hy+3.4*s,fill='#fff8e0',outline='',tags='fx')
++            if k<.5:r=(5+14*k)*s;c.create_oval(sx-r,sy-r*.7,sx+r,sy+r*.7,outline='#d8cfb8',width=1,tags='fx')
++            for i in range(3):
++                x,y=sx+dx*(10+i*8)*s+rng.uniform(-2,2),sy+dy*(10+i*8)*s-4*k*s;r=(4+5*k+i)*s
++                c.create_oval(x-r,y-r,x+r,y+r,fill='#6b665c',outline='',stipple='gray25',tags='fx')
++        return
++    k=(t-arrive)/max(.01,1-arrive)
++    if kind=='laser_bolt':
++        if k<.35:_flash(c,px,py,9*s*(1-k/.35)+3,'#fff3a0')
++        for _ in range(3 if small else 5):
++            a=rng.uniform(0,2*math.pi);d=(4+16*k)*s;x,y=px+math.cos(a)*d,py+math.sin(a)*d
++            c.create_line(x,y,x-math.cos(a)*5*s,y-math.sin(a)*5*s,fill='#ffe35a',width=max(1,1.4*s),tags='fx')
++        r=3.5*s;c.create_oval(px-r,py-r*.6,px+r,py+r*.6,fill='#3a2a0a',outline='#ffcf30' if k<.5 else '',stipple='gray50',tags='fx')
++    elif kind=='plasma_red':
++        r=(5+22*k)*s;c.create_oval(px-r,py-r*.65,px+r,py+r*.65,outline='#ff3b2a',width=max(1,3*(1-k)+.5),tags='fx')
++        if k<.3:
++            f=11*s*(1-k/.3)
++            for rr,color in ((f,'#ff3b2a'),(f*.55,'#ffd0b0')):c.create_oval(px-rr,py-rr,px+rr,py+rr,fill=color,outline='',tags='fx')
++        for _ in range(4 if small else 9):
++            vx,vy=rng.uniform(-1,1)*18*s,rng.uniform(-1.2,-.2)*16*s
++            x,y=px+vx*k,py+vy*k+30*s*k*k;r=max(.8,1.8*s*(1-k*.6))
++            c.create_oval(x-r,y-r,x+r,y+r,fill='#ff8a3a' if k<.5 else '#a02a14',outline='',tags='fx')
++        c.create_oval(px-9*s,py-4*s,px+9*s,py+5*s,fill='#ff5030',outline='',stipple='gray25',tags='fx')
++    else:
++        color='#cfcabb' if wall or not hit else '#8d7f63'
++        r=(6+34*k)*s;c.create_oval(px-r,py-r*.55,px+r,py+r*.55,outline='#e8dfc4',width=max(1,3.5*(1-k)),tags='fx')
++        if k<.2:_flash(c,px,py,16*s*(1-k/.2)+4,'#fff0b0')
++        for _ in range(5 if small else 11):
++            vx,vy=rng.uniform(-1,1)*22*s,rng.uniform(-1,.2)*20*s;r=(3+5*k)*s
++            x,y=px+vx*k,py+vy*k;c.create_oval(x-r,y-r,x+r,y+r,fill=color,outline='',stipple='gray50' if k>.45 else '',tags='fx')
++        for _ in range(0 if small else 6):
++            vx,vy=rng.uniform(-1,1)*30*s,rng.uniform(-1.4,-.4)*22*s
++            x,y=px+vx*k,py+vy*k+40*s*k*k;q=2*s
++            c.create_rectangle(x-q,y-q,x+q,y+q,fill='#3b342a',outline='',tags='fx')
++
++
+ def _arc_point(sx,sy,px,py,k,lift):
+     """Point on a thrown arc: straight in plan, lifted by a parabola."""
+     return sx+(px-sx)*k,sy+(py-sy)*k-lift*4*k*(1-k)

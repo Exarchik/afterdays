@@ -112,6 +112,8 @@ class EntityPanel(ttk.Frame):
             var=self.trophy_value if field=='trophy_value' else tk.StringVar();self.fields[field]=var
             if field!='trophy_value' and not (section=='module' and field=='target'):row(self.form,label,var,list(kind.values()) if isinstance(kind,dict) else None)
             var.trace_add('write',lambda *args,f=field:self.field_changed(f))
+        self.mode_vars={};self.modes_default=None
+        if section=='weapon':self.build_modes()
         self.module_options=None
         if section=='module':
             from module_options_ui import ModuleOptions
@@ -162,6 +164,53 @@ class EntityPanel(ttk.Frame):
         items=self.list.get_children()
         if items:self.open(items[0])
 
+    def build_modes(self):
+        """Fire modes of the weapon: the class defaults or the editor's own choice."""
+        import fire_modes
+        box=ttk.LabelFrame(self.form,text='Режими атаки',padding=8);box.pack(fill='x',pady=(10,4))
+        self.modes_default=tk.BooleanVar(value=True)
+        self.modes_hint=tk.StringVar()
+        ttk.Checkbutton(box,text='Як у класу зброї',variable=self.modes_default,command=self.modes_toggled).pack(anchor='w')
+        ttk.Label(box,textvariable=self.modes_hint,foreground='#5d6656',wraplength=330).pack(anchor='w',pady=(0,6))
+        self.mode_checks={}
+        for key,mode in fire_modes.MODES.items():
+            var=tk.BooleanVar();self.mode_vars[key]=var
+            check=ttk.Checkbutton(box,text=mode['name'],variable=var,command=self.schedule_preview);check.pack(anchor='w',pady=(4,0))
+            self.mode_checks[key]=check
+            ttk.Label(box,text='+ '+mode['pros'],foreground='#2f6b3a',wraplength=330).pack(anchor='w',padx=(22,0))
+            ttk.Label(box,text='− '+mode['cons'],foreground='#8a3b2c',wraplength=330).pack(anchor='w',padx=(22,0))
+        self.fields['category'].trace_add('write',lambda *args:self.modes_toggled(keep=True))
+
+    def category_key(self):
+        text=self.fields['category'].get();return next((k for k,v in catalog.CATEGORIES.items() if v==text),'pistol')
+
+    def modes_toggled(self,keep=False):
+        """Default on: show the class modes, locked. Off: unlock, starting from what is shown."""
+        import fire_modes
+        if self.modes_default is None:return
+        category=self.category_key();defaults=fire_modes.defaults(category)
+        self.modes_hint.set('Клас «'+catalog.CATEGORIES[category]+'»: '+', '.join(fire_modes.MODES[m]['name'] for m in defaults)+'.')
+        default=self.modes_default.get()
+        for key,var in self.mode_vars.items():
+            if default:var.set(key in defaults)
+            forbidden=key in fire_modes.FORBIDDEN.get(category,())
+            self.mode_checks[key].state(['disabled'] if default or forbidden else ['!disabled'])
+            if forbidden and not default:var.set(False)
+        if not self.loading:self.schedule_preview()
+
+    def load_modes(self,data):
+        if self.modes_default is None:return
+        explicit=data.get('fire_modes')
+        self.modes_default.set(not isinstance(explicit,list))
+        self.modes_toggled(keep=True)
+        if isinstance(explicit,list):
+            for key,var in self.mode_vars.items():var.set(key in explicit)
+
+    def read_modes(self,data):
+        if self.modes_default is None:return
+        if self.modes_default.get():data.pop('fire_modes',None)
+        else:data['fire_modes']=[key for key,var in self.mode_vars.items() if var.get()]
+
     def rebuild(self):
         self.loading=True;self.list.delete(*self.list.get_children())
         level_key='base_level' if self.section=='monster' else 'min_level' if self.section in ('weapon','armor','helmet','module') else None
@@ -193,6 +242,7 @@ class EntityPanel(ttk.Frame):
             value=self.original.get(field,'pistol' if field=='category' else '')
             self.fields[field].set(kind[value] if isinstance(kind,dict) else str(value))
         if self.module_options:self.module_options.load(self.original)
+        self.load_modes(self.original)
         for key,var in self.resists.items():var.set(str(self.original.get('resists',{}).get(key,0)))
         if self.curves:self.curves.set(self.original.get('rarity_stats',{}));self.penalties.set(self.original.get('fixed_penalties',{}))
         self.level.set(str(self.original.get('base_level',self.original.get('min_level',1))))
@@ -219,6 +269,7 @@ class EntityPanel(ttk.Frame):
             except (ValueError,StopIteration):raise ValueError(label+': некоректне значення')
             data[field]=value
         if data.get('projectile')=='':data.pop('projectile')  # by damage type: keep the record unchanged
+        self.read_modes(data)
         if self.module_options:self.module_options.apply(data)
         if self.section=='monster':data['resists']={k:int(v.get()) for k,v in self.resists.items()}
         if self.curves:

@@ -43,6 +43,16 @@ def run(capture=None):
                     # Attack animation: empty means "by damage type"; a chosen look is saved with the weapon.
                     assert panel.fields['projectile'].get()==catalog.PROJECTILES['']
                     panel.fields['projectile'].set(catalog.PROJECTILES['railgun'])
+                    # Fire modes: class defaults are locked until the weapon gets its own list.
+                    panel.fields['category'].set(catalog.CATEGORIES['automatic']);root.update()
+                    assert panel.modes_default.get() and [k for k,v in panel.mode_vars.items() if v.get()]==['single','burst']
+                    assert panel.mode_checks['aimed'].instate(['disabled'])
+                    panel.modes_default.set(False);panel.modes_toggled();panel.mode_vars['aimed'].set(True);root.update()
+                    assert not panel.mode_checks['aimed'].instate(['disabled'])
+                    if capture:
+                        canvas=panel.form.master
+                        try:canvas.yview_moveto(1.0)
+                        except Exception:pass
                 if section=='monster':
                     panel.fields['base_level'].set('7');panel.refresh_preview();root.update()
                     assert panel.level.get()=='7'
@@ -65,6 +75,8 @@ def run(capture=None):
             assert any(e['id']==app.events.current and e['title']=='Тест спільного збереження' for e in saved_events['events'])
             for section,panel in app.panels.items():assert loaded.data[catalog.GROUPS[section]][panel.current][{'weapon':'damage','armor':'defense','helmet':'defense','module':'base','monster':'hp'}[section]]==51
             assert loaded.data['equipment'][app.panels['weapon'].current]['projectile']=='railgun'
+            assert loaded.data['equipment'][app.panels['weapon'].current]['fire_modes']==['single','burst','aimed']
+            assert all('fire_modes' not in d for d in catalog.Store(Path(__file__).resolve().parents[1]).baseline['equipment'].values())
             assert all('projectile' not in d for k,d in loaded.data['equipment'].items() if k!=app.panels['weapon'].current and d['kind']=='weapon' and k in catalog.Store(Path(__file__).resolve().parents[1]).baseline['equipment'])
             panel=app.panels['weapon'];panel.fields['damage'].set('invalid')
             with patch('entity_editor.messagebox.showerror') as error:

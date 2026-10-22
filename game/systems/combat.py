@@ -11,8 +11,10 @@ def category(item):
     return content.EQUIPMENT.get(item.get('type_id'),{}).get('category','pistol') if item else 'pistol'
 
 def modes(item):
-    kind=category(item)
-    return ('single','burst') if kind=='automatic' else ('aimed',) if kind=='sniper' else ('single',)
+    """Fire modes of a weapon: its own list from the editor, else its class defaults."""
+    import fire_modes
+    explicit=content.EQUIPMENT.get(item.get('type_id'),{}).get('fire_modes') if item else None
+    return fire_modes.allowed(category(item),explicit)
 
 def shot_cost(item):
     allowed=modes(item);mode=item.get('fire_mode',allowed[0])
@@ -59,9 +61,10 @@ class Combat:
         return value if value in allowed else allowed[0]
 
     def cycle_fire_mode(self):
-        """Switch between single and burst without spending AP."""
-        if not self.battle or not self.weapon or len(self.fire_modes())<2:return False
-        self.weapon['fire_mode']='burst' if self.fire_mode()=='single' else 'single';return True
+        """Switch to the weapon's next fire mode without spending AP."""
+        allowed=self.fire_modes() if self.battle and self.weapon else ()
+        if len(allowed)<2:return False
+        self.weapon['fire_mode']=allowed[(allowed.index(self.fire_mode())+1)%len(allowed)];return True
 
     def shot_ap(self,weapon=None):
         """Calculate AP including automatic burst or aimed-shot surcharge."""

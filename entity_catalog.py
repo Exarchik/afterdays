@@ -68,6 +68,9 @@ def validate_definition(section, ident, data, texts, art):
         need(data.get('kind')==section,'тип спорядження не можна змінювати')
         for key in ('damage','range','defense','accuracy','ap','attack'):
             need(type(data.get(key)) is int and data[key]>=0,key+': має бути цілим ≥ 0')
+    if section=='weapon' and 'fire_modes' in data:
+        import fire_modes
+        for problem in fire_modes.problems(data.get('category'),data['fire_modes']):need(False,'режими атаки: '+problem)
     if section in ('module','monster'):
         need(type(data.get('legacy_index')) is int and data['legacy_index']>=0,'некоректний індекс')
     if section=='module':
