@@ -9,13 +9,13 @@ import random
 
 ARRIVE={'kinetic':.5,'piercing':.32,'thermal':.72,'energy':.55,'electric':.4}
 # Weapon looks chosen in the editor (equipment 'projectile'); events carry them as 'look'.
-LOOKS={'laser_bolt':.3,'railgun':.14,'plasma_red':.26,'heavy':.42}
+LOOKS={'laser_bolt':.3,'railgun':.14,'plasma_red':.26,'heavy':.42,'laser_beam':.06,'red_beam':.03}
 # A railgun's trail lingers, so its event lasts longer (seconds).
-DURATION={'railgun':.8}
+DURATION={'railgun':.8,'laser_beam':.6,'red_beam':1.0}
 # Monster and melee styles (see game/systems/attack_looks.py).
 STYLE_ARRIVE={'spit':.62,'acid':.6,'laser':.28,'mud':.6,'web':.45,'bite':.45,'claw':.4,'smash':.5,'punch':.4}
 MUZZLE={'kinetic':'#ffe08a','piercing':'#f4ffe0','thermal':'#ff9a50','energy':'#bff7f1','electric':'#e2d2ff',
-        'laser_bolt':'#fff2a0','railgun':'#d8f4ff','plasma_red':'#ffb09a','heavy':'#fff0b0'}
+        'laser_bolt':'#fff2a0','railgun':'#d8f4ff','plasma_red':'#ffb09a','heavy':'#fff0b0','laser_beam':'#fff1b0','red_beam':'#ffb0a8'}
 
 
 def zigzag(x1,y1,x2,y2,amp,rng):
@@ -159,6 +159,55 @@ def _draw_look(c,e,kind,sx,sy,px,py,t,s,small,seed):
     """The four editor looks: yellow laser bolt, railgun spiral, red plasma, heavy round."""
     arrive=LOOKS[kind];length=math.hypot(px-sx,py-sy) or 1;dx,dy=(px-sx)/length,(py-sy)/length
     hit=e.get('hit',True);wall=e.get('wall',False);rng=random.Random(seed)
+    if kind=='red_beam':
+        # Thin red beam hits at once; after half a second the wind blows it apart into sparks.
+        BREAK=.5;length_px=math.hypot(px-sx,py-sy) or 1;nx,ny=-(py-sy)/length_px,(px-sx)/length_px
+        if t<BREAK:
+            flicker=1+.15*math.sin(t*110+seed)
+            for width,color in ((4,'#6e0a0a'),(2,'#e0201a'),(.9,'#ffd0c8')):
+                c.create_line(sx,sy,px,py,fill=color,width=max(1,width*s*flicker),tags='fx')
+            r=(3.2+1.2*math.sin(t*80))*s
+            c.create_oval(px-r,py-r,px+r,py+r,fill='#ff4a3a',outline='',tags='fx')
+            c.create_oval(sx-2.4*s,sy-2.4*s,sx+2.4*s,sy+2.4*s,fill='#ff8a7a',outline='',tags='fx')
+            return
+        k=(t-BREAK)/(1-BREAK);wind=random.Random(seed*17)
+        gust=(.9,-.35)  # the same wind for every spark: drifting right and up
+        n=max(12,int(length_px/5))
+        for i in range(n):
+            f=(i+wind.random())/n;x0,y0=sx+(px-sx)*f,sy+(py-sy)*f
+            delay=wind.uniform(0,.35)  # sparks peel off one by one, not all at once
+            q=max(0,(k-delay)/(1-delay))
+            if q<=0:
+                c.create_line(x0,y0,x0+(px-sx)/n,y0+(py-sy)/n,fill='#e0201a',width=max(1,1.6*s),tags='fx');continue
+            if q>=1:continue
+            speed=wind.uniform(18,46)*s;swirl=wind.uniform(-1,1)*8*s
+            x=x0+gust[0]*speed*q+nx*swirl*math.sin(q*6+i);y=y0+gust[1]*speed*q+ny*swirl*math.sin(q*6+i)-10*s*q*q
+            size=max(.6,(1.6-1.2*q)*s)
+            color='#ff5a40' if q<.3 else '#ff9a5a' if q<.6 else '#a04030'
+            c.create_rectangle(x-size,y-size,x+size,y+size,fill=color,outline='',stipple='gray50' if q>.65 else '',tags='fx')
+        return
+    if kind=='laser_beam':
+        # Instant beam over the whole line: holds, flickers a little, then thins out and fades.
+        fade=max(0,(t-.55)/.45);flicker=1+.12*math.sin(t*90+seed)
+        widths=((4.5,'#9a3a06'),(2.8,'#ff7a12'),(1.5,'#ffc23a'),(0.7,'#fff6d0'))
+        stipple='gray50' if fade>.5 else ''
+        for width,color in widths[:4 if fade<.6 else 2]:
+            c.create_line(sx,sy,px,py,fill=color,width=max(1,width*s*flicker*(1-fade*.7)),capstyle='round',stipple=stipple,tags='fx')
+        g=(6+2*math.sin(t*70))*s*(1-fade*.6)
+        c.create_oval(sx-g,sy-g,sx+g,sy+g,fill='#ffd36a',outline='',tags='fx')
+        if t>=arrive:
+            r=(7+3*math.sin(t*60))*s*(1-fade*.5)
+            c.create_oval(px-r*1.6,py-r*.8,px+r*1.6,py+r*.8,fill='#ff6a10',outline='',stipple='gray50',tags='fx')
+            c.create_oval(px-r*.7,py-r*.7,px+r*.7,py+r*.7,fill='#fff1b0',outline='',tags='fx')
+            spark=random.Random(seed*31+int(t*30))
+            for _ in range(0 if small else 5):
+                a=spark.uniform(0,2*math.pi);d=spark.uniform(4,16)*s;x,y=px+math.cos(a)*d,py+math.sin(a)*d
+                c.create_line(x,y,x+math.cos(a)*4*s,y+math.sin(a)*4*s,fill='#ffb23a',width=1,tags='fx')
+            if fade>0:
+                for i in range(3):
+                    x,y=px+(i-1)*5*s,py-(6+18*fade+i*3)*s;q=(2+3*fade)*s
+                    c.create_oval(x-q,y-q,x+q,y+q,fill='#5a5248',outline='',stipple='gray25',tags='fx')
+        return
     if kind=='railgun':
         # The slug is near-instant; the trail stays and slowly falls apart.
         reach=min(1,t/arrive);hx,hy=sx+(px-sx)*reach,sy+(py-sy)*reach

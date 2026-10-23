@@ -18,7 +18,8 @@ AMMO = {'pistol':'Пістолетні','rifle':'Гвинтівкові','shell'
 # Attack animation of a weapon (ui/projectiles.py); '' draws it by damage type.
 PROJECTILES = {'':'За типом шкоди','kinetic':'Куля (кінетична)','piercing':'Голка (пробивна)','thermal':'Вогняна куля (термічна)',
                'energy':'Бірюзовий імпульс (енергетична)','electric':'Блискавка (електрична)','laser_bolt':'Жовтий лазерний імпульс',
-               'railgun':'Рельсотрон: спіральний слід','plasma_red':'Згусток червоної плазми','heavy':'Потужний постріл'}
+               'railgun':'Рельсотрон: спіральний слід','plasma_red':'Згусток червоної плазми','heavy':'Потужний постріл',
+               'laser_beam':'Помаранчевий лазерний промінь','red_beam':'Тонкий червоний промінь, що розсипається'}
 CATEGORIES = {'pistol':'Пістолет','rifle':'Гвинтівка','automatic':'Автоматична','shotgun':'Дробовик','sniper':'Снайперська'}
 TARGETS = {'weapon':'Зброя','protection':'Броня та шоломи','armor':'Лише броня','helmet':'Лише шоломи'}
 STATS = {

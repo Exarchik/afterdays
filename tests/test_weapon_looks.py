@@ -30,6 +30,7 @@ class WeaponLookTests(unittest.TestCase):
 
     def test_attack_look_follows_the_weapon(self):
         w={'type_id':'weapon_ray_laser','name':'x'}
+        adventure.WEAPON_LOOK['weapon_ray_laser']=''
         self.assertEqual(adventure.attack_look(w),{})
         adventure.WEAPON_LOOK['weapon_ray_laser']='laser_bolt'
         self.assertEqual(adventure.attack_look(w),{'look':'laser_bolt'})

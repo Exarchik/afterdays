@@ -1,0 +1,90 @@
+diff --git a/EDITING_CONTENT.md b/EDITING_CONTENT.md
+index 0bd5910..d9d25cc 100644
+--- a/EDITING_CONTENT.md
++++ b/EDITING_CONTENT.md
+@@ -209,7 +209,8 @@ Pillow має бути встановлений саме у версії ред
+   «За типом шкоди» малює снаряд за типом шкоди (куля, голка, вогняна куля, імпульс,
+   блискавка). Можна вибрати будь-який із них незалежно від типу шкоди або одну з
+   окремих анімацій: жовтий лазерний імпульс, рельсотрон зі спіральним слідом (його
+-  слід тримається довше, 0,8 с), згусток червоної плазми, потужний постріл. Анімація
++  слід тримається довше, 0,8 с), згусток червоної плазми, потужний постріл, помаранчевий лазерний
++  промінь (миттєвий промінь від стрільця до цілі, тримається 0,6 с). Анімація
+   лише візуальна й діє і для гравця, і для ворогів із цією зброєю.
+   Блок «Режими атаки»: клас зброї задає режими за замовчуванням (автоматична —
+   одиночний і черга, снайперська — прицільний, решта — одиночний). Зніміть галочку
+diff --git a/entity_catalog.py b/entity_catalog.py
+index df85bdd..5d0a543 100644
+--- a/entity_catalog.py
++++ b/entity_catalog.py
+@@ -18,7 +18,8 @@ AMMO = {'pistol':'Пістолетні','rifle':'Гвинтівкові','shell'
+ # Attack animation of a weapon (ui/projectiles.py); '' draws it by damage type.
+ PROJECTILES = {'':'За типом шкоди','kinetic':'Куля (кінетична)','piercing':'Голка (пробивна)','thermal':'Вогняна куля (термічна)',
+                'energy':'Бірюзовий імпульс (енергетична)','electric':'Блискавка (електрична)','laser_bolt':'Жовтий лазерний імпульс',
+-               'railgun':'Рельсотрон: спіральний слід','plasma_red':'Згусток червоної плазми','heavy':'Потужний постріл'}
++               'railgun':'Рельсотрон: спіральний слід','plasma_red':'Згусток червоної плазми','heavy':'Потужний постріл',
++               'laser_beam':'Помаранчевий лазерний промінь'}
+ CATEGORIES = {'pistol':'Пістолет','rifle':'Гвинтівка','automatic':'Автоматична','shotgun':'Дробовик','sniper':'Снайперська'}
+ TARGETS = {'weapon':'Зброя','protection':'Броня та шоломи','armor':'Лише броня','helmet':'Лише шоломи'}
+ STATS = {
+diff --git a/tests/test_weapon_looks.py b/tests/test_weapon_looks.py
+index 00894a3..46b9a9d 100644
+--- a/tests/test_weapon_looks.py
++++ b/tests/test_weapon_looks.py
+@@ -30,6 +30,7 @@ class WeaponLookTests(unittest.TestCase):
+ 
+     def test_attack_look_follows_the_weapon(self):
+         w={'type_id':'weapon_ray_laser','name':'x'}
++        adventure.WEAPON_LOOK['weapon_ray_laser']=''
+         self.assertEqual(adventure.attack_look(w),{})
+         adventure.WEAPON_LOOK['weapon_ray_laser']='laser_bolt'
+         self.assertEqual(adventure.attack_look(w),{'look':'laser_bolt'})
+diff --git a/ui/projectiles.py b/ui/projectiles.py
+index b6c3005..56ff1c0 100644
+--- a/ui/projectiles.py
++++ b/ui/projectiles.py
+@@ -9,13 +9,13 @@ import random
+ 
+ ARRIVE={'kinetic':.5,'piercing':.32,'thermal':.72,'energy':.55,'electric':.4}
+ # Weapon looks chosen in the editor (equipment 'projectile'); events carry them as 'look'.
+-LOOKS={'laser_bolt':.3,'railgun':.14,'plasma_red':.26,'heavy':.42}
++LOOKS={'laser_bolt':.3,'railgun':.14,'plasma_red':.26,'heavy':.42,'laser_beam':.06}
+ # A railgun's trail lingers, so its event lasts longer (seconds).
+-DURATION={'railgun':.8}
++DURATION={'railgun':.8,'laser_beam':.6}
+ # Monster and melee styles (see game/systems/attack_looks.py).
+ STYLE_ARRIVE={'spit':.62,'acid':.6,'laser':.28,'mud':.6,'web':.45,'bite':.45,'claw':.4,'smash':.5,'punch':.4}
+ MUZZLE={'kinetic':'#ffe08a','piercing':'#f4ffe0','thermal':'#ff9a50','energy':'#bff7f1','electric':'#e2d2ff',
+-        'laser_bolt':'#fff2a0','railgun':'#d8f4ff','plasma_red':'#ffb09a','heavy':'#fff0b0'}
++        'laser_bolt':'#fff2a0','railgun':'#d8f4ff','plasma_red':'#ffb09a','heavy':'#fff0b0','laser_beam':'#fff1b0'}
+ 
+ 
+ def zigzag(x1,y1,x2,y2,amp,rng):
+@@ -159,6 +159,28 @@ def _draw_look(c,e,kind,sx,sy,px,py,t,s,small,seed):
+     """The four editor looks: yellow laser bolt, railgun spiral, red plasma, heavy round."""
+     arrive=LOOKS[kind];length=math.hypot(px-sx,py-sy) or 1;dx,dy=(px-sx)/length,(py-sy)/length
+     hit=e.get('hit',True);wall=e.get('wall',False);rng=random.Random(seed)
++    if kind=='laser_beam':
++        # Instant beam over the whole line: holds, flickers a little, then thins out and fades.
++        fade=max(0,(t-.55)/.45);flicker=1+.12*math.sin(t*90+seed)
++        widths=((9,'#9a3a06'),(5.5,'#ff7a12'),(3,'#ffc23a'),(1.3,'#fff6d0'))
++        stipple='gray50' if fade>.5 else ''
++        for width,color in widths[:4 if fade<.6 else 2]:
++            c.create_line(sx,sy,px,py,fill=color,width=max(1,width*s*flicker*(1-fade*.7)),capstyle='round',stipple=stipple,tags='fx')
++        g=(6+2*math.sin(t*70))*s*(1-fade*.6)
++        c.create_oval(sx-g,sy-g,sx+g,sy+g,fill='#ffd36a',outline='',tags='fx')
++        if t>=arrive:
++            r=(7+3*math.sin(t*60))*s*(1-fade*.5)
++            c.create_oval(px-r*1.6,py-r*.8,px+r*1.6,py+r*.8,fill='#ff6a10',outline='',stipple='gray50',tags='fx')
++            c.create_oval(px-r*.7,py-r*.7,px+r*.7,py+r*.7,fill='#fff1b0',outline='',tags='fx')
++            spark=random.Random(seed*31+int(t*30))
++            for _ in range(0 if small else 5):
++                a=spark.uniform(0,2*math.pi);d=spark.uniform(4,16)*s;x,y=px+math.cos(a)*d,py+math.sin(a)*d
++                c.create_line(x,y,x+math.cos(a)*4*s,y+math.sin(a)*4*s,fill='#ffb23a',width=1,tags='fx')
++            if fade>0:
++                for i in range(3):
++                    x,y=px+(i-1)*5*s,py-(6+18*fade+i*3)*s;q=(2+3*fade)*s
++                    c.create_oval(x-q,y-q,x+q,y+q,fill='#5a5248',outline='',stipple='gray25',tags='fx')
++        return
+     if kind=='railgun':
+         # The slug is near-instant; the trail stays and slowly falls apart.
+         reach=min(1,t/arrive);hx,hy=sx+(px-sx)*reach,sy+(py-sy)*reach

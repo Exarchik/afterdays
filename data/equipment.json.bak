@@ -73,7 +73,7 @@
     "damage_type": "energy",
     "sprite_id": "weapon_ray_laser",
     "category": "rifle",
-    "projectile": "laser_bolt"
+    "projectile": "laser_beam"
   },
   "armor_plated_jacket": {
     "kind": "armor",
@@ -160,7 +160,11 @@
     "ammo_type": "rifle",
     "damage_type": "kinetic",
     "sprite_id": "weapon_pilgrim_carbine",
-    "category": "rifle"
+    "category": "rifle",
+    "fire_modes": [
+      "single",
+      "aimed"
+    ]
   },
   "weapon_horizon_sniper": {
     "kind": "weapon",
@@ -190,7 +194,10 @@
     "ammo_type": "heavy",
     "damage_type": "kinetic",
     "sprite_id": "weapon_hammer_lmg",
-    "category": "automatic"
+    "category": "automatic",
+    "fire_modes": [
+      "burst"
+    ]
   },
   "weapon_sun_plasma": {
     "kind": "weapon",

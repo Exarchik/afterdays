@@ -73,7 +73,7 @@
     "damage_type": "energy",
     "sprite_id": "weapon_ray_laser",
     "category": "rifle",
-    "projectile": "laser_bolt"
+    "projectile": "red_beam"
   },
   "armor_plated_jacket": {
     "kind": "armor",
