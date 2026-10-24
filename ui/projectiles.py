@@ -161,7 +161,7 @@ def _draw_look(c,e,kind,sx,sy,px,py,t,s,small,seed):
     hit=e.get('hit',True);wall=e.get('wall',False);rng=random.Random(seed)
     if kind=='red_beam':
         # Thin red beam hits at once; after half a second the wind blows it apart into sparks.
-        BREAK=.5;length_px=math.hypot(px-sx,py-sy) or 1;nx,ny=-(py-sy)/length_px,(px-sx)/length_px
+        BREAK=.2;length_px=math.hypot(px-sx,py-sy) or 1;nx,ny=-(py-sy)/length_px,(px-sx)/length_px
         if t<BREAK:
             flicker=1+.15*math.sin(t*110+seed)
             for width,color in ((4,'#6e0a0a'),(2,'#e0201a'),(.9,'#ffd0c8')):
